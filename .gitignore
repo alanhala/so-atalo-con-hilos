@@ -1,3 +1,4 @@
+.metadata
 # Object files
 *.o
 *.ko
@@ -30,3 +31,9 @@
 
 # Debug files
 *.dSYM/
+
+#Build files
+*/build
+*/Debug
+#Others
+RemoteSystemsTempFiles/
