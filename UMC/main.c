@@ -19,6 +19,7 @@
 #include <arpa/inet.h>
 #include <sys/wait.h>
 #include <signal.h>
+#include <pthread.h>
 
 #define PORT "25000"
 #define BACKLOG 10
@@ -27,6 +28,10 @@
 
 int createServerSocketReadyToAccept(struct sockaddr_in* my_addr,
 		int serverSocketfd);
+
+void *connectionResponse(int *clientSock_fd);
+
+void *handshake(void *param);
 
 int main(int argc, char **argv) {
 
@@ -37,15 +42,15 @@ int main(int argc, char **argv) {
 	serverSocketfd = createServerSocketReadyToAccept(&my_addr, serverSocketfd);
 
 	while (1) {
-		newSock_fd = accept(serverSocketfd, (struct sockaddr *) &their_addr, sizeof(their_addr));
+		newSock_fd = accept(serverSocketfd, (struct sockaddr *) &their_addr,
+				sizeof(their_addr));
 		if (newSock_fd == -1) {
 			// TODO Loguear error de aceptacion
 			// TODO analizar el tratamiento que quiere darse
 			exit(1);
-		}
-		else{
-			void *ptr; //TODO analizar si hay problema
-			creoThreads(ptr);
+		} else {
+			//void *ptr; //TODO analizar si hay problema
+			connectionResponse(newSock_fd);
 		}
 	}
 
@@ -54,9 +59,9 @@ int main(int argc, char **argv) {
 
 int createServerSocketReadyToAccept(struct sockaddr_in* my_addr,
 		int serverSocketfd) {
-	my_addr.sin_family = AF_INET;
-	my_addr.sin_port = htons(PORT);
-	my_addr.sin_addr.s_addr = inet_addr(MYIP);
+	my_addr->sin_family = AF_INET;
+	my_addr->sin_port = htons(PORT);
+	my_addr->sin_addr.s_addr = inet_addr(MYIP);
 	memset(&(my_addr->sin_zero), '\0', 8); // Poner a cero el resto de la estructura
 	serverSocketfd = socket(AF_INET, SOCK_STREAM, 0);
 	if (serverSocketfd == -1) {
@@ -84,4 +89,32 @@ int createServerSocketReadyToAccept(struct sockaddr_in* my_addr,
 	printf("server: waiting for connections...\n");
 	return serverSocketfd;
 
+}
+
+void *connectionResponse(int *clientSock_fd) {
+
+	printf("Llego al connection response"); //TODO BORRAR LINEA
+	pthread_t thread;
+
+	int iret1 = pthread_create(&thread, NULL, &handshake, clientSock_fd);
+	//Cuarto Parametro:
+	//*arg - pointer to argument of function.
+	//To pass multiple arguments, send a pointer to a structure.
+
+	if (iret1) {
+		// TODO LOGUEAR ERROR
+		// TODO Analizar el tratamiento que desea darse
+		fprintf(stderr, "Error - pthread_create() return code: %d\n", iret1);
+		exit(1);
+	}
+
+	pthread_join(thread, NULL);
+
+	exit(EXIT_SUCCESS); //TODO exit_success??
+
+}
+
+void *handshake(void *param)
+{
+	printf("llego al handshake"); //TODO borrar linea
 }
