@@ -26,8 +26,6 @@
 #define MAXDATASIZE 100
 #define MYIP "192.168.1.35" // TODO es necesario?
 
-int createServerSocketReadyToAccept(struct sockaddr_in* my_addr,
-		int serverSocketfd);
 
 void *connectionResponse(int *clientSock_fd);
 
@@ -43,10 +41,52 @@ void sigchld_handler(int s)
 	errno = saved_errno;
 }
 
+int createServerSocketReadyToAccept(int serverSocketfd, int yes,
+		struct sigaction* sa, struct addrinfo* p, struct addrinfo* servinfo) {
+	for (p = servinfo; p != NULL; p = p->ai_next) {
+		if ((serverSocketfd = socket(p->ai_family, p->ai_socktype,
+				p->ai_protocol)) == -1) {
+			perror("server: socket");
+			continue;
+		}
+
+		if (setsockopt(serverSocketfd, SOL_SOCKET, SO_REUSEADDR, &yes,
+				sizeof(int)) == -1) {
+			perror("setsockopt");
+			exit(1);
+		}
+
+		if (bind(serverSocketfd, p->ai_addr, p->ai_addrlen) == -1) {
+			close(serverSocketfd);
+			perror("server: bind");
+			continue;
+		}
+
+		break;
+	}
+	freeaddrinfo(servinfo); // all done with this structure
+	if (p == NULL) {
+		fprintf(stderr, "server: failed to bind\n");
+		exit(1);
+	}
+	if (listen(serverSocketfd, BACKLOG) == -1) {
+		perror("listen");
+		exit(1);
+	}
+	sa->sa_handler = sigchld_handler;
+	sigemptyset(&sa->sa_mask);
+	sa->sa_flags = SA_RESTART;
+	if (sigaction(SIGCHLD, &sa, NULL) == -1) {
+		perror("sigaction");
+		exit(1);
+	}
+	return serverSocketfd;
+}
+
 int main(int argc, char **argv) {
 
 	int serverSocketfd, newSock_fd;
-	//struct sockaddr_in my_addr;
+
 	struct addrinfo hints, *servinfo, *p;
 	struct sockaddr_storage their_addr; // connector's address information
 
@@ -63,52 +103,12 @@ int main(int argc, char **argv) {
 
 	if ((rv = getaddrinfo(NULL, PORT, &hints, &servinfo)) != 0) {
 		fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(rv));
-		return 1;
-	}
-
-	// loop through all the results and bind to the first we can
-	for (p = servinfo; p != NULL; p = p->ai_next) {
-		if ((serverSocketfd = socket(p->ai_family, p->ai_socktype, p->ai_protocol))
-				== -1) {
-			perror("server: socket");
-			continue;
-		}
-
-		if (setsockopt(serverSocketfd, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int))
-				== -1) {
-			perror("setsockopt");
-			exit(1);
-		}
-
-		if (bind(serverSocketfd, p->ai_addr, p->ai_addrlen) == -1) {
-			close(serverSocketfd);
-			perror("server: bind");
-			continue;
-		}
-
-		break;
-	}
-
-	freeaddrinfo(servinfo); // all done with this structure
-
-	if (p == NULL) {
-		fprintf(stderr, "server: failed to bind\n");
 		exit(1);
 	}
 
-	if (listen(serverSocketfd, BACKLOG) == -1) {
-		perror("listen");
-		exit(1);
-	}
 
-	sa.sa_handler = sigchld_handler; // reap all dead processes
-	sigemptyset(&sa.sa_mask);
-	sa.sa_flags = SA_RESTART;
-	if (sigaction(SIGCHLD, &sa, NULL) == -1) {
-		perror("sigaction");
-		exit(1);
-	}
-
+	serverSocketfd = createServerSocketReadyToAccept(serverSocketfd, yes, &sa,
+			p, servinfo);
 	printf("server: waiting for connections...\n");
 
 	//serverSocketfd = createServerSocketReadyToAccept(&my_addr, serverSocketfd);
@@ -122,49 +122,12 @@ int main(int argc, char **argv) {
 			continue;
 		}
 		//void *ptr; //TODO analizar si hay problema
-		//connectionResponse(newSock_fd);
-		printf("server: cliente aceptado\n");
+		connectionResponse(newSock_fd);
+
 
 	}
 
 	return 0;
-}
-/*
-int createServerSocketReadyToAccept(struct sockaddr_in* my_addr,
-		int serverSocketfd) {
-	my_addr->sin_family = AF_INET;
-	my_addr->sin_port = htons(PORT);
-	my_addr->sin_addr.s_addr = inet_addr(MYIP);
-	memset(&(my_addr->sin_zero), '\0', 8); // Poner a cero el resto de la estructura
-	serverSocketfd = socket(AF_INET, SOCK_STREAM, 0);
-	if (serverSocketfd == -1) {
-		// TODO Loguear que no se pudo crear el socket
-		// TODO Analizar el tratamiento que quiere darse
-		exit(1);
-	}
-	// TODO Loguear que se creo el socket
-	printf("El socket se creo correctamente");
-	//bind(sockfd, res->ai_addr, res->ai_addrlen);
-	//if (bind(serverSocketfd, my_addr->sin_addr.s_addr, my_addr->) == -1) {
-		//if (bind(serverSocketfd, struct sockaddr*) &*my_addr, sizeof(struct sockaddr)) == -1) {
-	if(0){
-	printf("error de bindeo");
-		close(serverSocketfd);
-		//TODO loguear el error
-		//TODO analizar el tratamiento que hay que darle
-		exit(1);
-	}
-	// TODO Loguear que se bindeo correctamente el socket
-
-	if (listen(serverSocketfd, BACKLOG) == -1) {
-		perror("listen");
-		exit(1);
-
-	}
-	// TODO Loguear esperando conexiones
-	printf("server: waiting for connections...\n");
-	return serverSocketfd;
-
 }
 
 
@@ -194,4 +157,4 @@ void *connectionResponse(int *clientSock_fd) {
 void *handshake(void *param) {
 	printf("llego al handshake"); //TODO borrar linea
 }
-*/
+
