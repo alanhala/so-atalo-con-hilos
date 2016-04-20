@@ -57,8 +57,8 @@ int main(int argc, char **argv) {
 	return 0;
 }
 
-int createServerSocketReadyToAccept(struct sockaddr_in* my_addr,
-		int serverSocketfd) {
+int createServerSocketReadyToAccept(struct sockaddr_in* my_addr, int serverSocketfd)
+{
 	my_addr->sin_family = AF_INET;
 	my_addr->sin_port = htons(PORT);
 	my_addr->sin_addr.s_addr = inet_addr(MYIP);
@@ -71,8 +71,10 @@ int createServerSocketReadyToAccept(struct sockaddr_in* my_addr,
 	}
 	// TODO Loguear que se creo el socket
 	printf("El socket se creo correctamente");
-	if (bind(serverSocketfd, (struct sockaddr*) &*my_addr,
-			sizeof(struct sockaddr)) == -1) {
+	//bind(sockfd, res->ai_addr, res->ai_addrlen);
+	if (bind(serverSocketfd, my_addr->sin_addr.s_addr, my_addr->) == -1) {
+	//if (bind(serverSocketfd, struct sockaddr*) &*my_addr, sizeof(struct sockaddr)) == -1) {
+		printf("error de bindeo");
 		close(serverSocketfd);
 		//TODO loguear el error
 		//TODO analizar el tratamiento que hay que darle
