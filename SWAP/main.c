@@ -28,7 +28,7 @@
 #include <signal.h>
 #include <pthread.h>
 
-#define PORT "25000"
+#define PORT "25005"
 #define SERVERIP "192.168.1.35"
 
 void *get_in_addr(struct sockaddr *sa) {
@@ -41,10 +41,10 @@ void *get_in_addr(struct sockaddr *sa) {
 
 int main(int argc, char *argv[]) {
 	int sockfd;
-
+	printf("tex");
 	struct addrinfo hints, *servinfo, *p;
 	int rv;
-	char s[INET6_ADDRSTRLEN];
+
 
 	memset(&hints, 0, sizeof hints);
 	hints.ai_family = AF_INET;
@@ -52,40 +52,45 @@ int main(int argc, char *argv[]) {
 
 	if ((rv = getaddrinfo(SERVERIP, PORT, &hints, &servinfo)) != 0) {
 		printf("tex");
+		exit(1);
+	}
+	printf("tex");
+	// loop through all the results and connect to the first we can
+
+	for(p = servinfo; p != NULL; p = p->ai_next) {
+			if ((sockfd = socket(p->ai_family, p->ai_socktype,
+					p->ai_protocol)) == -1) {
+				perror("server: socket");
+				continue;
+		}
+
+
+	/*sockfd = socket(AF_INET, SOCK_STREAM, 0);
+	if (sockfd == -1) {
+		perror("client: socket");
+		printf("texto");
+	return 1;
+	*/
+	}
+
+	if (connect(sockfd, servinfo->ai_addr, servinfo->ai_addrlen) == -1) {
+		close(sockfd);
+		perror("client newton: connect");
 		return 1;
 	}
 
-	// loop through all the results and connect to the first we can
-	sockfd = socket(AF_INET, SOCK_STREAM, 0);
-			if (sockfd == -1) {
-				perror("client: socket");
-				printf("tex");
-				return 1;
-			}
+	//if (p == NULL) {
+	//	fprintf(stderr, "client: failed to connect\n");
+	//	return 2;
+//	}
 
-			//if (connect(sockfd, p->ai_addr, p->ai_addrlen) == -1) {
-			if (connect(sockfd, servinfo->ai_addr, servinfo->ai_addrlen) == -1) {
-				close(sockfd);
-				perror("client newton: connect");
-				return 1;
-			}
+	printf("client: CONECTADO");
 
-			if (p == NULL) {
-				fprintf(stderr, "client: failed to connect\n");
-				return 2;
-			}
+	freeaddrinfo(servinfo); // all done with this structure
 
-			inet_ntop(p->ai_family, get_in_addr((struct sockaddr *) p->ai_addr),
-					s, sizeof s);
-			printf("client: connecting to %s\n", s);
+	printf("client: CONECTADO");
 
-			freeaddrinfo(servinfo); // all done with this structure
+	close(sockfd);
 
-			printf("client: CONECTADO");
-
-			while (1) {
-			};
-			close(sockfd);
-
-			return 0;
-		}
+	return 0;
+}
