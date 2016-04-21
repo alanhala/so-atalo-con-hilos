@@ -26,7 +26,7 @@
 #define MAXDATASIZE 100
 #define MYIP "192.168.1.35" // TODO es necesario?
 
-
+static int threadsActive = 0;
 void *connectionResponse(int *clientSock_fd);
 
 void *handshake(void *param);
@@ -93,7 +93,7 @@ int main(int argc, char **argv) {
 	socklen_t sin_size;
 	struct sigaction sa;
 	int yes = 1;
-	char s[INET6_ADDRSTRLEN];
+
 	int rv;
 
 	memset(&hints, 0, sizeof hints);
@@ -121,7 +121,7 @@ int main(int argc, char **argv) {
 			printf("server: error al aceptar cliente...\n");
 			continue;
 		}
-		//void *ptr; //TODO analizar si hay problema
+		threadsActive ++;
 		connectionResponse(newSock_fd);
 
 
@@ -133,10 +133,11 @@ int main(int argc, char **argv) {
 
 void *connectionResponse(int *clientSock_fd) {
 
-	printf("Llego al connection response"); //TODO BORRAR LINEA
+	//printf("Llego al connection response \n"); //TODO BORRAR LINEA
 	pthread_t thread;
 
 	int iret1 = pthread_create(&thread, NULL, &handshake, clientSock_fd);
+	printf("Hilo creado \n"); //TODO BORRAR LINEA
 	//Cuarto Parametro:
 	//*arg - pointer to argument of function.
 	//To pass multiple arguments, send a pointer to a structure.
@@ -144,17 +145,22 @@ void *connectionResponse(int *clientSock_fd) {
 	if (iret1) {
 		// TODO LOGUEAR ERROR
 		// TODO Analizar el tratamiento que desea darse
-		fprintf(stderr, "Error - pthread_create() return code: %d\n", iret1);
+		printf(stderr, "Error - pthread_create() return code: %d\n", iret1);
 		exit(1);
 	}
 
-	pthread_join(thread, NULL);
+	//pthread_join(thread, NULL);
 
-	exit(EXIT_SUCCESS); //TODO exit_success??
+	//exit(EXIT_SUCCESS); //TODO exit_success??
 
 }
 
 void *handshake(void *param) {
-	printf("llego al handshake"); //TODO borrar linea
+	//printf("llego al handshake %d", threadsActive); //TODO borrar linea
+	int threadNumber = threadsActive;
+	while (1){
+		printf("thread  %d \n", threadNumber); //TODO borrar linea
+		sleep(1);
+	}
 }
 

@@ -41,7 +41,7 @@ void *get_in_addr(struct sockaddr *sa) {
 
 int main(int argc, char *argv[]) {
 	int sockfd;
-	printf("tex");
+
 	struct addrinfo hints, *servinfo, *p;
 	int rv;
 
@@ -54,9 +54,8 @@ int main(int argc, char *argv[]) {
 		printf("tex");
 		exit(1);
 	}
-	printf("tex");
-	// loop through all the results and connect to the first we can
 
+	// loop through all the results and connect to the first we can
 	for(p = servinfo; p != NULL; p = p->ai_next) {
 			if ((sockfd = socket(p->ai_family, p->ai_socktype,
 					p->ai_protocol)) == -1) {
@@ -84,11 +83,11 @@ int main(int argc, char *argv[]) {
 	//	return 2;
 //	}
 
-	printf("client: CONECTADO");
+
 
 	freeaddrinfo(servinfo); // all done with this structure
 
-	printf("client: CONECTADO");
+	printf("client: CONECTADO \n");
 
 	close(sockfd);
 
