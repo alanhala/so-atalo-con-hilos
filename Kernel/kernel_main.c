@@ -1,9 +1,7 @@
 /*
- * main.c
-
-
+ * kernel_main.c
  *
- *  Created on: 20/4/2016
+ *  Created on: 28/4/2016
  *      Author: utnso
  */
 
@@ -20,31 +18,25 @@
 #include <sys/wait.h>
 #include <signal.h>
 #include <pthread.h>
+#include "socket.h"
 
-#define LISTENPORT "21000"
-#define SWAPPORT "20000"
-#define SWAPIP "localhost" // TODO es necesario?
+#define KERNELLISTENPORT  "30000"
+#define UMCIP  "localhost"
+#define UMCPORT  "21000"
 
-void kernel_and_cpu_connections();
-void connect_to_SWAP();
+void console_and_cpu_connections();
 
 int main(int argc, char **argv) {
-
-	void kernel_and_cpu_connections();
-	void connect_to_SWAP();
-
+	void console_and_cpu_connections();
 	return 0;
 }
 
-void kernel_and_cpu_connections() {
+void console_and_cpu_connections() {
 	int server_socket_descriptor = create_server_socket_descriptor("",
-	LISTENPORT);
+			KERNELLISTENPORT);
 	while (1) {
 		int client_socket_descriptor = accept_connection(
 				server_socket_descriptor);
 	}
 }
 
-void connecto_to_SWAP() {
-
-}
