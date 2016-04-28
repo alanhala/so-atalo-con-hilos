@@ -44,7 +44,7 @@ void correrImprimirTexto() {
 	analizadorLinea(strdup(IMPRIMIR_TEXTO), &functions, &kernel_functions);
 	printf("================\n");
 }
-
+/*
 int main(int argc, char **argv) {
 	correrAsignar();
 	correrDefinirVariables();
@@ -54,4 +54,4 @@ int main(int argc, char **argv) {
 	return 0;
 }
 
-
+*/

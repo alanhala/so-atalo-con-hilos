@@ -18,7 +18,8 @@
 #include <errno.h>
 #include <pthread.h>
 
-int create_server_socket_descriptor(char* ip, char* port);
+int create_server_socket_descriptor(char* port, int backlog);
 int accept_connection(int socket_descriptor);
+int create_client_socket_descriptor(char* ip, char* port);
 
 #endif /* SOCKET_H_ */

@@ -26,7 +26,7 @@ void connect_to_kernel();
 
 int main(int argc, char **argv) {
 
-	void connect_to_kernel();
+	connect_to_kernel();
 	return 0;
 }
 

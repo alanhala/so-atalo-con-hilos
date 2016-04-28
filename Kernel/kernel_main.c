@@ -23,17 +23,16 @@
 #define KERNELLISTENPORT  "30000"
 #define UMCIP  "localhost"
 #define UMCPORT  "21000"
-
+#define BACKLOG 10
 void console_and_cpu_connections();
 
 int main(int argc, char **argv) {
-	void console_and_cpu_connections();
+	console_and_cpu_connections();
 	return 0;
 }
 
 void console_and_cpu_connections() {
-	int server_socket_descriptor = create_server_socket_descriptor("",
-			KERNELLISTENPORT);
+	int server_socket_descriptor = create_server_socket_descriptor(KERNELLISTENPORT, BACKLOG);
 	while (1) {
 		int client_socket_descriptor = accept_connection(
 				server_socket_descriptor);

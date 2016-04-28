@@ -8,7 +8,7 @@
 #include <errno.h>
 #include <pthread.h>
 
-int create_server_socket_descriptor(char* ip, char* port) {
+int create_server_socket_descriptor(char *port, int backlog) {
 	int yes = 1;
 	struct addrinfo sample, *server_info, *p;
 	int status, socket_descriptor;
@@ -23,33 +23,33 @@ int create_server_socket_descriptor(char* ip, char* port) {
 		exit(1);
 	}
 	for(p = server_info; p != NULL; p = p->ai_next) {
-	        if ((socket_descriptor = socket(p->ai_family, p->ai_socktype,
-	                p->ai_protocol)) == -1) {
-	            perror("server: socket");
-	            continue;
-	        }
+		if ((socket_descriptor = socket(p->ai_family, p->ai_socktype,
+				p->ai_protocol)) == -1) {
+			perror("server: socket");
+			continue;
+		}
 
-	        if (setsockopt(socket_descriptor, SOL_SOCKET, SO_REUSEADDR, &yes,
-	                sizeof(int)) == -1) {
-	            perror("setsockopt");
-	            exit(1);
-	        }
+		if (setsockopt(socket_descriptor, SOL_SOCKET, SO_REUSEADDR, &yes,
+				sizeof(int)) == -1) {
+			perror("setsockopt");
+			exit(1);
+		}
 
-	        if (bind(socket_descriptor, p->ai_addr, p->ai_addrlen) == -1) {
-	            close(socket_descriptor);
-	            perror("server: bind");
-	            continue;
-	        }
+		if (bind(socket_descriptor, p->ai_addr, p->ai_addrlen) == -1) {
+			close(socket_descriptor);
+			perror("server: bind");
+			continue;
+		}
 
-	        break;
-	    }
+		break;
+	}
 
-	    freeaddrinfo(server_info); // all done with this structure
+	freeaddrinfo(server_info); // all done with this structure
 
-	    if (p == NULL)  {
-	        fprintf(stderr, "server: failed to bind\n");
-	        exit(1);
-	    }
+	if (p == NULL)  {
+		fprintf(stderr, "server: failed to bind\n");
+		exit(1);
+	}
 
 
 	printf("Creating socket \n");
@@ -75,7 +75,7 @@ int create_server_socket_descriptor(char* ip, char* port) {
 
 	printf("Starting listening \n");
 
-	if (listen(socket_descriptor, 3) == -1) {
+	if (listen(socket_descriptor, backlog) == -1) {
 		perror("listen");
 		exit(1);
 	}
@@ -94,5 +94,41 @@ int accept_connection(int socket_descriptor) {
 		printf("Connected \n");
 		return new_sd;
 	}
+}
 
+int create_client_socket_descriptor(char *ip, char *port) {
+	struct addrinfo sample, *server_info, *p;
+	int status, socket_descriptor;
+
+	memset(&sample, 0, sizeof sample);
+	sample.ai_family = AF_UNSPEC;
+	sample.ai_socktype = SOCK_STREAM;
+	if ((status = getaddrinfo(ip, port, &sample, &server_info)) != 0) {
+		printf("getaddrinfo: %s\n", gai_strerror(status));
+		exit(1);
+	}
+
+	for(p = server_info; p != NULL; p = p->ai_next) {
+		if ((socket_descriptor = socket(p->ai_family, p->ai_socktype, p->ai_protocol)) == -1) {
+			perror("client: socket");
+			continue;
+		}
+
+		if (connect(socket_descriptor, p->ai_addr, p->ai_addrlen) == -1) {
+			close(socket_descriptor);
+			perror("client: connect");
+			continue;
+		}
+
+		break;
+	}
+
+	if (p == NULL) {
+		fprintf(stderr, "client: failed to connect\n");
+		exit(2);
+	}
+
+	freeaddrinfo(server_info);
+
+	return socket_descriptor;
 }

@@ -29,7 +29,9 @@
 #include <pthread.h>
 #include "socket.h"
 
-#define LISTENPORT "20000"
+#define LISTENPORT "8000"
+#define BACKLOG 10
+
 
 void UMC_connection();
 
@@ -41,11 +43,12 @@ int main(int argc, char *argv[]) {
 }
 
 void UMC_connection() {
-	int server_socket_descriptor = create_server_socket_descriptor("",
-			LISTENPORT);
+	int server_socket_descriptor = create_server_socket_descriptor(LISTENPORT, 10);
 	while (1) {
-		int client_socket_descriptor = accept_connection(
+		int umc_socket_descriptor = accept_connection(
 				server_socket_descriptor);
+		printf("se conecto umc");
+		fflush(stdout);
 	}
 }
 
