@@ -37,3 +37,6 @@
 */Debug
 #Others
 RemoteSystemsTempFiles/
+
+*.cproject
+*.project
