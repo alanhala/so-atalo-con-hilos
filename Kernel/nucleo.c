@@ -15,7 +15,7 @@ struct PCB *CreatePCB ();
 
 
 
-int main (void) {
+/*int main (void) {
 
 	int i,q,tact;
     struct PCB  *ptmp;
@@ -116,7 +116,7 @@ int main (void) {
 		}
     ///free(ptmp); acordarse de eliminar los punteros
     return(0);
-};
+};*/
 
 struct PCB *CreatePCB (int pid,int in,int raf) {
     struct PCB *proc;
