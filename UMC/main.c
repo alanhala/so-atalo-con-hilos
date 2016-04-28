@@ -24,12 +24,15 @@
 #define PORT "25005"
 #define BACKLOG 10
 #define MAXDATASIZE 100
-#define MYIP "192.168.1.35" // TODO es necesario?
+//#define MYIP "192.168.1.35" // TODO es necesario?
+#define MYIP "10.15.247.151" // TODO es necesario?
+
 
 static int threadsActive = 0;
 void *connectionResponse(int *clientSock_fd);
 
-void *handshake(void *param);
+//void *handshake(void *param);
+void *handshake(int clientSock_fd);
 
 void sigchld_handler(int s)
 {
@@ -55,6 +58,7 @@ int createServerSocketReadyToAccept(int serverSocketfd, int yes,
 			perror("setsockopt");
 			exit(1);
 		}
+
 
 		if (bind(serverSocketfd, p->ai_addr, p->ai_addrlen) == -1) {
 			close(serverSocketfd);
@@ -133,11 +137,11 @@ int main(int argc, char **argv) {
 
 void *connectionResponse(int *clientSock_fd) {
 
-	//printf("Llego al connection response \n"); //TODO BORRAR LINEA
+
 	pthread_t thread;
 
 	int iret1 = pthread_create(&thread, NULL, &handshake, clientSock_fd);
-	printf("Hilo creado \n"); //TODO BORRAR LINEA
+
 	//Cuarto Parametro:
 	//*arg - pointer to argument of function.
 	//To pass multiple arguments, send a pointer to a structure.
@@ -148,18 +152,24 @@ void *connectionResponse(int *clientSock_fd) {
 		printf(stderr, "Error - pthread_create() return code: %d\n", iret1);
 		exit(1);
 	}
-
+	printf("Hilo creado \n"); //TODO BORRAR LINEA
 	//pthread_join(thread, NULL);
 
 	//exit(EXIT_SUCCESS); //TODO exit_success??
 
 }
 
-void *handshake(void *param) {
+void *handshake(int clientSock_fd) {
 	//printf("llego al handshake %d", threadsActive); //TODO borrar linea
 	int threadNumber = threadsActive;
+
 	while (1){
-		printf("thread  %d \n", threadNumber); //TODO borrar linea
+		//printf("thread  %d \n", threadNumber); //TODO borrar linea
+		char recvBuffer[18];
+		//send(param, "envio al cliente\n", sizeof("envio al cliente\n"), 0);
+		send(clientSock_fd, "envio al cliente\n", 17, 0);
+		recv(clientSock_fd, recvBuffer, 18, 0);
+		printf(recvBuffer);
 		sleep(1);
 	}
 }

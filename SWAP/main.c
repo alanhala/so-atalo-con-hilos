@@ -29,7 +29,8 @@
 #include <pthread.h>
 
 #define PORT "25005"
-#define SERVERIP "192.168.1.35"
+//#define SERVERIP "192.168.1.35"
+#define SERVERIP "10.15.247.151"
 
 void *get_in_addr(struct sockaddr *sa) {
 	if (sa->sa_family == AF_INET) {
@@ -45,7 +46,6 @@ int main(int argc, char *argv[]) {
 	struct addrinfo hints, *servinfo, *p;
 	int rv;
 
-
 	memset(&hints, 0, sizeof hints);
 	hints.ai_family = AF_INET;
 	hints.ai_socktype = SOCK_STREAM;
@@ -56,20 +56,19 @@ int main(int argc, char *argv[]) {
 	}
 
 	// loop through all the results and connect to the first we can
-	for(p = servinfo; p != NULL; p = p->ai_next) {
-			if ((sockfd = socket(p->ai_family, p->ai_socktype,
-					p->ai_protocol)) == -1) {
-				perror("server: socket");
-				continue;
+	for (p = servinfo; p != NULL; p = p->ai_next) {
+		if ((sockfd = socket(p->ai_family, p->ai_socktype, p->ai_protocol))
+				== -1) {
+			perror("server: socket");
+			continue;
 		}
 
-
-	/*sockfd = socket(AF_INET, SOCK_STREAM, 0);
-	if (sockfd == -1) {
-		perror("client: socket");
-		printf("texto");
-	return 1;
-	*/
+		/*sockfd = socket(AF_INET, SOCK_STREAM, 0);
+		 if (sockfd == -1) {
+		 perror("client: socket");
+		 printf("texto");
+		 return 1;
+		 */
 	}
 
 	if (connect(sockfd, servinfo->ai_addr, servinfo->ai_addrlen) == -1) {
@@ -83,11 +82,17 @@ int main(int argc, char *argv[]) {
 	//	return 2;
 //	}
 
-
-
 	freeaddrinfo(servinfo); // all done with this structure
 
 	printf("client: CONECTADO \n");
+	char recvBuff[17];
+
+	while (1) {
+		recv(sockfd, recvBuff, 17, 0);
+		printf(recvBuff);
+		send(sockfd, "envio al servidor\n", 18, 0);
+		sleep(1);
+	}
 
 	close(sockfd);
 
