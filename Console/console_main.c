@@ -75,13 +75,12 @@ int main(int argc, char **argv) {
 
 //Agrega Newton -- Fin
 
-
-
 	connect_to_kernel();
 	return 0;
 }
 
 void connect_to_kernel(){
+	create_client_socket_descriptor("localhost", "8001");
 
 }
 

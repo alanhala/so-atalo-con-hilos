@@ -20,22 +20,49 @@
 #include <pthread.h>
 #include "socket.h"
 
-#define KERNELLISTENPORT  "30000"
+#define CPULISTEN  "8000"
+#define CONSOLELISTEN "8001"
 #define UMCIP  "localhost"
 #define UMCPORT  "21000"
 #define BACKLOG 10
-void console_and_cpu_connections();
+
+void *cpu_connection(int socket_descriptor);
+void *console_connection(int socket_descriptor);
 
 int main(int argc, char **argv) {
-	console_and_cpu_connections();
-	return 0;
+	int cpu_socket_descriptor, console_socket_descriptor;
+	pthread_t cpu_thread;
+	pthread_t console_thread;
+
+
+	cpu_socket_descriptor = create_server_socket_descriptor(CPULISTEN, 4);
+	if (pthread_create(&cpu_thread, NULL, &cpu_connection, cpu_socket_descriptor)) {
+		printf("No se pudo crear el thread");
+		fflush(stdout);
+		exit(1);
+	}
+	console_socket_descriptor = create_server_socket_descriptor(CONSOLELISTEN, 4);
+	if (pthread_create(&console_thread, NULL, &console_connection, console_socket_descriptor)) {
+		printf("No se pudo crear el thread");
+		fflush(stdout);
+		exit(1);
+	}
+	while (1);
 }
 
-void console_and_cpu_connections() {
-	int server_socket_descriptor = create_server_socket_descriptor(KERNELLISTENPORT, BACKLOG);
+void *cpu_connection(int socket_descriptor) {
 	while (1) {
 		int client_socket_descriptor = accept_connection(
-				server_socket_descriptor);
+				socket_descriptor);
+		printf("Se conection una CPU");
+		fflush(stdout);
 	}
 }
 
+void *console_connection(int socket_desciptor) {
+	while (1) {
+		int client_socket_descriptor = accept_connection(socket_desciptor);
+		printf("Se conectio una consola");
+		fflush(stdout);
+	}
+}

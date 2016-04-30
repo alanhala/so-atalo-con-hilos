@@ -19,7 +19,7 @@
 #include <signal.h>
 #include <pthread.h>
 
-#define KERNELPORT "30000"
+#define KERNELPORT "8000"
 #define KERNELIP "localhost"
 
 #define UMCPORT "21000"
@@ -28,6 +28,7 @@
 void connect_to_UMC();
 void connect_to_Kernel();
 void *connect_to_UMC_thread();
+void *connect_to_kernel_thread(void);
 
 int
 
@@ -75,5 +76,18 @@ void *connect_to_UMC_thread() {
 }
 
 void connect_to_Kernel() {
+	pthread_t thread;
+	int thread_result = pthread_create(&thread, NULL, &connect_to_kernel_thread,
+			NULL);
 
+	if (thread_result) {
+		// TODO LOGUEAR ERROR
+		// TODO Analizar el tratamiento que desea darse
+		printf("Error - pthread_create() return code: %d\n", thread_result);
+		exit(1);
+	}
+}
+
+void *connect_to_kernel_thread(void) {
+	create_client_socket_descriptor("localhost", KERNELPORT);
 }
