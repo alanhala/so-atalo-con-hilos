@@ -1,0 +1,347 @@
+#include <commons/collections/queue.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <pthread.h>
+
+
+struct CPU {
+    int id;
+    int speed;
+ };
+
+struct PCB {
+    int pid;
+    struct CPU  *cpuexec;
+    int remaing;
+    int wtime;
+    int in;
+    int rafaga;
+    int io;
+    int r2;
+ };
+
+pthread_mutex_t mut_n,mut_r,mut_e,mut_b,mut_s;
+int i,q,tact;
+
+int qt;
+struct PCB  *ptmp;
+struct CPU  *pcpu;
+
+void *pColaNew,*pColaReady, *pColaExit, *pColaBlock,*pColaExec,*pColaPro, *pColaCpu;
+
+
+//pthread_cond_t count_waitexample;
+
+
+
+struct PCB *CreatePCB ();
+struct CPU *CreateCPU (int id,int speed) ;
+
+int main(void){
+
+
+	simuladorr2();
+	return 0;
+}
+
+
+
+void *recReady() {
+
+
+	while (1){
+		pthread_mutex_lock(&mut_n);
+		ptmp = queue_pop(pColaNew);
+		pthread_mutex_unlock(&mut_n);
+		//printf("Ready  proceso %d tiempo cpu %d\n",ptmp->pid,tact);
+		pthread_mutex_lock(&mut_r);
+		queue_push(pColaReady,ptmp);
+		pthread_mutex_unlock(&mut_r);
+
+		sleep(1);
+	}
+
+	//TODO CERRAR CONEXION DEL SOCKET
+}
+
+void *recNew() {
+
+	//TODO que reciba el socket_desciptor
+	while (1) {
+
+		//TODO int client_socket_descriptor = accept_connection(socket_desciptor);
+		pthread_mutex_lock(&mut_n);
+		queue_push(pColaNew,CreatePCB());
+		pthread_mutex_unlock(&mut_n);
+		printf("Se conectio una consola");
+		fflush(stdout);
+	}
+	//TODO CERRAR CONEXION DEL SOCKET
+}
+
+void *recExec() {
+	while (1) {
+		if (!queue_is_empty(pColaReady) && !queue_is_empty(pColaCpu) ){
+
+				ptmp = queue_pop(pColaReady);
+				pcpu = queue_pop(pColaCpu);
+				ptmp->cpuexec=pcpu;
+				//printf("Exec  proceso %d tiempo cpu %d\n",ptmp->pid,tact);
+				queue_push(pColaExec,ptmp);
+			}
+	}
+}
+void *recBlock() {
+	while (1) {
+		if (!queue_is_empty(pColaBlock)  ){
+					ptmp = queue_pop(pColaBlock);
+					ptmp->io=ptmp->io-1;
+					if ( ptmp->io > 0){
+						queue_push(pColaBlock,ptmp);
+					}
+					else {
+						if (  ptmp->rafaga >0)
+						{
+							//printf("readyblock proceso %d tiempo cpu %d\n",ptmp->pid,tact);
+							queue_push(pColaReady,ptmp);
+						}else{
+							//ptmp->remaing = tact;
+							//printf("Termina   proceso %d tiempo cpu %d\n",ptmp->pid,tact);
+							queue_push(pColaExit,ptmp);
+						}
+					}
+				}
+	}
+}
+int mainhilos(void){
+
+    //5 estados new, ready , exec, exit, block
+    pColaPro=queue_create();
+    pColaNew=queue_create();
+    pColaReady=queue_create();
+    pColaExit=queue_create();
+    pColaBlock=queue_create();
+    pColaExec=queue_create();
+    pColaCpu=queue_create();
+
+	//simuladorr2();
+	pthread_t thReady,thNew,thExec,thBlock;
+	/* Initialize mutex and condition variable objects */
+	  pthread_mutex_init(&mut_n, NULL);
+	  pthread_mutex_init(&mut_r, NULL);
+	  pthread_mutex_init(&mut_e, NULL);
+	  pthread_mutex_init(&mut_b, NULL);
+	  pthread_mutex_init(&mut_s, NULL);
+
+	  //pthread_cond_init (&count_threshold_cv, NULL);
+
+
+	int iret1 = pthread_create(&thNew, NULL, &recNew, NULL);
+		iret1 = pthread_create(&thReady, NULL, &recReady, NULL);
+		iret1 = pthread_create(&thExec, NULL, &recExec, NULL);
+		iret1 = pthread_create(&thBlock, NULL, &recBlock, NULL);
+
+
+		//Cuarto Parametro:
+		//*arg - pointer to argument of function.
+		//To pass multiple arguments, send a pointer to a structure.
+
+		if (iret1) {
+			// TODO LOGUEAR ERROR
+			// TODO Analizar el tratamiento que desea darse
+			printf("Error - pthread_create() return code: %d\n", iret1);
+			exit(1);
+		}
+		printf("Hilo creado \n"); //TODO BORRAR LINEA
+		//pthread_join(thread, NULL);
+
+		//exit(EXIT_SUCCESS); //TODO exit_success??
+
+
+	return 0;
+}
+
+int simuladorr3 (void) {
+
+
+
+    //5 estados new, ready , exec, exit, block
+    pColaPro=queue_create();
+    pColaNew=queue_create();
+    pColaReady=queue_create();
+    pColaExit=queue_create();
+    pColaBlock=queue_create();
+    pColaExec=queue_create();
+    pColaCpu=queue_create();
+    //test
+    //trate de hacer el ejercicio de round robin explicado en clase
+    //en el caso de los io lo puse como que volvia a retomar el proceso un tiempo dsp segun el de ej de clase
+
+    int vn[] =  {0,2,1,3};//id proceso
+    int vin[] =  {0,1,10,11};//tiempo de llegada
+    int vra[] =  {9,2,5,1};//duracion
+    int vra2[] =  {2,1,3,0}; //rafa 2
+    int vio[] =  {2,4,1,0}; //i/o time
+
+    for (i=0;i<=3;i++){
+    	queue_push(pColaPro,CreatePCB(vn[i],vin[i],vra[i],vio[i],vra2[i]));
+    }
+    for (i=1;i<=1;i++){
+    	queue_push(pColaCpu,CreateCPU(i,1));
+    }
+    q = 4;
+    qt = q;
+
+    //fin test
+
+    tact =0;
+
+    //Comienza algoritmo round robin
+    //para que funcione los tiempo de llegada tienen q estar ordenados en la cola
+
+    while (!queue_is_empty(pColaPro) &&  (ptmp=queue_peek(pColaPro))->in <= tact ){
+
+    				ptmp = queue_pop(pColaPro);
+    				printf("Saco  proceso %d tiempo cpu %d\n",ptmp->pid,tact);
+    				queue_push(pColaNew,ptmp);
+    		}
+
+    while (!queue_is_empty(pColaPro) || !queue_is_empty(pColaNew) || !queue_is_empty(pColaReady) || !queue_is_empty(pColaBlock)  || !queue_is_empty(pColaExec)  )
+    {//mientras haya procesos en alguna cola
+
+    	if (qt == 0) qt = q;
+
+
+
+
+    	while (!queue_is_empty(pColaPro) &&  (ptmp=queue_peek(pColaPro))->in <= tact ){
+
+				ptmp = queue_pop(pColaPro);
+				printf("Saco  proceso %d tiempo cpu %d\n",ptmp->pid,tact);
+				queue_push(pColaNew,ptmp);
+		}
+
+
+    	if (!queue_is_empty(pColaNew) ){
+
+				ptmp = queue_pop(pColaNew);
+				printf("Ready  proceso %d tiempo cpu %d\n",ptmp->pid,tact);
+				queue_push(pColaReady,ptmp);
+		}
+    	//fin prioridad los que acaban de entrar
+
+
+		while (!queue_is_empty(pColaReady) && !queue_is_empty(pColaCpu) ){
+			ptmp = queue_pop(pColaReady);
+			pcpu = queue_pop(pColaCpu);
+			ptmp->cpuexec=pcpu;
+			printf("Exec  proceso %d tiempo cpu %d\n",ptmp->pid,tact);
+			queue_push(pColaExec,ptmp);
+		}
+
+
+    	if (!queue_is_empty(pColaExec) ){
+
+    			qt = qt - 1;
+				ptmp = queue_pop(pColaExec);
+				if ( ptmp->rafaga > 0)
+				{
+					ptmp->rafaga = ptmp->rafaga - 1;
+				}
+
+				if ( qt == 0)
+				{
+						if ( ptmp->rafaga == 0)
+							{
+								if ( ptmp->io > 0){
+									ptmp->io++; // le sumo uno porque abajo se lo saco y se lo tengo q sacar en el prox ciclo
+									ptmp->rafaga = ptmp->r2;
+									ptmp->r2 = 0;
+									printf("Block proceso %d tiempo cpu %d\n",ptmp->pid,tact);
+									queue_push(pColaCpu,ptmp->cpuexec);
+									queue_push(pColaBlock,ptmp);
+								}
+								else{
+									ptmp->remaing = tact;
+									printf("Termina   proceso %d tiempo cpu %d\n",ptmp->pid,tact);
+									queue_push(pColaCpu,ptmp->cpuexec);
+									queue_push(pColaExit,ptmp);
+								}
+							}
+							else {
+
+							printf("%d libero x q proceso %d tiempo cpu %d\n",qt,ptmp->pid,tact);
+							queue_push(pColaCpu,ptmp->cpuexec);
+							queue_push(pColaReady,ptmp);
+							}
+
+
+				}
+
+
+				if (qt > 0 ) {
+					if ( ptmp->rafaga == 0)
+					{
+						qt=q;
+						if ( ptmp->io > 0){
+							ptmp->io++; // le sumo uno porque abajo se lo saco y se lo tengo q sacar en el prox ciclo
+							ptmp->rafaga = ptmp->r2;
+							ptmp->r2 = 0;
+							printf("Block proceso %d tiempo cpu %d\n",ptmp->pid,tact);
+							queue_push(pColaCpu,ptmp->cpuexec);
+							queue_push(pColaBlock,ptmp);
+						}
+						else{
+							ptmp->remaing = tact;
+							printf("Termina   proceso %d tiempo cpu %d\n",ptmp->pid,tact);
+							queue_push(pColaCpu,ptmp->cpuexec);
+							queue_push(pColaExit,ptmp);
+						}
+					}
+					else {
+						//printf("%d libero x q proceso %d tiempo cpu %d\n",qt,ptmp->pid,tact);
+						queue_push(pColaExec,ptmp);
+					}
+				}
+		}
+
+		if (!queue_is_empty(pColaBlock)  ){
+			ptmp = queue_pop(pColaBlock);
+			ptmp->io=ptmp->io-1;
+			if ( ptmp->io > 0){
+				queue_push(pColaBlock,ptmp);
+			}
+			else {
+				if (  ptmp->rafaga >0)
+				{
+					printf("readyblock proceso %d tiempo cpu %d\n",ptmp->pid,tact);
+					queue_push(pColaReady,ptmp);
+				}else{
+					ptmp->remaing = tact;
+					printf("Termina   proceso %d tiempo cpu %d\n",ptmp->pid,tact);
+					queue_push(pColaExit,ptmp);
+				}
+			}
+		}
+
+    	tact++;
+
+}
+
+
+
+
+
+   	while (!queue_is_empty(pColaExit)){
+				ptmp = queue_pop(pColaExit);
+
+				free(ptmp);
+		}
+    ///free(ptmp); acordarse de eliminar los punteros
+    return(0);
+};
+
+
+
+
+
