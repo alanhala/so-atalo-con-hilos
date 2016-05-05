@@ -87,7 +87,7 @@ int createServerSocketReadyToAccept(int serverSocketfd, int yes,
 	return serverSocketfd;
 }
 
-int main(int argc, char **argv) {
+int main2(int argc, char **argv) {
 
 	int serverSocketfd, newSock_fd;
 

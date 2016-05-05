@@ -20,14 +20,14 @@ struct PCB {
     int r2;
  };
 
-pthread_mutex_t mut_n,mut_r,mut_e,mut_b,mut_s;
-int i,q,tact;
+static pthread_mutex_t mut_n,mut_r,mut_e,mut_b,mut_s,mut_c;
+static int i,q,tact;
 
-int qt;
-struct PCB  *ptmp;
-struct CPU  *pcpu;
+static int qt;
+static struct PCB  *ptmp;
+static struct CPU  *pcpu;
 
-void *pColaNew,*pColaReady, *pColaExit, *pColaBlock,*pColaExec,*pColaPro, *pColaCpu;
+static void *pColaNew,*pColaReady, *pColaExit, *pColaBlock,*pColaExec,*pColaPro, *pColaCpu;
 
 
 //pthread_cond_t count_waitexample;
@@ -36,12 +36,64 @@ void *pColaNew,*pColaReady, *pColaExit, *pColaBlock,*pColaExec,*pColaPro, *pCola
 
 struct PCB *CreatePCB ();
 struct CPU *CreateCPU (int id,int speed) ;
+void *recNew() ;
+void *recReady() ;
+void *recBlock() ;
+void *recExec();
 
 int main(void){
 
+    //5 estados new, ready , exec, exit, block
+    pColaPro=queue_create();
+    pColaNew=queue_create();
+    pColaReady=queue_create();
+    pColaExit=queue_create();
+    pColaBlock=queue_create();
+    pColaExec=queue_create();
+    pColaCpu=queue_create();
 
-	simuladorr2();
+	pthread_t thReady,thNew,thExec,thBlock;
+	/* Initialize mutex and condition variable objects */
+	  pthread_mutex_init(&mut_n, NULL);
+	  pthread_mutex_init(&mut_r, NULL);
+	  pthread_mutex_init(&mut_e, NULL);
+	  pthread_mutex_init(&mut_b, NULL);
+	  pthread_mutex_init(&mut_c, NULL);
+	  pthread_mutex_init(&mut_s, NULL);
+
+	  //pthread_cond_init (&count_threshold_cv, NULL);
+
+
+	int iret1 = pthread_create(&thNew, NULL, &recNew, NULL);
+		iret1 = pthread_create(&thReady, NULL, &recReady, NULL);
+		iret1 = pthread_create(&thExec, NULL, &recExec, NULL);
+	//	iret1 = pthread_create(&thBlock, NULL, &recBlock, NULL);
+
+
+		//Cuarto Parametro:
+		//*arg - pointer to argument of function.
+		//To pass multiple arguments, send a pointer to a structure.
+
+		if (iret1) {
+			// TODO LOGUEAR ERROR
+			// TODO Analizar el tratamiento que desea darse
+			printf("Error - pthread_create() return code: %d\n", iret1);
+			exit(1);
+		}
+		printf("Hilo creado \n"); //TODO BORRAR LINEA
+		//pthread_join(thread, NULL);
+	  pthread_join( thNew, NULL);
+    pthread_join( thReady, NULL);
+    pthread_join( thExec, NULL);
+  //  pthread_join( thBlock, NULL);
+
+
+     exit(EXIT_SUCCESS);
+
+
+
 	return 0;
+
 }
 
 
@@ -83,11 +135,18 @@ void *recExec() {
 	while (1) {
 		if (!queue_is_empty(pColaReady) && !queue_is_empty(pColaCpu) ){
 
+        pthread_mutex_lock(&mut_r);
 				ptmp = queue_pop(pColaReady);
-				pcpu = queue_pop(pColaCpu);
+				pthread_mutex_unlock(&mut_r);
+				pthread_mutex_lock(&mut_c);
+        pcpu = queue_pop(pColaCpu);
+        pthread_mutex_unlock(&mut_c);
 				ptmp->cpuexec=pcpu;
+
 				//printf("Exec  proceso %d tiempo cpu %d\n",ptmp->pid,tact);
-				queue_push(pColaExec,ptmp);
+				pthread_mutex_lock(&mut_e);
+        queue_push(pColaExec,ptmp);
+        pthread_mutex_unlock(&mut_e);
 			}
 	}
 }
@@ -113,53 +172,9 @@ void *recBlock() {
 				}
 	}
 }
-int mainhilos(void){
-
-    //5 estados new, ready , exec, exit, block
-    pColaPro=queue_create();
-    pColaNew=queue_create();
-    pColaReady=queue_create();
-    pColaExit=queue_create();
-    pColaBlock=queue_create();
-    pColaExec=queue_create();
-    pColaCpu=queue_create();
-
-	//simuladorr2();
-	pthread_t thReady,thNew,thExec,thBlock;
-	/* Initialize mutex and condition variable objects */
-	  pthread_mutex_init(&mut_n, NULL);
-	  pthread_mutex_init(&mut_r, NULL);
-	  pthread_mutex_init(&mut_e, NULL);
-	  pthread_mutex_init(&mut_b, NULL);
-	  pthread_mutex_init(&mut_s, NULL);
-
-	  //pthread_cond_init (&count_threshold_cv, NULL);
 
 
-	int iret1 = pthread_create(&thNew, NULL, &recNew, NULL);
-		iret1 = pthread_create(&thReady, NULL, &recReady, NULL);
-		iret1 = pthread_create(&thExec, NULL, &recExec, NULL);
-		iret1 = pthread_create(&thBlock, NULL, &recBlock, NULL);
 
-
-		//Cuarto Parametro:
-		//*arg - pointer to argument of function.
-		//To pass multiple arguments, send a pointer to a structure.
-
-		if (iret1) {
-			// TODO LOGUEAR ERROR
-			// TODO Analizar el tratamiento que desea darse
-			printf("Error - pthread_create() return code: %d\n", iret1);
-			exit(1);
-		}
-		printf("Hilo creado \n"); //TODO BORRAR LINEA
-		//pthread_join(thread, NULL);
-
-		//exit(EXIT_SUCCESS); //TODO exit_success??
-
-
-	return 0;
-}
 
 int simuladorr3 (void) {
 
