@@ -19,7 +19,7 @@
 #include <signal.h>
 #include <pthread.h>
 
-#define KERNELPORT "8000"
+#define KERNELPORT "8002"
 #define KERNELIP "localhost"
 
 #define UMCPORT "21000"

@@ -18,19 +18,21 @@
 #include <sys/wait.h>
 #include <signal.h>
 #include <pthread.h>
+
 //#include <commons/log.h>
 
 #define KERNELTIP = "localhost"
 #define KERNELPORT = "30000"
 
 //Agrega Newton -- Inicio
-void cargaArray(char array[], FILE* codeF);
-void imprimeArray(const int cantCar,char array[]);
+//void cargaArray(char array[],  FILE* codeF);
+//void imprimeArray(const int cantCar,char array[]);
 //Agrega Newton -- Fin
 void connect_to_kernel();
 
 int main(int argc, char **argv) {
 
+/*
 //Agrega Newton -- Inicio
 
 		//t_log *errorLogger;
@@ -43,7 +45,7 @@ int main(int argc, char **argv) {
 							//a lo que se lea del archivo para el caracter de terminacion
 
 		//Se abre el archivo de texto
-		FILE *codeF = fopen("/home/utnso/workspace/LevantaArchivoEnArray/Debug/ansisopCode", "r");
+		struct FILE *codeF = fopen("/home/utnso/workspace/LevantaArchivoEnArray/Debug/ansisopCode", "r");
 
 		if(codeF==NULL){
 			//log_error(errorLogger,"No se encuentra el codigo ansisop\n");
@@ -74,7 +76,7 @@ int main(int argc, char **argv) {
 		imprimeArray(cantCar, array);
 
 //Agrega Newton -- Fin
-
+*/
 	connect_to_kernel();
 	return 0;
 }
@@ -84,8 +86,9 @@ void connect_to_kernel(){
 
 }
 
+/*
 //Agrega Newton -- Inicio
-void cargaArray(char array[], FILE* codeF) {
+void cargaArray(char* array, struct FILE* codeF) {
 	int c;
 	int i = 0;
 	for (i = 0; EOF; i++) {
@@ -104,3 +107,4 @@ void imprimeArray(const int cantCar,char array[]) {
 		printf("%c", array[i]);
 }
 //Agrega Newton -- Fin
+*/

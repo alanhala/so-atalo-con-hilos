@@ -20,7 +20,7 @@
 #include <pthread.h>
 #include "socket.h"
 
-#define CPULISTEN  "8000"
+#define CPULISTEN  "8002"
 #define CONSOLELISTEN "8001"
 #define UMCIP  "localhost"
 #define UMCPORT  "21000"
@@ -28,7 +28,7 @@
 
 void *cpu_connection(int socket_descriptor);
 void *console_connection(int socket_descriptor);
-
+/*
 int main(int argc, char **argv) {
 	int cpu_socket_descriptor, console_socket_descriptor;
 	pthread_t cpu_thread;
@@ -49,7 +49,7 @@ int main(int argc, char **argv) {
 	}
 	while (1);
 }
-
+*/
 void *cpu_connection(int socket_descriptor) {
 	while (1) {
 		int client_socket_descriptor = accept_connection(
