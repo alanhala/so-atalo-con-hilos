@@ -35,6 +35,13 @@ void *kernel_and_cpu_connection_handler(int client_socket_descriptor);
 
 int main(int argc, char **argv) {
 
+	if (strcmp(argv[1], "-test") == 0){
+		 correrTest();
+		 return 0;
+	}
+
+
+
 	connect_to_SWAP();
 	kernel_and_cpu_connections();
 
