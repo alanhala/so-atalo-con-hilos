@@ -23,13 +23,14 @@
 #include <commons/collections/list.h>
 #include <semaphore.h>
 #include "umc_play_main.h"
+#include "CUnit/Basic.h"
 
 
 int TAMANIO_MEMORIA_PRINCIPAL;
 char * MEMORIA_PRINCIPAL;
 int TAMANIO_MARCO;
 int CANTIDAD_MARCOS;
-t_list* tablas_de_paginas;
+t_list* lista_tabla_de_paginas;
 sem_t mut_tabla_de_paginas;
 
 int main(int argc, char **argv) {
@@ -48,7 +49,27 @@ int main(int argc, char **argv) {
 	//TODO ANALIZAR LO QUE DEVUELVE CUANDO NO ENCUENTRA LA PAGINA PORQUE NO AVANZO CON EL PROGRAMA
 	printf("busco la tabla de paginas de PID:%d\n", tabla->pid);
 	fflush(stdout);
-
+	asignar_frame_a_una_pagina(tabla, 2, 5);
+	printf("asigno el frame 2 a la pagina 5 del PID:%d\n", tabla->pid);
+	fflush(stdout);
+	int frame_de_pag_5 =devolverFrameDePagina(tabla, 5);
+	if (frame_de_pag_5 == 2){
+		printf("asignacion correcta\n");
+		fflush(stdout);
+	}else
+	{
+		printf("asignacion incorrecta\n");
+		fflush(stdout);
+	}
+	int frame_de_pag_4 =devolverFrameDePagina(tabla, 4);
+	if (frame_de_pag_4 == 2){
+			printf("assertfalse incorrecto\n");
+			fflush(stdout);
+		}else
+		{
+			printf("assertfalse correcto\n");
+			fflush(stdout);
+		}
 	// fin zona de test
 
 	while(1){
@@ -65,7 +86,7 @@ int inicializar_estructuras(){
 	inicializar_semaforos();
 	TAMANIO_MEMORIA_PRINCIPAL = TAMANIO_MARCO * CANTIDAD_MARCOS;
 	crear_memoria_principal();
-	tablas_de_paginas= list_create();
+	lista_tabla_de_paginas= list_create();
 	return 0;
 }
 
@@ -112,19 +133,32 @@ void crear_tabla_de_pagina_de_un_proceso(int pid, int paginas_requeridas_del_pro
 	nueva_tabla->paginas_totales=paginas_requeridas_del_proceso;
 	nueva_tabla->entradas=entradas;
 	sem_wait(&mut_tabla_de_paginas);
-	list_add(tablas_de_paginas, nueva_tabla);
+	list_add(lista_tabla_de_paginas, nueva_tabla);
 	sem_post(&mut_tabla_de_paginas);
 }
+
+
+void asignar_frame_a_una_pagina(t_tablas_de_paginas* tabla, int frame_a_asignar, int pagina){
+	tabla->entradas[pagina].frame=frame_a_asignar;
+}
+
+int devolverFrameDePagina(t_tablas_de_paginas* tabla, int pagina)
+{
+	return tabla->entradas[pagina].frame;
+
+}
+
 
 
 
 t_tablas_de_paginas* dame_tabla_de_paginas_de_pid(int pid_buscado){
 	sem_wait(&mut_tabla_de_paginas);
 
-	bool pid_iguales(t_tablas_de_paginas* tabla) {
+	int pid_iguales(t_tablas_de_paginas *tabla) {
 						return (tabla->pid == pid_buscado);}
 
-	t_tablas_de_paginas* tabla = list_find(tablas_de_paginas, (void*) pid_iguales);
+
+	t_tablas_de_paginas* tabla = list_find(lista_tabla_de_paginas, (void*) pid_iguales);
 	sem_post(&mut_tabla_de_paginas);
 	return tabla;
 
