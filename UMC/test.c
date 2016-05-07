@@ -73,9 +73,9 @@ void escribir_hola_en_frame_3(){
 	inicializacion_para_test(sizeof("hola"), 3);
 	inicializar_estructuras();
 
-	escribir_frame_de_memoria_principal(1, p);
+	escribir_frame_de_memoria_principal(3, p);
 
-	char* datos_escritos = leer_frame_de_memoria_principal(1);
+	char* datos_escritos = leer_frame_de_memoria_principal(3);
 	//char* datos_escritos = malloc(sizeof("hola"));
 	//memcpy(datos_escritos, MEMORIA_PRINCIPAL + (3*sizeof("hola")), sizeof("hola"));
 	CU_ASSERT_EQUAL(strcmp(datos_escritos, "hola"),0);
