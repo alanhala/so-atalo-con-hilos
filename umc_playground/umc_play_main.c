@@ -28,8 +28,8 @@
 
 int TAMANIO_MEMORIA_PRINCIPAL;
 char * MEMORIA_PRINCIPAL;
-int TAMANIO_MARCO;
-int CANTIDAD_MARCOS;
+int TAMANIO_FRAME;
+int CANTIDAD_FRAMES;
 t_list* lista_tabla_de_paginas;
 sem_t mut_tabla_de_paginas;
 
@@ -84,7 +84,7 @@ int main(int argc, char **argv) {
 
 int inicializar_estructuras(){
 	inicializar_semaforos();
-	TAMANIO_MEMORIA_PRINCIPAL = TAMANIO_MARCO * CANTIDAD_MARCOS;
+	TAMANIO_MEMORIA_PRINCIPAL = TAMANIO_FRAME * CANTIDAD_FRAMES;
 	crear_memoria_principal();
 	lista_tabla_de_paginas= list_create();
 	return 0;
@@ -96,8 +96,8 @@ void inicializar_semaforos(){
 }
 int cargar_archivo_configuracion(){
 	//TODO cargar archivo de configuracion y a partir de eso setear los valores
-	TAMANIO_MARCO=50;
-	CANTIDAD_MARCOS=2000;
+	TAMANIO_FRAME=50;
+	CANTIDAD_FRAMES=2000;
 	return 0;
 }
 

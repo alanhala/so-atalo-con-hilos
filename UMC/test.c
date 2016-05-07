@@ -17,13 +17,17 @@
 #include "memoriaPrincipal.h"
 #include "CUnit/Basic.h"
 #include "test.h"
+
+
 int correrTest(){
 
 CU_initialize_registry();
 	  CU_pSuite prueba = CU_add_suite("Suite de prueba", NULL, NULL);
 	  CU_add_test(prueba, "uno", cargo_programa_pid_100);
-	  CU_add_test(prueba, "uno", asigno_frame_2_a_la_pagina_5);
-	  CU_add_test(prueba, "uno", no_esta_presente_frame_2_en_pagina_4);
+	  CU_add_test(prueba, "dos", asigno_frame_2_a_la_pagina_5);
+	  CU_add_test(prueba, "tres", no_esta_presente_frame_2_en_pagina_4);
+	  CU_add_test(prueba, "cuarto", escribir_hola_en_frame_3);
+
 
 
 
@@ -62,3 +66,19 @@ void no_esta_presente_frame_2_en_pagina_4(){
 
 }
 
+void escribir_hola_en_frame_3(){
+
+	char hola[] = "hola";
+	char* p = &hola;
+	inicializacion_para_test(sizeof("hola"), 3);
+	inicializar_estructuras();
+
+	escribir_frame_de_memoria_principal(1, p);
+
+	char* datos_escritos = leer_frame_de_memoria_principal(1);
+	//char* datos_escritos = malloc(sizeof("hola"));
+	//memcpy(datos_escritos, MEMORIA_PRINCIPAL + (3*sizeof("hola")), sizeof("hola"));
+	CU_ASSERT_EQUAL(strcmp(datos_escritos, "hola"),0);
+
+
+}

@@ -4,6 +4,10 @@
  *  Created on: 6/5/2016
  *      Author: utnso
  */
+//pruebo con extern para ver si corren los test
+
+
+
 
 typedef struct e_t_p{
 	int frame;
@@ -17,6 +21,7 @@ typedef struct t_p {
 } t_tablas_de_paginas;
 
 void crear_memoria_principal();
+void inicializacion_para_test(int tamanio_frame, int cantidad_frame);
 int cargar_archivo_configuracion();
 void liberar_memoria_principal();
 int inicializar_estructuras();
@@ -27,3 +32,5 @@ t_tablas_de_paginas* dame_tabla_de_paginas_de_pid(int pid_buscado);
 void inicializar_semaforos();
 void asignar_frame_a_una_pagina(t_tablas_de_paginas* tabla, int frame_a_asignar, int pagina);
 int devolverFrameDePagina(t_tablas_de_paginas* tabla, int pagina);
+void escribir_frame_de_memoria_principal(int frame, char* datos);
+char* leer_frame_de_memoria_principal(int frame);
