@@ -11,3 +11,4 @@ void asigno_frame_2_a_la_pagina_5();
 void no_esta_presente_frame_2_en_pagina_4();
 void escribir_hola_en_frame_3();
 void crear_50_frames_de_memoria_principal();
+//void eliminar_tabla_de_pid_2(); TODO revisar

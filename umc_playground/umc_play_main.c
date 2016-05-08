@@ -45,14 +45,14 @@ int main(int argc, char **argv) {
 	printf("creo un programa con pid 200 \n");
 	fflush(stdout);
 
-	t_tablas_de_paginas* tabla= dame_tabla_de_paginas_de_pid(100);
+	t_tablas_de_paginas* tabla= buscar_tabla_de_paginas_de_pid(100);
 	//TODO ANALIZAR LO QUE DEVUELVE CUANDO NO ENCUENTRA LA PAGINA PORQUE NO AVANZO CON EL PROGRAMA
 	printf("busco la tabla de paginas de PID:%d\n", tabla->pid);
 	fflush(stdout);
 	asignar_frame_a_una_pagina(tabla, 2, 5);
 	printf("asigno el frame 2 a la pagina 5 del PID:%d\n", tabla->pid);
 	fflush(stdout);
-	int frame_de_pag_5 =devolverFrameDePagina(tabla, 5);
+	int frame_de_pag_5 =devolver_frame_de_pagina(tabla, 5);
 	if (frame_de_pag_5 == 2){
 		printf("asignacion correcta\n");
 		fflush(stdout);
@@ -61,7 +61,7 @@ int main(int argc, char **argv) {
 		printf("asignacion incorrecta\n");
 		fflush(stdout);
 	}
-	int frame_de_pag_4 =devolverFrameDePagina(tabla, 4);
+	int frame_de_pag_4 =devolver_frame_de_pagina(tabla, 4);
 	if (frame_de_pag_4 == 2){
 			printf("assertfalse incorrecto\n");
 			fflush(stdout);
@@ -142,7 +142,7 @@ void asignar_frame_a_una_pagina(t_tablas_de_paginas* tabla, int frame_a_asignar,
 	tabla->entradas[pagina].frame=frame_a_asignar;
 }
 
-int devolverFrameDePagina(t_tablas_de_paginas* tabla, int pagina)
+int devolver_frame_de_pagina(t_tablas_de_paginas* tabla, int pagina)
 {
 	return tabla->entradas[pagina].frame;
 
@@ -151,7 +151,7 @@ int devolverFrameDePagina(t_tablas_de_paginas* tabla, int pagina)
 
 
 
-t_tablas_de_paginas* dame_tabla_de_paginas_de_pid(int pid_buscado){
+t_tablas_de_paginas* buscar_tabla_de_paginas_de_pid(int pid_buscado){
 	sem_wait(&mut_tabla_de_paginas);
 
 	int pid_iguales(t_tablas_de_paginas *tabla) {

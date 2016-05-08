@@ -18,7 +18,6 @@
 #include <semaphore.h>
 #include "memoriaPrincipal.h"
 
-
 int inicializar_estructuras() {
 	inicializar_semaforos();
 	TAMANIO_MEMORIA_PRINCIPAL = TAMANIO_FRAME * CANTIDAD_FRAMES;
@@ -47,8 +46,8 @@ void crear_memoria_principal() {
 
 //solo para test
 void inicializacion_para_test(int tamanio_frame, int cantidad_frame) {
-	CANTIDAD_FRAMES=cantidad_frame;
-	TAMANIO_FRAME= tamanio_frame;
+	CANTIDAD_FRAMES = cantidad_frame;
+	TAMANIO_FRAME = tamanio_frame;
 }
 
 void liberar_memoria_principal() {
@@ -56,24 +55,43 @@ void liberar_memoria_principal() {
 }
 
 void cargar_nuevo_programa(int pid, int paginas_requeridas_del_proceso) {
-	//TODO validar si hay espacio en memoria principal
+	//TODO IMPORTANTE validar si hay espacio en memoria principal y/o swap. PREGUNTAR el criterio a utilizar
 	crear_tabla_de_pagina_de_un_proceso(pid, paginas_requeridas_del_proceso);
 
 }
 
-t_entrada_tabla_de_paginas* inicializar_paginas(
-		int paginas_requeridas_del_proceso) {
-	t_entrada_tabla_de_paginas* entradas = malloc(
-			sizeof(t_entrada_tabla_de_paginas)
-					* paginas_requeridas_del_proceso);
+void finalizar_programa(int pid){
+	//TODO avisarle a swap que finalice el programa
+	// Pasos (tal vez desordenados):
+	// 1) eliminar tabla de paginas
+	// 2) marcar como libres los frames de la pagina
+	// analizar el resto
+	/*
+	t_tablas_de_paginas* tabla = buscar_tabla_de_paginas_de_pid(pid);
+	int pag_tot = tabla->paginas_totales;
+	int pagina=1;
+	for(pagina; pagina==pag_tot; pagina++ ){
+		int frame = devolver_frame_de_pagina(tabla, pagina);
+		agregar_frame_a_lista_de_libres(frame);
+	}
+
+	int pid_iguales(t_tablas_de_paginas *tabla) {
+			return (tabla->pid == pid);
+		}
+
+	list_remove_by_condition(lista_tabla_de_paginas, pid_iguales);
+	free(tabla);
+	*/
+}
+
+t_entrada_tabla_de_paginas* inicializar_paginas(int paginas_requeridas_del_proceso) {
+	t_entrada_tabla_de_paginas* entradas = malloc(sizeof(t_entrada_tabla_de_paginas)* paginas_requeridas_del_proceso);
 	return entradas;
 }
 
-void crear_tabla_de_pagina_de_un_proceso(int pid,
-		int paginas_requeridas_del_proceso) {
+void crear_tabla_de_pagina_de_un_proceso(int pid, int paginas_requeridas_del_proceso) {
 
-	t_entrada_tabla_de_paginas* entradas = inicializar_paginas(
-			paginas_requeridas_del_proceso);
+	t_entrada_tabla_de_paginas* entradas = inicializar_paginas(paginas_requeridas_del_proceso);
 	t_tablas_de_paginas* nueva_tabla = malloc(sizeof(t_tablas_de_paginas));
 	nueva_tabla->pid = pid;
 	nueva_tabla->paginas_totales = paginas_requeridas_del_proceso;
@@ -86,9 +104,18 @@ void crear_tabla_de_pagina_de_un_proceso(int pid,
 void asignar_frame_a_una_pagina(t_tablas_de_paginas* tabla, int frame_a_asignar,
 		int pagina) {
 	tabla->entradas[pagina].frame = frame_a_asignar;
+
+	int frames_iguales(t_frame *frame) {
+				return (frame->frame == frame_a_asignar);
+			}
+
+	list_remove_by_condition(lista_frames_libres, frames_iguales);
+		//TODO deberia ver como hacer un free() del frame que saque de la lista
+
+
 }
 
-int devolverFrameDePagina(t_tablas_de_paginas* tabla, int pagina) {
+int devolver_frame_de_pagina(t_tablas_de_paginas* tabla, int pagina) {
 	return tabla->entradas[pagina].frame;
 
 }
@@ -109,7 +136,7 @@ void escribir_frame_de_memoria_principal(int frame, char* datos) {
 	memcpy(MEMORIA_PRINCIPAL + (frame * TAMANIO_FRAME), datos, TAMANIO_FRAME);
 }
 
-t_tablas_de_paginas* dame_tabla_de_paginas_de_pid(int pid_buscado) {
+t_tablas_de_paginas* buscar_tabla_de_paginas_de_pid(int pid_buscado) {
 	sem_wait(&mut_tabla_de_paginas);
 
 	int pid_iguales(t_tablas_de_paginas *tabla) {
@@ -123,19 +150,19 @@ t_tablas_de_paginas* dame_tabla_de_paginas_de_pid(int pid_buscado) {
 
 }
 
-void crear_lista_frames_libres(){
-	lista_frames_libres= list_create();
-	int i =0;
-	while(i<CANTIDAD_FRAMES){
-		s_frame* frame = nuevo_frame_de_memoria_principal(i);
-		list_add(lista_frames_libres,frame);
+void crear_lista_frames_libres() {
+	lista_frames_libres = list_create();
+	int i = 0;
+	while (i < CANTIDAD_FRAMES) {
+		agregar_frame_a_lista_de_libres(i);
 		i++;
 	}
 }
 
-
-s_frame * nuevo_frame_de_memoria_principal(int numero_de_frame){
-	s_frame* nuevo_frame =malloc(sizeof(s_frame));
-	nuevo_frame->frame=numero_de_frame;
-	return nuevo_frame;
+void agregar_frame_a_lista_de_libres(int numero_de_frame) {
+	t_frame* nuevo_frame = malloc(sizeof(t_frame));
+	nuevo_frame->frame = numero_de_frame;
+	list_add(lista_frames_libres, nuevo_frame);
 }
+
+
