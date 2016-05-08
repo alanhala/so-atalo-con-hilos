@@ -6,6 +6,14 @@
  */
 //pruebo con extern para ver si corren los test
 
+int TAMANIO_MEMORIA_PRINCIPAL;
+char * MEMORIA_PRINCIPAL;
+int TAMANIO_FRAME;
+int CANTIDAD_FRAMES;
+
+t_list* lista_frames_libres;
+t_list* lista_tabla_de_paginas;
+sem_t mut_tabla_de_paginas;
 
 
 
@@ -19,6 +27,11 @@ typedef struct t_p {
 	t_entrada_tabla_de_paginas* entradas;
 
 } t_tablas_de_paginas;
+
+typedef struct s_f {
+	int frame;
+} s_frame;
+
 
 void crear_memoria_principal();
 void inicializacion_para_test(int tamanio_frame, int cantidad_frame);
@@ -34,3 +47,5 @@ void asignar_frame_a_una_pagina(t_tablas_de_paginas* tabla, int frame_a_asignar,
 int devolverFrameDePagina(t_tablas_de_paginas* tabla, int pagina);
 void escribir_frame_de_memoria_principal(int frame, char* datos);
 char* leer_frame_de_memoria_principal(int frame);
+void crear_lista_frames_libres();
+s_frame * nuevo_frame_de_memoria_principal(int numero_de_frame);

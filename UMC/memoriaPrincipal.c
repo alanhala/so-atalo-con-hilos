@@ -18,19 +18,13 @@
 #include <semaphore.h>
 #include "memoriaPrincipal.h"
 
-int TAMANIO_MEMORIA_PRINCIPAL;
-char * MEMORIA_PRINCIPAL;
-int TAMANIO_FRAME;
-int CANTIDAD_FRAMES;
-
-t_list* lista_tabla_de_paginas;
-sem_t mut_tabla_de_paginas;
 
 int inicializar_estructuras() {
 	inicializar_semaforos();
 	TAMANIO_MEMORIA_PRINCIPAL = TAMANIO_FRAME * CANTIDAD_FRAMES;
 	crear_memoria_principal();
 	lista_tabla_de_paginas = list_create();
+	crear_lista_frames_libres();
 	return 0;
 }
 
@@ -129,3 +123,19 @@ t_tablas_de_paginas* dame_tabla_de_paginas_de_pid(int pid_buscado) {
 
 }
 
+void crear_lista_frames_libres(){
+	lista_frames_libres= list_create();
+	int i =0;
+	while(i<CANTIDAD_FRAMES){
+		s_frame* frame = nuevo_frame_de_memoria_principal(i);
+		list_add(lista_frames_libres,frame);
+		i++;
+	}
+}
+
+
+s_frame * nuevo_frame_de_memoria_principal(int numero_de_frame){
+	s_frame* nuevo_frame =malloc(sizeof(s_frame));
+	nuevo_frame->frame=numero_de_frame;
+	return nuevo_frame;
+}

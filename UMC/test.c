@@ -27,6 +27,7 @@ CU_initialize_registry();
 	  CU_add_test(prueba, "dos", asigno_frame_2_a_la_pagina_5);
 	  CU_add_test(prueba, "tres", no_esta_presente_frame_2_en_pagina_4);
 	  CU_add_test(prueba, "cuarto", escribir_hola_en_frame_3);
+	  CU_add_test(prueba, "cinco", crear_50_frames_de_memoria_principal);
 
 
 
@@ -76,9 +77,11 @@ void escribir_hola_en_frame_3(){
 	escribir_frame_de_memoria_principal(3, p);
 
 	char* datos_escritos = leer_frame_de_memoria_principal(3);
-	//char* datos_escritos = malloc(sizeof("hola"));
-	//memcpy(datos_escritos, MEMORIA_PRINCIPAL + (3*sizeof("hola")), sizeof("hola"));
 	CU_ASSERT_EQUAL(strcmp(datos_escritos, "hola"),0);
-
-
+}
+void crear_50_frames_de_memoria_principal(){
+	inicializacion_para_test(NULL, 50);
+	inicializar_estructuras();
+	int cant_frames = list_size(lista_frames_libres);
+	CU_ASSERT_EQUAL(cant_frames,50);
 }
