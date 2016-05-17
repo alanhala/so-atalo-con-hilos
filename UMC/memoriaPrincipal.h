@@ -51,6 +51,6 @@ void escribir_frame_de_memoria_principal(int frame, char* datos);
 char* leer_frame_de_memoria_principal(int frame);
 void crear_lista_frames();
 void agregar_frame_a_lista_de_frames(int numero_de_frame);
-void finalizar_programa(int pid); //TODO analizar bien el tema de los frames libres
+void finalizar_programa(int pid);
 void marcar_frame_como_libre(int numero_de_frame);
 int buscar_frame_libre();

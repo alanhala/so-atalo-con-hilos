@@ -22,16 +22,29 @@
 int correrTest(){
 
 CU_initialize_registry();
-	  CU_pSuite prueba = CU_add_suite("Suite de prueba", NULL, NULL);
+	  CU_pSuite carga_de_programa = CU_add_suite("Suite carga de programa", NULL, NULL);
+	  CU_add_test(carga_de_programa, "uno", cargo_programa_pid_100);
+	  CU_add_test(carga_de_programa, "dos", cargar_programa_asignando_20_frames);
 
-	  CU_add_test(prueba, "uno", cargo_programa_pid_100);
-	  CU_add_test(prueba, "dos", asigno_frame_2_a_la_pagina_5);
-	  CU_add_test(prueba, "tres", no_esta_presente_frame_2_en_pagina_4);
-	  CU_add_test(prueba, "cuarto", escribir_hola_en_frame_3);
-	  CU_add_test(prueba, "cinco", escribir_hola_en_frame_0);
-	  CU_add_test(prueba, "seis", crear_50_frames_de_memoria_principal);
-	  CU_add_test(prueba, "siete", cargar_programa_asignando_20_frames);
-	  CU_add_test(prueba, "ocho", eliminar_tabla_de_pid_2); //TODO TEST INCOMPLETO, hacer un test para eliminar un
+	  CU_pSuite creacion_de_estructuras = CU_add_suite("Suite creacion de estructuras", NULL, NULL);
+	  CU_add_test(creacion_de_estructuras, "uno", crear_50_frames_de_memoria_principal);
+
+
+	  CU_pSuite eliminacion_de_programa = CU_add_suite("Suite eliminacion de programa", NULL, NULL);
+	  CU_add_test(eliminacion_de_programa, "uno", eliminar_programa_pid_2);
+
+
+	  CU_pSuite escritura_de_frame = CU_add_suite("Suite escritura de frame", NULL, NULL);
+
+	  CU_add_test(escritura_de_frame, "uno", asigno_frame_2_a_la_pagina_5);
+	  CU_add_test(escritura_de_frame, "dos", no_esta_presente_frame_2_en_pagina_4);
+	  CU_add_test(escritura_de_frame, "tres", escribir_hola_en_frame_3);
+	  CU_add_test(escritura_de_frame, "cuatro", escribir_hola_en_frame_0);
+
+
+
+
+
 
 
 	  CU_basic_set_mode(CU_BRM_VERBOSE);
@@ -96,6 +109,10 @@ void escribir_hola_en_frame_0(){
 	char* datos_escritos = leer_frame_de_memoria_principal(0);
 	CU_ASSERT_EQUAL(strcmp(datos_escritos, "hola"),0);
 }
+
+
+
+
 void crear_50_frames_de_memoria_principal(){
 	inicializacion_para_test(NULL, 50);
 	inicializar_estructuras();
@@ -118,8 +135,7 @@ void cargar_programa_asignando_20_frames(){
 
 }
 
-void eliminar_tabla_de_pid_2(){
-	//TODO, analizarlo bien
+void eliminar_programa_pid_2(){
 	inicializacion_para_test(10, 90);
 	inicializar_estructuras();
 
