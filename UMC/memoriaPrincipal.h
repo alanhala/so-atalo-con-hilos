@@ -11,6 +11,12 @@ char * MEMORIA_PRINCIPAL;
 int TAMANIO_FRAME;
 int CANTIDAD_FRAMES;
 
+
+
+int	CANTIDAD_ENTRADAS_TLB;
+int MAX_FRAMES_POR_PROCESO;
+int RETARDO;
+
 t_list* lista_frames;
 sem_t mut_lista_frames;
 t_list* lista_tabla_de_paginas;
@@ -54,3 +60,15 @@ void agregar_frame_a_lista_de_frames(int numero_de_frame);
 void finalizar_programa(int pid);
 void marcar_frame_como_libre(int numero_de_frame);
 int buscar_frame_libre();
+
+
+
+
+// CONFIGURACION
+
+void set_cantidad_entradas_tlb(int entradas);
+void set_max_frames_por_proceso(int cantidad);
+void set_cantidad_frames(int cantidad_marcos);
+void set_tamanio_frame(int tamanio_marcos);
+void set_retardo(int retardo);
+

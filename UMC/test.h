@@ -6,6 +6,7 @@
  */
 
 int correrTest();
+void cargar_archivo_configuracion_umc();
 void cargo_programa_pid_100();
 void asigno_frame_2_a_la_pagina_5();
 void no_esta_presente_frame_2_en_pagina_4();

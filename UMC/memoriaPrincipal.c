@@ -192,3 +192,25 @@ void marcar_frame_como_libre(int numero_de_frame){
 	t_frame * frame_a_modificar = list_find(lista_frames, (void *)frames_iguales);
 	frame_a_modificar->asignado = 0;
 }
+
+
+
+
+
+// CONFIGURACION
+
+void set_cantidad_entradas_tlb(int entradas){
+	CANTIDAD_ENTRADAS_TLB =entradas;
+}
+void set_max_frames_por_proceso(int cantidad){
+	MAX_FRAMES_POR_PROCESO = cantidad;
+}
+void set_cantidad_frames(int cantidad_frames){
+	CANTIDAD_FRAMES = cantidad_frames;
+}
+void set_tamanio_frame(int tamanio_frame){
+	TAMANIO_FRAME= tamanio_frame;
+}
+void set_retardo(int retardo){
+	RETARDO = retardo;
+}
