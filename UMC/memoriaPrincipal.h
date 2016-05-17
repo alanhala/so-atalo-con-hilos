@@ -11,7 +11,8 @@ char * MEMORIA_PRINCIPAL;
 int TAMANIO_FRAME;
 int CANTIDAD_FRAMES;
 
-t_list* lista_frames_libres;
+t_list* lista_frames;
+sem_t mut_lista_frames;
 t_list* lista_tabla_de_paginas;
 sem_t mut_tabla_de_paginas;
 
@@ -40,7 +41,7 @@ int cargar_archivo_configuracion();
 void liberar_memoria_principal();
 int inicializar_estructuras();
 void cargar_nuevo_programa(int pid, int paginas_requeridas_del_proceso);
-void crear_tabla_de_pagina_de_un_proceso(int pid, int paginas_requeridas_del_proceso);
+t_tablas_de_paginas * crear_tabla_de_pagina_de_un_proceso(int pid, int paginas_requeridas_del_proceso);
 t_entrada_tabla_de_paginas* inicializar_paginas(int paginas_requeridas);
 t_tablas_de_paginas* buscar_tabla_de_paginas_de_pid(int pid_buscado);
 void inicializar_semaforos();
@@ -48,6 +49,8 @@ void asignar_frame_a_una_pagina(t_tablas_de_paginas* tabla, int frame_a_asignar,
 int devolver_frame_de_pagina(t_tablas_de_paginas* tabla, int pagina);
 void escribir_frame_de_memoria_principal(int frame, char* datos);
 char* leer_frame_de_memoria_principal(int frame);
-void crear_lista_frames_libres();
-void agregar_frame_a_lista_de_libres(int numero_de_frame);
+void crear_lista_frames();
+void agregar_frame_a_lista_de_frames(int numero_de_frame);
 void finalizar_programa(int pid); //TODO analizar bien el tema de los frames libres
+void marcar_frame_como_libre(int numero_de_frame);
+int buscar_frame_libre();

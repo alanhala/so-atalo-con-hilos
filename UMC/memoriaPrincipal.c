@@ -23,12 +23,13 @@ int inicializar_estructuras() {
 	TAMANIO_MEMORIA_PRINCIPAL = TAMANIO_FRAME * CANTIDAD_FRAMES;
 	crear_memoria_principal();
 	lista_tabla_de_paginas = list_create();
-	crear_lista_frames_libres();
+	crear_lista_frames();
 	return 0;
 }
 
 void inicializar_semaforos() {
 	sem_init(&mut_tabla_de_paginas, 0, 1);
+	sem_init(&mut_lista_frames, 0, 1);
 
 }
 int cargar_archivo_configuracion() {
@@ -56,23 +57,35 @@ void liberar_memoria_principal() {
 
 void cargar_nuevo_programa(int pid, int paginas_requeridas_del_proceso) {
 	//TODO IMPORTANTE validar si hay espacio en memoria principal y/o swap. PREGUNTAR el criterio a utilizar
-	crear_tabla_de_pagina_de_un_proceso(pid, paginas_requeridas_del_proceso);
 
+
+	t_tablas_de_paginas * tabla = crear_tabla_de_pagina_de_un_proceso(pid, paginas_requeridas_del_proceso);
+	int pagina=0;
+	for( 0 ; pagina < tabla->paginas_totales; pagina ++){
+		int frame_libre = buscar_frame_libre();
+		asignar_frame_a_una_pagina(tabla, frame_libre, pagina);
+	}
+
+}
+int buscar_frame_libre(){
+	int frame_libre(t_frame *frame) {
+			return (frame->asignado == 0);
+		}
+
+	t_frame* frame_encontrado = list_find(lista_frames,	(void*) frame_libre);
+
+	return frame_encontrado->frame;
 }
 
 void finalizar_programa(int pid){
 	//TODO avisarle a swap que finalice el programa
-	// Pasos (tal vez desordenados):
-	// 1) eliminar tabla de paginas
-	// 2) marcar como libres los frames de la pagina
-	// analizar el resto
-	/*
+
 	t_tablas_de_paginas* tabla = buscar_tabla_de_paginas_de_pid(pid);
-	int pag_tot = tabla->paginas_totales;
-	int pagina=1;
-	for(pagina; pagina==pag_tot; pagina++ ){
+
+	int pagina=0;
+	for(0; pagina < tabla->paginas_totales ; pagina++ ){
 		int frame = devolver_frame_de_pagina(tabla, pagina);
-		agregar_frame_a_lista_de_libres(frame);
+		marcar_frame_como_libre(frame);
 	}
 
 	int pid_iguales(t_tablas_de_paginas *tabla) {
@@ -80,8 +93,8 @@ void finalizar_programa(int pid){
 		}
 
 	list_remove_by_condition(lista_tabla_de_paginas, pid_iguales);
-	free(tabla);
-	*/
+
+
 }
 
 t_entrada_tabla_de_paginas* inicializar_paginas(int paginas_requeridas_del_proceso) {
@@ -89,7 +102,7 @@ t_entrada_tabla_de_paginas* inicializar_paginas(int paginas_requeridas_del_proce
 	return entradas;
 }
 
-void crear_tabla_de_pagina_de_un_proceso(int pid, int paginas_requeridas_del_proceso) {
+t_tablas_de_paginas * crear_tabla_de_pagina_de_un_proceso(int pid, int paginas_requeridas_del_proceso) {
 
 	t_entrada_tabla_de_paginas* entradas = inicializar_paginas(paginas_requeridas_del_proceso);
 	t_tablas_de_paginas* nueva_tabla = malloc(sizeof(t_tablas_de_paginas));
@@ -99,19 +112,22 @@ void crear_tabla_de_pagina_de_un_proceso(int pid, int paginas_requeridas_del_pro
 	sem_wait(&mut_tabla_de_paginas);
 	list_add(lista_tabla_de_paginas, nueva_tabla);
 	sem_post(&mut_tabla_de_paginas);
+
+	return nueva_tabla;
 }
 
 void asignar_frame_a_una_pagina(t_tablas_de_paginas* tabla, int frame_a_asignar,
 		int pagina) {
+
+
 	tabla->entradas[pagina].frame = frame_a_asignar;
 
 	int frames_iguales(t_frame *frame) {
 				return (frame->frame == frame_a_asignar);
 			}
 
-	list_remove_by_condition(lista_frames_libres, frames_iguales);
-		//TODO deberia ver como hacer un free() del frame que saque de la lista
-
+	t_frame * frame_a_modificar = list_find(lista_frames, (void *)frames_iguales);
+	frame_a_modificar->asignado = 1;
 
 }
 
@@ -150,19 +166,29 @@ t_tablas_de_paginas* buscar_tabla_de_paginas_de_pid(int pid_buscado) {
 
 }
 
-void crear_lista_frames_libres() {
-	lista_frames_libres = list_create();
+void crear_lista_frames() {
+	sem_wait(&mut_lista_frames);
+	lista_frames = list_create();
 	int i = 0;
 	while (i < CANTIDAD_FRAMES) {
-		agregar_frame_a_lista_de_libres(i);
+		agregar_frame_a_lista_de_frames(i);
 		i++;
 	}
+	sem_post(&mut_lista_frames);
 }
 
-void agregar_frame_a_lista_de_libres(int numero_de_frame) {
+void agregar_frame_a_lista_de_frames(int numero_de_frame) {
 	t_frame* nuevo_frame = malloc(sizeof(t_frame));
 	nuevo_frame->frame = numero_de_frame;
-	list_add(lista_frames_libres, nuevo_frame);
+	nuevo_frame->asignado = 0;
+	list_add(lista_frames, nuevo_frame);
 }
 
 
+void marcar_frame_como_libre(int numero_de_frame){
+	int frames_iguales(t_frame *frame) {
+					return (frame->frame == numero_de_frame);
+				}
+	t_frame * frame_a_modificar = list_find(lista_frames, (void *)frames_iguales);
+	frame_a_modificar->asignado = 0;
+}
