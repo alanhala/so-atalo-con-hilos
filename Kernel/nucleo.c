@@ -1,6 +1,8 @@
 #include <commons/collections/queue.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <parser/metadata_program.h>
+
 
 
 struct PCB {
@@ -15,7 +17,7 @@ struct PCB *CreatePCB ();
 
 
 
-int main (void) {
+/*int main (void) {
 
 	int i,q,tact;
     struct PCB  *ptmp;
@@ -116,7 +118,7 @@ int main (void) {
 		}
     ///free(ptmp); acordarse de eliminar los punteros
     return(0);
-};
+};*/
 
 struct PCB *CreatePCB (int pid,int in,int raf) {
     struct PCB *proc;
@@ -131,4 +133,41 @@ struct PCB *CreatePCB (int pid,int in,int raf) {
     return(proc);
 };
 
+typedef struct {
+	int numero_pagina;
+	t_intructions instruccion;
+} t_indice_instrucciones_elemento;
+
+typedef struct {
+
+} t_indice_etiqueta;
+
+typedef struct {
+	int pid;
+	int program_counter;
+	int paginas_codigo;
+	int cantidad_instrucciones;
+	t_indice_instrucciones_elemento* indice_instrucciones;
+	int cantidad_etiquetas;
+	//t_indice_etiqueta TODO: implementar esto
+	void* stack_index;
+} t_PCB;
+
+int obtener_cantidad_paginas_programa(t_metadata_program* metadata, int bytes_por_pagina) {
+	int bytes_totales = 0;
+	int i;
+	t_intructions* array_instrucciones = metadata->instrucciones_serializado;
+	for(i=0; i < metadata->instrucciones_size; i++) {
+		bytes_totales += (array_instrucciones->offset);
+		array_instrucciones++;
+	}
+
+	int total_paginas = bytes_totales / bytes_por_pagina;
+
+	if(total_paginas * bytes_por_pagina < bytes_totales) {
+		total_paginas += 1;
+	}
+
+	return total_paginas;
+}
 
