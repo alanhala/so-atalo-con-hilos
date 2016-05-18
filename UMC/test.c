@@ -84,7 +84,7 @@ void cargo_programa_pid_100(){
 	inicializacion_para_test(10, 300);
 	int init = inicializar_estructuras();
 	cargar_nuevo_programa(100, 200);
-	t_tablas_de_paginas* tabla= buscar_tabla_de_paginas_de_pid(100);
+	t_tabla_de_paginas* tabla= buscar_tabla_de_paginas_de_pid(100);
 	CU_ASSERT_EQUAL(tabla->pid, 100);
 }
 
@@ -92,7 +92,7 @@ void asigno_frame_2_a_la_pagina_5(){
 	inicializacion_para_test(10, 500);
 	int init = inicializar_estructuras();
 	cargar_nuevo_programa(100, 200);
-	t_tablas_de_paginas* tabla= buscar_tabla_de_paginas_de_pid(100);
+	t_tabla_de_paginas* tabla= buscar_tabla_de_paginas_de_pid(100);
 	asignar_frame_a_una_pagina(tabla, 2, 5);
 	CU_ASSERT_EQUAL(devolver_frame_de_pagina(tabla, 5),2);
 
@@ -102,7 +102,7 @@ void no_esta_presente_frame_2_en_pagina_4(){
 	inicializacion_para_test(10, 500);
 	int init = inicializar_estructuras();
 	cargar_nuevo_programa(100, 200);
-	t_tablas_de_paginas* tabla= buscar_tabla_de_paginas_de_pid(100);
+	t_tabla_de_paginas* tabla= buscar_tabla_de_paginas_de_pid(100);
 	asignar_frame_a_una_pagina(tabla, 2, 5);
 	CU_ASSERT_NOT_EQUAL(devolver_frame_de_pagina(tabla, 4),2);
 
@@ -167,7 +167,7 @@ void eliminar_programa_pid_2(){
 	cargar_nuevo_programa(3, 10);
 	//busco los valores previos a finalizar el programa
 	int viejo_size = list_size(lista_tabla_de_paginas);
-	t_tablas_de_paginas * tabla= buscar_tabla_de_paginas_de_pid(2);
+	t_tabla_de_paginas * tabla= buscar_tabla_de_paginas_de_pid(2);
 
 	int frames_que_va_a_liberar = tabla->paginas_totales;
 
