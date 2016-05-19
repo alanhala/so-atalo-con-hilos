@@ -45,7 +45,7 @@ int main(int argc, char **argv) {
 	printf("creo un programa con pid 200 \n");
 	fflush(stdout);
 
-	t_tablas_de_paginas* tabla= buscar_tabla_de_paginas_de_pid(100);
+	t_tabla_de_paginas* tabla= buscar_tabla_de_paginas_de_pid(100);
 	//TODO ANALIZAR LO QUE DEVUELVE CUANDO NO ENCUENTRA LA PAGINA PORQUE NO AVANZO CON EL PROGRAMA
 	printf("busco la tabla de paginas de PID:%d\n", tabla->pid);
 	fflush(stdout);
@@ -128,7 +128,7 @@ t_entrada_tabla_de_paginas* inicializar_paginas(int paginas_requeridas_del_proce
 void crear_tabla_de_pagina_de_un_proceso(int pid, int paginas_requeridas_del_proceso){
 
 	t_entrada_tabla_de_paginas* entradas = inicializar_paginas(paginas_requeridas_del_proceso);
-	t_tablas_de_paginas* nueva_tabla = malloc(sizeof(t_tablas_de_paginas));
+	t_tabla_de_paginas* nueva_tabla = malloc(sizeof(t_tabla_de_paginas));
 	nueva_tabla->pid=pid;
 	nueva_tabla->paginas_totales=paginas_requeridas_del_proceso;
 	nueva_tabla->entradas=entradas;
@@ -138,11 +138,11 @@ void crear_tabla_de_pagina_de_un_proceso(int pid, int paginas_requeridas_del_pro
 }
 
 
-void asignar_frame_a_una_pagina(t_tablas_de_paginas* tabla, int frame_a_asignar, int pagina){
+void asignar_frame_a_una_pagina(t_tabla_de_paginas* tabla, int frame_a_asignar, int pagina){
 	tabla->entradas[pagina].frame=frame_a_asignar;
 }
 
-int devolver_frame_de_pagina(t_tablas_de_paginas* tabla, int pagina)
+int devolver_frame_de_pagina(t_tabla_de_paginas* tabla, int pagina)
 {
 	return tabla->entradas[pagina].frame;
 
@@ -151,14 +151,14 @@ int devolver_frame_de_pagina(t_tablas_de_paginas* tabla, int pagina)
 
 
 
-t_tablas_de_paginas* buscar_tabla_de_paginas_de_pid(int pid_buscado){
+t_tabla_de_paginas* buscar_tabla_de_paginas_de_pid(int pid_buscado){
 	sem_wait(&mut_tabla_de_paginas);
 
-	int pid_iguales(t_tablas_de_paginas *tabla) {
+	int pid_iguales(t_tabla_de_paginas *tabla) {
 						return (tabla->pid == pid_buscado);}
 
 
-	t_tablas_de_paginas* tabla = list_find(lista_tabla_de_paginas, (void*) pid_iguales);
+	t_tabla_de_paginas* tabla = list_find(lista_tabla_de_paginas, (void*) pid_iguales);
 	sem_post(&mut_tabla_de_paginas);
 	return tabla;
 
