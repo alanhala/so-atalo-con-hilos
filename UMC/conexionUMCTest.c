@@ -27,7 +27,7 @@
 
 void serializacion_lectura_umc();
 
-void valido_que_se_conecta_cpu();
+
 
 int correrTestSerializacion(){
 
@@ -49,7 +49,7 @@ int correrTestSerializacion(){
 
 void serializacion_lectura_umc(){
 
-	int server_socket_descriptor = create_server_socket_descriptor("2002", 10);
+	int server_socket_descriptor = create_server_socket_descriptor("2005", 10);
 
 	int client_socket_descriptor = accept_connection(server_socket_descriptor);
 
@@ -62,5 +62,21 @@ void serializacion_lectura_umc(){
 	CU_ASSERT_TRUE(pedido->pagina == 73);
 	CU_ASSERT_TRUE(pedido->offset == 23);
 	CU_ASSERT_TRUE(pedido->size == 13);
+
+
+	//aca le mando la respuesta, deberia ser otro test pero quiero seguir manteniendo la misma conexion servidor
+
+	char * bytes_de_la_pagina = "recibo una respuesta de una pagina"; // aca deberia ir a buscar el contenido de la pagina a UMC
+	t_respuesta_bytes_de_una_pagina_a_CPU *respuesta_bytes = malloc(sizeof(t_respuesta_bytes_de_una_pagina_a_CPU));
+	memset(respuesta_bytes,0,sizeof(t_respuesta_bytes_de_una_pagina_a_CPU));
+	respuesta_bytes->bytes_de_una_pagina = bytes_de_la_pagina;
+	t_stream *buffer = serializar_mensaje(3,respuesta_bytes);
+
+	int bytes= send(client_socket_descriptor, buffer->datos, 50, 0);
+
+
+
+
 }
+
 

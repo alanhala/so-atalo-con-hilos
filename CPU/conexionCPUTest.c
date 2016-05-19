@@ -27,7 +27,6 @@ int correrTestSerializacion(){
 CU_initialize_registry();
 
 	CU_pSuite serializacion = CU_add_suite("Suite Serializacion", NULL, NULL);
-//	CU_add_test(serializacion,"uno", valido_conexion_con_umc);
 	CU_add_test(serializacion,"dos", serializacion_lectura_umc);
 
 	CU_basic_set_mode(CU_BRM_VERBOSE);
@@ -39,7 +38,7 @@ CU_initialize_registry();
 
 
 void serializacion_lectura_umc(){
-		int umc_socket_descriptor = create_client_socket_descriptor("localhost","2002");
+		int umc_socket_descriptor = create_client_socket_descriptor("localhost","2005");
 
 
 		t_solicitar_bytes_de_una_pagina_a_UMC *pedido = malloc(sizeof(t_solicitar_bytes_de_una_pagina_a_UMC));
@@ -52,8 +51,17 @@ void serializacion_lectura_umc(){
 		t_stream *buffer = serializar_mensaje(2,pedido);
 		int bytes= send(umc_socket_descriptor, buffer->datos, 20, 0);
 
-
 		CU_ASSERT_TRUE(bytes > 0);
+
+		char recv_buffer[50];
+		recv(umc_socket_descriptor, recv_buffer, 50, 0);
+
+
+		t_respuesta_bytes_de_una_pagina_a_CPU * respuesta = malloc(sizeof(t_respuesta_bytes_de_una_pagina_a_CPU));
+		respuesta = (t_respuesta_bytes_de_una_pagina_a_CPU*)deserealizar_mensaje(3, recv_buffer);
+
+
+		CU_ASSERT_TRUE(!strcmp(respuesta->bytes_de_una_pagina, "recibo una respuesta de una pagina"));
 
 }
 

@@ -75,3 +75,42 @@ t_stream *serializar_pedido_bytes_de_una_pagina_a_UMC(t_solicitar_bytes_de_una_p
 	return stream;
 }
 
+
+void *deserealizar_mensaje(uint8_t tipo, char* datos) {
+
+	void* estructuraDestino;
+
+	switch(tipo){
+	case (3):
+			estructuraDestino = deserializar_respuesta_bytes_de_una_pagina_a_CPU (datos);
+			break;
+	}
+
+	return estructuraDestino;
+}
+
+t_respuesta_bytes_de_una_pagina_a_CPU *deserializar_respuesta_bytes_de_una_pagina_a_CPU(char *datos){
+
+	int		tmpsize = 0,
+			offset = 0,
+			tamanoDato = 0;
+
+	const int desplazamientoHeader = 5;		//Offset inicial para no deserealizar tipo (1 byte) y length (4 bytes)
+
+	t_respuesta_bytes_de_una_pagina_a_CPU *respuesta = malloc(sizeof(t_respuesta_bytes_de_una_pagina_a_CPU));
+	memset(respuesta,0, sizeof(t_respuesta_bytes_de_una_pagina_a_CPU));
+
+	for(tamanoDato = 0; (datos+desplazamientoHeader)[tamanoDato] != '\0';tamanoDato++);//incremento tamanoDato, hasta el tamaÃ±o del nombre
+
+	respuesta->bytes_de_una_pagina = malloc(tamanoDato+1);
+	memset(respuesta->bytes_de_una_pagina,0,tamanoDato+1);
+
+	memcpy(respuesta->bytes_de_una_pagina, datos+desplazamientoHeader, tmpsize=tamanoDato+1);
+	offset+=tamanoDato+1;
+	offset+=desplazamientoHeader;
+
+	char endString = '\0';
+	memcpy(respuesta->bytes_de_una_pagina+offset,&endString,1);
+
+	return respuesta;
+}

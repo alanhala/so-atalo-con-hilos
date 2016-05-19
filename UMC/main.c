@@ -69,7 +69,7 @@ void cargar_variables_productivas(UMCConfigFile *ptrvaloresConfigFile);
 int main(int argc, char **argv) {
 
 	if (strcmp(argv[1], "-test") == 0){
-		 correrTest();
+		 //correrTest();
 		 correrTestSerializacion();
 		 return 0;
 	}

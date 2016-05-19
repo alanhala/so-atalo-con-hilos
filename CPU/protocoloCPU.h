@@ -19,8 +19,15 @@ typedef struct {
 	char *datos;
 } t_stream;
 
+typedef struct {
+	char *bytes_de_una_pagina;
+}__attribute__((packed)) t_respuesta_bytes_de_una_pagina_a_CPU;
+
+
 t_stream *serializar_pedido_bytes_de_una_pagina_a_UMC(t_solicitar_bytes_de_una_pagina_a_UMC *pedido);
 void *serealizar_mensaje(uint8_t tipo, char* datos);
+void *deserealizar_mensaje(uint8_t tipo, char* datos);
+t_respuesta_bytes_de_una_pagina_a_CPU *deserializar_respuesta_bytes_de_una_pagina_a_CPU(char *datos);
 
 
 #endif /* PROTOCOLOCPU_H_ */
