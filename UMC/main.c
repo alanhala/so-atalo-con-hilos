@@ -55,7 +55,7 @@ typedef struct umcConfigFile {
 	char 	*ip_swap;
 } UMCConfigFile;
 
-char** leerArray(t_config *config, char* key);
+char* leer_string(t_config *config, char* key);
 
 unsigned leerUnsigned(t_config *config, char* key);
 
@@ -69,7 +69,7 @@ void cargar_variables_productivas(UMCConfigFile *ptrvaloresConfigFile);
 int main(int argc, char **argv) {
 
 	if (strcmp(argv[1], "-test") == 0){
-//		 correrTest();
+		 correrTest();
 		 correrTestSerializacion();
 		 return 0;
 	}
@@ -171,8 +171,8 @@ void *kernel_and_cpu_connection_handler(int client_socket_descriptor) {
 
 int cargar_configuracion(){
 	t_log *errorLogger, *traceLogger;
-	traceLogger = log_create("LogTraceUMC.txt","UMCConfigFile",true,LOG_LEVEL_TRACE);
-	errorLogger = log_create("LogErroresUMC.txt","UMCConfigFile",true,LOG_LEVEL_ERROR);
+	traceLogger = log_create("LogTraceUMC.txt","main.c",true,LOG_LEVEL_TRACE);
+	errorLogger = log_create("LogErroresUMC.txt","main.c",true,LOG_LEVEL_ERROR);
 
 	//Declaracion de Variables
 	t_config *ptrConfig, *ptrConfigUpdate;
@@ -181,7 +181,7 @@ int cargar_configuracion(){
 
 	//Se asigna a ptrConfig el archivo de configuracion. Si no lo encuentra, finaliza
 	//y lo advierte en el log
-	ptrConfig = config_create("/home/utnso/GitHub/tp-2016-1c-Atalo-con-Hilos/UMC/umc.cfg");
+	ptrConfig = config_create("/home/utnso/GitHub/tp-2016-1c-Atalo-con-Hilos/UMC/Debug/umc.cfg");
 	if (ptrConfig == NULL){
 		log_error(errorLogger,"Archivo de configuración no disponible. No puede ejecutar el UMC.\n");
 		return -1;
@@ -194,7 +194,7 @@ int cargar_configuracion(){
 
 	log_trace(traceLogger,"Archivo de Configuracion levantado exitosamente.\n");
 
-	//printf("%s\n\n", ptrvaloresConfigFile->ip_swap);
+
 
 	/*
 
@@ -245,7 +245,8 @@ void levantaConfigFileEnVariables(UMCConfigFile *ptrvaloresConfigFile,t_config *
 	ptrvaloresConfigFile->marco_x_proc = leerUnsigned(ptrConfig, "MARCO_X_PROC");
 	ptrvaloresConfigFile->entradas_tlb = leerUnsigned(ptrConfig, "ENTRADAS_TLB");
 	ptrvaloresConfigFile->retardo = leerUnsigned(ptrConfig, "RETARDO");
-	ptrvaloresConfigFile->ip_swap = leerArray(ptrConfig, "IP_SWAP");
+	ptrvaloresConfigFile->ip_swap = leer_string(ptrConfig, "IP_SWAP");
+
 }
 void liberaVariables(t_log* traceLogger, t_config* ptrConfig, t_log* errorLogger, t_config* ptrConfigUpdate) {
 	//Libera Logs y el Config File
@@ -307,8 +308,12 @@ void detectaCambiosEnConfigFile() {
 
 
 void cargar_variables_productivas(UMCConfigFile *config){
-
+	//cargo un string - inicio
+	SWAPIP = malloc(strlen(config->ip_swap)+1);
+	memset(&SWAPIP, 0, (strlen(config->ip_swap)+1));
 	SWAPIP = config->ip_swap;
+	//cargo un string - fin
+
 	LISTENPORT= config->puerto;
 	SWAPPORT= config->puerto_swap;
 
@@ -321,10 +326,10 @@ void cargar_variables_productivas(UMCConfigFile *config){
 
 }
 
-char** leerArray(t_config *config, char* key) {
-	char **datoString = malloc(sizeof(config_get_array_value(config, key)));
+char* leer_string(t_config *config, char* key) {
+	char * datoString = malloc(sizeof(config_get_string_value(config, key)));
 	if (config_has_property(config, key)) {
-		datoString = config_get_array_value(config, key);
+		datoString = config_get_string_value(config, key);
 	} else {
 		error_show("No se leyó el %s de la config \n", key);
 	}

@@ -60,7 +60,7 @@ void cargar_archivo_configuracion_umc(){
 	int incorrecto =0;
 	if(LISTENPORT !=21000)
 		incorrecto =1;
-	if (SWAPIP !="localhost")
+	if (!strncmp(SWAPIP,"localhost", sizeof("localhost")))
 		incorrecto =1;
 	if(SWAPPORT != 8000)
 		incorrecto =1;
@@ -74,8 +74,6 @@ void cargar_archivo_configuracion_umc(){
 		incorrecto =1;
 	if (RETARDO != 10000)
 		incorrecto =1;
-
-
 
 	CU_ASSERT_EQUAL(incorrecto, 0);
 
