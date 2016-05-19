@@ -232,7 +232,7 @@ int darle_frame_a_una_pagina(t_tabla_de_paginas* tabla, int pagina){
 	//			  1.1.2.1) ir a buscar a swap
 	// 2) ir a buscar a swap
 
-	if(tengo_mas_frames_para_pedir(tabla))
+	if(tiene_tabla_mas_paginas_para_pedir(tabla))
 	{
 		int frame = buscar_frame_libre();
 		if(frame !=-1)
@@ -252,7 +252,7 @@ int darle_frame_a_una_pagina(t_tabla_de_paginas* tabla, int pagina){
 
 }
 
-int tengo_mas_frames_para_pedir(t_tabla_de_paginas* tabla)
+int tiene_tabla_mas_paginas_para_pedir(t_tabla_de_paginas* tabla)
 {	return (tabla->frames_en_uso < MAX_FRAMES_POR_PROCESO);
 
 }

@@ -18,7 +18,7 @@ int CANTIDAD_FRAMES;
 int	CANTIDAD_ENTRADAS_TLB;
 int TLB_HABILITADA = 0; //lo pongo en falso hasta que tenga lo demas completo
 int MAX_FRAMES_POR_PROCESO;
-int RETARDO;
+int RETARDO; //no hay varios retardos? uno para tlb, otro para mp? la del swap depende de swap...
 
 t_list* lista_frames;
 sem_t mut_lista_frames;
@@ -74,9 +74,10 @@ void agregar_frame_a_lista_de_frames(int numero_de_frame);
 void finalizar_programa(int pid);
 void marcar_frame_como_libre(int numero_de_frame);
 int buscar_frame_libre();
-
-
 int buscar_frame_de_una_pagina(t_tabla_de_paginas* tabla, int pagina);
+int tiene_tabla_mas_paginas_para_pedir(t_tabla_de_paginas* tabla);
+int darle_frame_a_una_pagina(t_tabla_de_paginas* tabla, int pagina);
+
 
 
 // TLB
