@@ -4,6 +4,19 @@
  *  Created on: 19/5/2016
  *      Author: utnso
  */
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <netdb.h>
+#include <arpa/inet.h>
+#include <sys/wait.h>
+#include <signal.h>
+#include <pthread.h>
+#include <commons/collections/list.h>
+#include <semaphore.h>
+#include "socket.h"
+#include "protocoloUMC.h"
+
 
 
 void *deserealizar_mensaje(uint8_t tipo, char* datos) {

@@ -4,6 +4,18 @@
  *  Created on: 19/5/2016
  *      Author: utnso
  */
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <netdb.h>
+#include <arpa/inet.h>
+#include <sys/wait.h>
+#include <signal.h>
+#include <pthread.h>
+#include <commons/collections/list.h>
+#include <semaphore.h>
+#include "socket.h"
+#include "protocoloCPU.h"
 
 
 t_stream *serializar_mensaje(int tipo,void* unaEstructura) {
@@ -45,13 +57,19 @@ t_stream *serializar_pedido_bytes_de_una_pagina_a_UMC(t_solicitar_bytes_de_una_p
 	uint32_t offset_pagina = pedido->offset;
 	uint32_t size_pagina = pedido->size;
 
-	memcpy(stream->datos,&numero_pagina,tmpsize=sizeof(uint32_t));
+	memcpy(stream->datos,&tipo,tmpsize=sizeof(uint8_t));
 	offset+=tmpsize;
 
-	memcpy(stream->datos+offset,&offset_pagina,tmpsize(uint32_t));
+	memcpy(stream->datos+offset,&size_pedido,tmpsize=sizeof(uint32_t));
 	offset+=tmpsize;
 
-	memcpy(stream->datos+offset,&size_pagina,tmpsize(uint32_t));
+	memcpy(stream->datos+offset,&numero_pagina,tmpsize=sizeof(uint32_t));
+	offset+=tmpsize;
+
+	memcpy(stream->datos+offset,&offset_pagina,tmpsize=sizeof(uint32_t));
+	offset+=tmpsize;
+
+	memcpy(stream->datos+offset,&size_pagina,tmpsize=sizeof(uint32_t));
 	offset+=tmpsize;
 
 	return stream;
