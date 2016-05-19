@@ -21,13 +21,15 @@
 
 
 void serializacion_lectura_umc();
+void serializacion_escritura_umc();
 
 int correrTestSerializacion(){
 
 CU_initialize_registry();
 
 	CU_pSuite serializacion = CU_add_suite("Suite Serializacion", NULL, NULL);
-	CU_add_test(serializacion,"dos", serializacion_lectura_umc);
+	//CU_add_test(serializacion,"dos", serializacion_lectura_umc);
+	CU_add_test(serializacion,"cinco", serializacion_escritura_umc);
 
 	CU_basic_set_mode(CU_BRM_VERBOSE);
 	CU_basic_run_tests();
@@ -36,6 +38,25 @@ CU_initialize_registry();
 	return CU_get_error();
 }
 
+void serializacion_escritura_umc(){
+	int umc_socket_descriptor = create_client_socket_descriptor("localhost","2007");
+
+	char * bytes_de_la_pagina = "escribir contenido de una pagina";
+	t_escribir_bytes_de_una_pagina_en_UMC *escritura_bytes = malloc(sizeof(t_escribir_bytes_de_una_pagina_en_UMC));
+	memset(escritura_bytes,0,sizeof(t_escribir_bytes_de_una_pagina_en_UMC));
+	escritura_bytes->pagina = 5;
+	escritura_bytes->offset = 10;
+	escritura_bytes->size= 50;
+	escritura_bytes->buffer = bytes_de_la_pagina;
+
+
+
+	t_stream *buffer = serializar_mensaje(10,escritura_bytes);
+
+	int bytes= send(umc_socket_descriptor, buffer->datos, 70, 0);
+
+
+}
 
 void serializacion_lectura_umc(){
 		int umc_socket_descriptor = create_client_socket_descriptor("localhost","2005");

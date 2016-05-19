@@ -26,7 +26,7 @@
 #include "protocoloUMC.h"
 
 void serializacion_lectura_umc();
-
+void serializacion_escritura_umc();
 
 
 int correrTestSerializacion(){
@@ -35,7 +35,8 @@ int correrTestSerializacion(){
 
 
 	CU_pSuite serializacion = CU_add_suite("Suite Serializacion", NULL, NULL);
-	CU_add_test(serializacion,"uno", serializacion_lectura_umc);
+	//CU_add_test(serializacion,"uno", serializacion_lectura_umc);
+	CU_add_test(serializacion,"cinco", serializacion_escritura_umc);
 
 
 	CU_basic_set_mode(CU_BRM_VERBOSE);
@@ -46,6 +47,23 @@ int correrTestSerializacion(){
 
 }
 
+void serializacion_escritura_umc(){
+	int server_socket_descriptor = create_server_socket_descriptor("2007", 10);
+
+	int client_socket_descriptor = accept_connection(server_socket_descriptor);
+
+	char recv_buffer[70];
+	int bytesrecv =recv(client_socket_descriptor, recv_buffer, 70, 0);
+
+
+	t_escribir_bytes_de_una_pagina_en_UMC * escritura = malloc(sizeof(t_escribir_bytes_de_una_pagina_en_UMC));
+	escritura = (t_escribir_bytes_de_una_pagina_en_UMC*)deserealizar_mensaje(10, recv_buffer);
+
+	CU_ASSERT_TRUE(escritura->pagina == 5);
+	CU_ASSERT_TRUE(escritura->offset == 10);
+	CU_ASSERT_TRUE(escritura->size == 50);
+	CU_ASSERT_TRUE(!strcmp(escritura->buffer,"escribir contenido de una pagina"));
+}
 
 void serializacion_lectura_umc(){
 
@@ -78,5 +96,6 @@ void serializacion_lectura_umc(){
 
 
 }
+
 
 

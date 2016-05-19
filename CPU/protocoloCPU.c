@@ -26,12 +26,75 @@ t_stream *serializar_mensaje(int tipo,void* unaEstructura) {
 	case (2):
 			stream = serializar_pedido_bytes_de_una_pagina_a_UMC((t_solicitar_bytes_de_una_pagina_a_UMC *)unaEstructura);
 			break;
+
+	case (10):
+			stream = serializar_escribir_bytes_de_una_pagina_en_UMC((t_escribir_bytes_de_una_pagina_en_UMC *)unaEstructura);
+			break;
 	}
 
 	return stream;
 }
 
+t_stream *serializar_escribir_bytes_de_una_pagina_en_UMC(t_escribir_bytes_de_una_pagina_en_UMC *escritura){
 
+	uint32_t 	tmpsize = 0,
+				offset = 0;
+
+	size_t size_bytes_a_escribir = strlen(escritura->buffer)+1;
+
+	uint32_t 	size_escritura = 	sizeof(uint32_t) +	    //Tamano del numero de pagina
+									sizeof(uint32_t) +	    //Tamano del offset
+									sizeof(uint32_t) +	    //Tamano del campo datos a escribir
+									size_bytes_a_escribir ;	//Tamano del char* de bytes
+
+	uint32_t 	streamSize =	sizeof(uint8_t)	+	//Tamano del tipo
+								sizeof(uint32_t)+	//Tamano del largo del stream
+								size_escritura;		//Tamano del pedido de pagina
+
+	t_stream *stream = malloc(streamSize);
+
+	memset(stream, 0,streamSize);
+	stream->size = size_escritura;
+	stream->datos = malloc(streamSize);
+	memset(stream->datos,0,streamSize);
+
+	uint8_t tipo = 10; 	//Tipo del Mensaje . Fijado estaticamente segun protocolo
+	uint32_t numero_pagina = escritura->pagina;
+	uint32_t offset_pagina = escritura->offset;
+	uint32_t size_pagina = escritura->size;
+
+	char* aux = malloc(streamSize);
+	char *escritura_aux = escritura->buffer;
+
+
+	memcpy(aux,&tipo,tmpsize=sizeof(uint8_t));
+	offset+=tmpsize;
+
+	memcpy(aux+offset,&size_escritura,tmpsize=sizeof(uint32_t));
+	offset+=tmpsize;
+
+	memcpy(aux+offset,&numero_pagina,tmpsize=sizeof(uint32_t));
+	offset+=tmpsize;
+
+	memcpy(aux+offset,&offset_pagina,tmpsize=sizeof(uint32_t));
+	offset+=tmpsize;
+
+	memcpy(aux+offset,&size_pagina,tmpsize=sizeof(uint32_t));
+	offset+=tmpsize;
+
+	memcpy(aux+offset,escritura_aux,tmpsize=size_bytes_a_escribir);
+	offset+=tmpsize;
+
+	char endString='\0';
+	memcpy(aux+offset,&endString,1);
+
+	stream->datos = aux;
+
+	return stream;
+
+
+
+}
 
 t_stream *serializar_pedido_bytes_de_una_pagina_a_UMC(t_solicitar_bytes_de_una_pagina_a_UMC *pedido){
 	uint32_t 	tmpsize = 0,
@@ -39,7 +102,7 @@ t_stream *serializar_pedido_bytes_de_una_pagina_a_UMC(t_solicitar_bytes_de_una_p
 
 	uint32_t 	size_pedido = 	sizeof(uint32_t) +	//Tamano del numero de pagina
 								sizeof(uint32_t) +	//Tamano del offset
-								sizeof(uint32_t);	//Tamano del campo datos a escribir
+								sizeof(uint32_t);	//Tamano del campo datos a leer
 
 	uint32_t 	streamSize =	sizeof(uint8_t)	+	//Tamano del tipo
 								sizeof(uint32_t)+	//Tamano del largo del stream

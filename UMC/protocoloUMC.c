@@ -25,12 +25,56 @@ void *deserealizar_mensaje(uint8_t tipo, char* datos) {
 
 	switch(tipo){
 	case (2):
-			estructuraDestino = deserializar_pedido_bytes_de_una_pagina_a_UMC (datos);
+			estructuraDestino = deserializar_pedido_bytes_de_una_pagina_a_UMC(datos);
 
 			break;
+	case (10):
+			estructuraDestino = deserializar_escribir_bytes_de_una_pagina_en_UMC(datos);
+			break;
+
 	}
 
 	return estructuraDestino;
+}
+
+t_escribir_bytes_de_una_pagina_en_UMC *deserializar_escribir_bytes_de_una_pagina_en_UMC(char *datos){
+	int		tmpsize = 0,
+			offset = 0,
+			tamanoDato = 0;
+
+	const int desplazamientoHeader = 5;		//Offset inicial para no deserealizar tipo (1 byte) y length (4 bytes)
+
+	t_escribir_bytes_de_una_pagina_en_UMC *escritura = malloc(sizeof(t_escribir_bytes_de_una_pagina_en_UMC));
+	memset(escritura,0, sizeof(t_escribir_bytes_de_una_pagina_en_UMC));
+
+
+	memcpy(&escritura->pagina, datos+desplazamientoHeader, tmpsize = sizeof(uint32_t));
+	offset+=tmpsize;
+	offset+=desplazamientoHeader;
+
+	memcpy(&escritura->offset, datos+offset, tmpsize = sizeof(uint32_t));
+	offset+=tmpsize;
+
+	memcpy(&escritura->size, datos+offset, tmpsize = sizeof(uint32_t));
+	offset+=tmpsize;
+
+
+	for(tamanoDato = 0; (datos+offset)[tamanoDato] != '\0';tamanoDato++);//incremento tamanoDato, hasta el tamaÃ±o del nombre
+
+	escritura->buffer = malloc(tamanoDato+1);
+	memset(escritura->buffer,0,tamanoDato+1);
+
+	memcpy(escritura->buffer, datos+offset, tmpsize=tamanoDato+1);
+	offset+=tamanoDato+1;
+	offset+=desplazamientoHeader;
+
+	char endString = '\0';
+	memcpy(escritura->buffer+offset,&endString,1);
+
+
+	return escritura;
+
+
 }
 
 
