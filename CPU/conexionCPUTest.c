@@ -20,6 +20,14 @@
 
 //Declaracion estructuras -- Inicio
 typedef struct {
+	uint32_t pagina;	//Numero de pagina
+	uint32_t offset;	//Offset de la pagina
+	uint32_t size; 		//Tamano de los datos a escribir
+}__attribute__((packed)) solicitar_bytes_de_una_pagina;
+
+
+
+typedef struct {
 	uint8_t tipo;
 	uint32_t length;
 	void *payload;
@@ -48,9 +56,9 @@ t_mensaje *crearMensaje(uint8_t tipo);
 void destruirMensaje(t_mensaje *mensaje);
 void ponerDatosEnMensaje(t_mensaje *mensaje, void *datos, uint32_t length);
 void *obtenerDatosDeMensaje(t_mensaje *mensaje);
-t_stream *serializarMensaje(int tipo, void *unaEstructura);
+t_stream *serializar_mensaje(int tipo, void *unaEstructura);
 t_stream *serializarPCB(t_PCB *unPCB);
-void *deserealizarMensaje(uint8_t tipo, char* datos);
+void *deserealizar_mensaje(uint8_t tipo, char* datos);
 t_header deserealizarHeader(char * header);
 t_header crearHeader(uint8_t tipo, uint32_t tamanoDatos);
 t_PCB *deserealizarPCB(char *datos);
@@ -83,19 +91,19 @@ void valido_conexion_con_umc(){
 	memset(pcb,0,sizeof(t_PCB));
 
 	pcb->pid = 463;
-	pcb->estado = "Uberazo";
+	pcb->estado = "Atalo con Hilos";
 	pcb->iPointer = 99;
 
 
-	t_stream *buffer = serializarMensaje(1,pcb);
-	int bytes= send(umc_socket_descriptor, buffer->datos, 20, 0);
+	t_stream *buffer = serializar_mensaje(1,pcb);
+	int bytes= send(umc_socket_descriptor, buffer->datos, 30, 0);
 
 
 	CU_ASSERT_TRUE(bytes > 0);
 
 }
 
-t_stream *serializarMensaje(int tipo,void* unaEstructura) {
+t_stream *serializar_mensaje(int tipo,void* unaEstructura) {
 
 	t_stream *stream;
 

@@ -54,9 +54,9 @@ t_mensaje *crearMensaje(uint8_t tipo);
 void destruirMensaje(t_mensaje *mensaje);
 void ponerDatosEnMensaje(t_mensaje *mensaje, void *datos, uint32_t length);
 void *obtenerDatosDeMensaje(t_mensaje *mensaje);
-t_stream *serializarMensaje(int tipo, void *unaEstructura);
+t_stream *serializar_mensaje(int tipo, void *unaEstructura);
 t_stream *serializarPCB(t_PCB *unPCB);
-void *deserealizarMensaje(uint8_t tipo, char* datos);
+void *deserealizar_mensaje(uint8_t tipo, char* datos);
 t_header deserealizarHeader(char * header);
 t_header crearHeader(uint8_t tipo, uint32_t tamanoDatos);
 t_PCB *deserealizarPCB(char *datos);
@@ -90,20 +90,20 @@ void valido_que_se_conecta_cpu(){
 	int client_socket_descriptor = accept_connection(server_socket_descriptor);
 
 
-	char recvBuffer[50];
+	char recvBuffer[30];
 	memset(recvBuffer,0,sizeof(recvBuffer));
-	int bytesrecv =recv(client_socket_descriptor, recvBuffer, 50, 0);
+	int bytesrecv =recv(client_socket_descriptor, recvBuffer, 30, 0);
 
 
 	t_PCB *unPCB = malloc(sizeof(unPCB));
 
-	unPCB = (t_PCB *)deserealizarMensaje(1,recvBuffer);
+	unPCB = (t_PCB *)deserealizar_mensaje(1,recvBuffer);
 
 
 	CU_ASSERT_TRUE(bytesrecv > 0);
 	CU_ASSERT_TRUE(unPCB->pid == 463);
 	CU_ASSERT_TRUE(unPCB->iPointer == 99);
-	CU_ASSERT_TRUE(!strcmp(unPCB->estado,"Uberazo"));
+	CU_ASSERT_TRUE(!strcmp(unPCB->estado,"Atalo con Hilos"));
 }
 
 
@@ -119,7 +119,7 @@ void valido_que_se_conecta_cpu(){
  * 		--> Recordar hacer free de la estructuraDestino luego de utilizar esta funcion
  */
 
-void *deserealizarMensaje(uint8_t tipo, char* datos) {
+void *deserealizar_mensaje(uint8_t tipo, char* datos) {
 
 	void* estructuraDestino;
 
