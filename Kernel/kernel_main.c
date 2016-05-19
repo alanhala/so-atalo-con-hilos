@@ -36,6 +36,11 @@ int main(int argc, char **argv) {
 		 correrTest();
 		 return 0;
 	}
+	if (strcmp(argv[1], "-planificador") == 0){
+		 Planificacion();
+		 return 0;
+	}
+
 
 	int cpu_socket_descriptor, console_socket_descriptor;
 	pthread_t cpu_thread;

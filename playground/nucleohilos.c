@@ -51,7 +51,7 @@ void *sacarDeColaTest() {
 	ptmp = queue_pop(pColaNew);
 	sem_post(&mut_n);
 }
-
+/*
 int main(void) {
 
 	//5 estados new, ready , exec, exit, block
@@ -65,7 +65,7 @@ int main(void) {
 	}
 	return 0;
 
-}
+}*/
 
 void *TestSemaforos() {
 
