@@ -22,6 +22,7 @@
 int correrTest(){
 
 CU_initialize_registry();
+
 	  CU_pSuite carga_de_programa = CU_add_suite("Suite carga de programa", NULL, NULL);
 	  CU_add_test(carga_de_programa, "uno", cargo_programa_pid_100);
 	  CU_add_test(carga_de_programa, "dos", cargar_programa_asignando_20_frames);
