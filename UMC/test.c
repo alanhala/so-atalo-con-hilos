@@ -15,6 +15,7 @@
 #include <commons/collections/list.h>
 #include <semaphore.h>
 #include "memoriaPrincipal.h"
+#include "main.h"
 #include "CUnit/Basic.h"
 #include "test.h"
 
@@ -23,12 +24,17 @@ int correrTest(){
 
 CU_initialize_registry();
 
+      CU_pSuite creacion_de_estructuras = CU_add_suite("Suite creacion de estructuras", NULL, NULL);
+	  CU_add_test(creacion_de_estructuras, "uno", cargar_archivo_configuracion_umc);
+	  CU_add_test(creacion_de_estructuras, "dos", crear_50_frames_de_memoria_principal);
+
+
+
 	  CU_pSuite carga_de_programa = CU_add_suite("Suite carga de programa", NULL, NULL);
 	  CU_add_test(carga_de_programa, "uno", cargo_programa_pid_100);
 	  CU_add_test(carga_de_programa, "dos", cargar_programa_asignando_20_frames);
 
-	  CU_pSuite creacion_de_estructuras = CU_add_suite("Suite creacion de estructuras", NULL, NULL);
-	  CU_add_test(creacion_de_estructuras, "uno", crear_50_frames_de_memoria_principal);
+
 
 
 	  CU_pSuite eliminacion_de_programa = CU_add_suite("Suite eliminacion de programa", NULL, NULL);
@@ -42,12 +48,6 @@ CU_initialize_registry();
 	  CU_add_test(escritura_de_frame, "tres", escribir_hola_en_frame_3);
 	  CU_add_test(escritura_de_frame, "cuatro", escribir_hola_en_frame_0);
 
-
-
-
-
-
-
 	  CU_basic_set_mode(CU_BRM_VERBOSE);
 	  CU_basic_run_tests();
 	  CU_cleanup_registry();
@@ -55,14 +55,38 @@ CU_initialize_registry();
 	  return CU_get_error();
 
 }
+void cargar_archivo_configuracion_umc(){
+	int result = cargar_configuracion();
+	int incorrecto =0;
+	if(LISTENPORT !=21000)
+		incorrecto =1;
+	if (SWAPIP !="localhost")
+		incorrecto =1;
+	if(SWAPPORT != 8000)
+		incorrecto =1;
+	if(CANTIDAD_FRAMES !=4000)
+		incorrecto =1;
+	if(TAMANIO_FRAME != 50)
+		incorrecto =1;
+	if(MAX_FRAMES_POR_PROCESO != 400)
+		incorrecto =1;
+	if (CANTIDAD_ENTRADAS_TLB != 300)
+		incorrecto =1;
+	if (RETARDO != 10000)
+		incorrecto =1;
 
+
+
+	CU_ASSERT_EQUAL(incorrecto, 0);
+
+}
 
 
 void cargo_programa_pid_100(){
 	inicializacion_para_test(10, 300);
 	int init = inicializar_estructuras();
 	cargar_nuevo_programa(100, 200);
-	t_tablas_de_paginas* tabla= buscar_tabla_de_paginas_de_pid(100);
+	t_tabla_de_paginas* tabla= buscar_tabla_de_paginas_de_pid(100);
 	CU_ASSERT_EQUAL(tabla->pid, 100);
 }
 
@@ -70,7 +94,7 @@ void asigno_frame_2_a_la_pagina_5(){
 	inicializacion_para_test(10, 500);
 	int init = inicializar_estructuras();
 	cargar_nuevo_programa(100, 200);
-	t_tablas_de_paginas* tabla= buscar_tabla_de_paginas_de_pid(100);
+	t_tabla_de_paginas* tabla= buscar_tabla_de_paginas_de_pid(100);
 	asignar_frame_a_una_pagina(tabla, 2, 5);
 	CU_ASSERT_EQUAL(devolver_frame_de_pagina(tabla, 5),2);
 
@@ -80,7 +104,7 @@ void no_esta_presente_frame_2_en_pagina_4(){
 	inicializacion_para_test(10, 500);
 	int init = inicializar_estructuras();
 	cargar_nuevo_programa(100, 200);
-	t_tablas_de_paginas* tabla= buscar_tabla_de_paginas_de_pid(100);
+	t_tabla_de_paginas* tabla= buscar_tabla_de_paginas_de_pid(100);
 	asignar_frame_a_una_pagina(tabla, 2, 5);
 	CU_ASSERT_NOT_EQUAL(devolver_frame_de_pagina(tabla, 4),2);
 
@@ -145,7 +169,7 @@ void eliminar_programa_pid_2(){
 	cargar_nuevo_programa(3, 10);
 	//busco los valores previos a finalizar el programa
 	int viejo_size = list_size(lista_tabla_de_paginas);
-	t_tablas_de_paginas * tabla= buscar_tabla_de_paginas_de_pid(2);
+	t_tabla_de_paginas * tabla= buscar_tabla_de_paginas_de_pid(2);
 
 	int frames_que_va_a_liberar = tabla->paginas_totales;
 

@@ -32,10 +32,13 @@ void *connect_to_kernel_thread(void);
 
 int main(int argc, char **argv) {
 	if (strcmp(argv[1], "-test") == 0){
-
+		 correrTest();
 		 correrTestSerializacion();
 		 return 0;
 	}
+
+
+
 
 
 	connect_to_UMC();
