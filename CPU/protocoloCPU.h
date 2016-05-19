@@ -23,6 +23,9 @@ typedef struct {
 	char * buffer;		//buffer que quiero escribir de la pagina
 }__attribute__((packed)) t_escribir_bytes_de_una_pagina_en_UMC;
 
+typedef struct {
+	int escritura_correcta; //0 si ok, -1 si no se pudo escribir la memoria (page fault?)
+}__attribute__((packed)) t_respuesta_escribir_bytes_de_una_pagina_en_UMC;
 
 
 typedef struct {
@@ -40,7 +43,7 @@ t_stream *serializar_pedido_bytes_de_una_pagina_a_UMC(t_solicitar_bytes_de_una_p
 void *serealizar_mensaje(uint8_t tipo, char* datos);
 void *deserealizar_mensaje(uint8_t tipo, char* datos);
 t_respuesta_bytes_de_una_pagina_a_CPU *deserializar_respuesta_bytes_de_una_pagina_a_CPU(char *datos);
-
+t_respuesta_escribir_bytes_de_una_pagina_en_UMC * deserializar_respuesta_escribir_bytes_de_una_pagina_en_UMC(char *datos);
 
 t_stream *serializar_escribir_bytes_de_una_pagina_en_UMC(t_escribir_bytes_de_una_pagina_en_UMC * unaEstructura);
 

@@ -109,11 +109,46 @@ t_stream *serializar_mensaje(int tipo, void* unaEstructura) {
 	case (3):
 			stream = serializar_respuesta_bytes_de_una_pagina_a_CPU((t_respuesta_bytes_de_una_pagina_a_CPU *)unaEstructura);
 			break;
+	case (11):
+			stream = serializar_respuesta_escribir_bytes_de_una_pagina_en_UMC((t_respuesta_escribir_bytes_de_una_pagina_en_UMC *)unaEstructura);
+			break;
 	}
 
 	return stream;
 }
 
+t_stream *serializar_respuesta_escribir_bytes_de_una_pagina_en_UMC(t_respuesta_escribir_bytes_de_una_pagina_en_UMC *respuesta){
+		uint32_t 	tmpsize = 0,
+					offset = 0;
+
+		uint32_t 	size_respuesta = sizeof(uint32_t);	//Tamano de la respuesta
+
+		uint32_t 	streamSize =	sizeof(uint8_t)	+	//Tamano del tipo
+									sizeof(uint32_t)+	//Tamano del largo del stream
+									size_respuesta;		//Tamano de la respuesta
+
+		t_stream *stream = malloc(streamSize);
+
+		memset(stream, 0,streamSize);
+		stream->size = size_respuesta;
+		stream->datos = malloc(streamSize);
+		memset(stream->datos,0,streamSize);
+
+
+		uint8_t tipo = 2; 	//Tipo del Mensaje . Fijado estaticamente segun protocolo
+		uint32_t escritura_resultado = respuesta->escritura_correcta;
+
+		memcpy(stream->datos,&tipo,tmpsize=sizeof(uint8_t));
+		offset+=tmpsize;
+
+		memcpy(stream->datos+offset,&size_respuesta,tmpsize=sizeof(uint32_t));
+		offset+=tmpsize;
+
+		memcpy(stream->datos+offset,&escritura_resultado,tmpsize=sizeof(uint32_t));
+		offset+=tmpsize;
+
+		return stream;
+}
 
 t_stream *serializar_respuesta_bytes_de_una_pagina_a_CPU(t_respuesta_bytes_de_una_pagina_a_CPU *unaEstructura){
 

@@ -147,10 +147,29 @@ void *deserealizar_mensaje(uint8_t tipo, char* datos) {
 	case (3):
 			estructuraDestino = deserializar_respuesta_bytes_de_una_pagina_a_CPU (datos);
 			break;
+	case (11):
+			estructuraDestino = deserializar_respuesta_escribir_bytes_de_una_pagina_en_UMC (datos);
+			break;
 	}
 
 	return estructuraDestino;
 }
+t_respuesta_escribir_bytes_de_una_pagina_en_UMC * deserializar_respuesta_escribir_bytes_de_una_pagina_en_UMC(char *datos){
+		int		tmpsize = 0,
+				offset = 0;
+
+		const int desplazamientoHeader = 5;		//Offset inicial para no deserealizar tipo (1 byte) y length (4 bytes)
+
+		t_respuesta_escribir_bytes_de_una_pagina_en_UMC *respuesta = malloc(sizeof(t_respuesta_escribir_bytes_de_una_pagina_en_UMC));
+		memset(respuesta,0, sizeof(t_respuesta_escribir_bytes_de_una_pagina_en_UMC));
+
+		memcpy(&respuesta->escritura_correcta, datos+desplazamientoHeader, tmpsize = sizeof(uint32_t));
+		offset+=tmpsize;
+		offset+=desplazamientoHeader;
+
+		return respuesta;
+}
+
 
 t_respuesta_bytes_de_una_pagina_a_CPU *deserializar_respuesta_bytes_de_una_pagina_a_CPU(char *datos){
 

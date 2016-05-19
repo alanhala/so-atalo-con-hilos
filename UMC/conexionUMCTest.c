@@ -63,6 +63,17 @@ void serializacion_escritura_umc(){
 	CU_ASSERT_TRUE(escritura->offset == 10);
 	CU_ASSERT_TRUE(escritura->size == 50);
 	CU_ASSERT_TRUE(!strcmp(escritura->buffer,"escribir contenido de una pagina"));
+
+	int resultado_de_la_escritura = -1;
+
+
+
+	t_respuesta_escribir_bytes_de_una_pagina_en_UMC *respuesta_escritura = malloc(sizeof(t_respuesta_escribir_bytes_de_una_pagina_en_UMC));
+	memset(respuesta_escritura,0,sizeof(t_respuesta_escribir_bytes_de_una_pagina_en_UMC));
+	respuesta_escritura->escritura_correcta = resultado_de_la_escritura;
+	t_stream *buffer = serializar_mensaje(11,respuesta_escritura);
+
+	int bytes= send(client_socket_descriptor, buffer->datos, 20, 0);
 }
 
 void serializacion_lectura_umc(){

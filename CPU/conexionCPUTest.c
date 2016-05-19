@@ -56,6 +56,17 @@ void serializacion_escritura_umc(){
 	int bytes= send(umc_socket_descriptor, buffer->datos, 70, 0);
 
 
+	char recv_buffer[20];
+	recv(umc_socket_descriptor, recv_buffer, 20, 0);
+
+
+	t_respuesta_escribir_bytes_de_una_pagina_en_UMC * respuesta = malloc(sizeof(t_respuesta_escribir_bytes_de_una_pagina_en_UMC));
+	respuesta = (t_respuesta_escribir_bytes_de_una_pagina_en_UMC*)deserealizar_mensaje(11, recv_buffer);
+
+
+	CU_ASSERT_TRUE(respuesta->escritura_correcta == -1);
+
+
 }
 
 void serializacion_lectura_umc(){
