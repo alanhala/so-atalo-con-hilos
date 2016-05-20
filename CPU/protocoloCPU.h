@@ -8,6 +8,8 @@
 #ifndef PROTOCOLOCPU_H_
 #define PROTOCOLOCPU_H_
 
+#include <netdb.h>
+
 typedef struct {
 	uint32_t pagina;	//Numero de pagina
 	uint32_t offset;	//Offset de la pagina

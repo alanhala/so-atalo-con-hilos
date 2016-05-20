@@ -43,9 +43,10 @@ void obtener_siguiente_instruccion() {
 
 	indice_copia += pcb->program_counter;
 
-	t_intructions next_instruction = get_next_instruction(pcb);
+	t_indice_instrucciones_elemento next_instruction = get_next_instruction(pcb);
 
-	CU_ASSERT_EQUAL(next_instruction.offset, 32);
-	CU_ASSERT_EQUAL(next_instruction.start, 16);
+	CU_ASSERT_EQUAL(next_instruction.instruccion.offset, 32);
+	CU_ASSERT_EQUAL(next_instruction.instruccion.start, 16);
+	CU_ASSERT_EQUAL(next_instruction.numero_pagina, 1);
 
 }
