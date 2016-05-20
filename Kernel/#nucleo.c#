@@ -1,0 +1,259 @@
+#include "nucleo.h"
+
+
+
+void Planificacion() {
+
+	//5 estados new, ready , exec, exit, block
+	pColaNew = queue_create();
+	pColaReady = queue_create();
+	pColaExit = queue_create();
+	pColaBlock = queue_create();
+	pColaExec = queue_create();
+	pColaCpu = list_create();
+
+	pthread_t thReady, thNew, thExec, thBlock,thExit,thCPU;
+	sem_init(&mut_new, 0, 1);
+	sem_init(&mut_ready, 0, 1);
+	sem_init(&mut_exec, 0, 1);
+	sem_init(&mut_block, 0, 1);
+	sem_init(&mut_exit, 0, 1);
+
+	int cpu_count =3;
+	sem_init(&cant_cpu, 0,cpu_count);//suponemos que hay 3 cpus libres.
+    for (int n=0; n<cpu_count; n++)
+    {
+        simulator_cpu_data[n].current = NULL;
+        simulator_cpu_data[n].state = CPU_IDLE;
+        simulator_cpu_data[n].preemption_timer = -1;
+        pthread_cond_init(&simulator_cpu_data[n].wakeup, NULL);
+    }
+
+	/* Start CPU threads */
+	for (n=0; n<cpu_count; n++)
+		pthread_create(&cpu_thread[n], NULL, simulator_cpu_thread_func,(void*)n);
+
+	/* Start supervisor thread */
+	simulator_supervisor_thread();
+
+
+
+
+
+
+
+	/* COMENTO PARA TEST, DESCOMENTAR*/
+
+	 pthread_create(&thNew, NULL, &recNew, NULL);
+	 pthread_create(&thReady, NULL, &recReady, NULL);
+	 pthread_create(&thExec, NULL, &recExec, NULL);
+	 pthread_create(&thExit, NULL, &recExit, NULL);
+
+	 printf("Hilo creado \n"); //TODO BORRAR LINEA
+
+	 pthread_join(thNew, NULL);
+	 pthread_join(thReady, NULL);
+	 pthread_join(thExec, NULL);
+	 //  pthread_join( thBlock, NULL);
+	 exit(EXIT_SUCCESS);
+
+
+	 /*COMENTO PARA TEST, DESCOMENTAR */
+
+}
+
+
+static void *simulator_cpu_thread_func(void *data)
+{
+    simulator_cpu_thread((int)data);
+    return NULL;
+}
+static void simulator_cpu_thread(unsigned int cpu_id)
+{
+    simulator_cpu_state_t state;
+
+    while (1)
+    {
+        pthread_mutex_lock(&simulator_mutex);
+        if (simulator_cpu_data[cpu_id].current == NULL)
+        {
+            /* the idle process was selected */
+            simulator_cpu_data[cpu_id].state = CPU_IDLE;
+        }
+        else
+        {
+            /* a process was scheduled */
+            simulator_cpu_data[cpu_id].state = CPU_RUNNING;
+
+            while (simulator_cpu_data[cpu_id].state == CPU_RUNNING)
+                pthread_cond_wait(&simulator_cpu_data[cpu_id].wakeup,
+                    &simulator_mutex);
+        }
+        state = simulator_cpu_data[cpu_id].state;
+        pthread_mutex_unlock(&simulator_mutex);
+
+        /* llamar a funciones de acuerdo al estado de la cpu */
+        switch (state)
+        {
+        case CPU_IDLE:
+
+            idle(cpu_id);
+            break;
+
+        case CPU_PREEMPT:
+
+            preempt(cpu_id);
+
+            break;
+
+        case CPU_BLOCK:
+
+            yield(cpu_id);
+
+            break;
+
+        case CPU_TERMINATE:
+            processes_terminated++;
+
+            terminate(cpu_id);
+
+            break;
+
+        case CPU_RUNNING:
+            /* esto nunca tendria q pasar */
+            break;
+        }
+    }
+}
+
+
+
+
+void *recReady() {
+
+	while (1) {
+		sem_wait(&cant_new);
+		sem_wait(&mut_new);
+		ptmp = queue_pop(pColaNew);
+		sem_post(&mut_new);
+		printf("Ready  proceso %d tiempo cpu \n",ptmp->pid);
+		sem_wait(&mut_ready);
+		queue_push(pColaReady, ptmp);
+		sem_post(&mut_ready);
+		sem_post(&cant_ready);
+
+		sleep(1);
+	}
+
+	//TODO CERRAR CONEXION DEL SOCKET
+}
+
+void *recNew() {
+
+
+	while (1) {
+		//aca falta conectarse con la consola y crear un nuevo PCB
+		//yo creo uno con solo un id para prueba
+		//int client_socket_descriptor = accept_connection(socket_desciptor);
+		sem_wait(&mut_new);
+		queue_push(pColaNew, CreatePCB()); //
+		sem_post(&mut_new);
+		printf("Se conectio una consola");
+		fflush(stdout);
+	}
+
+}
+
+
+
+void *recExec() {
+	while (1) {
+			sem_wait(&cant_cpu); //primero vemos que haya alguna cpu libre
+			sem_wait(&cant_ready);
+
+
+
+			sem_wait(&mut_ready);
+			ptmp = queue_pop(pColaReady);
+			sem_post(&mut_ready);
+
+			printf("Exec  proceso %d tiempo cpu \n",ptmp->pid);
+			sem_wait(&mut_exec);
+			queue_push(pColaExec, ptmp);
+			sem_post(&mut_exec);
+			sem_post(&cant_exec);
+
+
+	}
+}
+void *recExit() {
+	while (1) {
+			sem_wait(&cant_exec);
+
+
+			sem_wait(&mut_exec);
+			ptmp = queue_pop(pColaExec);
+			sem_post(&mut_exec);
+
+			printf("Exit  proceso %d tiempo cpu \n",ptmp->pid);
+
+			free(ptmp);// lo libero directamente creo q no es necesario hacer cola de exit
+			sem_post(&cant_cpu); // libre una cpu para que pueda seguir procesando
+
+
+	}
+}
+
+
+
+
+
+struct PCB *CreatePCB (int pid) {
+    struct PCB *proc;
+    proc = malloc(sizeof(struct PCB));
+    if (proc == NULL) {
+        printf("ERROR");
+        exit(1);
+    };
+    proc->pid = pid;
+    return(proc);
+};
+
+typedef struct {
+	int numero_pagina;
+	t_intructions instruccion;
+} t_indice_instrucciones_elemento;
+
+typedef struct {
+
+} t_indice_etiqueta;
+
+typedef struct {
+	int pid;
+	int program_counter;
+	int paginas_codigo;
+	int cantidad_instrucciones;
+	t_indice_instrucciones_elemento* indice_instrucciones;
+	int cantidad_etiquetas;
+	//t_indice_etiqueta TODO: implementar esto
+	void* stack_index;
+} t_PCB;
+
+int obtener_cantidad_paginas_programa(t_metadata_program* metadata, int bytes_por_pagina) {
+	int bytes_totales = 0;
+	int i;
+	t_intructions* array_instrucciones = metadata->instrucciones_serializado;
+	for(i=0; i < metadata->instrucciones_size; i++) {
+		bytes_totales += (array_instrucciones->offset);
+		array_instrucciones++;
+	}
+
+	int total_paginas = bytes_totales / bytes_por_pagina;
+
+	if(total_paginas * bytes_por_pagina < bytes_totales) {
+		total_paginas += 1;
+	}
+
+	return total_paginas;
+}
+
