@@ -19,6 +19,7 @@
 #include "memoriaPrincipal.h"
 
 int inicializar_estructuras() {
+	int result = cargar_configuracion();
 	inicializar_semaforos();
 	TAMANIO_MEMORIA_PRINCIPAL = TAMANIO_FRAME * CANTIDAD_FRAMES;
 	crear_memoria_principal();
@@ -138,20 +139,20 @@ int devolver_frame_de_pagina(t_tabla_de_paginas* tabla, int pagina) {
 
 }
 
-char* leer_frame_de_memoria_principal(int frame) {
+char* leer_frame_de_memoria_principal(int frame, int offset, int size) {
 
-	char* datos = malloc(TAMANIO_FRAME);
-	memcpy(datos, MEMORIA_PRINCIPAL + (frame * TAMANIO_FRAME), TAMANIO_FRAME);
+	char* datos = malloc(size);
+	memcpy(datos, MEMORIA_PRINCIPAL + (frame * TAMANIO_FRAME) + offset, size);
 	return datos;
 }
 
-void escribir_frame_de_memoria_principal(int frame, char* datos) {
+void escribir_frame_de_memoria_principal(int frame, int offset, int size, char* datos) {
 	//TODO esta funcion solo debe ser llamada si datos =< tamanio frame.
 	//TODO la funciona que la llama deberia cortar los datos en un array de datos de tamanio de frame
 
 	//TODO hacer test/analizar que pasa si los datos son menores a un frame(para que no queden bytes feos
 
-	memcpy(MEMORIA_PRINCIPAL + (frame * TAMANIO_FRAME), datos, TAMANIO_FRAME);
+	memcpy(MEMORIA_PRINCIPAL + (frame * TAMANIO_FRAME) + offset, datos, size);
 }
 
 t_tabla_de_paginas* buscar_tabla_de_paginas_de_pid(int pid_buscado) {
@@ -264,6 +265,27 @@ int tiene_tabla_mas_paginas_para_pedir(t_tabla_de_paginas* tabla)
 {	return (tabla->frames_en_uso < MAX_FRAMES_POR_PROCESO);
 
 }
+
+int escribir_pagina_de_programa(int pid, int pagina, int offset, int size, char * datos){
+
+	t_tabla_de_paginas* tabla = buscar_tabla_de_paginas_de_pid(pid);
+	int frame = buscar_frame_de_una_pagina(tabla, pagina);
+
+	if(frame != -1)
+	{
+		//actualizar_frame(frame, tabla); //aca varia segun el algoritmo de reemplazo
+		//copiar_contenido_a_frame(datos, frame);
+
+		return 0; //escritura ok;
+	}
+	else
+	{
+		return -1;// escritura no Ok;
+	}
+
+	//A PARTIR DE LA RESPUESTA DE ESCRITURA LE RESPONDO A CPU SI PUDE O NO ESCRIBIR
+}
+
 
 // TLB
 

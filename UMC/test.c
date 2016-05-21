@@ -26,7 +26,8 @@ CU_initialize_registry();
 
       CU_pSuite creacion_de_estructuras = CU_add_suite("Suite creacion de estructuras", NULL, NULL);
 	  CU_add_test(creacion_de_estructuras, "uno", cargar_archivo_configuracion_umc);
-	  CU_add_test(creacion_de_estructuras, "dos", crear_50_frames_de_memoria_principal);
+	  //CU_add_test(creacion_de_estructuras, "dos", crear_50_frames_de_memoria_principal);
+	  //rehacer este test a partir del archivo de configuracion
 
 
 
@@ -45,8 +46,13 @@ CU_initialize_registry();
 
 	  CU_add_test(escritura_de_frame, "uno", asigno_frame_2_a_la_pagina_5);
 	  CU_add_test(escritura_de_frame, "dos", no_esta_presente_frame_2_en_pagina_4);
-	  CU_add_test(escritura_de_frame, "tres", escribir_hola_en_frame_3);
+	  CU_add_test(escritura_de_frame, "tres", escribir_hola_en_frame_3_offset_5);
 	  CU_add_test(escritura_de_frame, "cuatro", escribir_hola_en_frame_0);
+
+
+	  CU_pSuite escritura_de_pagina = CU_add_suite("Suite escritura de pagina en memoria", NULL, NULL);
+
+	  CU_add_test(escritura_de_pagina, "uno", escribo_pagina_2_de_un_programa);
 
 	  CU_basic_set_mode(CU_BRM_VERBOSE);
 	  CU_basic_run_tests();
@@ -55,7 +61,17 @@ CU_initialize_registry();
 	  return CU_get_error();
 
 }
+
+void escribo_pagina_2_de_un_programa(){
+	int init = inicializar_estructuras();
+
+	//int resultado_escritura = escribir_pagina_de_programa(int pid, int pagina, int offset, int size, char * buffer);
+
+}
+
 void cargar_archivo_configuracion_umc(){
+	// si este test no pasa, para checkear rapido que atributo del archivo no se cargo correctamente
+	// poner un breakpoint despues de cada if y ver que condicion no se cumplio
 	int result = cargar_configuracion();
 	int incorrecto =0;
 	if(LISTENPORT !=21000)
@@ -81,7 +97,7 @@ void cargar_archivo_configuracion_umc(){
 
 
 void cargo_programa_pid_100(){
-	inicializacion_para_test(10, 300);
+	//inicializacion_para_test(10, 300);
 	int init = inicializar_estructuras();
 	cargar_nuevo_programa(100, 200);
 	t_tabla_de_paginas* tabla= buscar_tabla_de_paginas_de_pid(100);
@@ -89,7 +105,7 @@ void cargo_programa_pid_100(){
 }
 
 void asigno_frame_2_a_la_pagina_5(){
-	inicializacion_para_test(10, 500);
+	//inicializacion_para_test(10, 500);
 	int init = inicializar_estructuras();
 	cargar_nuevo_programa(100, 200);
 	t_tabla_de_paginas* tabla= buscar_tabla_de_paginas_de_pid(100);
@@ -99,7 +115,7 @@ void asigno_frame_2_a_la_pagina_5(){
 }
 
 void no_esta_presente_frame_2_en_pagina_4(){
-	inicializacion_para_test(10, 500);
+	//inicializacion_para_test(10, 500);
 	int init = inicializar_estructuras();
 	cargar_nuevo_programa(100, 200);
 	t_tabla_de_paginas* tabla= buscar_tabla_de_paginas_de_pid(100);
@@ -108,43 +124,34 @@ void no_esta_presente_frame_2_en_pagina_4(){
 
 }
 
-void escribir_hola_en_frame_3(){
+void escribir_hola_en_frame_3_offset_5(){
 
 	char hola[] = "hola";
 	char* p = &hola;
-	inicializacion_para_test(sizeof("hola"), 3);
+	//inicializacion_para_test(sizeof("hola"), 3);
 	inicializar_estructuras();
 
-	escribir_frame_de_memoria_principal(3, p);
+	escribir_frame_de_memoria_principal(3, 5, sizeof("hola"), p);
 
-	char* datos_escritos = leer_frame_de_memoria_principal(3);
+	char* datos_escritos = leer_frame_de_memoria_principal(3, 5, sizeof("hola"));
 	CU_ASSERT_EQUAL(strcmp(datos_escritos, "hola"),0);
 }
 void escribir_hola_en_frame_0(){
 
 	char hola[] = "hola";
 	char* p = &hola;
-	inicializacion_para_test(sizeof("hola"), 6);
+	//inicializacion_para_test(sizeof("hola"), 6);
 	inicializar_estructuras();
 
-	escribir_frame_de_memoria_principal(0, p);
+	escribir_frame_de_memoria_principal(0, 0, sizeof("hola"), p);
 
-	char* datos_escritos = leer_frame_de_memoria_principal(0);
+	char* datos_escritos = leer_frame_de_memoria_principal(0, 0, sizeof("hola"));
 	CU_ASSERT_EQUAL(strcmp(datos_escritos, "hola"),0);
 }
 
 
-
-
-void crear_50_frames_de_memoria_principal(){
-	inicializacion_para_test(NULL, 50);
-	inicializar_estructuras();
-	int cant_frames = list_size(lista_frames);
-	CU_ASSERT_EQUAL(cant_frames,50);
-}
-
 void cargar_programa_asignando_20_frames(){
-	inicializacion_para_test(10, 60);
+	//inicializacion_para_test(10, 60);
 	inicializar_estructuras();
 
 	cargar_nuevo_programa(1, 20);
@@ -159,7 +166,7 @@ void cargar_programa_asignando_20_frames(){
 }
 
 void eliminar_programa_pid_2(){
-	inicializacion_para_test(10, 90);
+	//inicializacion_para_test(10, 90);
 	inicializar_estructuras();
 
 	cargar_nuevo_programa(1, 40);
