@@ -48,17 +48,22 @@ void Planificacion() {
 
 t_PCB *conectarConsola()
 {
-	//TODO aca falta conectarse con la consola y crear un nuevo PCB
+	//aca falta conectarse con la consola y crear un nuevo PCB
 		//yo creo uno con solo un id para prueba
 		//int client_socket_descriptor = accept_connection(socket_desciptor);
 
-	t_PCB *pcb;
-	pcb = malloc(sizeof(t_PCB));
-    if (pcb == NULL) {
-        printf("ERROR");
-        exit(1);
-    };
-    pcb->pid = pid++;
+	  t_PCB *pcb;
+    pcb = malloc(sizeof(t_PCB));
+    pcb->pid = pid++ ;
+    pcb->program_counter = 0;
+    return(pcb);
+}
+
+t_PCB *createPCB()
+{
+	  t_PCB *pcb;
+    pcb = malloc(sizeof(t_PCB));
+    pcb->pid = pid++ ;
     pcb->program_counter = 0;
     return(pcb);
 }
@@ -109,12 +114,10 @@ int conectarCPU(){
 
 }
 
-void *recExec() {
+void deReadyaExec(t_cpu *auxcpu ) {
 t_PCB *pcb;
 int idcpu ;
-	while (1) {
-	    idcpu = conectarCPU();
-			sem_wait(&cant_cpu); //primero vemos que haya alguna cpu libre
+ 			sem_wait(&cant_cpu); //primero vemos que haya alguna cpu libre
 			sem_wait(&cant_ready);
 
 			sem_wait(&mut_ready);
@@ -127,19 +130,91 @@ int idcpu ;
 			//list_add_in_index(t_list *self, int index, void *data)
       list_add_in_index(pListaCpu,idcpu, pcb);
 			sem_post(&mut_cpu);
+}
+
+
+
+
+t_cpu *mensajeCPU()
+{
+    t_cpu *auxcpu = malloc(sizeof(t_msjcpu));
+    auxcpu->msj = (rand() % 4); //TODO RECIBIR POR SOCKET MSJ
+    auxcpu->id=1; //TODO recibir id de cpu;
+    //auxcpu->pcb =
+    return (auxcpu);
+
+}
+
+
+void *recExec() {
+t_PCB *pcb;
+int idcpu ;
+t_cpu *auxcpu;
+t_cpu *cpu_in_list;
+	while (1) {
+	   auxcpu = mensajeCPU();
+     switch(auxcpu->msj) {
+        case CPU_IDLE :
+           sem_post(&cant_cpu);
+           deReadyaExec(auxcpu);
+           break;
+        case CPU_PREEMPT :
+            sem_wait(&mut_cpu);
+            cpu_in_list = list_get(pListaCpu,auxcpu->id);
+            sem_post(&mut_cpu);
+            pcb = cpu_in_list->pcb;
+        		sem_wait(&mut_ready);
+        		pcb->estado = READY;
+        		queue_push(pColaReady, pcb);
+        		sem_post(&mut_ready);
+        		sem_post(&cant_ready);
+            sem_post(&cant_cpu);
+           break;
+        case CPU_BLOCK :
+            sem_wait(&mut_cpu);
+            cpu_in_list = list_get(pListaCpu,auxcpu->id);
+            sem_post(&mut_cpu);
+            pcb = cpu_in_list->pcb;
+        		sem_wait(&mut_block);
+        		pcb->estado = BLOCK;
+        		queue_push(pColaBlock, pcb);
+        		sem_post(&mut_block);
+        		sem_post(&cant_block);
+           break;
+        case CPU_EXIT :
+           //aca hay que liberar la cpu ponerla en idle y el proceso poner en cola exit
+            sem_wait(&mut_cpu);
+            cpu_in_list = list_get(pListaCpu,auxcpu->id);
+            cpu_in_list->msj = CPU_IDLE; //TODO este elemento se modifica directamente en la listacpu?? nose
+            //capaz hay que hacer
+            //list_add_in_index(cpu_in_list,auxcpu->id, cpu_in_list);
+            pcb = cpu_in_list->pcb;
+            sem_post(&mut_cpu);
+            sem_post(&cant_cpu);
+
+        		sem_wait(&mut_exit);
+        		pcb->estado = EXIT;
+        		queue_push(pColaExit, pcb);
+        		sem_post(&mut_exit);
+        		sem_post(&cant_exit);
+
+           break;
+      }
+
 	}
 }
-void *recExit() {
-	while (1) {
-		/*	sem_wait(&cant_exec);
-			sem_wait(&mut_exec);
-			ptmp = queue_pop(pColaExec);
-			sem_post(&mut_exec);
-			printf("Exit  proceso %d tiempo cpu \n",ptmp->pid);
 
-			free(ptmp);// lo libero directamente creo q no es necesario hacer cola de exit
-			sem_post(&cant_cpu); // libre una cpu para que pueda seguir procesando
-     */
+void *recExit() {
+t_PCB *pcb;
+	while (1) {
+			sem_wait(&cant_exit);
+			sem_wait(&mut_exit);
+			pcb = queue_pop(pColaExit);
+			sem_post(&mut_exit);
+		  //TODO llamar a consola y enviar pcb
+
+			free(pcb);// lo libero directamente creo q no es necesario hacer cola de exit
+
 
 	}
 }
