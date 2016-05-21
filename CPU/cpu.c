@@ -6,13 +6,13 @@
  *      Author: utnso
  */
 #include "cpu.h"
-#include "protocoloCPU.h"
+#include <commons/collections/list.h>
 
 AnSISOP_funciones functions = {
 	.AnSISOP_definirVariable	= definirVariable,
-	.AnSISOP_obtenerPosicionVariable= primitive_obtenerPosicionVariable,
-	.AnSISOP_dereferenciar	= primitive_dereferenciar,
-	.AnSISOP_asignar	= primitive_asignar,
+	.AnSISOP_obtenerPosicionVariable = obtenerPosicionVariable,
+	.AnSISOP_dereferenciar	= dereferenciar,
+	.AnSISOP_asignar	= asignar,
 	.AnSISOP_imprimir	= primitive_imprimir,
 	.AnSISOP_imprimirTexto	= primitive_imprimirTexto,
 };
@@ -27,7 +27,7 @@ void execute_next_instruction_for_process(t_PCB *pcb) {
 	char *instruccion_string = obtener_instruccion_de_umc(instruccion);
 
 	analizadorLinea(strdup(instruccion_string), &functions, &kernel_functions);
-}
+};
 
 
 char* obtener_instruccion_de_umc(t_indice_instrucciones_elemento instruccion) {
@@ -43,18 +43,92 @@ t_indice_instrucciones_elemento get_next_instruction(t_PCB *pcb) {
 }
 
 t_puntero definirVariable(t_nombre_variable variable) {
-	printf("definir la variable %c\n", variable);
+	t_stack_element *stack_element = list_get(pcb->stack, list_size(pcb->stack) - 1);
 
-	t_variable *puntero_variables = pcb->stack_index->variables;
-	puntero_variables += pcb->stack_index->cantidad_variables;
+	t_variable *new_variable = malloc(sizeof(t_variable));
 
-	puntero_variables->id = variable;
-	puntero_variables->direccion.size = sizeof(uint32_t);
-	puntero_variables->direccion.pagina = pcb->heap_first_free_space.pagina;//TODO: no siempre va a entrar la variable en la pagina actual
-	puntero_variables->direccion.offset = pcb->heap_first_free_space.offset;
-	pcb->stack_index->cantidad_variables++;
+	new_variable->id = variable;
+	new_variable->direccion.size = sizeof(uint32_t);
+	new_variable->direccion.pagina = pcb->heap_next_free_space.pagina;
+	new_variable->direccion.offset = pcb->heap_next_free_space.offset;
 
-	return (t_puntero)puntero_variables;
+	actualizar_next_free_space(pcb);
+
+	list_add(stack_element->variables, new_variable);
+
+	return (t_puntero)new_variable;
 }
+
+t_puntero obtenerPosicionVariable(t_nombre_variable identificador_variable) {
+	t_stack_element *stack_element = list_get(pcb->stack, list_size(pcb->stack) - 1);
+
+	int find_variable(t_variable *var) {
+		return var->id == identificador_variable;
+	}
+
+	t_variable *variable = list_find(stack_element->variables, (void*)find_variable);
+
+	return (t_puntero)variable;
+}
+
+t_valor_variable dereferenciar(t_puntero direccion_variable) {
+	t_variable *variable = (t_variable*) direccion_variable;
+
+	t_respuesta_bytes_de_una_pagina_a_CPU* respuesta = leer_memoria_de_umc(variable->direccion);
+
+	return (t_valor_variable)respuesta;
+}
+
+void asignar(t_puntero direccion_variable, t_valor_variable valor) {
+    t_variable *variable = (t_variable*) direccion_variable;
+
+    escribir_en_umc(variable->direccion, valor);
+}
+
+t_respuesta_bytes_de_una_pagina_a_CPU* leer_memoria_de_umc(t_direccion_virtual_memoria direccion) {
+    int umc_socket_descriptor = create_client_socket_descriptor("localhost","2005");
+
+    t_solicitar_bytes_de_una_pagina_a_UMC *pedido = malloc(sizeof(t_solicitar_bytes_de_una_pagina_a_UMC));
+    memset(pedido,0,sizeof(t_solicitar_bytes_de_una_pagina_a_UMC));
+
+    pedido->pagina = direccion.pagina;
+    pedido->offset = direccion.offset;
+    pedido->size = direccion.size;
+
+    t_stream *buffer = (t_stream*)serializar_mensaje(2,pedido);
+    send(umc_socket_descriptor, buffer->datos, 20, 0);
+
+    char recv_buffer[50];
+    recv(umc_socket_descriptor, recv_buffer, 50, 0);
+
+    t_respuesta_bytes_de_una_pagina_a_CPU *respuesta = malloc(sizeof(t_respuesta_bytes_de_una_pagina_a_CPU));
+    respuesta = (t_respuesta_bytes_de_una_pagina_a_CPU*)deserealizar_mensaje(3, recv_buffer);
+
+    return respuesta;
+}
+
+t_respuesta_escribir_bytes_de_una_pagina_en_UMC* escribir_en_umc(t_direccion_virtual_memoria direccion, void* valor) {
+    int umc_socket_descriptor = create_client_socket_descriptor("localhost","2007");
+    char * bytes_de_la_pagina = (char*)valor;
+    t_escribir_bytes_de_una_pagina_en_UMC *escritura_bytes = malloc(sizeof(t_escribir_bytes_de_una_pagina_en_UMC));
+    memset(escritura_bytes,0,sizeof(t_escribir_bytes_de_una_pagina_en_UMC));
+    escritura_bytes->pagina = direccion.pagina;
+    escritura_bytes->offset = direccion.offset;
+    escritura_bytes->size= direccion.size;
+    escritura_bytes->buffer = bytes_de_la_pagina;
+
+    t_stream *buffer = serializar_mensaje(10,escritura_bytes);
+
+    int bytes= send(umc_socket_descriptor, buffer->datos, 70, 0);
+
+    char recv_buffer[20];
+    recv(umc_socket_descriptor, recv_buffer, 20, 0);
+
+    t_respuesta_escribir_bytes_de_una_pagina_en_UMC * respuesta = malloc(sizeof(t_respuesta_escribir_bytes_de_una_pagina_en_UMC));
+    return (t_respuesta_escribir_bytes_de_una_pagina_en_UMC*)deserealizar_mensaje(11, recv_buffer);
+}
+
+void actualizar_next_free_space(t_PCB *pcb) {};
+
 
 

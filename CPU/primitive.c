@@ -21,10 +21,6 @@ t_puntero primitive_obtenerPosicionVariable(t_nombre_variable variable) {
 	return POSICION_MEMORIA;
 }
 
-t_valor_variable primitive_dereferenciar(t_puntero puntero) {
-	printf("Dereferenciar %d y su valor es: %d\n", puntero, CONTENIDO_VARIABLE);
-	return CONTENIDO_VARIABLE;
-}
 void primitive_asignar(t_puntero puntero, t_valor_variable variable) {
 	printf("Asignando en %d el valor %d\n", puntero, variable);
 }
