@@ -1,5 +1,5 @@
-#ifndef PAGE_INFO_H
-#define PAGE_INFO_H
+#ifndef PAGE_TABLE_H
+#define PAGE_TABLE_H
 
 	#include <stdlib.h>
 
@@ -8,7 +8,8 @@
 		int* pages_location;
 	} t_pages_table;
 
-	t_pages_table *create_pages_table(unsigned int pid, int pages_number);
+	t_pages_table *create_pages_table(unsigned int pid, int pages_number,
+			unsigned int page_size, int first_page_location);
 
 	void destroy_pages_table(t_pages_table* self);
 

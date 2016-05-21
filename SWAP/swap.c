@@ -5,7 +5,7 @@ void create_file(t_swap* self) {
 	char* incomplete_instruction = "dd if=/dev/zero bs=1 count=";
 	char* destiny = " of=";
 	char* linux_instruction = malloc(strlen(size_of_swap_file) +
-			strlen(incomplete_instruction) + strlen(destiny) + strlen(self->swap_name));
+			strlen(incomplete_instruction) + strlen(destiny) + strlen(self->swap_name) + 3);
 
 	strcpy(linux_instruction, incomplete_instruction);
 	strcat(linux_instruction, size_of_swap_file);
@@ -31,8 +31,8 @@ t_swap *create_swap() {
 	self->page_size = config_get_int_value(swap_config, "TAMANIO_PAGINA");
 	self->compaction_delay = config_get_int_value(swap_config, "RETARDO_COMPACTACION");
 	self->pages_table_list = list_create();
-	initialize_bitmap(self);
 	create_file(self);
+	initialize_bitmap(self);
 	self->file = fopen(self->swap_name, "r+");
 
 	return self;
@@ -42,7 +42,26 @@ void destroy_swap(t_swap* self) {
 	free(self);
 }
 
-void add_program(t_swap* self, unsigned int pid, unsigned int pages_number) {
-	t_pages_table* pages_table = create_pages_table(pid, pages_number);
-	list_add(self->pages_table_list, pages_table);
+bool space_available(t_swap* self, unsigned int pages_number, int* first_page_location) {
+//	TODO implement algorithm
+//	actualizar aca el bitmap o no
+	return true;
 }
+
+void initialize_program(t_swap* self, unsigned int pid, unsigned int pages_number) {
+	int* first_page_location = malloc(sizeof(int));
+	if (space_available(self, pages_number, first_page_location)) {
+		t_pages_table* pages_table = create_pages_table(pid, self->page_size,
+				self->pages_number, *first_page_location);
+		list_add(self->pages_table_list, pages_table);
+	}
+}
+
+bool is_pid(t_pages_table pages_table, unsigned int pid) {
+	return pages_table.pid == pid;
+}
+
+void remove_program(t_swap* self, unsigned int pid) {
+}
+
+
