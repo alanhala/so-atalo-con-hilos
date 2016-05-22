@@ -266,9 +266,8 @@ int tiene_tabla_mas_paginas_para_pedir(t_tabla_de_paginas* tabla)
 
 }
 
-int escribir_pagina_de_programa(int pid, int pagina, int offset, int size, char * datos){
+int escribir_pagina_de_programa(t_tabla_de_paginas * tabla, int pagina, int offset, int size, char * datos){
 
-	t_tabla_de_paginas* tabla = buscar_tabla_de_paginas_de_pid(pid);
 	int frame = buscar_frame_de_una_pagina(tabla, pagina);
 
 	if(frame != -1)
@@ -287,6 +286,20 @@ int escribir_pagina_de_programa(int pid, int pagina, int offset, int size, char 
 }
 
 
+char* leer_pagina_de_programa(t_tabla_de_paginas * tabla, int pagina, int offset, int size){
+
+		int frame = buscar_frame_de_una_pagina(tabla, pagina);
+
+		if(frame != -1)
+		{
+			//actualizar_frame(frame, tabla) // segun el algoritmo
+			return leer_frame_de_memoria_principal(frame, offset, size);
+		}
+		else
+		{
+			return "~-1"; //no pude leer memoria
+		}
+}
 // TLB
 
 tabla_tlb* crear_tlb(){

@@ -55,6 +55,11 @@ typedef struct tlb {
 } tabla_tlb;
 
 
+void escribir_frame_de_memoria_principal(int frame, int offset, int size, char* datos);
+char* leer_pagina_de_programa(t_tabla_de_paginas * tabla, int pagina, int offset, int size);
+int escribir_pagina_de_programa(t_tabla_de_paginas * tabla, int pagina, int offset, int size, char * buffer);
+
+
 void crear_memoria_principal();
 void inicializacion_para_test(int tamanio_frame, int cantidad_frame);
 int cargar_archivo_configuracion();
@@ -67,7 +72,6 @@ t_tabla_de_paginas* buscar_tabla_de_paginas_de_pid(int pid_buscado);
 void inicializar_semaforos();
 void asignar_frame_a_una_pagina(t_tabla_de_paginas* tabla, int frame_a_asignar, int pagina);
 int devolver_frame_de_pagina(t_tabla_de_paginas* tabla, int pagina);
-void escribir_frame_de_memoria_principal(int frame, int offset, int size, char* datos);
 char* leer_frame_de_memoria_principal(int frame, int offset, int size);
 void crear_lista_frames();
 void agregar_frame_a_lista_de_frames(int numero_de_frame);
@@ -81,7 +85,6 @@ int buscar_en_tlb_frame_de_pagina(int tabla, int pagina);
 void pedir_a_swap_la_pagina_y_actualizar_memoria_principal(int pid, int pagina, int frame_de_pagina);
 
 
-int escribir_pagina_de_programa(int pid, int pagina, int offset, int size, char * buffer);
 
 // TLB
 tabla_tlb* crear_tlb();
