@@ -41,3 +41,5 @@ RemoteSystemsTempFiles/
 *.cproject
 *.project
 /Debug/
+UMC/LogErroresUMC.txt
+UMC/LogTraceUMC.txt

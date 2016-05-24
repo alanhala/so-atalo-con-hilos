@@ -25,6 +25,8 @@ t_list* lista_tabla_de_paginas;
 sem_t mut_tabla_de_paginas;
 
 
+int TEST;
+
 
 typedef struct e_t_p{
 	int frame; // si no tiene frame asignado setear en -1
@@ -118,4 +120,4 @@ void set_cantidad_frames(int cantidad_marcos);
 void set_tamanio_frame(int tamanio_marcos);
 void set_retardo(int retardo);
 void set_algoritmo_reemplazo(char * algoritmo);
-
+void set_test();

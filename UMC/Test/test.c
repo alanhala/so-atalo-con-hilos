@@ -25,35 +25,36 @@ int correrTest(){
 CU_initialize_registry();
 
       CU_pSuite creacion_de_estructuras = CU_add_suite("Suite creacion de estructuras", NULL, NULL);
-	  CU_add_test(creacion_de_estructuras, "uno", cargar_archivo_configuracion_umc);
-	  CU_add_test(creacion_de_estructuras, "dos", cargar_archivo_ansisop_test);
+	  CU_add_test(creacion_de_estructuras, "cargo config", cargar_archivo_configuracion_umc);
+	  CU_add_test(creacion_de_estructuras, "cargo ansisop script", cargar_archivo_ansisop_test);
 	  //CU_add_test(creacion_de_estructuras, "dos", crear_50_frames_de_memoria_principal);
 	  //rehacer este test a partir del archivo de configuracion
 
 
 
 	  CU_pSuite carga_de_programa = CU_add_suite("Suite carga de programa", NULL, NULL);
-	  CU_add_test(carga_de_programa, "uno", cargo_programa_pid_100);
-	  CU_add_test(carga_de_programa, "dos", cargar_programa_sin_asignar_frames);
+	  //CU_add_test(carga_de_programa, "uno", cargo_programa_pid_100);
+	  CU_add_test(carga_de_programa, "cargo programa sin frames", cargar_programa_sin_asignar_frames);
 
 
 
 
 	  CU_pSuite eliminacion_de_programa = CU_add_suite("Suite eliminacion de programa", NULL, NULL);
-	  CU_add_test(eliminacion_de_programa, "uno", eliminar_programa_pid_2_sin_ningun_frame_asignado);
+	  CU_add_test(eliminacion_de_programa, "eliminar programa sin frames asignados", eliminar_programa_pid_2_sin_ningun_frame_asignado);
 	  //TODO HACER TEST PARA CUANDO TENGA ASIGNADO FRAMES
 	  //TODO TESTEAR CON SWAP TAMBIEN
 
+	  /*
 	  CU_pSuite escritura_de_frame = CU_add_suite("Suite escritura de frame", NULL, NULL);
 
 	  CU_add_test(escritura_de_frame, "uno", asigno_frame_2_a_la_pagina_5);
 	  CU_add_test(escritura_de_frame, "dos", no_esta_presente_frame_2_en_pagina_4);
 	  CU_add_test(escritura_de_frame, "tres", escribir_hola_en_frame_3_offset_5);
 	  CU_add_test(escritura_de_frame, "cuatro", escribir_hola_en_frame_0);
-
+	   */
 
 	  CU_pSuite escritura_de_pagina = CU_add_suite("Suite escritura de pagina en memoria", NULL, NULL);
-	  CU_add_test(escritura_de_pagina, "uno", escribo_pagina_2_de_un_programa);
+	  CU_add_test(escritura_de_pagina, "escritura pagina 2 de programa", escribo_pagina_2_de_un_programa);
 
 	  CU_basic_set_mode(CU_BRM_VERBOSE);
 	  CU_basic_run_tests();
@@ -98,7 +99,7 @@ void cargar_archivo_configuracion_umc(){
 		incorrecto =1;
 	if(CANTIDAD_FRAMES !=4000)
 		incorrecto =1;
-	if(TAMANIO_FRAME != 50)
+	if(TAMANIO_FRAME != 5)
 		incorrecto =1;
 	if(MAX_FRAMES_POR_PROCESO != 400)
 		incorrecto =1;
@@ -117,6 +118,9 @@ void cargar_archivo_configuracion_umc(){
 void cargo_programa_pid_100(){
 	//inicializacion_para_test(10, 300);
 	int init = inicializar_estructuras();
+	crear_swap_mock();
+
+
 	char * codigo = cargar_ansisop();
 	cargar_nuevo_programa(100, 200, codigo);
 	t_tabla_de_paginas* tabla= buscar_tabla_de_paginas_de_pid(100);
@@ -126,6 +130,9 @@ void cargo_programa_pid_100(){
 void asigno_frame_2_a_la_pagina_5(){
 	//inicializacion_para_test(10, 500);
 	int init = inicializar_estructuras();
+	crear_swap_mock();
+
+
 	char * codigo = cargar_ansisop();
 	cargar_nuevo_programa(100, 200, codigo);
 	t_tabla_de_paginas* tabla= buscar_tabla_de_paginas_de_pid(100);
@@ -137,6 +144,9 @@ void asigno_frame_2_a_la_pagina_5(){
 void no_esta_presente_frame_2_en_pagina_4(){
 	//inicializacion_para_test(10, 500);
 	int init = inicializar_estructuras();
+	crear_swap_mock();
+
+
 	char * codigo = cargar_ansisop();
 	cargar_nuevo_programa(100, 200, codigo);
 	t_tabla_de_paginas* tabla= buscar_tabla_de_paginas_de_pid(100);
@@ -151,6 +161,7 @@ void escribir_hola_en_frame_3_offset_5(){
 	char* p = &hola;
 	//inicializacion_para_test(sizeof("hola"), 3);
 	inicializar_estructuras();
+	crear_swap_mock();
 
 	//escribir_frame_de_memoria_principal(3, 5, sizeof("hola"), p);
 	escribir_frame_de_memoria_principal(3, 5, strlen("hola")+1, p);
@@ -165,6 +176,8 @@ void escribir_hola_en_frame_0(){
 	char* p = &hola;
 	//inicializacion_para_test(sizeof("hola"), 6);
 	inicializar_estructuras();
+	crear_swap_mock();
+
 
 	escribir_frame_de_memoria_principal(0, 0, sizeof("hola"), p);
 
@@ -176,6 +189,9 @@ void escribir_hola_en_frame_0(){
 void cargar_programa_sin_asignar_frames(){
 	//inicializacion_para_test(10, 60);
 	inicializar_estructuras();
+	crear_swap_mock();
+
+
 	char * codigo = cargar_ansisop();
 	int cargado  = cargar_nuevo_programa(1, 20, codigo);
 
@@ -185,13 +201,15 @@ void cargar_programa_sin_asignar_frames(){
 	int frames_asignados= list_count_satisfying(lista_frames, (void *) frames_asignado);
 
 	CU_ASSERT_EQUAL(frames_asignados, 0);
-	CU_ASSERT_EQUAL(cargado, -1); //hago este test para cuando no esta swap
+	CU_ASSERT_EQUAL(cargado, -1); //para ver si se cargo en swap (puede ser mock)
 
 }
 
 void eliminar_programa_pid_2_sin_ningun_frame_asignado(){
 	//inicializacion_para_test(10, 90);
 	inicializar_estructuras();
+	crear_swap_mock();
+
 	char * codigo;
 	cargar_nuevo_programa(1, 40, codigo);
 	cargar_nuevo_programa(2, 20, codigo);

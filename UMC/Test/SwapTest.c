@@ -5,7 +5,7 @@
  *      Author: utnso
  */
 
-#include <malloc.h>
+
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -35,6 +35,7 @@ void crear_swap_mock(){
 
 int cargar_nuevo_programa_en_swap_mock(int pid, int paginas_requeridas_del_proceso, char *codigo_programa){
 	memcpy(SWAP_MOCK + (pid * MAX_FRAMES_POR_PROCESO * 5), codigo_programa, sizeof(codigo_programa));
+	return 0;
 }
 
 char * leer_pagina_de_swap_mock(int pid, int pagina){

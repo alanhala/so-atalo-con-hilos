@@ -252,18 +252,26 @@ void pedir_a_swap_la_pagina_y_actualizar_memoria_principal(int pid, int pagina, 
 
 
 int cargar_nuevo_programa_en_swap(int pid, int paginas_requeridas_del_proceso, char *codigo_programa){
-	return 0;
+	if (TEST)
+		return cargar_nuevo_programa_en_swap_mock(pid, paginas_requeridas_del_proceso, codigo_programa);
+	return -1;
 }
 
 char * leer_pagina_de_swap(int pid, int pagina){
+	if(TEST)
+		return leer_pagina_de_swap_mock(pid, pagina);
 	return "";
 }
 
 int escribir_pagina_de_swap(int pid, int pagina, char * datos){
+	if (TEST)
+		return escribir_pagina_de_swap_mock(pid, pagina, datos);
 	return -1;
 }
 
 int finalizar_programa_de_swap(int pid){
+	if(TEST)
+		return finalizar_programa_de_swap_mock(pid);
 	return -1;
 }
 
@@ -468,4 +476,7 @@ void set_algoritmo_reemplazo(char * algoritmo){
 				ALGORITMO_REEMPLAZO = 2;
 	if (!strcmp(algoritmo, "test") || !strcmp(algoritmo, "TEST"))
 			ALGORITMO_REEMPLAZO = 99;
+}
+void set_test(){
+	TEST=1;
 }

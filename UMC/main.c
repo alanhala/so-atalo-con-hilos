@@ -70,10 +70,12 @@ void cargar_variables_productivas(UMCConfigFile *ptrvaloresConfigFile);
 int main(int argc, char **argv) {
 
 	if (strcmp(argv[1], "-test") == 0){
-		 correr_swap_mock_test();
-		 //correrTest();
-		 //correrTestSerializacion();
-		 return 0;
+		set_test();//para usar mock
+		//correr_swap_mock_test();
+
+		correrTest();
+		//correrTestSerializacion();
+		return 0;
 	}
 
 
