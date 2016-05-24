@@ -14,8 +14,8 @@
 #include <pthread.h>
 #include <commons/collections/list.h>
 #include <semaphore.h>
-#include "memoriaPrincipal.h"
-#include "main.h"
+#include "../memoriaPrincipal.h"
+#include "../main.h"
 #include "CUnit/Basic.h"
 #include "test.h"
 

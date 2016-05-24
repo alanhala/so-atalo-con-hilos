@@ -20,10 +20,10 @@
 #include <pthread.h>
 #include <commons/collections/list.h>
 #include <semaphore.h>
-#include "memoriaPrincipal.h"
+#include "../memoriaPrincipal.h"
 #include "CUnit/Basic.h"
 #include "test.h"
-#include "protocoloUMC.h"
+#include "../protocoloUMC.h"
 
 void serializacion_lectura_umc();
 void serializacion_escritura_umc();
