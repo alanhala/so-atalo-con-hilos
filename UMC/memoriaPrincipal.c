@@ -78,9 +78,6 @@ int cargar_nuevo_programa(int pid, int paginas_requeridas_del_proceso, char * co
 
 }
 
-int cargar_nuevo_programa_en_swap(int pid, int paginas_requeridas_del_proceso, char *codigo_programa){
-	return 0;
-}
 
 int buscar_frame_libre(){
 	//todo devolver -1 si no hay libres
@@ -94,7 +91,8 @@ int buscar_frame_libre(){
 }
 
 void finalizar_programa(int pid){
-	//TODO avisarle a swap que finalice el programa
+	//TODO aca no se le debe enviar nada a swap, debe hacerse en el switch del protocolo
+	// yo aca solo manejo las estructuras de UMC
 
 	t_tabla_de_paginas* tabla = buscar_tabla_de_paginas_de_pid(pid);
 
@@ -248,7 +246,25 @@ int buscar_frame_de_una_pagina(t_tabla_de_paginas* tabla, int pagina){
 }
 
 void pedir_a_swap_la_pagina_y_actualizar_memoria_principal(int pid, int pagina, int frame_de_pagina){
+	char * datos =  leer_pagina_de_swap(pid, pagina);
+	escribir_pagina_de_programa(pid, pagina, 0, TAMANIO_FRAME, datos);
+}
 
+
+int cargar_nuevo_programa_en_swap(int pid, int paginas_requeridas_del_proceso, char *codigo_programa){
+	return 0;
+}
+
+char * leer_pagina_de_swap(int pid, int pagina){
+	return "";
+}
+
+int escribir_pagina_de_swap(int pid, int pagina, char * datos){
+	return -1;
+}
+
+int finalizar_programa_de_swap(int pid){
+	return -1;
 }
 
 int buscar_en_tlb_frame_de_pagina(int pid, int pagina){
@@ -278,7 +294,8 @@ int darle_frame_a_una_pagina(t_tabla_de_paginas* tabla, int pagina){
 		}
 		else
 		{
-			int frame_conseguido= reemplazar_frame(tabla);
+
+			int frame_conseguido= seleccionar_frame_victima(tabla);
 			// ALGORITMO DE REEAMPLZADO
 			/*
 			if(tiene_algun_frame(tabla))
@@ -293,7 +310,7 @@ int darle_frame_a_una_pagina(t_tabla_de_paginas* tabla, int pagina){
 	}
 	else
 	{
-		int frame_conseguido= reemplazar_frame(tabla);
+		int frame_conseguido= seleccionar_frame_victima(tabla);
 	}
 }
 
@@ -312,9 +329,11 @@ void actualizar_frame(t_tabla_de_paginas * tabla, int frame){
 
 }
 
-int reemplazar_frame(t_tabla_de_paginas* tabla)
+int seleccionar_frame_victima(t_tabla_de_paginas* tabla)
 {
-	int frame;
+	//ACA SELECCIONO EL FRAME CON CONTENIDO SEGUN ALGORITMO Y LO GUARDO EN SWAP. LUEGO DEVUELVO EL
+	//FRAME DE LA VICTIMA PARA QUE SEA UTILIZADO POR OTRA PAGINA
+	int frame_victima;
 	switch(ALGORITMO_REEMPLAZO){
 	case 1: //clock
 		//frame= reemplazar_clock_(tabla);
@@ -328,7 +347,7 @@ int reemplazar_frame(t_tabla_de_paginas* tabla)
 			break;
 	}
 
-	return frame;
+	return frame_victima;
 }
 
 void actualizar_reemplazo(t_tabla_de_paginas* tabla, int frame_a_asignar,int pagina){
@@ -374,8 +393,9 @@ int tiene_tabla_mas_paginas_para_pedir(t_tabla_de_paginas* tabla)
 
 }
 
-int escribir_pagina_de_programa(t_tabla_de_paginas * tabla, int pagina, int offset, int size, char * datos){
+int escribir_pagina_de_programa(int pid, int pagina, int offset, int size, char * datos){
 
+	t_tabla_de_paginas * tabla = buscar_tabla_de_paginas_de_pid(pid);
 	int frame = buscar_frame_de_una_pagina(tabla, pagina);
 
 	if(frame != -1)
@@ -394,15 +414,14 @@ int escribir_pagina_de_programa(t_tabla_de_paginas * tabla, int pagina, int offs
 	//A PARTIR DE LA RESPUESTA DE ESCRITURA LE RESPONDO A CPU SI PUDE O NO ESCRIBIR
 }
 
+char* leer_pagina_de_programa(int pid, int pagina, int offset, int size){
 
-
-char* leer_pagina_de_programa(t_tabla_de_paginas * tabla, int pagina, int offset, int size){
-
+		t_tabla_de_paginas * tabla = buscar_tabla_de_paginas_de_pid(pid);
 		int frame = buscar_frame_de_una_pagina(tabla, pagina);
 
 		if(frame != -1)
 		{
-			actualizar_frame(frame, tabla); // segun el algoritmo
+			//actualizar_frame(frame, tabla); // segun el algoritmo
 			return leer_frame_de_memoria_principal(frame, offset, size);
 		}
 		else

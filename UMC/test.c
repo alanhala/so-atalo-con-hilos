@@ -76,9 +76,9 @@ void escribo_pagina_2_de_un_programa(){
 	char * buffer = "escritura";
 	char * codigo = cargar_ansisop();
 	cargar_nuevo_programa(100, 200, codigo);
-	t_tabla_de_paginas* tabla= buscar_tabla_de_paginas_de_pid(100);
-	int resultado_escritura = escribir_pagina_de_programa( tabla,  2,  5,  strlen(buffer) +1,  buffer);
 
+	int resultado_escritura = escribir_pagina_de_programa(100,  2,  5,  strlen(buffer) +1,  buffer);
+	t_tabla_de_paginas* tabla= buscar_tabla_de_paginas_de_pid(100);
 	int frame_escrito =buscar_frame_de_una_pagina(tabla, 2);
 	char * lectura = leer_frame_de_memoria_principal(frame_escrito,5, strlen(buffer)+1);
 	CU_ASSERT_EQUAL(strcmp(lectura, buffer), 0);
