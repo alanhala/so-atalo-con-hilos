@@ -6,13 +6,12 @@
  */
 //pruebo con extern para ver si corren los test
 
-
-
 int TAMANIO_MEMORIA_PRINCIPAL;
 char * MEMORIA_PRINCIPAL;
 int TAMANIO_FRAME;
 int CANTIDAD_FRAMES;
 
+int ALGORITMO_REEMPLAZO;
 
 
 int	CANTIDAD_ENTRADAS_TLB;
@@ -28,14 +27,19 @@ sem_t mut_tabla_de_paginas;
 
 
 typedef struct e_t_p{
-	int frame;
+	int frame; // si no tiene frame asignado setear en -1
+	int utilizado;
+	int modificado;
 } t_entrada_tabla_de_paginas;
+
+
 
 typedef struct t_p {
 	int pid;
 	int paginas_totales;
 	t_entrada_tabla_de_paginas* entradas;
 	int frames_en_uso;
+
 } t_tabla_de_paginas;
 
 typedef struct s_f {
@@ -59,13 +63,13 @@ void escribir_frame_de_memoria_principal(int frame, int offset, int size, char* 
 char* leer_pagina_de_programa(t_tabla_de_paginas * tabla, int pagina, int offset, int size);
 int escribir_pagina_de_programa(t_tabla_de_paginas * tabla, int pagina, int offset, int size, char * buffer);
 
-
+void actualizar_frame(t_tabla_de_paginas * tabla, int frame);
 void crear_memoria_principal();
 void inicializacion_para_test(int tamanio_frame, int cantidad_frame);
 int cargar_archivo_configuracion();
 void liberar_memoria_principal();
 int inicializar_estructuras();
-void cargar_nuevo_programa(int pid, int paginas_requeridas_del_proceso);
+int cargar_nuevo_programa(int pid, int paginas_requeridas_del_proceso, char * codigo_programa);
 t_tabla_de_paginas * crear_tabla_de_pagina_de_un_proceso(int pid, int paginas_requeridas_del_proceso);
 t_entrada_tabla_de_paginas* inicializar_paginas(int paginas_requeridas);
 t_tabla_de_paginas* buscar_tabla_de_paginas_de_pid(int pid_buscado);
@@ -85,6 +89,7 @@ int buscar_en_tlb_frame_de_pagina(int tabla, int pagina);
 void pedir_a_swap_la_pagina_y_actualizar_memoria_principal(int pid, int pagina, int frame_de_pagina);
 
 
+int cargar_nuevo_programa_en_swap(int pid, int paginas_requeridas_del_proceso, char *codigo_programa);
 
 // TLB
 tabla_tlb* crear_tlb();
@@ -98,4 +103,5 @@ void set_max_frames_por_proceso(int cantidad);
 void set_cantidad_frames(int cantidad_marcos);
 void set_tamanio_frame(int tamanio_marcos);
 void set_retardo(int retardo);
+void set_algoritmo_reemplazo(char * algoritmo);
 

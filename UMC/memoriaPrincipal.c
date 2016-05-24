@@ -56,18 +56,32 @@ void liberar_memoria_principal() {
 	free(MEMORIA_PRINCIPAL);
 }
 
-void cargar_nuevo_programa(int pid, int paginas_requeridas_del_proceso) {
-	//TODO IMPORTANTE validar si hay espacio en memoria principal y/o swap. PREGUNTAR el criterio a utilizar
+int cargar_nuevo_programa(int pid, int paginas_requeridas_del_proceso, char * codigo_programa) {
 
+	int pudo_cargar_swap = cargar_nuevo_programa_en_swap(pid, paginas_requeridas_del_proceso, codigo_programa);
+	if (pudo_cargar_swap != -1 )
+	{
+		t_tabla_de_paginas * tabla = crear_tabla_de_pagina_de_un_proceso(pid, paginas_requeridas_del_proceso);
 
-	t_tabla_de_paginas * tabla = crear_tabla_de_pagina_de_un_proceso(pid, paginas_requeridas_del_proceso);
-	int pagina=0;
-	for( 0 ; pagina < tabla->paginas_totales; pagina ++){
-		int frame_libre = buscar_frame_libre();
-		asignar_frame_a_una_pagina(tabla, frame_libre, pagina);
+		/* ESTO SE SUPONE QUE NO ES NECESARIO YA QUE NO CARGO NADA EN UMC
+		int pagina=0;
+		for( 0 ; pagina < tabla->paginas_totales; pagina ++){
+			int frame_libre = buscar_frame_libre();
+			asignar_frame_a_una_pagina(tabla, frame_libre, pagina);
+		}*/
+		return 0; // se pudo cargar el programa correctamente
+	}
+	else
+	{
+		return -1;//no se pudo cargar el programa en swap
 	}
 
 }
+
+int cargar_nuevo_programa_en_swap(int pid, int paginas_requeridas_del_proceso, char *codigo_programa){
+	return 0;
+}
+
 int buscar_frame_libre(){
 	//todo devolver -1 si no hay libres
 	int frame_libre(t_frame *frame) {
@@ -87,7 +101,8 @@ void finalizar_programa(int pid){
 	int pagina=0;
 	for(0; pagina < tabla->paginas_totales ; pagina++ ){
 		int frame = devolver_frame_de_pagina(tabla, pagina);
-		marcar_frame_como_libre(frame);
+		if (frame >=0)// por si nunca se asigno
+			marcar_frame_como_libre(frame);
 	}
 
 	int pid_iguales(t_tabla_de_paginas *tabla) {
@@ -101,6 +116,15 @@ void finalizar_programa(int pid){
 
 t_entrada_tabla_de_paginas* inicializar_paginas(int paginas_requeridas_del_proceso) {
 	t_entrada_tabla_de_paginas* entradas = malloc(sizeof(t_entrada_tabla_de_paginas)* paginas_requeridas_del_proceso);
+	int i=0;
+	while(i<paginas_requeridas_del_proceso)
+	{
+		entradas[i].frame=-1; // para que cuando busque el frame y no tenga devuelva eso
+		entradas[i].modificado=0;
+		i++;
+		//TODO INICIARLIZAR TODO LO QUE HAGA FALTA
+	}
+
 	return entradas;
 }
 
@@ -134,7 +158,7 @@ void asignar_frame_a_una_pagina(t_tabla_de_paginas* tabla, int frame_a_asignar,	
 }
 
 int devolver_frame_de_pagina(t_tabla_de_paginas* tabla, int pagina) {
-	// si no la encuentro devolver -1
+	// Cuando la paginna no tiene asignado frame es -1
 	return tabla->entradas[pagina].frame;
 
 }
@@ -200,9 +224,9 @@ void marcar_frame_como_libre(int numero_de_frame){
 int buscar_frame_de_una_pagina(t_tabla_de_paginas* tabla, int pagina){
 
 	// 1) buscar en tlb
-	// 2) si no esta, busco el frame de la pagina en la tabla
-	// 3) si no esta, checkeo que haya frame libre y lo asigno (y los criterios de limites etc)
-	// 4) si no esta, lo voy a buscar a swap y actualizo lo que sea necesario
+	// 2) si no esta, busco el frame de la pagina en la tabla (UMC)
+	// 3) si no esta, lo voy a buscar a swap y actualizo lo que sea necesario
+	// ver el tema de los limites
 	int frame_de_pagina = -1;
 	if(TLB_HABILITADA)
 	{
@@ -215,12 +239,10 @@ int buscar_frame_de_una_pagina(t_tabla_de_paginas* tabla, int pagina){
 		if(frame_de_pagina == -1 )
 		{
 			frame_de_pagina = darle_frame_a_una_pagina(tabla, pagina);
-			if(frame_de_pagina != -1)
-			{
-				pedir_a_swap_la_pagina_y_actualizar_memoria_principal(tabla->pid, pagina, frame_de_pagina);
-				//TODO revisar si tengo que actualizar tlb o no, o cuando tengo que hacerlo
-			}
+			//pedir_a_swap_la_pagina_y_actualizar_memoria_principal(tabla->pid, pagina, frame_de_pagina);
+			return frame_de_pagina;
 		}
+
 	}
 
 }
@@ -236,10 +258,15 @@ int buscar_en_tlb_frame_de_pagina(int pid, int pagina){
 int darle_frame_a_una_pagina(t_tabla_de_paginas* tabla, int pagina){
 	// 1) si tengo cupo para pedir, pido y asigno
 	//    1.1) busco frame libre
-	//		  1.1.1) si hay libre lo asigno
-	// 		  1.1.2) analizar que hago. seguramente reemplazar alguno. tengo que pedir a swap?
-	//			  1.1.2.1) ir a buscar a swap
-	// 2) ir a buscar a swap
+	//		  1.1.1) si hay libre en la memoria lo asigno
+	// 		  1.1.2) si no hay lugar libre en la memoria hago un reemplazo
+
+	// 2) reemplazar
+	//TODO REVISAR BIEN
+
+
+	//para los test deberia ser lo sufiecientemente grande para que no se produzcan reemplazos
+
 
 	if(tiene_tabla_mas_paginas_para_pedir(tabla))
 	{
@@ -251,18 +278,99 @@ int darle_frame_a_una_pagina(t_tabla_de_paginas* tabla, int pagina){
 		}
 		else
 		{
-			return -1;// para ir a buscar a swap
+			int frame_conseguido= reemplazar_frame(tabla);
+			// ALGORITMO DE REEAMPLZADO
+			/*
+			if(tiene_algun_frame(tabla))
+			{
+			int frame_conseguido= reemplazar_frame(tabla);
+			//marca_no_valida_entrada(tabla,frame_conseguido);
+			actualizar_reemplazo(tabla, frame_conseguido, pagina);
+			return frame_conseguido;
+			}
+			*/
 		}
 	}
 	else
 	{
-		return -1; //para ir a buscar a swap
+		int frame_conseguido= reemplazar_frame(tabla);
 	}
+}
+
+void actualizar_frame(t_tabla_de_paginas * tabla, int frame){
+	switch(ALGORITMO_REEMPLAZO){
+
+
+	case 1: //algoritmo clock
+		break;
+	case 2: //algoritmo clock modificado
+		break;
+	case 99: //algoritmo test
+			break;
+	}
+
 
 }
 
+int reemplazar_frame(t_tabla_de_paginas* tabla)
+{
+	int frame;
+	switch(ALGORITMO_REEMPLAZO){
+	case 1: //clock
+		//frame= reemplazar_clock_(tabla);
+		break;
+
+	case 2: //clock M
+		//frame= reemplazar_clock_modificado(tabla);
+		break;
+	case 99: //algoritmo_test
+			//frame= reemplazar_test(tabla);
+			break;
+	}
+
+	return frame;
+}
+
+void actualizar_reemplazo(t_tabla_de_paginas* tabla, int frame_a_asignar,int pagina){
+	tabla->entradas[pagina].frame=frame_a_asignar;
+	tabla->entradas[pagina].utilizado=1;
+	tabla->frames_en_uso +=1;
+
+
+	//todo eze: aca tengo qeu buscar el frame que corresponda y reiniciar los
+	// los valores de uso y modificacion
+}
+
+
+
+
+
+void marca_no_utilizada_entrada(t_tabla_de_paginas* tabla, int frame)
+{
+	int pagina = dame_pagina_de_un_frame_para_tabla(tabla, frame);
+	tabla->entradas[pagina].utilizado=0;
+}
+
+int dame_pagina_de_un_frame_para_tabla(t_tabla_de_paginas *tabla, int frame){
+	t_entrada_tabla_de_paginas* entradas = tabla->entradas;
+
+	//TODO eze: testear si con i < size o <=
+	int i=0;
+	for(i ;i< list_size(entradas); i++ )
+	{
+		if(entradas[i].frame == frame && entradas[i].utilizado)
+		{
+		   return i;
+		}
+
+	}
+	return -1;
+}
+
+
 int tiene_tabla_mas_paginas_para_pedir(t_tabla_de_paginas* tabla)
-{	return (tabla->frames_en_uso < MAX_FRAMES_POR_PROCESO);
+{
+	return (tabla->frames_en_uso < MAX_FRAMES_POR_PROCESO);
 
 }
 
@@ -272,8 +380,9 @@ int escribir_pagina_de_programa(t_tabla_de_paginas * tabla, int pagina, int offs
 
 	if(frame != -1)
 	{
+		//ver el tema de los modificados
 		//actualizar_frame(frame, tabla); //aca varia segun el algoritmo de reemplazo
-		//copiar_contenido_a_frame(datos, frame);
+		escribir_frame_de_memoria_principal(frame, offset, size, datos);
 
 		return 0; //escritura ok;
 	}
@@ -286,20 +395,22 @@ int escribir_pagina_de_programa(t_tabla_de_paginas * tabla, int pagina, int offs
 }
 
 
+
 char* leer_pagina_de_programa(t_tabla_de_paginas * tabla, int pagina, int offset, int size){
 
 		int frame = buscar_frame_de_una_pagina(tabla, pagina);
 
 		if(frame != -1)
 		{
-			//actualizar_frame(frame, tabla) // segun el algoritmo
+			actualizar_frame(frame, tabla); // segun el algoritmo
 			return leer_frame_de_memoria_principal(frame, offset, size);
 		}
 		else
 		{
-			return "~-1"; //no pude leer memoria
+			return "~/-1"; //no pude leer memoria
 		}
 }
+
 // TLB
 
 tabla_tlb* crear_tlb(){
@@ -328,4 +439,14 @@ void set_tamanio_frame(int tamanio_frame){
 }
 void set_retardo(int retardo){
 	RETARDO = retardo;
+}
+void set_algoritmo_reemplazo(char * algoritmo){
+
+
+	if (!strcmp(algoritmo, "CLOCK") || !strcmp(algoritmo, "clock"))
+			ALGORITMO_REEMPLAZO = 1;
+	if (!strcmp(algoritmo, "CLOCKM") || !strcmp(algoritmo, "clockM")|| !strcmp(algoritmo, "clockm") || !strcmp(algoritmo, "ClockM"))
+				ALGORITMO_REEMPLAZO = 2;
+	if (!strcmp(algoritmo, "test") || !strcmp(algoritmo, "TEST"))
+			ALGORITMO_REEMPLAZO = 99;
 }

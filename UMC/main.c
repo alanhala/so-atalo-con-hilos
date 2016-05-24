@@ -53,6 +53,7 @@ typedef struct umcConfigFile {
 			entradas_tlb,
 			retardo;
 	char 	*ip_swap;
+	char 	*algoritmo_reemplazo;
 } UMCConfigFile;
 
 char* leer_string(t_config *config, char* key);
@@ -246,6 +247,7 @@ void levantaConfigFileEnVariables(UMCConfigFile *ptrvaloresConfigFile,t_config *
 	ptrvaloresConfigFile->entradas_tlb = leerUnsigned(ptrConfig, "ENTRADAS_TLB");
 	ptrvaloresConfigFile->retardo = leerUnsigned(ptrConfig, "RETARDO");
 	ptrvaloresConfigFile->ip_swap = leer_string(ptrConfig, "IP_SWAP");
+	ptrvaloresConfigFile->algoritmo_reemplazo = leer_string(ptrConfig, "ALGORITMO");
 
 }
 void liberaVariables(t_log* traceLogger, t_config* ptrConfig, t_log* errorLogger, t_config* ptrConfigUpdate) {
@@ -323,6 +325,7 @@ void cargar_variables_productivas(UMCConfigFile *config){
 	set_cantidad_frames(config->marcos);
 	set_tamanio_frame(config->marcos_size);
 	set_retardo(config->retardo);
+	set_algoritmo_reemplazo(config->algoritmo_reemplazo);
 
 }
 
