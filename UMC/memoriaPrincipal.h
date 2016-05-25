@@ -80,6 +80,7 @@ int finalizar_programa_de_swap(int pid);
 void pedir_a_swap_la_pagina_y_actualizar_memoria_principal(int pid, int pagina, int frame_de_pagina);
 
 
+int conseguir_frame_mediante_reemplazo(t_tabla_de_paginas* tabla, int pagina, int frame);
 int buscar_pagina_de_frame_en_tabla_de_paginas(t_tabla_de_paginas * tabla, int frame_buscado); //TODO hacer checkeos necesarios de si esta escrito o modificado. Pensarlo
 void escribir_frame_de_memoria_principal(int frame, int offset, int size, char* datos);
 void actualizar_frame(t_tabla_de_paginas * tabla, int frame);

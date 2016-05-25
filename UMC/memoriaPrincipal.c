@@ -289,6 +289,24 @@ int buscar_en_tlb_frame_de_pagina(int pid, int pagina){
 
 }
 
+int conseguir_frame_mediante_reemplazo(t_tabla_de_paginas* tabla, int pagina, int frame) {
+	int frame_victima = seleccionar_frame_victima(tabla);
+	char* contenido_frame_victima = leer_frame_de_memoria_principal(
+			frame_victima, 0, TAMANIO_FRAME);
+	int pagina_victima = buscar_pagina_de_frame_en_tabla_de_paginas(tabla,
+			frame_victima);
+	// TODO IF PAGINA_VICTIMA FUE MODIFICADO, SINO ES AL PEDO
+	escribir_pagina_de_swap(tabla->pid, pagina_victima,
+			contenido_frame_victima);
+	frame = frame_victima;
+	char* contenido_pagina_a_actualizar = leer_pagina_de_swap(tabla->pid,
+			pagina);
+	escribir_frame_de_memoria_principal(frame, 0, TAMANIO_FRAME,
+			contenido_pagina_a_actualizar);
+	actualizar_reemplazo(tabla, frame, pagina);
+	return frame;
+}
+
 int darle_frame_a_una_pagina(t_tabla_de_paginas* tabla, int pagina){
 	// 1) si tengo cupo para pedir, pido y asigno
 	//    1.1) busco frame libre
@@ -312,51 +330,12 @@ int darle_frame_a_una_pagina(t_tabla_de_paginas* tabla, int pagina){
 		}
 		else
 		{
-			//si no hay lugar en la memoria principal, selecciono un frame victica,
-			//guardo la pagina correspondiente en swap
-			// y voy a buscar el valor de la pagina que quiero a swap.
-			//actualizo los valores que correspondan
-
-			int frame_victima= seleccionar_frame_victima(tabla);
-
-			char * contenido_frame_victima= leer_frame_de_memoria_principal(frame_victima, 0, TAMANIO_FRAME);
-			int pagina_victima = buscar_pagina_de_frame_en_tabla_de_paginas(tabla, frame_victima);
-			// TODO IF PAGINA_VICTIMA FUE MODIFICADO, SINO ES AL PEDO
-			escribir_pagina_de_swap(tabla->pid, pagina_victima, contenido_frame_victima);
-
-			frame = frame_victima;
-			char * contenido_pagina_a_actualizar = leer_pagina_de_swap(tabla->pid, pagina);
-			escribir_frame_de_memoria_principal(frame, 0, TAMANIO_FRAME, contenido_pagina_a_actualizar);
-			actualizar_reemplazo(tabla, frame, pagina);
-
-
-			return frame;
-
+			return  conseguir_frame_mediante_reemplazo(tabla, pagina, frame);
 		}
 	}
 	else
 	{
-
-		//si no esta en la UMC, selecciono un frame victica,
-		//guardo la pagina correspondiente en swap
-		// y voy a buscar el valor de la pagina que quiero a swap.
-		//actualizo los valores que correspondan
-
-		int frame_victima= seleccionar_frame_victima(tabla);
-
-		char * contenido_frame_victima= leer_frame_de_memoria_principal(frame_victima, 0, TAMANIO_FRAME);
-		int pagina_victima = buscar_pagina_de_frame_en_tabla_de_paginas(tabla, frame_victima);
-		// TODO IF PAGINA_VICTIMA FUE MODIFICADO, SINO ES AL PEDO
-		escribir_pagina_de_swap(tabla->pid, pagina_victima, contenido_frame_victima);
-
-		frame = frame_victima;
-		char * contenido_pagina_a_actualizar = leer_pagina_de_swap(tabla->pid, pagina);
-		escribir_frame_de_memoria_principal(frame, 0, TAMANIO_FRAME, contenido_pagina_a_actualizar);
-		actualizar_reemplazo(tabla, frame, pagina);
-
-
-
-		return frame;
+		return conseguir_frame_mediante_reemplazo(tabla, pagina, frame);
 	}
 }
 
