@@ -225,8 +225,9 @@ void marcar_frame_como_libre(int numero_de_frame){
 int buscar_frame_de_una_pagina(t_tabla_de_paginas* tabla, int pagina){
 
 	// 1) buscar en tlb
-	// 2) si no esta, busco el frame de la pagina en la tabla (UMC)
-	// 3) si no esta, lo voy a buscar a swap y actualizo lo que sea necesario
+	// 2) si no esta en tlb, busco el frame de la pagina en la tabla (UMC)
+	// 3) si no esta en umc, selecciono un frame victica, guardo la pagina correspondiente en swap
+	// y voy a buscar el valor de la pagina que quiero a swap. actualizo los valores que correspondan
 	// ver el tema de los limites
 	int frame_de_pagina = -1;
 	if(TLB_HABILITADA)
@@ -240,14 +241,18 @@ int buscar_frame_de_una_pagina(t_tabla_de_paginas* tabla, int pagina){
 		if(frame_de_pagina == -1 )
 		{
 			frame_de_pagina = darle_frame_a_una_pagina(tabla, pagina);
-			pedir_a_swap_la_pagina_y_actualizar_memoria_principal(tabla->pid, pagina, frame_de_pagina);
+
 			return frame_de_pagina;
 		}
 
 	}
+	return frame_de_pagina;
 
 }
 
+
+
+//obsoleto
 void pedir_a_swap_la_pagina_y_actualizar_memoria_principal(int pid, int pagina, int frame_de_pagina){
 	char * datos =  leer_pagina_de_swap(pid, pagina);
 	//escribir_pagina_de_programa(pid, pagina, 0, TAMANIO_FRAME, datos);
@@ -296,10 +301,10 @@ int darle_frame_a_una_pagina(t_tabla_de_paginas* tabla, int pagina){
 
 	//para los test deberia ser lo sufiecientemente grande para que no se produzcan reemplazos
 
-
+	int frame = -1;
 	if(tiene_tabla_mas_paginas_para_pedir(tabla))
 	{
-		int frame = buscar_frame_libre();
+		frame = buscar_frame_libre();
 		if(frame !=-1)
 		{
 			asignar_frame_a_una_pagina(tabla, frame, pagina);
@@ -307,26 +312,69 @@ int darle_frame_a_una_pagina(t_tabla_de_paginas* tabla, int pagina){
 		}
 		else
 		{
+			//si no hay lugar en la memoria principal, selecciono un frame victica,
+			//guardo la pagina correspondiente en swap
+			// y voy a buscar el valor de la pagina que quiero a swap.
+			//actualizo los valores que correspondan
 
-			int frame_conseguido= seleccionar_frame_victima(tabla);
-			return frame_conseguido;
-			// ALGORITMO DE REEAMPLZADO
-			/*
-			if(tiene_algun_frame(tabla))
-			{
-			int frame_conseguido= reemplazar_frame(tabla);
-			//marca_no_valida_entrada(tabla,frame_conseguido);
-			actualizar_reemplazo(tabla, frame_conseguido, pagina);
-			return frame_conseguido;
-			}
-			*/
+			int frame_victima= seleccionar_frame_victima(tabla);
+
+			char * contenido_frame_victima= leer_frame_de_memoria_principal(frame_victima, 0, TAMANIO_FRAME);
+			int pagina_victima = buscar_pagina_de_frame_en_tabla_de_paginas(tabla, frame_victima);
+			// TODO IF PAGINA_VICTIMA FUE MODIFICADO, SINO ES AL PEDO
+			escribir_pagina_de_swap(tabla->pid, pagina_victima, contenido_frame_victima);
+
+			frame = frame_victima;
+			char * contenido_pagina_a_actualizar = leer_pagina_de_swap(tabla->pid, pagina);
+			escribir_frame_de_memoria_principal(frame, 0, TAMANIO_FRAME, contenido_pagina_a_actualizar);
+			actualizar_reemplazo(tabla, frame, pagina);
+
+
+			return frame;
+
 		}
 	}
 	else
 	{
-		int frame_conseguido= seleccionar_frame_victima(tabla);
+
+		//si no esta en la UMC, selecciono un frame victica,
+		//guardo la pagina correspondiente en swap
+		// y voy a buscar el valor de la pagina que quiero a swap.
+		//actualizo los valores que correspondan
+
+		int frame_victima= seleccionar_frame_victima(tabla);
+
+		char * contenido_frame_victima= leer_frame_de_memoria_principal(frame_victima, 0, TAMANIO_FRAME);
+		int pagina_victima = buscar_pagina_de_frame_en_tabla_de_paginas(tabla, frame_victima);
+		// TODO IF PAGINA_VICTIMA FUE MODIFICADO, SINO ES AL PEDO
+		escribir_pagina_de_swap(tabla->pid, pagina_victima, contenido_frame_victima);
+
+		frame = frame_victima;
+		char * contenido_pagina_a_actualizar = leer_pagina_de_swap(tabla->pid, pagina);
+		escribir_frame_de_memoria_principal(frame, 0, TAMANIO_FRAME, contenido_pagina_a_actualizar);
+		actualizar_reemplazo(tabla, frame, pagina);
+
+
+
+		return frame;
 	}
 }
+
+int buscar_pagina_de_frame_en_tabla_de_paginas(t_tabla_de_paginas * tabla, int frame_buscado){
+
+	int pagina = -1;
+	int i=0;
+	for (i; i < tabla->paginas_totales; i++){ //TODO testear si es menor o menor igual (creo que menor)
+		if ((tabla->entradas[i]).frame == frame_buscado){
+			//TODO IMPORTANTE && tabla->entradas[i]->asignado == 1 QUE ESTA ASIGNADO Y NO ES EL DRAFT QUE QUEDO
+			pagina = i;
+
+		}
+
+	}
+	return pagina;
+}
+
 
 void actualizar_frame(t_tabla_de_paginas * tabla, int frame){
 	switch(ALGORITMO_REEMPLAZO){
@@ -370,12 +418,11 @@ int reemplazar_test(t_tabla_de_paginas * tabla){
 
 void actualizar_reemplazo(t_tabla_de_paginas* tabla, int frame_a_asignar,int pagina){
 	tabla->entradas[pagina].frame=frame_a_asignar;
-	tabla->entradas[pagina].utilizado=1;
-	tabla->frames_en_uso +=1;
+	//tabla->entradas[pagina].utilizado=1;
+	//tabla->frames_en_uso +=1;
 
 
-	//todo eze: aca tengo qeu buscar el frame que corresponda y reiniciar los
-	// los valores de uso y modificacion
+	//todo eze: analizar
 }
 
 
@@ -439,7 +486,7 @@ char* leer_pagina_de_programa(int pid, int pagina, int offset, int size){
 
 		if(frame != -1)
 		{
-			//actualizar_frame(frame, tabla); // segun el algoritmo
+			//actualizar_frame(frame, tabla); // segun el algoritmo. esto lo hago en el paso anterior buscar frame
 			return leer_frame_de_memoria_principal(frame, offset, size);
 		}
 		else
