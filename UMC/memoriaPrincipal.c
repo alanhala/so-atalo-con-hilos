@@ -213,7 +213,8 @@ int buscar_frame_de_una_pagina(t_tabla_de_paginas* tabla, int pagina){
 		if(frame_de_pagina == -1 )
 		{
 			frame_de_pagina = darle_frame_a_una_pagina(tabla, pagina);
-
+			char * contenido =leer_pagina_de_swap(tabla->pid, pagina);
+			escribir_frame_de_memoria_principal(frame_de_pagina, 0, TAMANIO_FRAME, contenido);
 			return frame_de_pagina;
 		}
 
@@ -253,22 +254,39 @@ int buscar_en_tlb_frame_de_pagina(int pid, int pagina){
 
 }
 
-int conseguir_frame_mediante_reemplazo(t_tabla_de_paginas* tabla, int pagina, int frame) {
-	int frame_victima = seleccionar_frame_victima(tabla);
-	char* contenido_frame_victima = leer_frame_de_memoria_principal(
-			frame_victima, 0, TAMANIO_FRAME);
-	int pagina_victima = buscar_pagina_de_frame_en_tabla_de_paginas(tabla,
-			frame_victima);
+int conseguir_frame_mediante_reemplazo(t_tabla_de_paginas* tabla, int pagina) {
+	int pagina_victima = seleccionar_pagina_victima(tabla) ;
+	int frame_victima = (tabla->entradas[pagina_victima]).frame ;
+	printf("\n frame victima %d\n", frame_victima);
+	char* contenido_frame_victima = leer_frame_de_memoria_principal(frame_victima, 0, TAMANIO_FRAME);
+	printf("\n contenido de frame victima a escribir en swap :  %s en pagina victima %d\n", contenido_frame_victima, pagina_victima);
+	//int pagina_victima = buscar_pagina_de_frame_en_tabla_de_paginas(tabla, frame_victima);
 	// TODO IF PAGINA_VICTIMA FUE MODIFICADO, SINO ES AL PEDO
-	escribir_pagina_de_swap(tabla->pid, pagina_victima,
-			contenido_frame_victima);
+	escribir_pagina_de_swap(tabla->pid, pagina_victima,	contenido_frame_victima);
+	//escribir_pagina_de_swap(tabla->pid, pagina,	contenido_frame_victima);
+	//frame = frame_victima;
+	char* contenido_pagina_a_actualizar = leer_pagina_de_swap(tabla->pid, pagina);
+	//char* contenido_pagina_a_actualizar = leer_pagina_de_swap(tabla->pid, pagina_victima);
+	printf("\n contenido a actualizar :  %s en pagina victima %d\n", contenido_pagina_a_actualizar, pagina);
+	escribir_frame_de_memoria_principal(frame_victima, 0, TAMANIO_FRAME, contenido_pagina_a_actualizar);
+	actualizar_reemplazo(tabla, frame_victima, pagina, pagina_victima);
+	return frame_victima;
+
+	/*int frame_victima = seleccionar_frame_victima(tabla);
+	//int frame_victima= (tabla->entradas[pagina_victima]).frame;
+	char* contenido_frame_victima = leer_frame_de_memoria_principal(frame_victima, 0, TAMANIO_FRAME);
+	int pagina_victima = buscar_pagina_de_frame_en_tabla_de_paginas(tabla, frame_victima);
+	// TODO IF PAGINA_VICTIMA FUE MODIFICADO, SINO ES AL PEDO
+	escribir_pagina_de_swap(tabla->pid, pagina_victima,	contenido_frame_victima);
+	//escribir_pagina_de_swap(tabla->pid, pagina,	contenido_frame_victima);
 	frame = frame_victima;
-	char* contenido_pagina_a_actualizar = leer_pagina_de_swap(tabla->pid,
-			pagina);
-	escribir_frame_de_memoria_principal(frame, 0, TAMANIO_FRAME,
-			contenido_pagina_a_actualizar);
-	actualizar_reemplazo(tabla, frame, pagina);
-	return frame;
+	char* contenido_pagina_a_actualizar = leer_pagina_de_swap(tabla->pid, pagina);
+	//char* contenido_pagina_a_actualizar = leer_pagina_de_swap(tabla->pid, pagina_victima);
+
+	escribir_frame_de_memoria_principal(frame, 0, TAMANIO_FRAME, contenido_pagina_a_actualizar);
+	actualizar_reemplazo(tabla, frame, pagina, pagina_victima);
+	return frame; */
+
 }
 
 int darle_frame_a_una_pagina(t_tabla_de_paginas* tabla, int pagina){
@@ -280,16 +298,17 @@ int darle_frame_a_una_pagina(t_tabla_de_paginas* tabla, int pagina){
 		if(frame !=-1)
 		{
 			asignar_frame_a_una_pagina(tabla, frame, pagina);
+
 			return frame;
 		}
 		else
 		{
-			return  conseguir_frame_mediante_reemplazo(tabla, pagina, frame);
+			return  conseguir_frame_mediante_reemplazo(tabla, pagina);
 		}
 	}
 	else
 	{
-		return conseguir_frame_mediante_reemplazo(tabla, pagina, frame);
+		return conseguir_frame_mediante_reemplazo(tabla, pagina);
 	}
 }
 
@@ -298,7 +317,7 @@ int buscar_pagina_de_frame_en_tabla_de_paginas(t_tabla_de_paginas * tabla, int f
 	int pagina = -1;
 	int i=0;
 	for (i; i < tabla->paginas_totales; i++){ //TODO testear si es menor o menor igual (creo que menor)
-		if ((tabla->entradas[i]).frame == frame_buscado){
+		if ((tabla->entradas[i]).frame == frame_buscado && frame_buscado != -1){
 			//TODO IMPORTANTE && tabla->entradas[i]->asignado == 1 QUE ESTA ASIGNADO Y NO ES EL DRAFT QUE QUEDO
 			pagina = i;
 
@@ -324,11 +343,11 @@ void actualizar_frame(t_tabla_de_paginas * tabla, int frame){
 
 }
 int reemplazar_test(t_tabla_de_paginas * tabla);
-int seleccionar_frame_victima(t_tabla_de_paginas* tabla)
+int seleccionar_pagina_victima(t_tabla_de_paginas* tabla)
 {
 	//ACA SELECCIONO EL FRAME CON CONTENIDO SEGUN ALGORITMO Y LO GUARDO EN SWAP. LUEGO DEVUELVO EL
 	//FRAME DE LA VICTIMA PARA QUE SEA UTILIZADO POR OTRA PAGINA
-	int frame_victima ;
+	int pagina_victima ;
 	switch(ALGORITMO_REEMPLAZO){
 	case 1: //clock
 		//frame= reemplazar_clock_(tabla);
@@ -338,22 +357,34 @@ int seleccionar_frame_victima(t_tabla_de_paginas* tabla)
 		//frame= reemplazar_clock_modificado(tabla);
 		break;
 	case 99: //algoritmo_test
-			frame_victima= reemplazar_test(tabla);
+			pagina_victima= reemplazar_test(tabla);
 			break;
 	}
 
-	return frame_victima;
+	return pagina_victima;
 }
 
 int reemplazar_test(t_tabla_de_paginas * tabla){
-	return 0;
+
+	int pagina=-1;
+	int i = 0;
+	for(i; i<tabla->paginas_totales; i++){
+
+		if((tabla->entradas[i]).frame != -1){
+			pagina = i;
+			break;
+		}
+	}
+	return pagina;
 }
 
-void actualizar_reemplazo(t_tabla_de_paginas* tabla, int frame_a_asignar,int pagina){
+void actualizar_reemplazo(t_tabla_de_paginas* tabla, int frame_a_asignar,int pagina, int pagina_victima){
 	tabla->entradas[pagina].frame=frame_a_asignar;
 	//tabla->entradas[pagina].utilizado=1;
 	//tabla->frames_en_uso +=1;
 
+
+	tabla->entradas[pagina_victima].frame = -1;
 
 	//todo eze: analizar
 }

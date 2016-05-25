@@ -48,12 +48,13 @@ void simulacion_1(){
 	//voy a leer el contenido de la pagina 0 a las necesarias.
 	inicializar_estructuras();
 	crear_swap_mock();
-	char * codigo = "pag01pag02pag03pag04pag05pag06pag07pag08pag09pag10pag11pag12pag13pag14pag15pag16pag17pag18" ;
+	char * codigo = "pag00pag01pag02pag03pag04pag05pag06pag07pag08pag09pag10pag11pag12pag13pag14pag15pag16pag17pag18" ;
 	int tamanio_codigo=	strlen(codigo); //no agrego el /0
 
 	int paginas_necesarias = (tamanio_codigo/TAMANIO_FRAME);
 	set_max_frames_por_proceso(paginas_necesarias - 10);
 	cargar_nuevo_programa(0, paginas_necesarias, codigo);
+	cargar_nuevo_programa(5, paginas_necesarias, codigo);
 
 	int lecturas=0;
 	int resultado_lectura = 0;
@@ -63,6 +64,24 @@ void simulacion_1(){
 			resultado_lectura = -1;
 	}
 
+
 	CU_ASSERT_EQUAL(resultado_lectura , 0);
+
+	char * lectura_una_pagina =  leer_pagina_de_programa(0, 0, 0, TAMANIO_FRAME);
+	char * lectura_una_pagina_5 =  leer_pagina_de_programa(0, 2, 0, TAMANIO_FRAME);
+	char * lectura_una_pagina_18 =  leer_pagina_de_programa(0, 18, 0, TAMANIO_FRAME);
+
+	CU_ASSERT_EQUAL(strcmp(lectura_una_pagina, "pag00") , 0);
+	CU_ASSERT_EQUAL(strcmp(lectura_una_pagina_5, "pag02") , 0);
+	CU_ASSERT_EQUAL(strcmp(lectura_una_pagina_18, "pag18") , 0);
+
+
+	escribir_pagina_de_programa(0, 17, 0, TAMANIO_FRAME, "piatti");
+	char * lectura_una_pagina_17 =  leer_pagina_de_programa(0, 17, 0, TAMANIO_FRAME);
+	CU_ASSERT_EQUAL(strcmp(lectura_una_pagina_17, "piatt") , 0);
+
+	escribir_pagina_de_programa(5, 5, 0, TAMANIO_FRAME, "piatti");
+	char * lectura_una_pagina_5_pid5 =  leer_pagina_de_programa(5, 5, 0, TAMANIO_FRAME);
+	CU_ASSERT_EQUAL(strcmp(lectura_una_pagina_5_pid5, "piatt") , 0);
 
 }

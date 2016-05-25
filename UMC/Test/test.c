@@ -19,10 +19,12 @@
 #include "CUnit/Basic.h"
 #include "test.h"
 
-
+void buscar_pagina_de_frame_en_tabla_de_paginas_test();
 int correrTest(){
 
 CU_initialize_registry();
+
+	/*
 
       CU_pSuite creacion_de_estructuras = CU_add_suite("Suite creacion de estructuras", NULL, NULL);
 	  CU_add_test(creacion_de_estructuras, "cargo config", cargar_archivo_configuracion_umc);
@@ -51,10 +53,16 @@ CU_initialize_registry();
 	  CU_add_test(escritura_de_frame, "dos", no_esta_presente_frame_2_en_pagina_4);
 	  CU_add_test(escritura_de_frame, "tres", escribir_hola_en_frame_3_offset_5);
 	  CU_add_test(escritura_de_frame, "cuatro", escribir_hola_en_frame_0);
-	   */
+
 
 	  CU_pSuite escritura_de_pagina = CU_add_suite("Suite escritura de pagina en memoria", NULL, NULL);
 	  CU_add_test(escritura_de_pagina, "escritura pagina 2 de programa", escribo_pagina_2_de_un_programa);
+
+ */
+
+	  CU_pSuite aux = CU_add_suite("Suite aux", NULL, NULL);
+	  CU_add_test(aux, "buscar_pagina_de_frame_en_tabla_de_paginas", buscar_pagina_de_frame_en_tabla_de_paginas_test);
+
 
 	  CU_basic_set_mode(CU_BRM_VERBOSE);
 	  CU_basic_run_tests();
@@ -62,6 +70,30 @@ CU_initialize_registry();
 
 	  return CU_get_error();
 
+}
+
+void buscar_pagina_de_frame_en_tabla_de_paginas_test(){
+	inicializar_estructuras();
+		crear_swap_mock();
+		char * codigo = "pag00pag01pag02pag03pag04pag05pag06pag07pag08pag09pag10pag11pag12pag13pag14pag15pag16pag17pag18" ;
+		int tamanio_codigo=	strlen(codigo); //no agrego el /0
+
+		int paginas_necesarias = (tamanio_codigo/TAMANIO_FRAME);
+		set_max_frames_por_proceso(paginas_necesarias - 10);
+		cargar_nuevo_programa(0, paginas_necesarias, codigo);
+
+
+		char * leo1 =  leer_pagina_de_programa(0, 1, 0, TAMANIO_FRAME);
+		char * leo12 =  leer_pagina_de_programa(0, 12, 0, TAMANIO_FRAME);
+
+		t_tabla_de_paginas * tabla = buscar_tabla_de_paginas_de_pid(0);
+		int pagina1 = buscar_pagina_de_frame_en_tabla_de_paginas(tabla,  (tabla->entradas[1]).frame);
+		int pagina12 = buscar_pagina_de_frame_en_tabla_de_paginas(tabla,  (tabla->entradas[12]).frame);
+		int pagina8 = buscar_pagina_de_frame_en_tabla_de_paginas(tabla,  (tabla->entradas[8]).frame);
+
+		CU_ASSERT_EQUAL(pagina1, 1);
+		CU_ASSERT_EQUAL(pagina12, 12);
+		CU_ASSERT_EQUAL(pagina8, -1);
 }
 
 void cargar_archivo_ansisop_test(){
