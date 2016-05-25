@@ -33,12 +33,6 @@ void inicializar_semaforos() {
 	sem_init(&mut_lista_frames, 0, 1);
 
 }
-int cargar_archivo_configuracion() {
-	//TODO cargar archivo de configuracion y a partir de eso setear los valores
-	TAMANIO_FRAME = 50;
-	CANTIDAD_FRAMES = 2000;
-	return 0;
-}
 
 void crear_memoria_principal() {
 	char* datos = malloc(TAMANIO_MEMORIA_PRINCIPAL);
@@ -46,11 +40,6 @@ void crear_memoria_principal() {
 	MEMORIA_PRINCIPAL = datos;
 }
 
-//solo para test
-void inicializacion_para_test(int tamanio_frame, int cantidad_frame) {
-	CANTIDAD_FRAMES = cantidad_frame;
-	TAMANIO_FRAME = tamanio_frame;
-}
 
 void liberar_memoria_principal() {
 	free(MEMORIA_PRINCIPAL);
@@ -63,12 +52,6 @@ int cargar_nuevo_programa(int pid, int paginas_requeridas_del_proceso, char * co
 	{
 		t_tabla_de_paginas * tabla = crear_tabla_de_pagina_de_un_proceso(pid, paginas_requeridas_del_proceso);
 
-		/* ESTO SE SUPONE QUE NO ES NECESARIO YA QUE NO CARGO NADA EN UMC
-		int pagina=0;
-		for( 0 ; pagina < tabla->paginas_totales; pagina ++){
-			int frame_libre = buscar_frame_libre();
-			asignar_frame_a_una_pagina(tabla, frame_libre, pagina);
-		}*/
 		return 0; // se pudo cargar el programa correctamente
 	}
 	else
@@ -80,7 +63,7 @@ int cargar_nuevo_programa(int pid, int paginas_requeridas_del_proceso, char * co
 
 
 int buscar_frame_libre(){
-	//todo devolver -1 si no hay libres
+	//TODO IMPORTANTE devolver -1 si no hay libres
 	int frame_libre(t_frame *frame) {
 			return (frame->asignado == 0);
 		}
@@ -142,8 +125,6 @@ t_tabla_de_paginas * crear_tabla_de_pagina_de_un_proceso(int pid, int paginas_re
 }
 
 void asignar_frame_a_una_pagina(t_tabla_de_paginas* tabla, int frame_a_asignar,	int pagina) {
-
-
 	tabla->entradas[pagina].frame = frame_a_asignar;
 	tabla->frames_en_uso ++;
 	int frames_iguales(t_frame *frame) {
@@ -156,27 +137,18 @@ void asignar_frame_a_una_pagina(t_tabla_de_paginas* tabla, int frame_a_asignar,	
 }
 
 int devolver_frame_de_pagina(t_tabla_de_paginas* tabla, int pagina) {
-	// Cuando la paginna no tiene asignado frame es -1
+	// Cuando la pagina no tiene asignado frame es -1
 	return tabla->entradas[pagina].frame;
 
 }
 
 char* leer_frame_de_memoria_principal(int frame, int offset, int size) {
-
-
-	//if ((frame * TAMANIO_FRAME) + offset + size > TAMANIO_MEMORIA_PRINCIPAL)
-	//	return "~/-1";
 	char* datos = malloc(size);
 	memcpy(datos, MEMORIA_PRINCIPAL + (frame * TAMANIO_FRAME) + offset, size);
 	return datos;
 }
 
 void escribir_frame_de_memoria_principal(int frame, int offset, int size, char* datos) {
-	//TODO esta funcion solo debe ser llamada si datos =< tamanio frame.
-	//TODO la funciona que la llama deberia cortar los datos en un array de datos de tamanio de frame
-
-	//TODO hacer test/analizar que pasa si los datos son menores a un frame(para que no queden bytes feos
-
 	memcpy(MEMORIA_PRINCIPAL + (frame * TAMANIO_FRAME) + offset, datos, size);
 }
 
@@ -252,14 +224,6 @@ int buscar_frame_de_una_pagina(t_tabla_de_paginas* tabla, int pagina){
 
 
 
-//obsoleto
-void pedir_a_swap_la_pagina_y_actualizar_memoria_principal(int pid, int pagina, int frame_de_pagina){
-	char * datos =  leer_pagina_de_swap(pid, pagina);
-	//escribir_pagina_de_programa(pid, pagina, 0, TAMANIO_FRAME, datos);
-	//todo aca exploto, analizar si esta bien lo que hago
-	escribir_frame_de_memoria_principal(frame_de_pagina, 0, TAMANIO_FRAME, datos);
-}
-
 
 int cargar_nuevo_programa_en_swap(int pid, int paginas_requeridas_del_proceso, char *codigo_programa){
 	if (TEST)
@@ -308,16 +272,6 @@ int conseguir_frame_mediante_reemplazo(t_tabla_de_paginas* tabla, int pagina, in
 }
 
 int darle_frame_a_una_pagina(t_tabla_de_paginas* tabla, int pagina){
-	// 1) si tengo cupo para pedir, pido y asigno
-	//    1.1) busco frame libre
-	//		  1.1.1) si hay libre en la memoria lo asigno
-	// 		  1.1.2) si no hay lugar libre en la memoria hago un reemplazo
-
-	// 2) reemplazar
-	//TODO REVISAR BIEN
-
-
-	//para los test deberia ser lo sufiecientemente grande para que no se produzcan reemplazos
 
 	int frame = -1;
 	if(tiene_tabla_mas_paginas_para_pedir(tabla))
@@ -354,7 +308,7 @@ int buscar_pagina_de_frame_en_tabla_de_paginas(t_tabla_de_paginas * tabla, int f
 	return pagina;
 }
 
-
+//obsoleto
 void actualizar_frame(t_tabla_de_paginas * tabla, int frame){
 	switch(ALGORITMO_REEMPLAZO){
 
@@ -407,7 +361,7 @@ void actualizar_reemplazo(t_tabla_de_paginas* tabla, int frame_a_asignar,int pag
 
 
 
-
+//obsoleto
 void marca_no_utilizada_entrada(t_tabla_de_paginas* tabla, int frame)
 {
 	int pagina = dame_pagina_de_un_frame_para_tabla(tabla, frame);
@@ -434,11 +388,9 @@ int dame_pagina_de_un_frame_para_tabla(t_tabla_de_paginas *tabla, int frame){
 int tiene_tabla_mas_paginas_para_pedir(t_tabla_de_paginas* tabla)
 {
 	return (tabla->frames_en_uso < MAX_FRAMES_POR_PROCESO);
-
 }
 
 int escribir_pagina_de_programa(int pid, int pagina, int offset, int size, char * datos){
-
 	t_tabla_de_paginas * tabla = buscar_tabla_de_paginas_de_pid(pid);
 	int frame = buscar_frame_de_una_pagina(tabla, pagina);
 
@@ -455,7 +407,6 @@ int escribir_pagina_de_programa(int pid, int pagina, int offset, int size, char 
 		return -1;// escritura no Ok;
 	}
 
-	//A PARTIR DE LA RESPUESTA DE ESCRITURA LE RESPONDO A CPU SI PUDE O NO ESCRIBIR
 }
 
 char* leer_pagina_de_programa(int pid, int pagina, int offset, int size){
@@ -465,7 +416,6 @@ char* leer_pagina_de_programa(int pid, int pagina, int offset, int size){
 
 		if(frame != -1)
 		{
-			//actualizar_frame(frame, tabla); // segun el algoritmo. esto lo hago en el paso anterior buscar frame
 			return leer_frame_de_memoria_principal(frame, offset, size);
 		}
 		else
