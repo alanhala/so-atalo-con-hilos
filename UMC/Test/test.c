@@ -68,7 +68,7 @@ void cargar_archivo_ansisop_test(){
 	//si este test no pasa validar la ruta del archivo
 	char * codigo = cargar_ansisop();
 
-	CU_ASSERT_EQUAL(strlen(codigo) >16, 0);
+	CU_ASSERT_NOT_EQUAL(strlen(codigo) >16, 0);
 }
 
 void escribo_pagina_2_de_un_programa(){
@@ -193,7 +193,7 @@ void cargar_programa_sin_asignar_frames(){
 
 
 	char * codigo = cargar_ansisop();
-	int cargado  = cargar_nuevo_programa(1, 20, codigo);
+	int cargado  = cargar_nuevo_programa(1, 100, codigo);
 
 	int frames_asignado(t_frame *frame) {
 					return (frame->asignado == 1);
@@ -236,9 +236,9 @@ char * cargar_ansisop(){
 	int cantCar, c;
 	cantCar=1;
 	while ((c = getc(codeF)) != EOF)
-			{
-				cantCar++;
-			}
+	{
+		cantCar++;
+	}
 
 	char array[cantCar];
 

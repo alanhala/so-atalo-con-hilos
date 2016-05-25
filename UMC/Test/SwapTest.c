@@ -27,8 +27,8 @@
 
 void crear_swap_mock(){
 
-	char* datos = malloc(10000);
-	memset(datos, '/0', 10000);
+	char* datos = malloc(10000000);
+	memset(datos, '/0', 10000000);
 	SWAP_MOCK = datos;
 
 }
@@ -42,6 +42,7 @@ char * leer_pagina_de_swap_mock(int pid, int pagina){
 	char* datos = malloc(TAMANIO_FRAME);
 	memcpy(datos, SWAP_MOCK + (pid * MAX_FRAMES_POR_PROCESO * 5) + (pagina * TAMANIO_FRAME),  TAMANIO_FRAME);
 	return datos;
+
 
 
 }

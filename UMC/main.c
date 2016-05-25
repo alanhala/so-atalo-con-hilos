@@ -71,10 +71,13 @@ int main(int argc, char **argv) {
 
 	if (strcmp(argv[1], "-test") == 0){
 		set_test();//para usar mock
+		simulaciones();
+
 		//correr_swap_mock_test();
 
-		correrTest();
+		//correrTest();
 		//correrTestSerializacion();
+
 		return 0;
 	}
 
