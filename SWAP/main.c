@@ -36,6 +36,10 @@ void UMC_connection();
 void *UMC_connection_handler(int umc_socket_descriptor);
 
 int main(int argc, char *argv[]) {
+		if (strcmp(argv[1], "-test") == 0){
+			correr_protocolo_test();
+			return 0;
+		}
 
 	UMC_connection();
 	while (1) {
