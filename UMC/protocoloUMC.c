@@ -31,11 +31,86 @@ void *deserealizar_mensaje(uint8_t tipo, char* datos) {
 	case (10):
 			estructuraDestino = deserializar_escribir_bytes_de_una_pagina_en_UMC(datos);
 			break;
+	case (20):
+			estructuraDestino = deserializar_respuesta_iniciar_programa_en_swap(datos);
+			break;
+	case (22):
+			estructuraDestino = deserializar_respuesta_leer_pagina_swap(datos);
+		    break;
+
+	case (26):
+			estructuraDestino = deserializar_respuesta_escribir_pagina_swap(datos);
+	        break;
 
 	}
 
 	return estructuraDestino;
 }
+
+t_respuesta_escribir_pagina_swap * deserializar_respuesta_escribir_pagina_swap(char *datos){
+			int		tmpsize = 0,
+					offset = 0;
+
+			const int desplazamientoHeader = 5;		//Offset inicial para no deserealizar tipo (1 byte) y length (4 bytes)
+
+			t_respuesta_escribir_pagina_swap *respuesta = malloc(sizeof(t_respuesta_escribir_pagina_swap));
+			memset(respuesta,0, sizeof(t_respuesta_escribir_pagina_swap));
+
+			memcpy(&respuesta->escritura_correcta, datos+desplazamientoHeader, tmpsize = sizeof(uint32_t));
+			offset+=tmpsize;
+			offset+=desplazamientoHeader;
+
+
+			return respuesta;
+
+}
+
+t_respuesta_leer_pagina_swap *deserializar_respuesta_leer_pagina_swap(char *datos){
+
+	int		tmpsize = 0,
+			offset = 0,
+			tamanoDato = 0;
+
+	const int desplazamientoHeader = 5;		//Offset inicial para no deserealizar tipo (1 byte) y length (4 bytes)
+
+	t_respuesta_leer_pagina_swap *respuesta = malloc(sizeof(t_respuesta_leer_pagina_swap));
+	memset(respuesta,0, sizeof(t_respuesta_leer_pagina_swap));
+
+	for(tamanoDato = 0; (datos+desplazamientoHeader)[tamanoDato] != '\0';tamanoDato++);//incremento tamanoDato, hasta el tamaÃ±o del nombre
+
+	respuesta->datos = malloc(tamanoDato+1);
+	memset(respuesta->datos,0,tamanoDato+1);
+
+	memcpy(respuesta->datos, datos+desplazamientoHeader, tmpsize=tamanoDato+1);
+	offset+=tamanoDato+1;
+	offset+=desplazamientoHeader;
+
+	char endString = '\0';
+	memcpy(respuesta->datos+offset,&endString,1);
+
+	return respuesta;
+
+}
+
+
+t_respuesta_iniciar_programa_en_swap * deserializar_respuesta_iniciar_programa_en_swap(char* datos){
+		int		tmpsize = 0,
+				offset = 0;
+
+		const int desplazamientoHeader = 5;		//Offset inicial para no deserealizar tipo (1 byte) y length (4 bytes)
+
+		t_respuesta_iniciar_programa_en_swap *respuesta = malloc(sizeof(t_respuesta_iniciar_programa_en_swap));
+		memset(respuesta,0, sizeof(t_respuesta_iniciar_programa_en_swap));
+
+		memcpy(&respuesta->cargado_correctamente, datos+desplazamientoHeader, tmpsize = sizeof(uint32_t));
+		offset+=tmpsize;
+		offset+=desplazamientoHeader;
+
+
+		return respuesta;
+
+}
+
 
 t_escribir_bytes_de_una_pagina_en_UMC *deserializar_escribir_bytes_de_una_pagina_en_UMC(char *datos){
 	int		tmpsize = 0,
@@ -79,7 +154,6 @@ t_escribir_bytes_de_una_pagina_en_UMC *deserializar_escribir_bytes_de_una_pagina
 
 
 t_solicitar_bytes_de_una_pagina_a_UMC *deserializar_pedido_bytes_de_una_pagina_a_UMC(char *datos){
-
 	int		tmpsize = 0,
 			offset = 0;
 
@@ -121,8 +195,8 @@ t_stream *serializar_mensaje(int tipo, void* unaEstructura) {
 		    break;
 
 	case (26):
-			  stream = serializar_escribir_pagina_swap((t_escribir_pagina_swap *)unaEstructura);
-			  break;
+			stream = serializar_escribir_pagina_swap((t_escribir_pagina_swap *)unaEstructura);
+			break;
 	  }
 
 	return stream;
@@ -276,8 +350,6 @@ t_stream * serializar_iniciar_programa_en_swap(t_iniciar_programa_en_swap * pedi
     return stream;
 
 }
-
-
 
 t_stream *serializar_respuesta_escribir_bytes_de_una_pagina_en_UMC(t_respuesta_escribir_bytes_de_una_pagina_en_UMC *respuesta){
 		uint32_t 	tmpsize = 0,

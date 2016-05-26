@@ -61,6 +61,8 @@ typedef struct {
 }__attribute__((packed)) t_respuesta_iniciar_programa_en_swap;
 
 t_stream * serializar_iniciar_programa_en_swap(t_iniciar_programa_en_swap *pedido);
+t_respuesta_iniciar_programa_en_swap * deserializar_respuesta_iniciar_programa_en_swap(char* datos);
+
 
 typedef struct {
   uint32_t pid;
@@ -73,7 +75,7 @@ typedef struct {
 
 
 t_stream * serializar_leer_pagina_swap(t_leer_pagina_swap * pedido);
-
+t_respuesta_leer_pagina_swap *deserializar_respuesta_leer_pagina_swap(char *datos);
 
 typedef struct {
   uint32_t pid;
@@ -87,7 +89,7 @@ typedef struct {
 
 
 t_stream * serializar_escribir_pagina_swap(t_escribir_pagina_swap * escritura);
-
+t_respuesta_escribir_pagina_swap * deserializar_respuesta_escribir_pagina_swap(char *datos);
 
 
 

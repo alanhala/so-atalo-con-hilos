@@ -40,9 +40,9 @@ int correrTestSerializacion(){
 	//CU_add_test(serializacion,"uno", serializacion_lectura_umc);
 	//CU_add_test(serializacion,"cinco", serializacion_escritura_umc);
 
-	//CU_add_test(serializacion,"seis", serializacion_carga_programa_swap);
+	CU_add_test(serializacion,"seis", serializacion_carga_programa_swap);
 	//CU_add_test(serializacion,"siete", serializacion_lectura_pagina_swap);
-	CU_add_test(serializacion,"ocho", serializacion_escritura_pagina_swap);
+	//CU_add_test(serializacion,"ocho", serializacion_escritura_pagina_swap);
 
 
 	CU_basic_set_mode(CU_BRM_VERBOSE);
@@ -55,7 +55,7 @@ int correrTestSerializacion(){
 
 
 void serializacion_escritura_pagina_swap(){
-	int swap_socket_descriptor = create_client_socket_descriptor("localhost","2033");
+		int swap_socket_descriptor = create_client_socket_descriptor("localhost","2033");
 
 
 		t_escribir_pagina_swap *escritura = malloc(sizeof(t_escribir_pagina_swap));
@@ -69,7 +69,18 @@ void serializacion_escritura_pagina_swap(){
 		t_stream *buffer = serializar_mensaje(26,escritura);
 		int bytes= send(swap_socket_descriptor, buffer->datos, 50, 0);
 
-		CU_ASSERT_TRUE(bytes > 0);
+
+		char recv_buffer[50];
+		recv(swap_socket_descriptor, recv_buffer, 50, 0);
+
+
+		t_respuesta_escribir_pagina_swap * respuesta = malloc(sizeof(t_respuesta_escribir_pagina_swap));
+		respuesta = (t_respuesta_escribir_pagina_swap*)deserealizar_mensaje(26, recv_buffer);
+
+
+		CU_ASSERT_EQUAL(respuesta->escritura_correcta, 0);
+
+
 
 }
 void serializacion_lectura_pagina_swap(){
@@ -86,7 +97,16 @@ void serializacion_lectura_pagina_swap(){
 	t_stream *buffer = serializar_mensaje(22,lectura);
 	int bytes= send(swap_socket_descriptor, buffer->datos, 50, 0);
 
-	CU_ASSERT_TRUE(bytes > 0);
+	char recv_buffer[50];
+	recv(swap_socket_descriptor, recv_buffer, 50, 0);
+
+
+	t_respuesta_leer_pagina_swap * respuesta = malloc(sizeof(t_respuesta_leer_pagina_swap));
+	respuesta = (t_respuesta_leer_pagina_swap*)deserealizar_mensaje(22, recv_buffer);
+
+
+	CU_ASSERT_EQUAL(strcmp(respuesta->datos, "contenido de la pagina"), 0);
+
 
 }
 
@@ -105,7 +125,16 @@ void serializacion_carga_programa_swap(){
 	t_stream *buffer = serializar_mensaje(20,carga);
 	int bytes= send(swap_socket_descriptor, buffer->datos, 50, 0);
 
-	CU_ASSERT_TRUE(bytes > 0);
+	char recv_buffer[50];
+	recv(swap_socket_descriptor, recv_buffer, 50, 0);
+
+
+	t_respuesta_iniciar_programa_en_swap * respuesta = malloc(sizeof(t_respuesta_iniciar_programa_en_swap));
+	respuesta = (t_respuesta_iniciar_programa_en_swap*)deserealizar_mensaje(20, recv_buffer);
+
+
+	CU_ASSERT_EQUAL(respuesta->cargado_correctamente, 0);
+
 
 
 }
