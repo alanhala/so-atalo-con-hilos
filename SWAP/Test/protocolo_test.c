@@ -40,7 +40,7 @@ int correr_protocolo_test(){
 
 
 void serializacion_escribir_pagina_swap_test(){
-	int server_socket_descriptor = create_server_socket_descriptor("2033", 10);
+	int server_socket_descriptor = create_server_socket_descriptor("localhost","2033", 10);
 
 	int client_socket_descriptor = accept_connection(server_socket_descriptor);
 
@@ -69,7 +69,7 @@ void serializacion_escribir_pagina_swap_test(){
 
 
 void serializacion_carga_programa_swap_test(){
-	int server_socket_descriptor = create_server_socket_descriptor("2031", 10);
+	int server_socket_descriptor = create_server_socket_descriptor("localhost","2031", 10);
 
 	int client_socket_descriptor = accept_connection(server_socket_descriptor);
 
@@ -98,7 +98,7 @@ void serializacion_carga_programa_swap_test(){
 
 
 void serializacion_leer_pagina_swap_test(){
-	int server_socket_descriptor = create_server_socket_descriptor("2032", 10);
+	int server_socket_descriptor = create_server_socket_descriptor("localhost","2032", 10);
 
 	int client_socket_descriptor = accept_connection(server_socket_descriptor);
 

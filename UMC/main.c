@@ -108,7 +108,7 @@ void kernel_and_cpu_connections() {
 }
 
 void *kernel_and_cpu_connection_thread() {
-	int server_socket_descriptor = create_server_socket_descriptor(LISTENPORT,
+	int server_socket_descriptor = create_server_socket_descriptor("localhost", LISTENPORT,
 	BACKLOG);
 
 	while (1) {

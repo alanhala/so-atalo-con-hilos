@@ -52,8 +52,7 @@ int main(int argc, char *argv[]) {
 void UMC_connection() {
 	//Solo se va a conectar un proceso UMC
 
-	int server_socket_descriptor = create_server_socket_descriptor(LISTENPORT,
-			10);
+	int server_socket_descriptor = create_server_socket_descriptor("localhost",LISTENPORT, 10);
 	int umc_socket_descriptor = accept_connection(server_socket_descriptor);
 
 	pthread_t thread;

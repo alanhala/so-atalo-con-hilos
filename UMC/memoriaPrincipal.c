@@ -239,10 +239,11 @@ int cargar_nuevo_programa_en_swap(int pid, int paginas_requeridas_del_proceso, c
 		carga->codigo_programa= codigo_programa;
 
 		t_stream *buffer = serializar_mensaje(20,carga);
-		int bytes= send(SWAP_SOCKET_DESCRIPTOR, buffer->datos, 50, 0);
+		send(SWAP_SOCKET_DESCRIPTOR, "1", strlen("1"), 0);
+		int bytes= send(SWAP_SOCKET_DESCRIPTOR, buffer->datos, 200, 0);
 
-		char recv_buffer[50];
-		recv(SWAP_SOCKET_DESCRIPTOR, recv_buffer, 50, 0);
+		char recv_buffer[1];
+		recv(SWAP_SOCKET_DESCRIPTOR, recv_buffer, 1, 0);
 
 
 		t_respuesta_iniciar_programa_en_swap * respuesta = malloc(sizeof(t_respuesta_iniciar_programa_en_swap));
@@ -265,6 +266,7 @@ char * leer_pagina_de_swap(int pid, int pagina){
 
 
 	t_stream *buffer = serializar_mensaje(22,lectura);
+	send(SWAP_SOCKET_DESCRIPTOR, "2", strlen("1"), 0);
 	int bytes= send(SWAP_SOCKET_DESCRIPTOR, buffer->datos, 50, 0);
 
 	char recv_buffer[50];
@@ -295,6 +297,7 @@ int escribir_pagina_de_swap(int pid, int pagina, char * datos){
 
 
 	t_stream *buffer = serializar_mensaje(26,escritura);
+	send(SWAP_SOCKET_DESCRIPTOR, "3", strlen("1"), 0);
 	int bytes= send(SWAP_SOCKET_DESCRIPTOR, buffer->datos, 50, 0);
 
 
@@ -423,8 +426,8 @@ int seleccionar_pagina_victima(t_tabla_de_paginas* tabla)
 		//frame= reemplazar_clock_modificado(tabla);
 		break;
 	case 99: //algoritmo_test
-			pagina_victima= reemplazar_test(tabla);
-			break;
+		pagina_victima= reemplazar_test(tabla);
+		break;
 	}
 
 	return pagina_victima;
