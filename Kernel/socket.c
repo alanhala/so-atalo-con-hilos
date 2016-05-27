@@ -8,7 +8,7 @@
 #include <errno.h>
 #include <pthread.h>
 
-int create_server_socket_descriptor(char *port, int backlog) {
+int create_server_socket_descriptor(char* ip, char *port, int backlog) {
 	int yes = 1;
 	struct addrinfo sample, *server_info, *p;
 	int status, socket_descriptor;
@@ -16,9 +16,8 @@ int create_server_socket_descriptor(char *port, int backlog) {
 	memset(&sample, 0, sizeof sample);
 	sample.ai_family = AF_UNSPEC;
 	sample.ai_socktype = SOCK_STREAM;
-	sample.ai_flags = AI_PASSIVE;
 
-	if ((status = getaddrinfo(NULL, port, &sample, &server_info)) != 0) {
+	if ((status = getaddrinfo(ip, port, &sample, &server_info)) != 0) {
 		printf("getaddrinfo: %s\n", gai_strerror(status));
 		exit(1);
 	}
