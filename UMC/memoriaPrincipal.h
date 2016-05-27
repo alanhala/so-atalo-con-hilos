@@ -6,6 +6,8 @@
  */
 //pruebo con extern para ver si corren los test
 
+int SWAP_SOCKET_DESCRIPTOR;
+
 int TAMANIO_MEMORIA_PRINCIPAL;
 char * MEMORIA_PRINCIPAL;
 int TAMANIO_FRAME;
@@ -25,7 +27,7 @@ t_list* lista_tabla_de_paginas;
 sem_t mut_tabla_de_paginas;
 
 
-int TEST;
+int SWAP_MOCK_ENABLE;
 
 
 typedef struct e_t_p{
@@ -121,3 +123,5 @@ void set_tamanio_frame(int tamanio_marcos);
 void set_retardo(int retardo);
 void set_algoritmo_reemplazo(char * algoritmo);
 void set_test();
+
+void set_socket_descriptor(int fd);

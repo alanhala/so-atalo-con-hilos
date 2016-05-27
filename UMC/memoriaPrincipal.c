@@ -17,6 +17,7 @@
 #include <commons/collections/list.h>
 #include <semaphore.h>
 #include "memoriaPrincipal.h"
+#include "protocoloUMC.h"
 
 int inicializar_estructuras() {
 	int result = cargar_configuracion();
@@ -227,25 +228,90 @@ int buscar_frame_de_una_pagina(t_tabla_de_paginas* tabla, int pagina){
 
 
 int cargar_nuevo_programa_en_swap(int pid, int paginas_requeridas_del_proceso, char *codigo_programa){
-	if (TEST)
+	if (SWAP_MOCK_ENABLE)
 		return cargar_nuevo_programa_en_swap_mock(pid, paginas_requeridas_del_proceso, codigo_programa);
-	return -1;
+
+		t_iniciar_programa_en_swap *carga = malloc(sizeof(t_iniciar_programa_en_swap));
+		memset(carga,0,sizeof(t_iniciar_programa_en_swap));
+
+		carga->pid = pid;
+		carga->paginas_necesarias = paginas_requeridas_del_proceso;
+		carga->codigo_programa= codigo_programa;
+
+		t_stream *buffer = serializar_mensaje(20,carga);
+		int bytes= send(SWAP_SOCKET_DESCRIPTOR, buffer->datos, 50, 0);
+
+		char recv_buffer[50];
+		recv(SWAP_SOCKET_DESCRIPTOR, recv_buffer, 50, 0);
+
+
+		t_respuesta_iniciar_programa_en_swap * respuesta = malloc(sizeof(t_respuesta_iniciar_programa_en_swap));
+		respuesta = (t_respuesta_iniciar_programa_en_swap*)deserealizar_mensaje(20, recv_buffer);
+
+
+	return respuesta;
 }
 
 char * leer_pagina_de_swap(int pid, int pagina){
-	if(TEST)
+	if(SWAP_MOCK_ENABLE)
 		return leer_pagina_de_swap_mock(pid, pagina);
-	return "~/-1";
+
+
+	t_leer_pagina_swap *lectura = malloc(sizeof(t_leer_pagina_swap));
+	memset(lectura,0,sizeof(t_leer_pagina_swap));
+
+	lectura->pid = pid;
+	lectura->pagina = pagina;
+
+
+	t_stream *buffer = serializar_mensaje(22,lectura);
+	int bytes= send(SWAP_SOCKET_DESCRIPTOR, buffer->datos, 50, 0);
+
+	char recv_buffer[50];
+	recv(SWAP_SOCKET_DESCRIPTOR, recv_buffer, 50, 0);
+
+
+	t_respuesta_leer_pagina_swap * respuesta = malloc(sizeof(t_respuesta_leer_pagina_swap));
+	respuesta = (t_respuesta_leer_pagina_swap*)deserealizar_mensaje(22, recv_buffer);
+
+
+
+
+	return respuesta; //debe devolver esto si no leyo bien "~/-1"
 }
 
 int escribir_pagina_de_swap(int pid, int pagina, char * datos){
-	if (TEST)
+	if (SWAP_MOCK_ENABLE)
 		return escribir_pagina_de_swap_mock(pid, pagina, datos);
-	return -1;
+
+
+
+	t_escribir_pagina_swap *escritura = malloc(sizeof(t_escribir_pagina_swap));
+	memset(escritura,0,sizeof(t_escribir_pagina_swap));
+
+	escritura->pid = pid;
+	escritura->pagina = pagina;
+	escritura->datos = datos;
+
+
+	t_stream *buffer = serializar_mensaje(26,escritura);
+	int bytes= send(SWAP_SOCKET_DESCRIPTOR, buffer->datos, 50, 0);
+
+
+	char recv_buffer[50];
+	recv(SWAP_SOCKET_DESCRIPTOR, recv_buffer, 50, 0);
+
+
+	t_respuesta_escribir_pagina_swap * respuesta = malloc(sizeof(t_respuesta_escribir_pagina_swap));
+	respuesta = (t_respuesta_escribir_pagina_swap*)deserealizar_mensaje(26, recv_buffer);
+
+
+
+	return respuesta;
 }
 
 int finalizar_programa_de_swap(int pid){
-	if(TEST)
+	if(SWAP_MOCK_ENABLE)
 		return finalizar_programa_de_swap_mock(pid);
 	return -1;
 }
@@ -495,5 +561,10 @@ void set_algoritmo_reemplazo(char * algoritmo){
 			ALGORITMO_REEMPLAZO = 99;
 }
 void set_test(){
-	TEST=1;
+	SWAP_MOCK_ENABLE=1;
+}
+
+
+void set_socket_descriptor(int fd){
+	SWAP_SOCKET_DESCRIPTOR = fd;
 }

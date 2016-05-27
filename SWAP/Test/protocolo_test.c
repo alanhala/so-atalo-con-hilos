@@ -11,6 +11,7 @@
 #include "CUnit/Basic.h"
 #include "../protocolo_swap.h"
 #include "../swap.h"
+#include "../socket.h"
 
 
 void serializacion_carga_programa_swap_test();

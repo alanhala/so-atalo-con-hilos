@@ -47,7 +47,11 @@ void simulacion_1(){
 	//voy a cargar 1 programas, las paginas necesarias van a ser 5 mas que el tamanio del codigo ansisop
 	//voy a leer el contenido de la pagina 0 a las necesarias.
 	inicializar_estructuras();
+
 	crear_swap_mock();
+	printf("%s", SWAPIP); //TODO TENGO ERROR ACA
+	int swap_socket = create_client_socket_descriptor("localhost", "2031");
+	set_socket_descriptor(swap_socket);
 	char * codigo = "pag00pag01pag02pag03pag04pag05pag06pag07pag08pag09pag10pag11pag12pag13pag14pag15pag16pag17pag18" ;
 	int tamanio_codigo=	strlen(codigo); //no agrego el /0
 
