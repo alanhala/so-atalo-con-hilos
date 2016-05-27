@@ -18,6 +18,7 @@
 		unsigned int compaction_delay;
 		t_list* pages_table_list;
 		int* bitmap;
+		int total_pids;
 	} t_swap;
 
 	t_swap *create_swap();
@@ -30,4 +31,21 @@
 
 	void initialize_bitmap(t_swap* self);
 
+	int check_space_available(t_swap* self, unsigned int pages_amount);
+
+	void add_program_to_bitmap(t_swap* self, unsigned int pages_amount,
+			unsigned int first_page_location);
+
+	void write_swap_file(t_swap* self, int first_page_location,
+			unsigned int pages_amount, char * program);
+
+	int initialize_program(t_swap* self, unsigned int pid, unsigned int pages_amount, char* program);
+
+	void remove_program(t_swap* self, unsigned int pid);
+
+	t_pages_table* find_pages_table(t_swap* self, unsigned int pid);
+
+	char* read_page(t_swap* self, unsigned int pid, unsigned int page);
+
+	char* read_swap_file(t_swap* self, int page_location);
 #endif
