@@ -21,8 +21,8 @@ AnSISOP_kernel kernel_functions = { };
 
 t_PCB *pcb;
 
-void execute_next_instruction_for_process(t_PCB *pcb) {
-	t_indice_instrucciones_elemento instruccion = get_next_instruction(pcb);
+void execute_next_instruction_for_process() {
+	t_indice_instrucciones_elemento instruccion = get_next_instruction();
 
 	char *instruccion_string = obtener_instruccion_de_umc(instruccion);
 
@@ -34,7 +34,7 @@ char* obtener_instruccion_de_umc(t_indice_instrucciones_elemento instruccion) {
 	return "a = a + b";
 }
 
-t_indice_instrucciones_elemento get_next_instruction(t_PCB *pcb) {
+t_indice_instrucciones_elemento get_next_instruction() {
 	t_indice_instrucciones_elemento *indice = pcb->indice_instrucciones;
 
 	indice += pcb->program_counter;
@@ -49,8 +49,8 @@ t_puntero definirVariable(t_nombre_variable variable) {
 
 	new_variable->id = variable;
 	new_variable->direccion.size = sizeof(uint32_t);
-	new_variable->direccion.pagina = pcb->heap_next_free_space.pagina;
-	new_variable->direccion.offset = pcb->heap_next_free_space.offset;
+	new_variable->direccion.pagina = pcb->stack_next_free_space.pagina;
+	new_variable->direccion.offset = pcb->stack_next_free_space.offset;
 
 	actualizar_next_free_space(pcb);
 
@@ -128,7 +128,23 @@ t_respuesta_escribir_bytes_de_una_pagina_en_UMC* escribir_en_umc(t_direccion_vir
     return (t_respuesta_escribir_bytes_de_una_pagina_en_UMC*)deserealizar_mensaje(11, recv_buffer);
 }
 
-void actualizar_next_free_space(t_PCB *pcb) {};
+void actualizar_next_free_space() {};
+
+void set_PCB(t_PCB *new_pcb) {
+    pcb = new_pcb;
+}
+
+t_PCB* get_PCB() {
+    return pcb;
+}
+
+t_stack_element* create_stack_element() {
+    t_stack_element *stack_element = malloc(sizeof(stack_element));
+    stack_element->variables = list_create();
+    stack_element->argumentos = list_create();
+
+    return stack_element;
+}
 
 
 
