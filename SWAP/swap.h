@@ -21,7 +21,7 @@
 		int total_pids;
 	} t_swap;
 
-	t_swap *create_swap();
+	t_swap *create_swap(char* config_file_path);
 
 	void create_file(t_swap* self);
 
@@ -43,9 +43,6 @@
 
 	void remove_program(t_swap* self, unsigned int pid);
 
-	t_pages_table* find_pages_table(t_swap* self, unsigned int pid);
-
 	char* read_page(t_swap* self, unsigned int pid, unsigned int page);
 
-	char* read_swap_file(t_swap* self, int page_location);
 #endif

@@ -7,7 +7,6 @@
 
 #ifndef CPU_H_
 #define CPU_H_
-#endif /* CPU_H_ */
 
 #include <parser/metadata_program.h>
 #include <parser/parser.h>
@@ -48,18 +47,18 @@ typedef struct {
 	uint32_t cantidad_etiquetas;
 	//t_indice_etiqueta TODO: implementar esto
 	t_list *stack;
-	t_direccion_virtual_memoria heap_start;
-	uint32_t heap_size;
-	t_direccion_virtual_memoria heap_next_free_space;
+	t_direccion_virtual_memoria stack_pointer;
+	uint32_t stack_size;
+	t_direccion_virtual_memoria stack_next_free_space;
 } t_PCB;
 
-void execute_next_instruction_for_process(t_PCB *pcb);
-
-t_indice_instrucciones_elemento get_next_instruction(t_PCB *pcb);
-
+void execute_next_instruction_for_process();
+t_indice_instrucciones_elemento get_next_instruction();
 char* obtener_instruccion_de_umc(t_indice_instrucciones_elemento instruccion);
-
-void actualizar_next_free_space(t_PCB *pcb);
+void actualizar_next_free_space();
+void set_PCB(t_PCB *pcb);
+t_PCB* get_PCB();
+t_stack_element* create_stack_element();
 
 t_puntero obtenerPosicionVariable(t_nombre_variable identificador_variable);
 t_puntero definirVariable(t_nombre_variable variable);
@@ -69,3 +68,4 @@ void asignar(t_puntero direccion_variable, t_valor_variable valor);
 t_respuesta_bytes_de_una_pagina_a_CPU* leer_memoria_de_umc(t_direccion_virtual_memoria direccion);
 t_respuesta_escribir_bytes_de_una_pagina_en_UMC* escribir_en_umc(t_direccion_virtual_memoria direccion, void* valor);
 
+#endif /* CPU_H_ */

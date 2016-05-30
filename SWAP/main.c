@@ -37,13 +37,9 @@
 void UMC_connection(t_swap* swap);
 
 int main(int argc, char *argv[]) {
-//		if (strcmp(argv[1], "-test") == 0){
-//			correr_protocolo_test();
-//			return 0;
-//		}
-	t_swap* swap = create_swap();
-	UMC_connection(swap);
-	return 0;
+	run_specs();
+//	UMC_connection(swap);
+//	return 0;
 }
 
 void UMC_connection(t_swap* swap) {
