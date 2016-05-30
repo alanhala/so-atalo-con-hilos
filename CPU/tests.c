@@ -59,15 +59,13 @@ void test_obtener_posicion_variable() {
     mockear_pcb();
 
     definirVariable('a');
-    definirVariable('b');
 
     t_PCB *pcb = get_PCB();
 
-    t_variable *puntero_variable = obtenerPosicionVariable('a');
-    CU_ASSERT_EQUAL(puntero_variable->id, 'a');
-
-    puntero_variable = obtenerPosicionVariable('b');
-    CU_ASSERT_EQUAL(puntero_variable->id, 'b');
+    t_direccion_virtual_memoria *direccion = obtenerPosicionVariable('a');
+    CU_ASSERT_EQUAL(direccion->size, sizeof(uint32_t));
+    CU_ASSERT_EQUAL(direccion->pagina, 8);
+    CU_ASSERT_EQUAL(direccion->offset, 30);
 }
 
 void mockear_pcb() {

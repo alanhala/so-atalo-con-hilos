@@ -56,7 +56,7 @@ t_puntero definirVariable(t_nombre_variable variable) {
 
 	list_add(stack_element->variables, new_variable);
 
-	return (t_puntero)new_variable;
+	return (t_puntero)&new_variable->direccion;
 }
 
 t_puntero obtenerPosicionVariable(t_nombre_variable identificador_variable) {
@@ -68,21 +68,21 @@ t_puntero obtenerPosicionVariable(t_nombre_variable identificador_variable) {
 
 	t_variable *variable = list_find(stack_element->variables, (void*)find_variable);
 
-	return (t_puntero)variable;
+	return (t_puntero) &variable->direccion;
 }
 
 t_valor_variable dereferenciar(t_puntero direccion_variable) {
-	t_variable *variable = (t_variable*) direccion_variable;
+    t_direccion_virtual_memoria *direccion = (t_direccion_virtual_memoria*) direccion_variable;
 
-	t_respuesta_bytes_de_una_pagina_a_CPU* respuesta = leer_memoria_de_umc(variable->direccion);
+    t_respuesta_bytes_de_una_pagina_a_CPU* respuesta = leer_memoria_de_umc(*direccion);
 
-	return (t_valor_variable)respuesta;
+    return (t_valor_variable)respuesta;
 }
 
 void asignar(t_puntero direccion_variable, t_valor_variable valor) {
-    t_variable *variable = (t_variable*) direccion_variable;
+    t_direccion_virtual_memoria *direccion = (t_variable*) direccion_variable;
 
-    escribir_en_umc(variable->direccion, valor);
+    escribir_en_umc(*direccion, valor);
 }
 
 t_respuesta_bytes_de_una_pagina_a_CPU* leer_memoria_de_umc(t_direccion_virtual_memoria direccion) {
