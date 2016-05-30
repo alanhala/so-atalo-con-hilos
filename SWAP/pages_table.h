@@ -5,6 +5,7 @@
 
 	typedef struct {
 		unsigned int pid;
+		unsigned int pages_number;
 		int* pages_location;
 	} t_pages_table;
 
