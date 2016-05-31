@@ -69,14 +69,15 @@ void cargar_variables_productivas(UMCConfigFile *ptrvaloresConfigFile);
 
 int main(int argc, char **argv) {
 
-	if (strcmp(argv[1], "-test") == 0){
-		set_test();//para usar mock
-		//simulaciones();
+	if (strcmp(argv[1], "-test") == 0 || strcmp(argv[1], "-testMock") == 0){
+		if(strcmp(argv[1], "-testMock") == 0)
+			set_test();//para usar mock
+		simulaciones();
 
 		//correr_swap_mock_test();
 
 		//correrTest();
-		correrTestSerializacion();
+		//correrTestSerializacion();
 
 		return 0;
 	}
@@ -107,7 +108,7 @@ void kernel_and_cpu_connections() {
 }
 
 void *kernel_and_cpu_connection_thread() {
-	int server_socket_descriptor = create_server_socket_descriptor(LISTENPORT,
+	int server_socket_descriptor = create_server_socket_descriptor("localhost", LISTENPORT,
 	BACKLOG);
 
 	while (1) {
@@ -344,3 +345,5 @@ char* leer_string(t_config *config, char* key) {
 	}
 	return datoString;
 }
+
+
