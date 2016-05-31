@@ -471,8 +471,17 @@ int reemplazar_clock(t_tabla_de_paginas * tabla){
 	{
 		if ((tabla->entradas[indice]).segunda_oportunidad == 0 && (tabla->entradas[indice]).frame != -1)
 		{
-			//todo chequeo que el frame sea distinto de -1 ??
-			tabla->indice_segunda_oportunidad = indice;
+			//TODO NO SE SI ES NECESARIO SUMARLE UNO AL INDICE PERO LO DIJO MASOERO
+//			tabla->indice_segunda_oportunidad = indice;
+			if (tabla->indice_segunda_oportunidad == (tabla->paginas_totales -1))
+			{
+				tabla->indice_segunda_oportunidad = 0;
+			}
+			else
+			{
+				tabla->indice_segunda_oportunidad = indice + 1;
+			}
+
 			return (tabla->entradas[indice]).frame;
 		}
 		if ((tabla->entradas[indice]).frame != -1)
@@ -486,7 +495,15 @@ int reemplazar_clock(t_tabla_de_paginas * tabla){
 		if ((tabla->entradas[indice]).segunda_oportunidad == 0 && (tabla->entradas[indice]).frame != -1)
 		{
 
-			tabla->indice_segunda_oportunidad = indice;
+//			tabla->indice_segunda_oportunidad = indice;
+			if (tabla->indice_segunda_oportunidad == (tabla->paginas_totales -1))
+			{
+				tabla->indice_segunda_oportunidad = 0;
+			}
+			else
+			{
+				tabla->indice_segunda_oportunidad = indice + 1;
+			}
 			return (tabla->entradas[indice]).frame;
 		}
 		if ((tabla->entradas[indice]).frame != -1)
