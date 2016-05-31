@@ -23,6 +23,7 @@
 #include "simulacion.h"
 
 void simulacion_1();
+void simulacion_2();
 void simulacion_simple();
 int simulaciones(){
 
@@ -30,6 +31,7 @@ CU_initialize_registry();
 
       CU_pSuite simulaciones = CU_add_suite("Suite simulaciones", NULL, NULL);
 	  CU_add_test(simulaciones, "simulacion_1", simulacion_1);
+	  //CU_add_test(simulaciones, "simulacion_2", simulacion_2);
 	  //CU_add_test(simulaciones, "simulacion_simple", simulacion_simple);
 
 	  CU_basic_set_mode(CU_BRM_VERBOSE);
@@ -43,6 +45,94 @@ CU_initialize_registry();
 }
 
 
+
+void simulacion_2(){
+	inicializar_estructuras();
+	set_algoritmo_reemplazo("test");
+	crear_swap_mock();
+
+//	int swap_socket = create_client_socket_descriptor("192.168.0.33", "6000");
+	//set_socket_descriptor(swap_socket);
+	char * codigo_pid0= "0pg000pg010pg020pg030pg040pg050pg060pg070pg080pg090pg100pg110pg120pg130pg14";
+	char * codigo_pid5 = "5pg005pg015pg025pg035pg045pg055pg065pg075pg085pg095pg105pg115pg125pg135pg14";
+
+
+	int paginas_necesarias = (30);
+	set_max_frames_por_proceso(5);
+	cargar_nuevo_programa(0, paginas_necesarias, codigo_pid0);
+	cargar_nuevo_programa(5, paginas_necesarias, codigo_pid5);
+
+	int lecturas=0;
+	int resultado_lectura = 0;
+	for(lecturas; lecturas < 10; lecturas ++){
+		char * lo_que_leo =  leer_pagina_de_programa(0, lecturas, 0, TAMANIO_FRAME);
+		if (!strcmp(lo_que_leo, "~/-1"))
+			resultado_lectura = -1;
+	}
+
+	int lecturas_pid5=0;
+	int resultado_lectura_pid5 = 0;
+	for(lecturas_pid5; lecturas_pid5 < 10; lecturas_pid5 ++){
+		char * lo_que_leo_pid5 =  leer_pagina_de_programa(5, lecturas_pid5, 0, TAMANIO_FRAME);
+		if (!strcmp(lo_que_leo_pid5, "~/-1"))
+			resultado_lectura_pid5 = -1;
+	}
+	CU_ASSERT_EQUAL(resultado_lectura , 0);
+	CU_ASSERT_EQUAL(resultado_lectura_pid5 , 0);
+
+//
+//	char * lectura_una_pagina =  leer_pagina_de_programa(0, 0, 0, TAMANIO_FRAME);
+//	char * lectura_una_pagina_2 =  leer_pagina_de_programa(0, 2, 0, TAMANIO_FRAME);
+//	char * lectura_una_pagina_18 =  leer_pagina_de_programa(0, 18, 0, TAMANIO_FRAME);
+//
+//	CU_ASSERT_EQUAL(strcmp(lectura_una_pagina, "pag00") , 0);
+//	CU_ASSERT_EQUAL(strcmp(lectura_una_pagina_2, "pag02") , 0);
+//	CU_ASSERT_EQUAL(strcmp(lectura_una_pagina_18, "pag18") , 0);
+//
+//
+//	escribir_pagina_de_programa(0, 17, 0, TAMANIO_FRAME, "piatti");
+//	char * lectura_una_pagina_17 =  leer_pagina_de_programa(0, 17, 0, TAMANIO_FRAME);
+//	CU_ASSERT_EQUAL(strcmp(lectura_una_pagina_17, "piatt") , 0);
+//
+//	escribir_pagina_de_programa(5, 5, 0, TAMANIO_FRAME, "piatti");
+//	char * lectura_una_pagina_5_pid5 =  leer_pagina_de_programa(5, 5, 0, TAMANIO_FRAME);
+//	CU_ASSERT_EQUAL(strcmp(lectura_una_pagina_5_pid5, "piatt") , 0);
+//
+//
+//
+//	int lecturas_pid5=0;
+//	int resultado_lectura_pid5 = 0;
+//	for(lecturas_pid5; lecturas_pid5 < 16; lecturas_pid5 ++){
+//		char * lo_que_leo_pid5 =  leer_pagina_de_programa(5, lecturas_pid5, 0, TAMANIO_FRAME);
+//		if (!strcmp(lo_que_leo_pid5, "~/-1"))
+//			resultado_lectura = -1;
+//	}
+//
+//
+//	char * lectura_una_pagina_0_pid5 =  leer_pagina_de_programa(5, 0, 0, TAMANIO_FRAME);
+//	char * lectura_una_pagina_17_pid5 =  leer_pagina_de_programa(5, 17, 0, TAMANIO_FRAME);
+//	char * lectura_una_pagina_13_pid5 =  leer_pagina_de_programa(5, 13, 0, TAMANIO_FRAME);
+//
+//	CU_ASSERT_EQUAL(strcmp(lectura_una_pagina_0_pid5, "pag00") , 0);
+//	CU_ASSERT_EQUAL(strcmp(lectura_una_pagina_17_pid5, "pag17") , 0);
+//	CU_ASSERT_EQUAL(strcmp(lectura_una_pagina_13_pid5, "pag13") , 0);
+//
+//	escribir_pagina_de_programa(5, 13, 0, TAMANIO_FRAME, "tony");
+//	lectura_una_pagina_13_pid5 =  leer_pagina_de_programa(5, 13, 0, TAMANIO_FRAME);
+//	CU_ASSERT_EQUAL(strcmp(lectura_una_pagina_13_pid5, "tony") , 0);
+
+	int frame=0;
+
+	for(frame; CANTIDAD_FRAMES > (frame-1); frame ++){
+		t_frame * f=list_get(lista_frames, frame);
+		if (f->asignado == 1){
+			char * lectura = leer_frame_de_memoria_principal(frame, 0, TAMANIO_FRAME);
+			printf("%s", lectura);
+		}
+	}
+
+
+}
 
 void simulacion_1(){
 	inicializar_estructuras();
@@ -110,17 +200,28 @@ void simulacion_1(){
 	lectura_una_pagina_13_pid5 =  leer_pagina_de_programa(5, 13, 0, TAMANIO_FRAME);
 	CU_ASSERT_EQUAL(strcmp(lectura_una_pagina_13_pid5, "tony") , 0);
 
+
+	int frame=0;
+
+	for(frame; CANTIDAD_FRAMES > (frame-1); frame ++){
+		t_frame * f=list_get(lista_frames, frame);
+		if (f->asignado == 1){
+			char * lectura = leer_frame_de_memoria_principal(frame, 0, TAMANIO_FRAME);
+			printf("%s", lectura);
+		}
+	}
 }
+
 
 
 
 void simulacion_simple(){
 	inicializar_estructuras();
 
-	//crear_swap_mock();
+	crear_swap_mock();
 	//printf("%s", SWAPIP); //TODO TENGO ERROR ACA
-	int swap_socket = create_client_socket_descriptor("192.168.0.33", "6000");
-	set_socket_descriptor(swap_socket);
+	//int swap_socket = create_client_socket_descriptor("192.168.0.33", "6000");
+	//set_socket_descriptor(swap_socket);
 	char * codigo = "pag00pag01pag02pag03pag04pag05pag06pag07pag08pag09" ;
 	//int tamanio_codigo=	strlen(codigo); //no agrego el /0
 
@@ -132,36 +233,11 @@ void simulacion_simple(){
 	int lecturas=0;
 	int resultado_lectura = 0;
 	char * lo_que_leo =  leer_pagina_de_programa(0, 6, 0, TAMANIO_FRAME);
-	char * directo_de_memoria = leer_frame_de_memoria_principal(5,0, TAMANIO_FRAME);
+
 
 	send(SWAP_SOCKET_DESCRIPTOR, "4", strlen("1"), 0);
-	CU_ASSERT_EQUAL(strcmp(directo_de_memoria, "pag05") , 0);
-	CU_ASSERT_EQUAL(strcmp(lo_que_leo, "pag05") , 0);
 
-	//for(lecturas; lecturas < 16; lecturas ++){
-	//	char * lo_que_leo =  leer_pagina_de_programa(0, lecturas, 0, TAMANIO_FRAME);
-	//	if (!strcmp(lo_que_leo, "~/-1"))
-	//		resultado_lectura = -1;
-	//}
+	CU_ASSERT_EQUAL(strcmp(lo_que_leo, "pag06") , 0);
 
 
-//	CU_ASSERT_EQUAL(resultado_lectura , 0);
-
-	//char * lectura_una_pagina =  leer_pagina_de_programa(0, 0, 0, TAMANIO_FRAME);
-	//char * lectura_una_pagina_5 =  leer_pagina_de_programa(0, 2, 0, TAMANIO_FRAME);
-	//char * lectura_una_pagina_18 =  leer_pagina_de_programa(0, 18, 0, TAMANIO_FRAME);
-
-	//CU_ASSERT_EQUAL(strcmp(lectura_una_pagina, "pag00") , 0);
-	//CU_ASSERT_EQUAL(strcmp(lectura_una_pagina_5, "pag02") , 0);
-	//CU_ASSERT_EQUAL(strcmp(lectura_una_pagina_18, "pag18") , 0);
-
-	/*
-	escribir_pagina_de_programa(0, 17, 0, TAMANIO_FRAME, "piatti");
-	char * lectura_una_pagina_17 =  leer_pagina_de_programa(0, 17, 0, TAMANIO_FRAME);
-	CU_ASSERT_EQUAL(strcmp(lectura_una_pagina_17, "piatt") , 0);
-
-	escribir_pagina_de_programa(5, 5, 0, TAMANIO_FRAME, "piatti");
-	char * lectura_una_pagina_5_pid5 =  leer_pagina_de_programa(5, 5, 0, TAMANIO_FRAME);
-	CU_ASSERT_EQUAL(strcmp(lectura_una_pagina_5_pid5, "piatt") , 0);
-	*/
 }
