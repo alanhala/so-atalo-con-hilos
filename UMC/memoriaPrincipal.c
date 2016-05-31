@@ -103,6 +103,7 @@ t_entrada_tabla_de_paginas* inicializar_paginas(int paginas_requeridas_del_proce
 	{
 		entradas[i].frame=-1; // para que cuando busque el frame y no tenga devuelva eso
 		entradas[i].modificado=0;
+		entradas[i].segunda_oportunidad =1;
 		i++;
 		//TODO INICIARLIZAR TODO LO QUE HAGA FALTA
 	}
@@ -118,6 +119,7 @@ t_tabla_de_paginas * crear_tabla_de_pagina_de_un_proceso(int pid, int paginas_re
 	nueva_tabla->paginas_totales = paginas_requeridas_del_proceso;
 	nueva_tabla->entradas = entradas;
 	nueva_tabla->frames_en_uso=0;
+	nueva_tabla->indice_segunda_oportunidad=0;
 	sem_wait(&mut_tabla_de_paginas);
 	list_add(lista_tabla_de_paginas, nueva_tabla);
 	sem_post(&mut_tabla_de_paginas);
@@ -448,7 +450,7 @@ int seleccionar_pagina_victima(t_tabla_de_paginas* tabla)
 	int pagina_victima ;
 	switch(ALGORITMO_REEMPLAZO){
 	case 1: //clock
-		//frame= reemplazar_clock_(tabla);
+		pagina_victima= reemplazar_clock(tabla);
 		break;
 
 	case 2: //clock M
@@ -460,6 +462,38 @@ int seleccionar_pagina_victima(t_tabla_de_paginas* tabla)
 	}
 
 	return pagina_victima;
+}
+
+int reemplazar_clock(t_tabla_de_paginas * tabla){
+	int indice = tabla->indice_segunda_oportunidad;
+
+	while(indice < tabla->paginas_totales)
+	{
+		if ((tabla->entradas[indice]).segunda_oportunidad == 0 && (tabla->entradas[indice]).frame != -1)
+		{
+			//todo chequeo que el frame sea distinto de -1 ??
+			tabla->indice_segunda_oportunidad = indice;
+			return (tabla->entradas[indice]).frame;
+		}
+		if ((tabla->entradas[indice]).frame != -1)
+			(tabla->entradas[indice]).segunda_oportunidad = 0;
+		indice ++;
+	}
+
+	indice = 0;
+	while(indice < tabla->indice_segunda_oportunidad)
+	{
+		if ((tabla->entradas[indice]).segunda_oportunidad == 0 && (tabla->entradas[indice]).frame != -1)
+		{
+
+			tabla->indice_segunda_oportunidad = indice;
+			return (tabla->entradas[indice]).frame;
+		}
+		if ((tabla->entradas[indice]).frame != -1)
+			(tabla->entradas[indice]).segunda_oportunidad = 0;
+		indice ++;
+	}
+	return -1; //el algoritmo funciono mal
 }
 
 int reemplazar_test(t_tabla_de_paginas * tabla){
@@ -478,11 +512,13 @@ int reemplazar_test(t_tabla_de_paginas * tabla){
 
 void actualizar_reemplazo(t_tabla_de_paginas* tabla, int frame_a_asignar,int pagina, int pagina_victima){
 	tabla->entradas[pagina].frame=frame_a_asignar;
+	tabla->entradas[pagina].segunda_oportunidad=1;
 	//tabla->entradas[pagina].utilizado=1;
 	//tabla->frames_en_uso +=1;
 
 
 	tabla->entradas[pagina_victima].frame = -1;
+	tabla->entradas[pagina_victima].segunda_oportunidad = 1;
 
 	//todo eze: analizar
 }
