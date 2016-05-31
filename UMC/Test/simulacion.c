@@ -46,10 +46,10 @@ int simulaciones(){
 CU_initialize_registry();
 
       CU_pSuite simulaciones = CU_add_suite("Suite simulaciones", NULL, NULL);
-      //CU_add_test(simulaciones, "simulacion_1", simulacion_1);
+      CU_add_test(simulaciones, "simulacion_1", simulacion_1);
 	  //CU_add_test(simulaciones, "simulacion_2", simulacion_2);
       //CU_add_test(simulaciones, "simulacion_3", simulacion_3);
-      CU_add_test(simulaciones, "simulacion_alternando_programas", simulacion_alternando_programas);
+      //CU_add_test(simulaciones, "simulacion_alternando_programas", simulacion_alternando_programas);
 	  //CU_add_test(simulaciones, "simulacion_simple", simulacion_simple);
 
 	  CU_basic_set_mode(CU_BRM_VERBOSE);
@@ -67,6 +67,7 @@ CU_initialize_registry();
 void simulacion_2(){
 	inicializar_estructuras();
 	set_algoritmo_reemplazo("test");
+
 	crear_swap_mock();
 
 //	int swap_socket = create_client_socket_descriptor("192.168.0.33", "6000");
@@ -144,7 +145,8 @@ void simulacion_2(){
 
 void simulacion_1(){
 	inicializar_estructuras();
-	set_algoritmo_reemplazo("test");
+//	set_algoritmo_reemplazo("test");
+	set_algoritmo_reemplazo("Clock");
 	crear_swap_mock();
 
 //	int swap_socket = create_client_socket_descriptor("192.168.0.33", "6000");
@@ -291,6 +293,7 @@ void simulacion_alternando_programas(){
 
 	inicializar_estructuras();
 	set_algoritmo_reemplazo("test");
+
 	crear_swap_mock();
 
 //	int swap_socket = create_client_socket_descriptor("192.168.0.33", "6000");

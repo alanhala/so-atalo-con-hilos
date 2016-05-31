@@ -493,6 +493,36 @@ int reemplazar_clock(t_tabla_de_paginas * tabla){
 			(tabla->entradas[indice]).segunda_oportunidad = 0;
 		indice ++;
 	}
+
+
+	while(indice < tabla->paginas_totales)
+		{
+			if ((tabla->entradas[indice]).segunda_oportunidad == 0 && (tabla->entradas[indice]).frame != -1)
+			{
+				//todo chequeo que el frame sea distinto de -1 ??
+				tabla->indice_segunda_oportunidad = indice;
+				return (tabla->entradas[indice]).frame;
+			}
+			if ((tabla->entradas[indice]).frame != -1)
+				(tabla->entradas[indice]).segunda_oportunidad = 0;
+			indice ++;
+		}
+
+		indice = 0;
+		while(indice < tabla->indice_segunda_oportunidad)
+		{
+			if ((tabla->entradas[indice]).segunda_oportunidad == 0 && (tabla->entradas[indice]).frame != -1)
+			{
+
+				tabla->indice_segunda_oportunidad = indice;
+				return (tabla->entradas[indice]).frame;
+			}
+			if ((tabla->entradas[indice]).frame != -1)
+				(tabla->entradas[indice]).segunda_oportunidad = 0;
+			indice ++;
+		}
+
+
 	return -1; //el algoritmo funciono mal
 }
 
@@ -621,7 +651,7 @@ void set_retardo(int retardo){
 void set_algoritmo_reemplazo(char * algoritmo){
 
 
-	if (!strcmp(algoritmo, "CLOCK") || !strcmp(algoritmo, "clock"))
+	if (!strcmp(algoritmo, "CLOCK") || !strcmp(algoritmo, "clock")|| !strcmp(algoritmo, "Clock"))
 			ALGORITMO_REEMPLAZO = 1;
 	if (!strcmp(algoritmo, "CLOCKM") || !strcmp(algoritmo, "clockM")|| !strcmp(algoritmo, "clockm") || !strcmp(algoritmo, "ClockM"))
 				ALGORITMO_REEMPLAZO = 2;
