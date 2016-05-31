@@ -22,16 +22,34 @@
 #include "test.h"
 #include "simulacion.h"
 
+
+void print_memoria_principal() {
+	int frame = 0;
+	for (frame; 200; frame++) {
+		t_frame* f = list_get(lista_frames, frame);
+		if (f->asignado == 1) {
+			char* lectura = leer_frame_de_memoria_principal(frame, 0,
+					TAMANIO_FRAME);
+			printf("%s", lectura);
+		}
+	}
+}
+
 void simulacion_1();
 void simulacion_2();
+void simulacion_3();
+void simulacion_alternando_programas();
+
 void simulacion_simple();
 int simulaciones(){
 
 CU_initialize_registry();
 
       CU_pSuite simulaciones = CU_add_suite("Suite simulaciones", NULL, NULL);
-	  CU_add_test(simulaciones, "simulacion_1", simulacion_1);
+      //CU_add_test(simulaciones, "simulacion_1", simulacion_1);
 	  //CU_add_test(simulaciones, "simulacion_2", simulacion_2);
+      //CU_add_test(simulaciones, "simulacion_3", simulacion_3);
+      CU_add_test(simulaciones, "simulacion_alternando_programas", simulacion_alternando_programas);
 	  //CU_add_test(simulaciones, "simulacion_simple", simulacion_simple);
 
 	  CU_basic_set_mode(CU_BRM_VERBOSE);
@@ -121,17 +139,7 @@ void simulacion_2(){
 //	lectura_una_pagina_13_pid5 =  leer_pagina_de_programa(5, 13, 0, TAMANIO_FRAME);
 //	CU_ASSERT_EQUAL(strcmp(lectura_una_pagina_13_pid5, "tony") , 0);
 
-	int frame=0;
-
-	for(frame; CANTIDAD_FRAMES > (frame-1); frame ++){
-		t_frame * f=list_get(lista_frames, frame);
-		if (f->asignado == 1){
-			char * lectura = leer_frame_de_memoria_principal(frame, 0, TAMANIO_FRAME);
-			printf("%s", lectura);
-		}
-	}
-
-
+	print_memoria_principal();
 }
 
 void simulacion_1(){
@@ -201,15 +209,130 @@ void simulacion_1(){
 	CU_ASSERT_EQUAL(strcmp(lectura_una_pagina_13_pid5, "tony") , 0);
 
 
-	int frame=0;
+	print_memoria_principal();
+}
 
-	for(frame; CANTIDAD_FRAMES > (frame-1); frame ++){
-		t_frame * f=list_get(lista_frames, frame);
-		if (f->asignado == 1){
-			char * lectura = leer_frame_de_memoria_principal(frame, 0, TAMANIO_FRAME);
-			printf("%s", lectura);
-		}
-	}
+
+void simulacion_3(){
+
+	inicializar_estructuras();
+	set_algoritmo_reemplazo("test");
+	crear_swap_mock();
+
+	//	int swap_socket = create_client_socket_descriptor("192.168.0.33", "6000");
+		//set_socket_descriptor(swap_socket);
+		char * codigo_pid0= "0pg000pg010pg020pg030pg040pg050pg060pg070pg080pg090pg100pg110pg120pg130pg14";
+		char * codigo_pid5 = "5pg005pg015pg025pg035pg045pg055pg065pg075pg085pg095pg105pg115pg125pg135pg14";
+
+
+		int paginas_necesarias = (30);
+		set_max_frames_por_proceso(5);
+		cargar_nuevo_programa(0, paginas_necesarias, codigo_pid0);
+		cargar_nuevo_programa(5, paginas_necesarias, codigo_pid5);
+
+
+		char * lectura_una_pagina =  leer_pagina_de_programa(0, 0, 0, TAMANIO_FRAME);
+		char * lectura_una_pagina_2 =  leer_pagina_de_programa(0, 2, 0, TAMANIO_FRAME);
+		char * lectura_una_pagina_10 =  leer_pagina_de_programa(0, 10, 0, TAMANIO_FRAME);
+
+		CU_ASSERT_EQUAL(strcmp(lectura_una_pagina, "0pg00") , 0);
+		CU_ASSERT_EQUAL(strcmp(lectura_una_pagina_2, "0pg02") , 0);
+		CU_ASSERT_EQUAL(strcmp(lectura_una_pagina_10, "0pg10") , 0);
+		escribir_pagina_de_programa(0, 12, 0, TAMANIO_FRAME, "piatti");
+		char * lectura_una_pagina_12 =  leer_pagina_de_programa(0, 12, 0, TAMANIO_FRAME);
+		CU_ASSERT_EQUAL(strcmp(lectura_una_pagina_12, "piatt") , 0);
+
+
+		escribir_pagina_de_programa(5, 8, 0, TAMANIO_FRAME, "tony");
+		escribir_pagina_de_programa(5, 10, 0, TAMANIO_FRAME, "to10");
+		escribir_pagina_de_programa(5, 3, 0, TAMANIO_FRAME, "ton3");
+		char * lectura_una_pagina_8_pid5 =  leer_pagina_de_programa(5, 8, 0, TAMANIO_FRAME);
+		char * lectura_una_pagina_10_pid5 =  leer_pagina_de_programa(5, 10, 0, TAMANIO_FRAME);
+		char * lectura_una_pagina_3_pid5 =  leer_pagina_de_programa(5, 3, 0, TAMANIO_FRAME);
+		CU_ASSERT_EQUAL(strcmp(lectura_una_pagina_8_pid5, "tony") , 0);
+		CU_ASSERT_EQUAL(strcmp(lectura_una_pagina_10_pid5, "to10") , 0);
+		CU_ASSERT_EQUAL(strcmp(lectura_una_pagina_3_pid5, "ton3") , 0);
+
+
+		//	escribir_pagina_de_programa(5, 5, 0, TAMANIO_FRAME, "piatti");
+	//	char * lectura_una_pagina_5_pid5 =  leer_pagina_de_programa(5, 5, 0, TAMANIO_FRAME);
+	//	CU_ASSERT_EQUAL(strcmp(lectura_una_pagina_5_pid5, "piatt") , 0);
+	//
+	//
+	//
+	//	int lecturas_pid5=0;
+	//	int resultado_lectura_pid5 = 0;
+	//	for(lecturas_pid5; lecturas_pid5 < 16; lecturas_pid5 ++){
+	//		char * lo_que_leo_pid5 =  leer_pagina_de_programa(5, lecturas_pid5, 0, TAMANIO_FRAME);
+	//		if (!strcmp(lo_que_leo_pid5, "~/-1"))
+	//			resultado_lectura = -1;
+	//	}
+	//
+	//
+	//	char * lectura_una_pagina_0_pid5 =  leer_pagina_de_programa(5, 0, 0, TAMANIO_FRAME);
+	//	char * lectura_una_pagina_17_pid5 =  leer_pagina_de_programa(5, 17, 0, TAMANIO_FRAME);
+	//	char * lectura_una_pagina_13_pid5 =  leer_pagina_de_programa(5, 13, 0, TAMANIO_FRAME);
+	//
+	//	CU_ASSERT_EQUAL(strcmp(lectura_una_pagina_0_pid5, "pag00") , 0);
+	//	CU_ASSERT_EQUAL(strcmp(lectura_una_pagina_17_pid5, "pag17") , 0);
+	//	CU_ASSERT_EQUAL(strcmp(lectura_una_pagina_13_pid5, "pag13") , 0);
+	//
+	//	escribir_pagina_de_programa(5, 13, 0, TAMANIO_FRAME, "tony");
+	//	lectura_una_pagina_13_pid5 =  leer_pagina_de_programa(5, 13, 0, TAMANIO_FRAME);
+	//	CU_ASSERT_EQUAL(strcmp(lectura_una_pagina_13_pid5, "tony") , 0);
+
+		//print_memoria_principal();
+
+
+}
+
+
+void simulacion_alternando_programas(){
+
+	inicializar_estructuras();
+	set_algoritmo_reemplazo("test");
+	crear_swap_mock();
+
+//	int swap_socket = create_client_socket_descriptor("192.168.0.33", "6000");
+	//set_socket_descriptor(swap_socket);
+	char * codigo_pid0= "0pg000pg010pg020pg030pg040pg050pg060pg070pg080pg090pg100pg110pg120pg130pg14";
+	char * codigo_pid5 = "5pg005pg015pg025pg035pg045pg055pg065pg075pg085pg095pg105pg115pg125pg135pg14";
+	char * codigo_pid3 = "3pg003pg013pg023pg033pg043pg053pg063pg073pg083pg093pg103pg113pg123pg133pg14";
+
+
+	int paginas_necesarias = (30);
+	set_max_frames_por_proceso(5);
+	cargar_nuevo_programa(0, paginas_necesarias, codigo_pid0);
+	cargar_nuevo_programa(5, paginas_necesarias, codigo_pid5);
+	cargar_nuevo_programa(3, paginas_necesarias, codigo_pid3);
+
+
+	escribir_pagina_de_programa(0, 3, 0, TAMANIO_FRAME, "piatt");
+	escribir_pagina_de_programa(3, 3, 0, TAMANIO_FRAME, "piatt");
+	escribir_pagina_de_programa(5, 3, 0, TAMANIO_FRAME, "piatt");
+	char * lectura_una_pagina_3_pid0 =  leer_pagina_de_programa(0, 3, 0, TAMANIO_FRAME);
+	char * lectura_una_pagina_3_pid3 =  leer_pagina_de_programa(3, 3, 0, TAMANIO_FRAME);
+	char * lectura_una_pagina_3_pid5 =  leer_pagina_de_programa(5, 3, 0, TAMANIO_FRAME);
+	CU_ASSERT_EQUAL(strcmp(lectura_una_pagina_3_pid0, "piatt") , 0);
+	CU_ASSERT_EQUAL(strcmp(lectura_una_pagina_3_pid3, "piatt") , 0);
+	CU_ASSERT_EQUAL(strcmp(lectura_una_pagina_3_pid5, "piatt") , 0);
+
+
+
+
+	char * lectura_pagina_6_pid0 =  leer_pagina_de_programa(0, 6, 0, TAMANIO_FRAME);
+	char * lectura_pagina_8_pid3 =  leer_pagina_de_programa(3, 8, 0, 3);
+	char * lectura_pagina_11_pid5 =  leer_pagina_de_programa(5, 11, 0, TAMANIO_FRAME);
+
+	CU_ASSERT_EQUAL(strcmp(lectura_pagina_6_pid0, "0pg06") , 0);
+	CU_ASSERT_EQUAL(strcmp(lectura_pagina_8_pid3, "3pg") , 0);
+	CU_ASSERT_EQUAL(strcmp(lectura_pagina_11_pid5, "5pg11") , 0);
+
+
+
+	//print_memoria_principal();
+
+
 }
 
 
