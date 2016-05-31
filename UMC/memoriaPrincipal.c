@@ -246,7 +246,7 @@ int cargar_nuevo_programa_en_swap(int pid, int paginas_requeridas_del_proceso, c
 
 		t_stream *buffer = serializar_mensaje(1,carga);
 
-		int bytes_enviados = send(SWAP_SOCKET_DESCRIPTOR, buffer, buffer->size, 0);
+		int bytes_enviados = send(SWAP_SOCKET_DESCRIPTOR, buffer->datos, buffer->size, 0);
 
 		t_header *aHeader = malloc(sizeof(t_header));
 
@@ -301,7 +301,7 @@ char * leer_pagina_de_swap(int pid, int pagina){
 
 	respuesta = (t_respuesta_leer_pagina_swap*)deserealizar_mensaje(buffer_header[0], buffer_recv);
 
-	return respuesta; //debe devolver esto si no leyo bien "~/-1"
+	return respuesta->datos; //debe devolver esto si no leyo bien "~/-1"
 }
 
 int escribir_pagina_de_swap(int pid, int pagina, char * datos){
@@ -338,7 +338,7 @@ int escribir_pagina_de_swap(int pid, int pagina, char * datos){
 
 	respuesta = (t_respuesta_escribir_pagina_swap*)deserealizar_mensaje(buffer_header[0], buffer_recv);
 
-	return respuesta;
+	return respuesta->escritura_correcta;
 }
 
 int finalizar_programa_de_swap(int pid){
@@ -463,16 +463,16 @@ int seleccionar_pagina_victima(t_tabla_de_paginas* tabla)
 }
 
 int reemplazar_test(t_tabla_de_paginas * tabla){
-
-	int pagina=-1;
+	int pagina=0;
+	//int pagina=-1;
 	int i = 0;
-	for(i; i<tabla->paginas_totales; i++){
-
-		if((tabla->entradas[i]).frame != -1){
-			pagina = i;
-			break;
-		}
-	}
+//	for(i; i<tabla->paginas_totales; i++){
+//
+//		if((tabla->entradas[i]).frame != -1){
+//			pagina = i;
+//			break;
+//		}
+//	//}
 	return pagina;
 }
 
