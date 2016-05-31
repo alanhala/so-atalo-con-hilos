@@ -98,7 +98,7 @@ void simulacion_simple(){
 
 	crear_swap_mock();
 	printf("%s", SWAPIP); //TODO TENGO ERROR ACA
-	int swap_socket = create_client_socket_descriptor("192.168.0.102", "8000");
+	int swap_socket = create_client_socket_descriptor("localhost", "8000");
 	set_socket_descriptor(swap_socket);
 	char * codigo = "pag000pag10pag2\0pag3\0pag4\0pag5\0pag6\0pag7\0pag8\0pag9\0" ;
 	int tamanio_codigo=	strlen(codigo); //no agrego el /0

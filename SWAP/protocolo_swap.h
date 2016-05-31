@@ -15,6 +15,10 @@ typedef struct {
 t_stream *serializar_mensaje(int tipo, void* unaEstructura);
 void *deserealizar_mensaje(uint8_t tipo, char* datos);
 
+typedef struct {
+	uint8_t tipo;		//Tipo del Mensaje
+	uint32_t length;	//Largo de la totalidad del mensaje (mensaje en si mas largo y tipo)
+}__attribute((packed)) t_header;
 
 typedef struct {
   uint32_t pid;

@@ -19,6 +19,11 @@ typedef struct {
 }__attribute__((packed)) t_respuesta_bytes_de_una_pagina_a_CPU;
 
 typedef struct {
+	uint8_t tipo;
+	uint32_t length;
+}__attribute__((packed)) t_header;
+
+typedef struct {
 	uint32_t pagina;	//Numero de pagina
 	uint32_t offset;	//Offset de la pagina
 	uint32_t size; 		//Tamano de los datos a escribir
