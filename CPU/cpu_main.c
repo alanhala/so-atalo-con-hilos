@@ -23,7 +23,7 @@
 #define KERNELIP "localhost"
 
 #define UMCPORT "21000"
-#define UMCIP "localhost"
+#define UMCIP "192.168.0.16"
 
 
 void connect_to_UMC();
@@ -32,21 +32,17 @@ void connect_to_Kernel();
 
 int main(int argc, char **argv) {
 
-	if (argc == 2) {
+	/*if (argc == 3) {
 	    if (strcmp(argv[2], "-conexiones") == 0){
     		connect_to_UMC();
-    		connect_to_Kernel();
+    		//connect_to_Kernel();
     	    }
-	}
+	}*/
 	if (strcmp(argv[1], "-test") == 0){
 		 correrTest();
 		 //correrTestSerializacion();
 		 return 0;
 	}
-
-
-
-
 
 	connect_to_UMC();
 	connect_to_Kernel();

@@ -47,6 +47,7 @@ typedef struct {
 	t_list *variables;
 	uint32_t posicion_retorno;
 	t_direccion_virtual_memoria valor_retorno;
+	t_direccion_virtual_memoria direccion_inicial;
 } t_stack_element;
 
 typedef struct {

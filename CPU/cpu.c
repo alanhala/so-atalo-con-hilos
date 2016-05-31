@@ -21,6 +21,8 @@ AnSISOP_kernel kernel_functions = { };
 
 t_PCB *pcb;
 
+uint32_t tamanio_pagina;
+
 void execute_next_instruction_for_process() {
 	t_indice_instrucciones_elemento instruccion = get_next_instruction();
 
@@ -127,8 +129,24 @@ t_respuesta_escribir_bytes_de_una_pagina_en_UMC* escribir_en_umc(t_dato_en_memor
     return (t_respuesta_escribir_bytes_de_una_pagina_en_UMC*)deserealizar_mensaje(11, recv_buffer);
 }
 
-void incrementar_next_free_space() {
+void incrementar_next_free_space(uint32_t size) {
+    t_direccion_virtual_memoria direccion = pcb->stack_next_free_space;
+    if(direccion.offset + size > tamanio_pagina) {
+	pcb->stack_next_free_space.pagina++;
+	pcb->stack_next_free_space.offset = 0;
+    } else {
+	pcb->stack_next_free_space.offset += size;
+    }
+};
 
+void free_stack_element_memory(t_stack_element *element) {
+
+    void free_memory(void *variable) {
+	free(variable);
+    }
+
+    list_destroy_and_destroy_elements(element->variables, free_memory);
+    list_destroy_and_destroy_elements(element->argumentos, free_memory);
 };
 
 void set_PCB(t_PCB *new_pcb) {
@@ -137,6 +155,10 @@ void set_PCB(t_PCB *new_pcb) {
 
 t_PCB* get_PCB() {
     return pcb;
+}
+
+void set_tamanio_pagina(uint32_t tamanio) {
+    tamanio_pagina = tamanio;
 }
 
 t_stack_element* create_stack_element() {

@@ -20,4 +20,8 @@ void test_definir_variable();
 
 void test_obtener_posicion_variable();
 
+void test_actualizar_next_free_space();
+
+void test_asignar_y_leer_valor();
+
 #endif /* TESTS_H_ */
