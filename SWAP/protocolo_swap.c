@@ -24,15 +24,15 @@ void *deserealizar_mensaje(uint8_t tipo, char* datos) {
 	void* estructuraDestino;
 
 	switch(tipo){
-	case (20):
+	case (1):
 			estructuraDestino =  deserializar_iniciar_programa_en_swap(datos);
 			break;
 
-	case (22):
+	case (2):
 			estructuraDestino =  deserializar_lectura_pagina_swap(datos);
 			break;
 
-	case (26):
+	case (3):
 			estructuraDestino =  deserializar_escribir_pagina_swap(datos);
 			break;
 
@@ -42,6 +42,7 @@ void *deserealizar_mensaje(uint8_t tipo, char* datos) {
 }
 
 t_escribir_pagina_swap * deserializar_escribir_pagina_swap(char *datos){
+
 	int		tmpsize = 0,
 			offset = 0,
 			tamanoDato = 0;
@@ -49,8 +50,8 @@ t_escribir_pagina_swap * deserializar_escribir_pagina_swap(char *datos){
 	const int desplazamientoHeader = 5;		//Offset inicial para no deserealizar tipo (1 byte) y length (4 bytes)
 
 	t_escribir_pagina_swap *escritura = malloc(sizeof(t_escribir_pagina_swap));
-	memset(escritura,0, sizeof(t_escribir_pagina_swap));
 
+	memset(escritura,0, sizeof(t_escribir_pagina_swap));
 
 	memcpy(&escritura->pid, datos+desplazamientoHeader, tmpsize = sizeof(uint32_t));
 	offset+=tmpsize;
@@ -58,7 +59,6 @@ t_escribir_pagina_swap * deserializar_escribir_pagina_swap(char *datos){
 
 	memcpy(&escritura->pagina, datos+offset, tmpsize = sizeof(uint32_t));
 	offset+=tmpsize;
-
 
 	for(tamanoDato = 0; (datos+offset)[tamanoDato] != '\0';tamanoDato++);//incremento tamanoDato, hasta el tamaÃ±o del nombre
 
@@ -72,13 +72,13 @@ t_escribir_pagina_swap * deserializar_escribir_pagina_swap(char *datos){
 	char endString = '\0';
 	memcpy(escritura->datos+offset,&endString,1);
 
-
 	return escritura;
 
 }
 
 
 t_leer_pagina_swap * deserializar_lectura_pagina_swap(char * datos){
+
 	int		tmpsize = 0,
 			offset = 0,
 			tamanoDato = 0;
@@ -87,7 +87,6 @@ t_leer_pagina_swap * deserializar_lectura_pagina_swap(char * datos){
 
 	t_leer_pagina_swap *pedido = malloc(sizeof(t_leer_pagina_swap));
 	memset(pedido,0, sizeof(t_leer_pagina_swap));
-
 
 	memcpy(&pedido->pid, datos+desplazamientoHeader, tmpsize = sizeof(uint32_t));
 	offset+=tmpsize;
@@ -112,14 +111,12 @@ t_iniciar_programa_en_swap * deserializar_iniciar_programa_en_swap(char *datos){
 	t_iniciar_programa_en_swap *pedido = malloc(sizeof(t_iniciar_programa_en_swap));
 	memset(pedido,0, sizeof(t_iniciar_programa_en_swap));
 
-
 	memcpy(&pedido->pid, datos+desplazamientoHeader, tmpsize = sizeof(uint32_t));
 	offset+=tmpsize;
 	offset+=desplazamientoHeader;
 
 	memcpy(&pedido->paginas_necesarias, datos+offset, tmpsize = sizeof(uint32_t));
 	offset+=tmpsize;
-
 
 	for(tamanoDato = 0; (datos+offset)[tamanoDato] != '\0';tamanoDato++);//incremento tamanoDato, hasta el tamaÃ±o del nombre
 
@@ -133,10 +130,7 @@ t_iniciar_programa_en_swap * deserializar_iniciar_programa_en_swap(char *datos){
 	char endString = '\0';
 	memcpy(pedido->codigo_programa+offset,&endString,1);
 
-
 	return pedido;
-
-
 }
 
 
@@ -146,14 +140,13 @@ t_stream *serializar_mensaje(int tipo, void* unaEstructura) {
 	t_stream *stream;
 
 	switch(tipo){
-	case (20):
+	case (2):
 			stream = serializar_respuesta_iniciar_programa_en_swap((t_respuesta_iniciar_programa_en_swap*)unaEstructura);
 			break;
-	case (22):
+	case (4):
 		    stream = serializar_respuesta_leer_pagina_swap((t_respuesta_leer_pagina_swap *)unaEstructura);
 		    break;
-
-	case (26):
+	case (6):
 			stream = serializar_respuesta_escribir_pagina_swap((t_respuesta_escribir_pagina_swap *)unaEstructura);
 	        break;
 
@@ -163,6 +156,7 @@ t_stream *serializar_mensaje(int tipo, void* unaEstructura) {
 
 
 t_stream * serializar_respuesta_leer_pagina_swap(t_respuesta_leer_pagina_swap *respuesta){
+
 		uint32_t 	tmpsize = 0,
 					offset = 0;
 
@@ -179,11 +173,10 @@ t_stream * serializar_respuesta_leer_pagina_swap(t_respuesta_leer_pagina_swap *r
 		stream->datos = malloc(streamSize);
 		memset(stream->datos,0,streamSize);
 
-
 	 	char* aux = malloc(streamSize);
 	 	char *respuesta_aux = respuesta->datos;
 
-		uint8_t tipo = 22; 	//Tipo del Mensaje . Fijado estaticamente segun protocolo
+		uint8_t tipo = 2; 	//Tipo del Mensaje . Fijado estaticamente segun protocolo
 
 		memcpy(aux,&tipo,tmpsize=sizeof(uint8_t));
 		offset+=tmpsize;
@@ -200,8 +193,6 @@ t_stream * serializar_respuesta_leer_pagina_swap(t_respuesta_leer_pagina_swap *r
 		stream->datos = aux;
 
 		return stream;
-
-
 }
 
 t_stream * serializar_respuesta_escribir_pagina_swap(t_respuesta_escribir_pagina_swap *respuesta){
@@ -210,8 +201,6 @@ t_stream * serializar_respuesta_escribir_pagina_swap(t_respuesta_escribir_pagina
 
 			uint32_t 	size_respuesta =	sizeof(uint32_t);    //Tamano de escritura correcta
 
-
-
 			uint32_t 	streamSize =	sizeof(uint8_t)	+	//Tamano del tipo
 										sizeof(uint32_t)+	//Tamano del largo del stream
 										size_respuesta;		//Tamano de la respuesta
@@ -219,14 +208,12 @@ t_stream * serializar_respuesta_escribir_pagina_swap(t_respuesta_escribir_pagina
 			t_stream *stream = malloc(streamSize);
 
 			memset(stream, 0,streamSize);
-			stream->size = size_respuesta;
+			stream->size = streamSize;
 			stream->datos = malloc(streamSize);
 			memset(stream->datos,0,streamSize);
 
-			uint8_t tipo = 26; 	//Tipo del Mensaje . Fijado estaticamente segun protocolo
+			uint8_t tipo = 3; 	//Tipo del Mensaje . Fijado estaticamente segun protocolo
 			uint32_t escrito_correctamente = respuesta->escritura_correcta;
-
-
 
 			memcpy(stream->datos,&tipo,tmpsize=sizeof(uint8_t));
 			offset+=tmpsize;
@@ -246,8 +233,6 @@ t_stream * serializar_respuesta_iniciar_programa_en_swap(t_respuesta_iniciar_pro
 
 			uint32_t 	size_respuesta =	sizeof(uint32_t); 	    //Tamano de respuesta cargada
 
-
-
 		    uint32_t 	streamSize =	sizeof(uint8_t)	+	//Tamano del tipo
 										sizeof(uint32_t)+	//Tamano del largo del stream
 										size_respuesta;		//Tamano de la respuesta
@@ -255,11 +240,11 @@ t_stream * serializar_respuesta_iniciar_programa_en_swap(t_respuesta_iniciar_pro
 		    t_stream *stream = malloc(streamSize);
 
 		    memset(stream, 0,streamSize);
-		    stream->size = size_respuesta;
+		    stream->size = streamSize;
 		    stream->datos = malloc(streamSize);
 		    memset(stream->datos,0,streamSize);
 
-		    uint8_t tipo = 20; 	//Tipo del Mensaje . Fijado estaticamente segun protocolo
+		    uint8_t tipo = 1; 	//Tipo del Mensaje . Fijado estaticamente segun protocolo
 		    uint32_t cargado_correctamente = respuesta->cargado_correctamente;
 
 

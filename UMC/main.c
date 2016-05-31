@@ -72,6 +72,7 @@ int main(int argc, char **argv) {
 	if (strcmp(argv[1], "-test") == 0 || strcmp(argv[1], "-testMock") == 0){
 		if(strcmp(argv[1], "-testMock") == 0)
 			set_test();//para usar mock
+
 		simulaciones();
 
 		//correr_swap_mock_test();
@@ -254,7 +255,7 @@ void levantaConfigFileEnVariables(UMCConfigFile *ptrvaloresConfigFile,t_config *
 	ptrvaloresConfigFile->entradas_tlb = leerUnsigned(ptrConfig, "ENTRADAS_TLB");
 	ptrvaloresConfigFile->retardo = leerUnsigned(ptrConfig, "RETARDO");
 	ptrvaloresConfigFile->ip_swap = leer_string(ptrConfig, "IP_SWAP");
-	ptrvaloresConfigFile->algoritmo_reemplazo = leer_string(ptrConfig, "ALGORITMO");
+	//ptrvaloresConfigFile->algoritmo_reemplazo = leer_string(ptrConfig, "ALGORITMO");
 
 }
 void liberaVariables(t_log* traceLogger, t_config* ptrConfig, t_log* errorLogger, t_config* ptrConfigUpdate) {
@@ -332,7 +333,7 @@ void cargar_variables_productivas(UMCConfigFile *config){
 	set_cantidad_frames(config->marcos);
 	set_tamanio_frame(config->marcos_size);
 	set_retardo(config->retardo);
-	set_algoritmo_reemplazo(config->algoritmo_reemplazo);
+	//set_algoritmo_reemplazo(config->algoritmo_reemplazo);
 
 }
 

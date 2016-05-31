@@ -137,6 +137,8 @@ void asignar_frame_a_una_pagina(t_tabla_de_paginas* tabla, int frame_a_asignar,	
 
 }
 
+
+
 int devolver_frame_de_pagina(t_tabla_de_paginas* tabla, int pagina) {
 	// Cuando la pagina no tiene asignado frame es -1
 	return tabla->entradas[pagina].frame;
@@ -167,6 +169,8 @@ t_tabla_de_paginas* buscar_tabla_de_paginas_de_pid(int pid_buscado) {
 
 }
 
+
+
 void crear_lista_frames() {
 	sem_wait(&mut_lista_frames);
 	lista_frames = list_create();
@@ -186,6 +190,7 @@ void agregar_frame_a_lista_de_frames(int numero_de_frame) {
 }
 
 
+
 void marcar_frame_como_libre(int numero_de_frame){
 	int frames_iguales(t_frame *frame) {
 					return (frame->frame == numero_de_frame);
@@ -193,6 +198,7 @@ void marcar_frame_como_libre(int numero_de_frame){
 	t_frame * frame_a_modificar = list_find(lista_frames, (void *)frames_iguales);
 	frame_a_modificar->asignado = 0;
 }
+
 
 
 int buscar_frame_de_una_pagina(t_tabla_de_paginas* tabla, int pagina){
@@ -226,8 +232,8 @@ int buscar_frame_de_una_pagina(t_tabla_de_paginas* tabla, int pagina){
 
 
 
-
 int cargar_nuevo_programa_en_swap(int pid, int paginas_requeridas_del_proceso, char *codigo_programa){
+
 	if (SWAP_MOCK_ENABLE)
 		return cargar_nuevo_programa_en_swap_mock(pid, paginas_requeridas_del_proceso, codigo_programa);
 
@@ -238,82 +244,105 @@ int cargar_nuevo_programa_en_swap(int pid, int paginas_requeridas_del_proceso, c
 		carga->paginas_necesarias = paginas_requeridas_del_proceso;
 		carga->codigo_programa= codigo_programa;
 
-		t_stream *buffer = serializar_mensaje(20,carga);
-		send(SWAP_SOCKET_DESCRIPTOR, "1", strlen("1"), 0);
-		int bytes= send(SWAP_SOCKET_DESCRIPTOR, buffer->datos, 200, 0);
+		t_stream *buffer = serializar_mensaje(1,carga);
 
-		char recv_buffer[1];
-		recv(SWAP_SOCKET_DESCRIPTOR, recv_buffer, 1, 0);
+		int bytes_enviados = send(SWAP_SOCKET_DESCRIPTOR, buffer->datos, buffer->size, 0);
 
+		t_header *aHeader = malloc(sizeof(t_header));
+
+		char 	buffer_header[5];	//Buffer donde se almacena el header recibido
+
+		int 	bytes_recibidos_header,	//Cantidad de bytes recibidos en el recv() que recibe el header
+				bytes_recibidos;		//Cantidad de bytes recibidos en el recv() que recibe el mensaje completo
+
+		bytes_recibidos_header = recv(SWAP_SOCKET_DESCRIPTOR, buffer_header, 5, MSG_PEEK);
+
+		char buffer_recv[buffer_header[1]]; 	//El buffer para recibir el mensaje se crea con la longitud recibida
+
+		bytes_recibidos = recv(SWAP_SOCKET_DESCRIPTOR,buffer_recv,buffer_header[1],0);
 
 		t_respuesta_iniciar_programa_en_swap * respuesta = malloc(sizeof(t_respuesta_iniciar_programa_en_swap));
-		respuesta = (t_respuesta_iniciar_programa_en_swap*)deserealizar_mensaje(20, recv_buffer);
 
+		respuesta = (t_respuesta_iniciar_programa_en_swap*)deserealizar_mensaje(buffer_header[0], buffer_recv);
 
 	return respuesta;
 }
 
 char * leer_pagina_de_swap(int pid, int pagina){
+
 	if(SWAP_MOCK_ENABLE)
 		return leer_pagina_de_swap_mock(pid, pagina);
 
-
 	t_leer_pagina_swap *lectura = malloc(sizeof(t_leer_pagina_swap));
+
 	memset(lectura,0,sizeof(t_leer_pagina_swap));
 
 	lectura->pid = pid;
 	lectura->pagina = pagina;
 
+	t_stream *buffer = serializar_mensaje(3,lectura);
 
-	t_stream *buffer = serializar_mensaje(22,lectura);
-	send(SWAP_SOCKET_DESCRIPTOR, "2", strlen("1"), 0);
-	int bytes= send(SWAP_SOCKET_DESCRIPTOR, buffer->datos, 50, 0);
+	int bytes_enviados = send(SWAP_SOCKET_DESCRIPTOR, buffer->datos, buffer->size, 0);
 
-	char recv_buffer[50];
-	recv(SWAP_SOCKET_DESCRIPTOR, recv_buffer, 50, 0);
+	t_header *aHeader = malloc(sizeof(t_header));
 
+	char 	buffer_header[5];	//Buffer donde se almacena el header recibido
 
-	t_respuesta_leer_pagina_swap * respuesta = malloc(sizeof(t_respuesta_leer_pagina_swap));
-	respuesta = (t_respuesta_leer_pagina_swap*)deserealizar_mensaje(22, recv_buffer);
+	int 	bytes_recibidos_header,	//Cantidad de bytes recibidos en el recv() que recibe el header
+			bytes_recibidos;		//Cantidad de bytes recibidos en el recv() que recibe el mensaje completo
 
+	bytes_recibidos_header = recv(SWAP_SOCKET_DESCRIPTOR, buffer_header, 5, MSG_PEEK);
 
+	char buffer_recv[buffer_header[1]]; 	//El buffer para recibir el mensaje se crea con la longitud recibida
 
+	bytes_recibidos = recv(SWAP_SOCKET_DESCRIPTOR,buffer_recv,buffer_header[1],0);
 
-	return respuesta; //debe devolver esto si no leyo bien "~/-1"
+	t_respuesta_leer_pagina_swap *respuesta = malloc(sizeof(t_respuesta_leer_pagina_swap));
+
+	respuesta = (t_respuesta_leer_pagina_swap*)deserealizar_mensaje(buffer_header[0], buffer_recv);
+
+	return respuesta->datos; //debe devolver esto si no leyo bien "~/-1"
 }
 
 int escribir_pagina_de_swap(int pid, int pagina, char * datos){
+
 	if (SWAP_MOCK_ENABLE)
 		return escribir_pagina_de_swap_mock(pid, pagina, datos);
 
-
-
 	t_escribir_pagina_swap *escritura = malloc(sizeof(t_escribir_pagina_swap));
+
 	memset(escritura,0,sizeof(t_escribir_pagina_swap));
 
 	escritura->pid = pid;
 	escritura->pagina = pagina;
 	escritura->datos = datos;
 
+	t_stream *buffer = serializar_mensaje(5,escritura);
 
-	t_stream *buffer = serializar_mensaje(26,escritura);
-	send(SWAP_SOCKET_DESCRIPTOR, "3", strlen("1"), 0);
-	int bytes= send(SWAP_SOCKET_DESCRIPTOR, buffer->datos, 50, 0);
+	int bytes_enviados = send(SWAP_SOCKET_DESCRIPTOR, buffer->datos, buffer->size, 0);
 
+	t_header *aHeader = malloc(sizeof(t_header));
 
-	char recv_buffer[50];
-	recv(SWAP_SOCKET_DESCRIPTOR, recv_buffer, 50, 0);
+	char 	buffer_header[5];	//Buffer donde se almacena el header recibido
 
+	int 	bytes_recibidos_header,	//Cantidad de bytes recibidos en el recv() que recibe el header
+			bytes_recibidos;		//Cantidad de bytes recibidos en el recv() que recibe el mensaje completo
 
-	t_respuesta_escribir_pagina_swap * respuesta = malloc(sizeof(t_respuesta_escribir_pagina_swap));
-	respuesta = (t_respuesta_escribir_pagina_swap*)deserealizar_mensaje(26, recv_buffer);
+	bytes_recibidos_header = recv(SWAP_SOCKET_DESCRIPTOR, buffer_header, 5, MSG_PEEK);
 
+	char buffer_recv[buffer_header[1]]; 	//El buffer para recibir el mensaje se crea con la longitud recibida
 
+	bytes_recibidos = recv(SWAP_SOCKET_DESCRIPTOR,buffer_recv,buffer_header[1],0);
 
-	return respuesta;
+	t_respuesta_escribir_pagina_swap *respuesta = malloc(sizeof(t_respuesta_escribir_pagina_swap));
+
+	respuesta = (t_respuesta_escribir_pagina_swap*)deserealizar_mensaje(buffer_header[0], buffer_recv);
+
+	return respuesta->escritura_correcta;
 }
 
 int finalizar_programa_de_swap(int pid){
+
 	if(SWAP_MOCK_ENABLE)
 		return finalizar_programa_de_swap_mock(pid);
 	return -1;
@@ -434,16 +463,16 @@ int seleccionar_pagina_victima(t_tabla_de_paginas* tabla)
 }
 
 int reemplazar_test(t_tabla_de_paginas * tabla){
-
-	int pagina=-1;
+	int pagina=0;
+	//int pagina=-1;
 	int i = 0;
-	for(i; i<tabla->paginas_totales; i++){
-
-		if((tabla->entradas[i]).frame != -1){
-			pagina = i;
-			break;
-		}
-	}
+//	for(i; i<tabla->paginas_totales; i++){
+//
+//		if((tabla->entradas[i]).frame != -1){
+//			pagina = i;
+//			break;
+//		}
+//	//}
 	return pagina;
 }
 

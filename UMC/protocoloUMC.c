@@ -25,22 +25,20 @@ void *deserealizar_mensaje(uint8_t tipo, char* datos) {
 
 	switch(tipo){
 	case (2):
+			estructuraDestino = deserializar_respuesta_iniciar_programa_en_swap(datos);
+			break;
+	case (4):
+			estructuraDestino = deserializar_respuesta_leer_pagina_swap(datos);
+		    break;
+	case (6):
+			estructuraDestino = deserializar_respuesta_escribir_pagina_swap(datos);
+	        break;
+	case (8):
 			estructuraDestino = deserializar_pedido_bytes_de_una_pagina_a_UMC(datos);
-
 			break;
 	case (10):
 			estructuraDestino = deserializar_escribir_bytes_de_una_pagina_en_UMC(datos);
 			break;
-	case (20):
-			estructuraDestino = deserializar_respuesta_iniciar_programa_en_swap(datos);
-			break;
-	case (22):
-			estructuraDestino = deserializar_respuesta_leer_pagina_swap(datos);
-		    break;
-
-	case (26):
-			estructuraDestino = deserializar_respuesta_escribir_pagina_swap(datos);
-	        break;
 
 	}
 
@@ -180,28 +178,27 @@ t_stream *serializar_mensaje(int tipo, void* unaEstructura) {
 	t_stream *stream;
 
 	switch(tipo){
+	case (1):
+				stream = serializar_iniciar_programa_en_swap((t_iniciar_programa_en_swap *)unaEstructura);
+				break;
 	case (3):
+			    stream = serializar_leer_pagina_swap((t_leer_pagina_swap *)unaEstructura);
+			    break;
+	case (5):
+				stream = serializar_escribir_pagina_swap((t_escribir_pagina_swap *)unaEstructura);
+				break;
+	case (7):
 			stream = serializar_respuesta_bytes_de_una_pagina_a_CPU((t_respuesta_bytes_de_una_pagina_a_CPU *)unaEstructura);
 			break;
-	case (11):
+	case (9):
 			stream = serializar_respuesta_escribir_bytes_de_una_pagina_en_UMC((t_respuesta_escribir_bytes_de_una_pagina_en_UMC *)unaEstructura);
-			break;
-	case (20):
-			stream = serializar_iniciar_programa_en_swap((t_iniciar_programa_en_swap *)unaEstructura);
-			break;
-
-	case (22):
-		    stream = serializar_leer_pagina_swap((t_leer_pagina_swap *)unaEstructura);
-		    break;
-
-	case (26):
-			stream = serializar_escribir_pagina_swap((t_escribir_pagina_swap *)unaEstructura);
 			break;
 	  }
 
 	return stream;
 }
 t_stream * serializar_escribir_pagina_swap(t_escribir_pagina_swap * escritura){
+
 		uint32_t 	tmpsize = 0,
 	    			offset = 0;
 
@@ -211,18 +208,18 @@ t_stream * serializar_escribir_pagina_swap(t_escribir_pagina_swap * escritura){
 										sizeof(uint32_t) +	    //Tamano de pagina
 										size_datos ;			//Tamano del char* de bytes
 
-	    uint32_t 	streamSize =	sizeof(uint8_t)	+	//Tamano del tipo
-	                  sizeof(uint32_t)+					//Tamano del largo del stream
-	                  size_escritura;					//Tamano del pedido
+	    uint32_t 	streamSize =		sizeof(uint8_t)	+	//Tamano del tipo
+	                  	  	  	  		sizeof(uint32_t)+					//Tamano del largo del stream
+										size_escritura;					//Tamano del pedido
 
 	    t_stream *stream = malloc(streamSize);
 
 	    memset(stream, 0,streamSize);
-	    stream->size = size_escritura;
+	    stream->size = streamSize;
 	    stream->datos = malloc(streamSize);
 	    memset(stream->datos,0,streamSize);
 
-	    uint8_t tipo = 26; 	//Tipo del Mensaje . Fijado estaticamente segun protocolo
+	    uint8_t tipo = 5; 	//Tipo del Mensaje . Fijado estaticamente segun protocolo
 	    uint32_t pid = escritura->pid;
 	    uint32_t pagina = escritura->pagina;
 
@@ -234,7 +231,7 @@ t_stream * serializar_escribir_pagina_swap(t_escribir_pagina_swap * escritura){
 	    memcpy(aux,&tipo,tmpsize=sizeof(uint8_t));
 	    offset+=tmpsize;
 
-	    memcpy(aux+offset,&size_escritura,tmpsize=sizeof(uint32_t));
+	    memcpy(aux+offset,&streamSize,tmpsize=sizeof(uint32_t));
 	    offset+=tmpsize;
 
 	    memcpy(aux+offset,&pid,tmpsize=sizeof(uint32_t));
@@ -262,7 +259,6 @@ t_stream * serializar_leer_pagina_swap(t_leer_pagina_swap * pedido){
 		uint32_t 	size_pedido = 	sizeof(uint32_t) +	    //Tamano del pid
 									sizeof(uint32_t) ;   	//Tamano de pagina
 
-
 	    uint32_t 	streamSize =	sizeof(uint8_t)	+	//Tamano del tipo
 									sizeof(uint32_t)+	//Tamano del largo del stream
 									size_pedido;		//Tamano del pedido
@@ -270,11 +266,11 @@ t_stream * serializar_leer_pagina_swap(t_leer_pagina_swap * pedido){
 	    t_stream *stream = malloc(streamSize);
 
 	    memset(stream, 0,streamSize);
-	    stream->size = size_pedido;
+	    stream->size = streamSize;
 	    stream->datos = malloc(streamSize);
 	    memset(stream->datos,0,streamSize);
 
-	    uint8_t tipo = 22; 	//Tipo del Mensaje . Fijado estaticamente segun protocolo
+	    uint8_t tipo = 3; 	//Tipo del Mensaje . Fijado estaticamente segun protocolo
 	    uint32_t pid = pedido->pid;
 	    uint32_t pagina = pedido->pagina;
 
@@ -282,7 +278,7 @@ t_stream * serializar_leer_pagina_swap(t_leer_pagina_swap * pedido){
 		memcpy(stream->datos,&tipo,tmpsize=sizeof(uint8_t));
 		offset+=tmpsize;
 
-		memcpy(stream->datos+offset,&size_pedido,tmpsize=sizeof(uint32_t));
+		memcpy(stream->datos+offset,&streamSize,tmpsize=sizeof(uint32_t));
 		offset+=tmpsize;
 
 		memcpy(stream->datos+offset,&pid,tmpsize=sizeof(uint32_t));
@@ -304,21 +300,21 @@ t_stream * serializar_iniciar_programa_en_swap(t_iniciar_programa_en_swap * pedi
     size_t size_codigo = strlen(pedido->codigo_programa)+1;
 
     uint32_t 	size_escritura = 	sizeof(uint32_t) +	    //Tamano del pid
-                    sizeof(uint32_t) +	    //Tamano de paginas necesarias
-                    size_codigo ;			//Tamano del char* de bytes
+                    				sizeof(uint32_t) +	    //Tamano de paginas necesarias
+									size_codigo ;			//Tamano del char* de bytes
 
     uint32_t 	streamSize =	sizeof(uint8_t)	+	//Tamano del tipo
-                  sizeof(uint32_t)+	//Tamano del largo del stream
-                  size_escritura;		//Tamano del pedido
+                  	  	  	  	sizeof(uint32_t)+	//Tamano del largo del stream
+								size_escritura;		//Tamano del pedido
 
     t_stream *stream = malloc(streamSize);
 
     memset(stream, 0,streamSize);
-    stream->size = size_escritura;
+    stream->size = streamSize;
     stream->datos = malloc(streamSize);
     memset(stream->datos,0,streamSize);
 
-    uint8_t tipo = 20; 	//Tipo del Mensaje . Fijado estaticamente segun protocolo
+    uint8_t tipo = 1; 	//Tipo del Mensaje . Fijado estaticamente segun protocolo
     uint32_t pid = pedido->pid;
     uint32_t paginas_necesarias = pedido->paginas_necesarias;
 
@@ -330,7 +326,7 @@ t_stream * serializar_iniciar_programa_en_swap(t_iniciar_programa_en_swap * pedi
     memcpy(aux,&tipo,tmpsize=sizeof(uint8_t));
     offset+=tmpsize;
 
-    memcpy(aux+offset,&size_escritura,tmpsize=sizeof(uint32_t));
+    memcpy(aux+offset,&streamSize,tmpsize=sizeof(uint32_t));
     offset+=tmpsize;
 
     memcpy(aux+offset,&pid,tmpsize=sizeof(uint32_t));
