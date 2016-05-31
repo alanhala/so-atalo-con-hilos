@@ -463,16 +463,16 @@ int seleccionar_pagina_victima(t_tabla_de_paginas* tabla)
 }
 
 int reemplazar_test(t_tabla_de_paginas * tabla){
-	int pagina=0;
-	//int pagina=-1;
+
+	int pagina=-1;
 	int i = 0;
-//	for(i; i<tabla->paginas_totales; i++){
-//
-//		if((tabla->entradas[i]).frame != -1){
-//			pagina = i;
-//			break;
-//		}
-//	//}
+	for(i; i<tabla->paginas_totales; i++){
+
+		if((tabla->entradas[i]).frame != -1){
+			pagina = i;
+			break;
+		}
+	}
 	return pagina;
 }
 

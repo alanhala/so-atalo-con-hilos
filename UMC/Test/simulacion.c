@@ -45,14 +45,12 @@ CU_initialize_registry();
 
 
 void simulacion_1(){
-	//voy a cargar 1 programas, las paginas necesarias van a ser 5 mas que el tamanio del codigo ansisop
-	//voy a leer el contenido de la pagina 0 a las necesarias.
 	inicializar_estructuras();
 	set_algoritmo_reemplazo("test");
-	//crear_swap_mock();
-	//printf("%s", SWAPIP); //TODO TENGO ERROR ACA
-	int swap_socket = create_client_socket_descriptor("192.168.0.33", "6000");
-	set_socket_descriptor(swap_socket);
+	crear_swap_mock();
+
+//	int swap_socket = create_client_socket_descriptor("192.168.0.33", "6000");
+	//set_socket_descriptor(swap_socket);
 	char * codigo = "pag00pag01pag02pag03pag04pag05pag06pag07pag08pag09pag10pag11pag12pag13pag14pag15pag16pag17pag18" ;
 	int tamanio_codigo=	strlen(codigo); //no agrego el /0
 
@@ -80,7 +78,7 @@ void simulacion_1(){
 	CU_ASSERT_EQUAL(strcmp(lectura_una_pagina_2, "pag02") , 0);
 	CU_ASSERT_EQUAL(strcmp(lectura_una_pagina_18, "pag18") , 0);
 
-	/*
+
 	escribir_pagina_de_programa(0, 17, 0, TAMANIO_FRAME, "piatti");
 	char * lectura_una_pagina_17 =  leer_pagina_de_programa(0, 17, 0, TAMANIO_FRAME);
 	CU_ASSERT_EQUAL(strcmp(lectura_una_pagina_17, "piatt") , 0);
@@ -88,7 +86,30 @@ void simulacion_1(){
 	escribir_pagina_de_programa(5, 5, 0, TAMANIO_FRAME, "piatti");
 	char * lectura_una_pagina_5_pid5 =  leer_pagina_de_programa(5, 5, 0, TAMANIO_FRAME);
 	CU_ASSERT_EQUAL(strcmp(lectura_una_pagina_5_pid5, "piatt") , 0);
-	*/
+
+
+
+	int lecturas_pid5=0;
+	int resultado_lectura_pid5 = 0;
+	for(lecturas_pid5; lecturas_pid5 < 16; lecturas_pid5 ++){
+		char * lo_que_leo_pid5 =  leer_pagina_de_programa(5, lecturas_pid5, 0, TAMANIO_FRAME);
+		if (!strcmp(lo_que_leo_pid5, "~/-1"))
+			resultado_lectura = -1;
+	}
+
+
+	char * lectura_una_pagina_0_pid5 =  leer_pagina_de_programa(5, 0, 0, TAMANIO_FRAME);
+	char * lectura_una_pagina_17_pid5 =  leer_pagina_de_programa(5, 17, 0, TAMANIO_FRAME);
+	char * lectura_una_pagina_13_pid5 =  leer_pagina_de_programa(5, 13, 0, TAMANIO_FRAME);
+
+	CU_ASSERT_EQUAL(strcmp(lectura_una_pagina_0_pid5, "pag00") , 0);
+	CU_ASSERT_EQUAL(strcmp(lectura_una_pagina_17_pid5, "pag17") , 0);
+	CU_ASSERT_EQUAL(strcmp(lectura_una_pagina_13_pid5, "pag13") , 0);
+
+	escribir_pagina_de_programa(5, 13, 0, TAMANIO_FRAME, "tony");
+	lectura_una_pagina_13_pid5 =  leer_pagina_de_programa(5, 13, 0, TAMANIO_FRAME);
+	CU_ASSERT_EQUAL(strcmp(lectura_una_pagina_13_pid5, "tony") , 0);
+
 }
 
 
