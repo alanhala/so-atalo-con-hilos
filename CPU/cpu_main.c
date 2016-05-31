@@ -28,10 +28,16 @@
 
 void connect_to_UMC();
 void connect_to_Kernel();
-void *connect_to_UMC_thread();
-void *connect_to_kernel_thread(void);
+
 
 int main(int argc, char **argv) {
+
+	if (argc == 2) {
+	    if (strcmp(argv[2], "-conexiones") == 0){
+    		connect_to_UMC();
+    		connect_to_Kernel();
+    	    }
+	}
 	if (strcmp(argv[1], "-test") == 0){
 		 correrTest();
 		 //correrTestSerializacion();
@@ -53,50 +59,22 @@ int main(int argc, char **argv) {
 }
 
 void connect_to_UMC() {
-	pthread_t thread;
-	int thread_result = pthread_create(&thread, NULL, &connect_to_UMC_thread,
-			NULL);
-
-	if (thread_result) {
-		// TODO LOGUEAR ERROR
-		// TODO Analizar el tratamiento que desea darse
-		printf("Error - pthread_create() return code: %d\n", thread_result);
-		exit(1);
-	}
-
-}
-
-void *connect_to_UMC_thread() {
 	int umc_socket_descriptor = create_client_socket_descriptor(UMCIP,
-			UMCPORT);
+    			UMCPORT);
 
-	while (1) { //TODO REVISAR por que hace print de lo que envia y de lo que recibe. puede que ser que sea por el socket?
-			//char header[1];
-			char recvBuffer[15];
-			send(umc_socket_descriptor, "holaa umc, soy cpu\n", 19, 0);
-			//recv(swap_socket_descriptor, header, 2, 0);
-			//char recvBuffer[header];
-			recv(umc_socket_descriptor, recvBuffer, 15, 0);
 
-			printf(recvBuffer);
-			fflush(stdout);
-			sleep(1);
-		}
+
+	set_umc_socket_descriptor(umc_socket_descriptor);
+
 }
+
+
 
 void connect_to_Kernel() {
-	pthread_t thread;
-	int thread_result = pthread_create(&thread, NULL, &connect_to_kernel_thread,
-			NULL);
+	int kernel_socket_descriptor =create_client_socket_descriptor("localhost", KERNELPORT);
 
-	if (thread_result) {
-		// TODO LOGUEAR ERROR
-		// TODO Analizar el tratamiento que desea darse
-		printf("Error - pthread_create() return code: %d\n", thread_result);
-		exit(1);
-	}
+	set_kernel_socket_descriptor(kernel_socket_descriptor);
+
+
 }
 
-void *connect_to_kernel_thread(void) {
-	create_client_socket_descriptor("localhost", KERNELPORT);
-}

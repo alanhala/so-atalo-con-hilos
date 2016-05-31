@@ -55,6 +55,7 @@ void test_definir_variable() {
     CU_ASSERT_EQUAL(list_size(stack_element->variables), 2);
 }
 
+
 void test_obtener_posicion_variable() {
     mockear_pcb();
 
@@ -62,11 +63,23 @@ void test_obtener_posicion_variable() {
 
     t_PCB *pcb = get_PCB();
 
-    t_direccion_virtual_memoria *direccion = obtenerPosicionVariable('a');
-    CU_ASSERT_EQUAL(direccion->size, sizeof(uint32_t));
-    CU_ASSERT_EQUAL(direccion->pagina, 8);
-    CU_ASSERT_EQUAL(direccion->offset, 30);
+    t_dato_en_memoria *dato = obtenerPosicionVariable('a');
+    CU_ASSERT_EQUAL(dato->size, sizeof(uint32_t));
+    CU_ASSERT_EQUAL(dato->direccion.pagina, 8);
+    CU_ASSERT_EQUAL(dato->direccion.offset, 30);
 }
+
+void test_asignar_y_leer_valor() {
+    mockear_pcb();
+    definirVariable('a');
+    t_dato_en_memoria *dato_en_memoria = obtenerPosicionVariable('a');
+    asignar(dato_en_memoria, 1234);
+    t_valor_variable valor = dereferenciar(dato_en_memoria);
+
+    CU_ASSERT_EQUAL(valor, 1234);
+
+}
+
 
 void mockear_pcb() {
     t_PCB *pcb = malloc(sizeof(t_PCB));
@@ -88,10 +101,10 @@ void mockear_pcb() {
 
     pcb->stack = list_create();
 
+
     t_direccion_virtual_memoria *free_space = malloc(sizeof(t_direccion_virtual_memoria));
     free_space->offset = 30;
     free_space->pagina = 8;
-    free_space->size = sizeof(uint32_t);
 
     pcb->stack_next_free_space = *free_space;
 
