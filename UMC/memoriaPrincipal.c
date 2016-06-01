@@ -430,7 +430,7 @@ int seleccionar_pagina_victima(t_tabla_de_paginas* tabla)
 		break;
 
 	case 2: //clock M
-//		pagina_victima= reemplazar_clock_modificado(tabla);
+		pagina_victima= reemplazar_clock_modificado(tabla);
 		break;
 	case 99: //algoritmo_test
 		pagina_victima= reemplazar_test(tabla);
@@ -447,6 +447,7 @@ int busco_cero_cero(t_tabla_de_paginas * tabla){
 	{
 		if ((tabla->entradas[indice]).segunda_oportunidad == 0 && (tabla->entradas[indice]).modificado == 0 && (tabla->entradas[indice]).frame != -1)
 		{
+			int victima = indice;
 			if (tabla->indice_segunda_oportunidad == (tabla->paginas_totales -1))
 			{
 				tabla->indice_segunda_oportunidad = 0;
@@ -456,7 +457,7 @@ int busco_cero_cero(t_tabla_de_paginas * tabla){
 				tabla->indice_segunda_oportunidad = indice + 1;
 			}
 
-			return (tabla->entradas[indice]).frame;
+			return victima;
 		}
 
 		indice ++;
@@ -467,7 +468,7 @@ int busco_cero_cero(t_tabla_de_paginas * tabla){
 	{
 		if ((tabla->entradas[indice]).segunda_oportunidad == 0 && (tabla->entradas[indice]).modificado == 0 && (tabla->entradas[indice]).frame != -1)
 		{
-
+			int victima = indice;
 			if (tabla->indice_segunda_oportunidad == (tabla->paginas_totales -1))
 			{
 				tabla->indice_segunda_oportunidad = 0;
@@ -476,7 +477,7 @@ int busco_cero_cero(t_tabla_de_paginas * tabla){
 			{
 				tabla->indice_segunda_oportunidad = indice + 1;
 			}
-			return (tabla->entradas[indice]).frame;
+			return victima;
 		}
 		indice ++;
 	}
@@ -491,6 +492,7 @@ int busco_cero_uno(t_tabla_de_paginas * tabla){
 	{
 		if ((tabla->entradas[indice]).segunda_oportunidad == 0 && (tabla->entradas[indice]).modificado == 1 && (tabla->entradas[indice]).frame != -1)
 		{
+			int victima = indice;
 			if (tabla->indice_segunda_oportunidad == (tabla->paginas_totales -1))
 			{
 				tabla->indice_segunda_oportunidad = 0;
@@ -500,7 +502,7 @@ int busco_cero_uno(t_tabla_de_paginas * tabla){
 				tabla->indice_segunda_oportunidad = indice + 1;
 			}
 
-			return (tabla->entradas[indice]).frame;
+			return victima;
 		}
 		if ((tabla->entradas[indice]).frame != -1)
 			(tabla->entradas[indice]).segunda_oportunidad = 0;
@@ -512,7 +514,7 @@ int busco_cero_uno(t_tabla_de_paginas * tabla){
 	{
 		if ((tabla->entradas[indice]).segunda_oportunidad == 0 && (tabla->entradas[indice]).modificado == 1 && (tabla->entradas[indice]).frame != -1)
 		{
-
+			int victima = indice;
 			if (tabla->indice_segunda_oportunidad == (tabla->paginas_totales -1))
 			{
 				tabla->indice_segunda_oportunidad = 0;
@@ -521,7 +523,7 @@ int busco_cero_uno(t_tabla_de_paginas * tabla){
 			{
 				tabla->indice_segunda_oportunidad = indice + 1;
 			}
-			return (tabla->entradas[indice]).frame;
+			return victima;
 		}
 		if ((tabla->entradas[indice]).frame != -1)
 					(tabla->entradas[indice]).segunda_oportunidad = 0;
