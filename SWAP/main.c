@@ -31,7 +31,6 @@
 #include "swap.h"
 #include "protocolo_swap.h"
 
-#define LISTENPORT "8000"
 #define BACKLOG 10
 
 void UMC_connection(t_swap* swap);
@@ -46,8 +45,8 @@ int main(int argc, char *argv[]) {
 void UMC_connection(t_swap* swap) {
 	//Solo se va a conectar un proceso UMC
 
-	int server_socket_descriptor = create_server_socket_descriptor("localhost",
-			LISTENPORT,	10);
+	int server_socket_descriptor = create_server_socket_descriptor("192.168.0.33",
+			swap->port,	10);
 
 	int umc_socket_descriptor = accept_connection(server_socket_descriptor);
 

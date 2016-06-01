@@ -11,7 +11,7 @@
 
 	typedef struct {
 		FILE* file;
-		int port;
+		char* port;
 		char* swap_name;
 		unsigned int pages_number;
 		unsigned int page_size;
