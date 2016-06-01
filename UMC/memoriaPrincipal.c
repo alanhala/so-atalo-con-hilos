@@ -354,7 +354,16 @@ int finalizar_programa_de_swap(int pid){
 }
 
 int buscar_en_tlb_frame_de_pagina(int pid, int pagina){
-
+	int frame= -1;
+	int i= 0;
+	while(i < CANTIDAD_ENTRADAS_TLB){
+		if((TLB->entradas[i]).pid == pid && (TLB->entradas[i]).pagina == pagina){
+			frame = (TLB->entradas[i]).frame;
+			break;
+		}
+		i++;
+	}
+	return frame;
 }
 
 int conseguir_frame_mediante_reemplazo(t_tabla_de_paginas* tabla, int pagina) {
@@ -693,6 +702,7 @@ int escribir_pagina_de_programa(int pid, int pagina, int offset, int size, char 
 
 		//ver el tema de los modificados
 		//actualizar_frame(frame, tabla); //aca varia segun el algoritmo de reemplazo
+		actualizar_tlb(pid, pagina, frame);
 		escribir_frame_de_memoria_principal(frame, offset, size, datos);
 
 		return 0; //escritura ok;
@@ -713,6 +723,7 @@ char* leer_pagina_de_programa(int pid, int pagina, int offset, int size){
 		if(frame != -1)
 		{
 			//(tabla->entradas[pagina]).segunda_oportunidad = 1;
+			actualizar_tlb(pid, pagina, frame);
 			return leer_frame_de_memoria_principal(frame, offset, size);
 		}
 		else
@@ -732,8 +743,10 @@ int buscar_victima_tlb_lru(int pid){
 		// la linea de arriba es si le quiero pisar solo al de mi proceso
 		if((TLB->entradas[indice].lru) > mas_viejo
 				&&  TLB->entradas[indice].frame != -1){
+			mas_viejo = (TLB->entradas[indice].lru);
 			victima = indice;
 		}
+		indice ++;
 	}
 	return victima;
 }
@@ -746,9 +759,10 @@ int buscar_entrada_tlb(int pid){
 			entrada_tlb = i;
 			break;
 		}
+		i++;
 	}
 
-	if (entrada_tlb != -1)
+	if (entrada_tlb == -1)
 		entrada_tlb = buscar_victima_tlb_lru(pid);
 
 	return entrada_tlb;
@@ -759,13 +773,30 @@ int buscar_entrada_tlb(int pid){
 void lru_sumarle_uno_a_todos(){
 	int i= 0;
 	while(i < CANTIDAD_ENTRADAS_TLB){
-		if((TLB->entradas[i]).pid == -1){
+		if((TLB->entradas[i]).pid != -1){
 			(TLB->entradas[i]).lru ++;
 		}
+		i++;
 	}
 }
+int esta_presente_en_tlb(int pid, int pagina){
+	int i= 0;
+	while(i < CANTIDAD_ENTRADAS_TLB){
+		if((TLB->entradas[i]).pid == pid && (TLB->entradas[i]).pagina == pagina){
+			return i;
+		}
+		i++;
+	}
+	return  -1;
+}
+
 void actualizar_tlb(int pid, int pagina, int frame){
-	int entrada = buscar_entrada_tlb(pid);
+
+	int entrada = -1;
+
+	entrada = esta_presente_en_tlb(pid,pagina);
+	if (entrada == -1)
+		entrada = buscar_entrada_tlb(pid);
 
 	(TLB->entradas[entrada]).pid = pid;
 	(TLB->entradas[entrada]).lru = -1; // lo seteo en -1 para que cuando le sume uno a todos quede en 0
