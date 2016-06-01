@@ -732,6 +732,77 @@ tabla_tlb* crear_tlb(){
 
 
 
+// COMANDOS
+
+void dump_memory(int pid){
+	//Contenido de memoria:
+	//Datos almacenados en la memoria de todos los procesos o de un proceso en particular.
+	if (pid == -1)
+	{
+
+
+		void dump(t_tabla_de_paginas *tabla)
+		{
+			printf("Contenido en memoria de proceso %d\n", tabla->pid);
+			int i =0;
+			for(i; i<tabla->paginas_totales; i++)
+			{
+				int frame =(tabla->entradas[i]).frame ;
+				if (frame != -1)
+				{
+					char *  contenido = leer_frame_de_memoria_principal(frame, 0, TAMANIO_FRAME);
+					printf("%s\n", contenido);
+				}
+			}
+		}
+		list_iterate(lista_tabla_de_paginas, (void*) dump);
+	}
+	else
+	{
+		t_tabla_de_paginas * tabla = buscar_tabla_de_paginas_de_pid(pid);
+		printf("Contenido en memoria de proceso %d\n", tabla->pid);
+		int i =0;
+		for(i; i<tabla->paginas_totales; i++)
+		{
+			int frame =(tabla->entradas[i]).frame ;
+			if (frame != -1)
+			{
+				char *  contenido = leer_frame_de_memoria_principal(frame, 0, TAMANIO_FRAME);
+				printf("%s\n", contenido);
+			}
+		}
+
+	}
+}
+
+
+void flush_memory(int pid){
+	if (pid == -1)
+		{
+			void flush(t_tabla_de_paginas *tabla)
+			{
+				int i =0;
+				for(i; i<tabla->paginas_totales; i++){
+					(tabla->entradas[i]).modificado = 1;
+				}
+			}
+			list_iterate(lista_tabla_de_paginas, (void*) flush);
+		}
+	else
+	{
+
+		t_tabla_de_paginas * tabla = buscar_tabla_de_paginas_de_pid(pid);
+		int i =0;
+		for(i; i<tabla->paginas_totales; i++){
+			(tabla->entradas[i]).modificado = 1;
+		}
+	}
+}
+
+
+
+
+
 // CONFIGURACION
 
 void set_cantidad_entradas_tlb(int entradas){

@@ -65,7 +65,7 @@ void liberaVariables(t_log* traceLogger, t_config* ptrConfig, t_log* errorLogger
 void detectaCambiosEnConfigFile();
 void cargar_variables_productivas(UMCConfigFile *ptrvaloresConfigFile);
 
-
+void interprete_de_comandos();
 
 int main(int argc, char **argv) {
 
@@ -348,3 +348,27 @@ char* leer_string(t_config *config, char* key) {
 }
 
 
+
+void interprete_de_comandos(){
+	while(1)
+	{
+		// leo una linea
+
+		// si es "retardo xx"
+		//set_retardo(xx);
+
+		// si es dumpstruct xx
+		// dump_structs(xx);
+
+		//si es dumpmemory xx
+		// dump_memory(xx);
+
+		//si es flushmemory xx
+		//flush_memory(xx)
+
+		//si es flushtlb xx
+		//flush_tlb(xx)
+
+	}
+
+}

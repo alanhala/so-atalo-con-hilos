@@ -118,6 +118,22 @@ tabla_tlb* crear_tlb();
 
 
 
+// COMANDOS
+void dump_structs(int pid);
+void dump_memory(int pid);
+void flush_tlb(int pid);
+void flush_memory(int pid);
+/*
+retardo: Este comando permitirá modificar la cantidad de milisegundos que debe esperar el proceso UMC antes de responder una solicitud. Este parámetro será de ayuda para evaluar el funcionamiento del sistema.
+dump: Este comando generará un reporte en pantalla y en un archivo en disco del estado actual de:
+	Estructuras de memoria: Tablas de páginas de todos los procesos o de un proceso en particular.
+
+
+flush
+tlb: Este comando deberá limpiar completamente el contenido de la TLB.
+
+*/
+
 // CONFIGURACION
 
 void set_cantidad_entradas_tlb(int entradas);

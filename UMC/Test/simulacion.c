@@ -39,17 +39,19 @@ void simulacion_1();
 void simulacion_2();
 void simulacion_3();
 void simulacion_alternando_programas();
-
+void comandos();
 void simulacion_simple();
 int simulaciones(){
 
 CU_initialize_registry();
 
       CU_pSuite simulaciones = CU_add_suite("Suite simulaciones", NULL, NULL);
-      CU_add_test(simulaciones, "simulacion_1", simulacion_1);
-	  CU_add_test(simulaciones, "simulacion_2", simulacion_2);
-      CU_add_test(simulaciones, "simulacion_3", simulacion_3);
-      CU_add_test(simulaciones, "simulacion_alternando_programas", simulacion_alternando_programas);
+     // CU_add_test(simulaciones, "simulacion_1", simulacion_1);
+	  //CU_add_test(simulaciones, "simulacion_2", simulacion_2);
+     //CU_add_test(simulaciones, "simulacion_3", simulacion_3);
+      CU_add_test(simulaciones, "comandos", comandos);
+
+      //CU_add_test(simulaciones, "simulacion_alternando_programas", simulacion_alternando_programas);
 	  //CU_add_test(simulaciones, "simulacion_simple", simulacion_simple);
 
 	  CU_basic_set_mode(CU_BRM_VERBOSE);
@@ -62,7 +64,16 @@ CU_initialize_registry();
 
 }
 
+void comandos(){
+	simulacion_3();
+	dump_memory(-1);
+	flush_memory(0);
 
+	t_tabla_de_paginas * tabla = buscar_tabla_de_paginas_de_pid(0);
+
+	int a=0;
+
+}
 
 void simulacion_2(){
 	inicializar_estructuras();
