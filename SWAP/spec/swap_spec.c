@@ -73,7 +73,7 @@ int swap_spec() {
 
 void loads_configuration_file() {
 	t_swap* swap = create_swap("./spec/config_file_test.txt");
-	CU_ASSERT_EQUAL(swap->port, 6000);
+	CU_ASSERT_NSTRING_EQUAL(swap->port, "6000", 4);
 	CU_ASSERT_EQUAL(swap->pages_number, 10);
 	CU_ASSERT_EQUAL(swap->page_size, 5);
 	CU_ASSERT_EQUAL(swap->compaction_delay, 6000);

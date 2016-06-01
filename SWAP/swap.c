@@ -26,7 +26,7 @@ void initialize_bitmap(t_swap* self) {
 t_swap *create_swap(char* config_file_path) {
 	t_swap* self = malloc(sizeof(t_swap));
 	t_config* swap_config = config_create(config_file_path);
-	self->port = config_get_int_value(swap_config, "PUERTO_ESCUCHA");
+	self->port = config_get_string_value(swap_config, "PUERTO_ESCUCHA");
 	self->swap_name = config_get_string_value(swap_config, "NOMBRE_SWAP");
 	self->pages_number = config_get_int_value(swap_config, "CANTIDAD_PAGINAS");
 	self->page_size = config_get_int_value(swap_config, "TAMANIO_PAGINA");
