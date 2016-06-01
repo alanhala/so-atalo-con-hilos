@@ -775,6 +775,8 @@ void actualizar_tlb(int pid, int pagina, int frame){
 	lru_sumarle_uno_a_todos();
 }
 
+
+
 inicializar_entradas_tlb(){
 	entrada_tlb* entradas= malloc(sizeof(entrada_tlb)*CANTIDAD_ENTRADAS_TLB);
 
@@ -801,15 +803,51 @@ tabla_tlb* crear_tlb(){
 
 
 
-
 // COMANDOS
+
+void flush_tlb(int pid){
+	if (pid == -1)
+	{
+		void flush(t_tabla_de_paginas *tabla)
+		{
+			int i= 0;
+			while(i < CANTIDAD_ENTRADAS_TLB){
+				if((TLB->entradas[i]).pid == tabla->pid){
+					(TLB->entradas[i]).pid =-1;
+					(TLB->entradas[i]).lru = 0;
+					(TLB->entradas[i]).pagina = -1;
+					(TLB->entradas[i]).frame = -1;
+				}
+				i++;
+			}
+		}
+		list_iterate(lista_tabla_de_paginas, (void*) flush);
+	}
+	else
+	{
+
+		int i= 0;
+		while(i < CANTIDAD_ENTRADAS_TLB){
+			if((TLB->entradas[i]).pid == pid){
+				(TLB->entradas[i]).pid =-1;
+				(TLB->entradas[i]).lru =0;
+				(TLB->entradas[i]).pagina = -1;
+				(TLB->entradas[i]).frame = -1;
+			}
+			i++;
+		}
+
+
+	}
+
+}
+
 
 void dump_memory(int pid){
 	//Contenido de memoria:
 	//Datos almacenados en la memoria de todos los procesos o de un proceso en particular.
 	if (pid == -1)
 	{
-
 
 		void dump(t_tabla_de_paginas *tabla)
 		{
