@@ -33,8 +33,8 @@ int SWAP_MOCK_ENABLE;
 typedef struct e_t_p{
 	int frame; // si no tiene frame asignado setear en -1
 	int segunda_oportunidad;
-	int utilizado;
 	int modificado;
+	int lru;
 } t_entrada_tabla_de_paginas;
 
 
@@ -111,7 +111,7 @@ int buscar_en_tlb_frame_de_pagina(int tabla, int pagina);
 
 
 int reemplazar_clock(t_tabla_de_paginas * tabla);
-
+int reemplazar_clock_modificado(t_tabla_de_paginas * tabla);
 
 // TLB
 tabla_tlb* crear_tlb();

@@ -102,8 +102,9 @@ t_entrada_tabla_de_paginas* inicializar_paginas(int paginas_requeridas_del_proce
 	while(i<paginas_requeridas_del_proceso)
 	{
 		entradas[i].frame=-1; // para que cuando busque el frame y no tenga devuelva eso
-		entradas[i].modificado=0;
 		entradas[i].segunda_oportunidad =1;
+		entradas[i].modificado=0;
+		entradas[i].lru =0;
 		i++;
 		//TODO INICIARLIZAR TODO LO QUE HAGA FALTA
 	}
@@ -228,6 +229,7 @@ int buscar_frame_de_una_pagina(t_tabla_de_paginas* tabla, int pagina){
 		}
 
 	}
+
 	return frame_de_pagina;
 
 }
@@ -360,32 +362,20 @@ int conseguir_frame_mediante_reemplazo(t_tabla_de_paginas* tabla, int pagina) {
 	printf("\n frame victima %d\n", frame_victima);
 	char* contenido_frame_victima = leer_frame_de_memoria_principal(frame_victima, 0, TAMANIO_FRAME);
 	printf("\n contenido de frame victima a escribir en swap :  %s en pagina victima %d\n", contenido_frame_victima, pagina_victima);
+	escribir_pagina_de_swap(tabla->pid, pagina_victima,     contenido_frame_victima);
+
 	//int pagina_victima = buscar_pagina_de_frame_en_tabla_de_paginas(tabla, frame_victima);
 	// TODO IF PAGINA_VICTIMA FUE MODIFICADO, SINO ES AL PEDO
-	escribir_pagina_de_swap(tabla->pid, pagina_victima,	contenido_frame_victima);
-	//escribir_pagina_de_swap(tabla->pid, pagina,	contenido_frame_victima);
-	//frame = frame_victima;
+	//if ((tabla->entradas[pagina_victima]).modificado == 1)
+	//	escribir_pagina_de_swap(tabla->pid, pagina_victima,	contenido_frame_victima);
+
 	char* contenido_pagina_a_actualizar = leer_pagina_de_swap(tabla->pid, pagina);
-	//char* contenido_pagina_a_actualizar = leer_pagina_de_swap(tabla->pid, pagina_victima);
+
 	printf("\n contenido a actualizar :  %s en pagina victima %d\n", contenido_pagina_a_actualizar, pagina);
 	escribir_frame_de_memoria_principal(frame_victima, 0, TAMANIO_FRAME, contenido_pagina_a_actualizar);
 	actualizar_reemplazo(tabla, frame_victima, pagina, pagina_victima);
 	return frame_victima;
 
-	/*int frame_victima = seleccionar_frame_victima(tabla);
-	//int frame_victima= (tabla->entradas[pagina_victima]).frame;
-	char* contenido_frame_victima = leer_frame_de_memoria_principal(frame_victima, 0, TAMANIO_FRAME);
-	int pagina_victima = buscar_pagina_de_frame_en_tabla_de_paginas(tabla, frame_victima);
-	// TODO IF PAGINA_VICTIMA FUE MODIFICADO, SINO ES AL PEDO
-	escribir_pagina_de_swap(tabla->pid, pagina_victima,	contenido_frame_victima);
-	//escribir_pagina_de_swap(tabla->pid, pagina,	contenido_frame_victima);
-	frame = frame_victima;
-	char* contenido_pagina_a_actualizar = leer_pagina_de_swap(tabla->pid, pagina);
-	//char* contenido_pagina_a_actualizar = leer_pagina_de_swap(tabla->pid, pagina_victima);
-
-	escribir_frame_de_memoria_principal(frame, 0, TAMANIO_FRAME, contenido_pagina_a_actualizar);
-	actualizar_reemplazo(tabla, frame, pagina, pagina_victima);
-	return frame; */
 
 }
 
@@ -427,34 +417,20 @@ int buscar_pagina_de_frame_en_tabla_de_paginas(t_tabla_de_paginas * tabla, int f
 	return pagina;
 }
 
-//obsoleto
-void actualizar_frame(t_tabla_de_paginas * tabla, int frame){
-	switch(ALGORITMO_REEMPLAZO){
 
-
-	case 1: //algoritmo clock
-		break;
-	case 2: //algoritmo clock modificado
-		break;
-	case 99: //algoritmo test
-			break;
-	}
-
-
-}
 int reemplazar_test(t_tabla_de_paginas * tabla);
 int seleccionar_pagina_victima(t_tabla_de_paginas* tabla)
 {
 	//ACA SELECCIONO EL FRAME CON CONTENIDO SEGUN ALGORITMO Y LO GUARDO EN SWAP. LUEGO DEVUELVO EL
 	//FRAME DE LA VICTIMA PARA QUE SEA UTILIZADO POR OTRA PAGINA
-	int pagina_victima ;
+	int pagina_victima =-1 ;
 	switch(ALGORITMO_REEMPLAZO){
 	case 1: //clock
 		pagina_victima= reemplazar_clock(tabla);
 		break;
 
 	case 2: //clock M
-		//frame= reemplazar_clock_modificado(tabla);
+//		pagina_victima= reemplazar_clock_modificado(tabla);
 		break;
 	case 99: //algoritmo_test
 		pagina_victima= reemplazar_test(tabla);
@@ -464,15 +440,57 @@ int seleccionar_pagina_victima(t_tabla_de_paginas* tabla)
 	return pagina_victima;
 }
 
-int reemplazar_clock(t_tabla_de_paginas * tabla){
+int busco_cero_cero(t_tabla_de_paginas * tabla){
 	int indice = tabla->indice_segunda_oportunidad;
 
 	while(indice < tabla->paginas_totales)
 	{
-		if ((tabla->entradas[indice]).segunda_oportunidad == 0 && (tabla->entradas[indice]).frame != -1)
+		if ((tabla->entradas[indice]).segunda_oportunidad == 0 && (tabla->entradas[indice]).modificado == 0 && (tabla->entradas[indice]).frame != -1)
 		{
-			//TODO NO SE SI ES NECESARIO SUMARLE UNO AL INDICE PERO LO DIJO MASOERO
-//			tabla->indice_segunda_oportunidad = indice;
+			if (tabla->indice_segunda_oportunidad == (tabla->paginas_totales -1))
+			{
+				tabla->indice_segunda_oportunidad = 0;
+			}
+			else
+			{
+				tabla->indice_segunda_oportunidad = indice + 1;
+			}
+
+			return (tabla->entradas[indice]).frame;
+		}
+
+		indice ++;
+	}
+
+	indice = 0;
+	while(indice < tabla->indice_segunda_oportunidad)
+	{
+		if ((tabla->entradas[indice]).segunda_oportunidad == 0 && (tabla->entradas[indice]).modificado == 0 && (tabla->entradas[indice]).frame != -1)
+		{
+
+			if (tabla->indice_segunda_oportunidad == (tabla->paginas_totales -1))
+			{
+				tabla->indice_segunda_oportunidad = 0;
+			}
+			else
+			{
+				tabla->indice_segunda_oportunidad = indice + 1;
+			}
+			return (tabla->entradas[indice]).frame;
+		}
+		indice ++;
+	}
+
+	return  -1; //no encontro a ninguno
+}
+
+int busco_cero_uno(t_tabla_de_paginas * tabla){
+	int indice = tabla->indice_segunda_oportunidad;
+
+	while(indice < tabla->paginas_totales)
+	{
+		if ((tabla->entradas[indice]).segunda_oportunidad == 0 && (tabla->entradas[indice]).modificado == 1 && (tabla->entradas[indice]).frame != -1)
+		{
 			if (tabla->indice_segunda_oportunidad == (tabla->paginas_totales -1))
 			{
 				tabla->indice_segunda_oportunidad = 0;
@@ -492,10 +510,9 @@ int reemplazar_clock(t_tabla_de_paginas * tabla){
 	indice = 0;
 	while(indice < tabla->indice_segunda_oportunidad)
 	{
-		if ((tabla->entradas[indice]).segunda_oportunidad == 0 && (tabla->entradas[indice]).frame != -1)
+		if ((tabla->entradas[indice]).segunda_oportunidad == 0 && (tabla->entradas[indice]).modificado == 1 && (tabla->entradas[indice]).frame != -1)
 		{
 
-//			tabla->indice_segunda_oportunidad = indice;
 			if (tabla->indice_segunda_oportunidad == (tabla->paginas_totales -1))
 			{
 				tabla->indice_segunda_oportunidad = 0;
@@ -507,6 +524,86 @@ int reemplazar_clock(t_tabla_de_paginas * tabla){
 			return (tabla->entradas[indice]).frame;
 		}
 		if ((tabla->entradas[indice]).frame != -1)
+					(tabla->entradas[indice]).segunda_oportunidad = 0;
+		indice ++;
+	}
+
+	return -1 ; //no encontro ninguno
+}
+
+int reemplazar_clock_modificado(t_tabla_de_paginas * tabla){
+	int indice = tabla->indice_segunda_oportunidad;
+
+
+	int pagina_victima = busco_cero_cero(tabla);
+
+	if (pagina_victima != -1)
+		return pagina_victima;
+
+	pagina_victima = busco_cero_uno(tabla);
+
+	if (pagina_victima != -1)
+			return pagina_victima;
+
+	pagina_victima = busco_cero_cero(tabla);
+
+	if (pagina_victima != -1)
+		return pagina_victima;
+
+	pagina_victima = busco_cero_uno(tabla);
+
+	if (pagina_victima != -1)
+			return pagina_victima;
+
+
+	return -1; // el algoritmo no funciono
+
+
+}
+
+
+
+int reemplazar_clock(t_tabla_de_paginas * tabla){
+	int indice = tabla->indice_segunda_oportunidad;
+
+	while(indice < tabla->paginas_totales)
+	{
+		if ((tabla->entradas[indice]).segunda_oportunidad == 0 && (tabla->entradas[indice]).frame != -1)
+		{
+			if (tabla->indice_segunda_oportunidad == (tabla->paginas_totales -1))
+			{
+				tabla->indice_segunda_oportunidad = 0;
+			}
+			else
+			{
+				tabla->indice_segunda_oportunidad = indice + 1;
+			}
+			return indice;
+			//return (tabla->entradas[indice]).frame;
+		}
+		if ((tabla->entradas[indice]).frame != -1)
+			(tabla->entradas[indice]).segunda_oportunidad = 0;
+		indice ++;
+	}
+
+	indice = 0;
+	while(indice < tabla->indice_segunda_oportunidad)
+	{
+		if ((tabla->entradas[indice]).segunda_oportunidad == 0 && (tabla->entradas[indice]).frame != -1)
+		{
+
+			if (tabla->indice_segunda_oportunidad == (tabla->paginas_totales -1))
+			{
+				tabla->indice_segunda_oportunidad = 0;
+			}
+			else
+			{
+				tabla->indice_segunda_oportunidad = indice + 1;
+			}
+			return indice;
+			//return (tabla->entradas[indice]).frame;
+		}
+		if ((tabla->entradas[indice]).frame != -1)
 			(tabla->entradas[indice]).segunda_oportunidad = 0;
 		indice ++;
 	}
@@ -516,9 +613,10 @@ int reemplazar_clock(t_tabla_de_paginas * tabla){
 		{
 			if ((tabla->entradas[indice]).segunda_oportunidad == 0 && (tabla->entradas[indice]).frame != -1)
 			{
-				//todo chequeo que el frame sea distinto de -1 ??
+
 				tabla->indice_segunda_oportunidad = indice;
-				return (tabla->entradas[indice]).frame;
+				return indice;
+				///return (tabla->entradas[indice]).frame;
 			}
 			if ((tabla->entradas[indice]).frame != -1)
 				(tabla->entradas[indice]).segunda_oportunidad = 0;
@@ -532,7 +630,8 @@ int reemplazar_clock(t_tabla_de_paginas * tabla){
 			{
 
 				tabla->indice_segunda_oportunidad = indice;
-				return (tabla->entradas[indice]).frame;
+				return indice;
+				//return (tabla->entradas[indice]).frame;
 			}
 			if ((tabla->entradas[indice]).frame != -1)
 				(tabla->entradas[indice]).segunda_oportunidad = 0;
@@ -560,41 +659,19 @@ int reemplazar_test(t_tabla_de_paginas * tabla){
 void actualizar_reemplazo(t_tabla_de_paginas* tabla, int frame_a_asignar,int pagina, int pagina_victima){
 	tabla->entradas[pagina].frame=frame_a_asignar;
 	tabla->entradas[pagina].segunda_oportunidad=1;
+	tabla->entradas[pagina].modificado=0;
+
 	//tabla->entradas[pagina].utilizado=1;
 	//tabla->frames_en_uso +=1;
 
 
 	tabla->entradas[pagina_victima].frame = -1;
 	tabla->entradas[pagina_victima].segunda_oportunidad = 1;
+	tabla->entradas[pagina_victima].modificado = 0;
 
 	//todo eze: analizar
 }
 
-
-
-
-//obsoleto
-void marca_no_utilizada_entrada(t_tabla_de_paginas* tabla, int frame)
-{
-	int pagina = dame_pagina_de_un_frame_para_tabla(tabla, frame);
-	tabla->entradas[pagina].utilizado=0;
-}
-
-int dame_pagina_de_un_frame_para_tabla(t_tabla_de_paginas *tabla, int frame){
-	t_entrada_tabla_de_paginas* entradas = tabla->entradas;
-
-	//TODO eze: testear si con i < size o <=
-	int i=0;
-	for(i ;i< list_size(entradas); i++ )
-	{
-		if(entradas[i].frame == frame && entradas[i].utilizado)
-		{
-		   return i;
-		}
-
-	}
-	return -1;
-}
 
 
 int tiene_tabla_mas_paginas_para_pedir(t_tabla_de_paginas* tabla)
@@ -608,6 +685,9 @@ int escribir_pagina_de_programa(int pid, int pagina, int offset, int size, char 
 
 	if(frame != -1)
 	{
+		//(tabla->entradas[pagina]).segunda_oportunidad = 1;
+		//(tabla->entradas[pagina]).modificado = 0;
+
 		//ver el tema de los modificados
 		//actualizar_frame(frame, tabla); //aca varia segun el algoritmo de reemplazo
 		escribir_frame_de_memoria_principal(frame, offset, size, datos);
@@ -624,10 +704,12 @@ int escribir_pagina_de_programa(int pid, int pagina, int offset, int size, char 
 char* leer_pagina_de_programa(int pid, int pagina, int offset, int size){
 
 		t_tabla_de_paginas * tabla = buscar_tabla_de_paginas_de_pid(pid);
+
 		int frame = buscar_frame_de_una_pagina(tabla, pagina);
 
 		if(frame != -1)
 		{
+			//(tabla->entradas[pagina]).segunda_oportunidad = 1;
 			return leer_frame_de_memoria_principal(frame, offset, size);
 		}
 		else
