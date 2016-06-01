@@ -14,7 +14,7 @@ int TAMANIO_FRAME;
 int CANTIDAD_FRAMES;
 
 int ALGORITMO_REEMPLAZO;
-
+tabla_tlb TLB; //AGREGAR LOS SEMAFOROS QUE CORRESPONDAN
 
 int	CANTIDAD_ENTRADAS_TLB;
 int TLB_HABILITADA;
@@ -55,8 +55,9 @@ typedef struct s_f {
 
 typedef struct entradatlb {
 	int pid;
-	int pag;
+	int pagina;
 	int frame;
+	int lru;
 } entrada_tlb;
 
 typedef struct tlb {
@@ -114,6 +115,7 @@ int reemplazar_clock(t_tabla_de_paginas * tabla);
 int reemplazar_clock_modificado(t_tabla_de_paginas * tabla);
 
 // TLB
+tabla_tlb TLB; //AGREGAR LOS SEMAFOROS QUE CORRESPONDAN
 tabla_tlb* crear_tlb();
 
 

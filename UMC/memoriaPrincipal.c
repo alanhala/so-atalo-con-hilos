@@ -24,6 +24,7 @@ int inicializar_estructuras() {
 	inicializar_semaforos();
 	TAMANIO_MEMORIA_PRINCIPAL = TAMANIO_FRAME * CANTIDAD_FRAMES;
 	crear_memoria_principal();
+	TLB = crear_tlb();
 	lista_tabla_de_paginas = list_create();
 	crear_lista_frames();
 	return 0;
@@ -722,11 +723,80 @@ char* leer_pagina_de_programa(int pid, int pagina, int offset, int size){
 
 // TLB
 
-tabla_tlb* crear_tlb(){
-	tabla_tlb* tabla = malloc(sizeof(tabla_tlb));
+int buscar_victima_tlb_lru(int pid){
+	int victima = -1;
+	int indice = 0;
+	int mas_viejo = -1;
+	while(indice < CANTIDAD_ENTRADAS_TLB){
+		//if((TLB->entradas[indice]).pid == pid &&  (TLB->entradas[indice].lru) > mas_viejo
+		// la linea de arriba es si le quiero pisar solo al de mi proceso
+		if((TLB->entradas[indice].lru) > mas_viejo
+				&&  TLB->entradas[indice].frame != -1){
+			victima = indice;
+		}
+	}
+	return victima;
+}
+
+int buscar_entrada_tlb(int pid){
+	int entrada_tlb = -1;
+	int i= 0;
+	while(i < CANTIDAD_ENTRADAS_TLB){
+		if((TLB->entradas[i]).pid == -1){
+			entrada_tlb = i;
+			break;
+		}
+	}
+
+	if (entrada_tlb != -1)
+		entrada_tlb = buscar_victima_tlb_lru(pid);
+
+	return entrada_tlb;
+
+
+}
+
+void lru_sumarle_uno_a_todos(){
+	int i= 0;
+	while(i < CANTIDAD_ENTRADAS_TLB){
+		if((TLB->entradas[i]).pid == -1){
+			(TLB->entradas[i]).lru ++;
+		}
+	}
+}
+void actualizar_tlb(int pid, int pagina, int frame){
+	int entrada = buscar_entrada_tlb(pid);
+
+	(TLB->entradas[entrada]).pid = pid;
+	(TLB->entradas[entrada]).lru = -1; // lo seteo en -1 para que cuando le sume uno a todos quede en 0
+	(TLB->entradas[entrada]).frame = frame;
+	(TLB->entradas[entrada]).pagina = pagina;
+
+	lru_sumarle_uno_a_todos();
+}
+
+inicializar_entradas_tlb(){
 	entrada_tlb* entradas= malloc(sizeof(entrada_tlb)*CANTIDAD_ENTRADAS_TLB);
-	tabla->entradas = entradas;
-	return tabla;
+
+	int i=0;
+	while(i<CANTIDAD_ENTRADAS_TLB)
+	{
+		entradas[i].pid =-1;
+		entradas[i].frame=-1; // para que cuando busque el frame y no tenga devuelva eso
+		entradas[i].pagina =-1;
+		entradas[i].lru =0;
+		i++;
+
+	}
+	return entradas;
+
+}
+tabla_tlb* crear_tlb(){
+
+	entrada_tlb* entradas = inicializar_entradas_tlb();
+	tabla_tlb* tlb = malloc(sizeof(tabla_tlb));
+	tlb->entradas = entradas;
+	return tlb;
 }
 
 
