@@ -29,6 +29,7 @@
 #include <semaphore.h>
 #include "socket.h"
 #include "memoriaPrincipal.h"
+#include "protocoloUMC.h"
 #include "main.h"
 
 int BACKLOG =10;
@@ -70,8 +71,15 @@ int main(int argc, char **argv) {
 	if (strcmp(argv[1], "-test") == 0 || strcmp(argv[1], "-testMock") == 0){
 		if(strcmp(argv[1], "-testMock") == 0)
 			set_test();//para usar mock
+		//simulaciones();
 
-	int cpu_socket_descriptor = create_server_socket_descriptor("192.168.0.33",5000,BACKLOG);
+		//correr_swap_mock_test();
+
+		//correrTest();
+		//correrTestSerializacion();
+	}
+
+	int cpu_socket_descriptor = create_server_socket_descriptor("localhost","5000",BACKLOG);
 
 	while (1) {
 
@@ -136,29 +144,16 @@ int main(int argc, char **argv) {
 			int bytes_sent = send(cpu_socket_descriptor,buffer->datos,buffer->size,0);
 		}
 
+	}
+	connect_to_SWAP();
+		kernel_and_cpu_connections();
 
-		//simulaciones();
-
-		//correr_swap_mock_test();
-
-		//correrTest();
-		//correrTestSerializacion();
+		while (1) {
+			sleep(10);
+		}
 
 		return 0;
-	}
-
-
-
-	connect_to_SWAP();
-	kernel_and_cpu_connections();
-
-	while (1) {
-		sleep(10);
-	}
-
-	return 0;
 }
-
 void kernel_and_cpu_connections() {
 	pthread_t thread;
 	int thread_result = pthread_create(&thread, NULL,
@@ -435,5 +430,5 @@ void interprete_de_comandos(){
 
 	}
 
-}
+
 }
