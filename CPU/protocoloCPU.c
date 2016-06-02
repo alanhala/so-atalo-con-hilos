@@ -23,11 +23,11 @@ t_stream *serializar_mensaje(int tipo,void* unaEstructura) {
 	t_stream *stream;
 
 	switch(tipo){
-	case (2):
+	case (31):
 			stream = serializar_pedido_bytes_de_una_pagina_a_UMC((t_solicitar_bytes_de_una_pagina_a_UMC *)unaEstructura);
 			break;
 
-	case (10):
+	case (33):
 			stream = serializar_escribir_bytes_de_una_pagina_en_UMC((t_escribir_bytes_de_una_pagina_en_UMC *)unaEstructura);
 			break;
 	}
@@ -54,23 +54,22 @@ t_stream *serializar_escribir_bytes_de_una_pagina_en_UMC(t_escribir_bytes_de_una
 	t_stream *stream = malloc(streamSize);
 
 	memset(stream, 0,streamSize);
-	stream->size = size_escritura;
+	stream->size = streamSize;
 	stream->datos = malloc(streamSize);
 	memset(stream->datos,0,streamSize);
 
-	uint8_t tipo = 10; 	//Tipo del Mensaje . Fijado estaticamente segun protocolo
+	uint8_t tipo = 33; 	//Tipo del Mensaje . Fijado estaticamente segun protocolo
 	uint32_t numero_pagina = escritura->pagina;
 	uint32_t offset_pagina = escritura->offset;
 	uint32_t size_pagina = escritura->size;
 
-	char* aux = malloc(streamSize);
+	char *aux = malloc(streamSize);
 	char *escritura_aux = escritura->buffer;
-
 
 	memcpy(aux,&tipo,tmpsize=sizeof(uint8_t));
 	offset+=tmpsize;
 
-	memcpy(aux+offset,&size_escritura,tmpsize=sizeof(uint32_t));
+	memcpy(aux+offset,&streamSize,tmpsize=sizeof(uint32_t));
 	offset+=tmpsize;
 
 	memcpy(aux+offset,&numero_pagina,tmpsize=sizeof(uint32_t));
@@ -97,6 +96,7 @@ t_stream *serializar_escribir_bytes_de_una_pagina_en_UMC(t_escribir_bytes_de_una
 }
 
 t_stream *serializar_pedido_bytes_de_una_pagina_a_UMC(t_solicitar_bytes_de_una_pagina_a_UMC *pedido){
+
 	uint32_t 	tmpsize = 0,
 				offset = 0;
 
@@ -111,11 +111,11 @@ t_stream *serializar_pedido_bytes_de_una_pagina_a_UMC(t_solicitar_bytes_de_una_p
 	t_stream *stream = malloc(streamSize);
 
 	memset(stream, 0,streamSize);
-	stream->size = size_pedido;
+	stream->size = streamSize;
 	stream->datos = malloc(streamSize);
 	memset(stream->datos,0,streamSize);
 
-	uint8_t tipo = 2; 	//Tipo del Mensaje . Fijado estaticamente segun protocolo
+	uint8_t tipo = 31; 	//Tipo del Mensaje . Fijado estaticamente segun protocolo
 	uint32_t numero_pagina = pedido->pagina;
 	uint32_t offset_pagina = pedido->offset;
 	uint32_t size_pagina = pedido->size;
@@ -123,7 +123,7 @@ t_stream *serializar_pedido_bytes_de_una_pagina_a_UMC(t_solicitar_bytes_de_una_p
 	memcpy(stream->datos,&tipo,tmpsize=sizeof(uint8_t));
 	offset+=tmpsize;
 
-	memcpy(stream->datos+offset,&size_pedido,tmpsize=sizeof(uint32_t));
+	memcpy(stream->datos+offset,&streamSize,tmpsize=sizeof(uint32_t));
 	offset+=tmpsize;
 
 	memcpy(stream->datos+offset,&numero_pagina,tmpsize=sizeof(uint32_t));
@@ -144,10 +144,10 @@ void *deserealizar_mensaje(uint8_t tipo, char* datos) {
 	void* estructuraDestino;
 
 	switch(tipo){
-	case (3):
+	case (32):
 			estructuraDestino = deserializar_respuesta_bytes_de_una_pagina_a_CPU (datos);
 			break;
-	case (11):
+	case (34):
 			estructuraDestino = deserializar_respuesta_escribir_bytes_de_una_pagina_en_UMC (datos);
 			break;
 	}

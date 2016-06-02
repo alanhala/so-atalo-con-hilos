@@ -42,7 +42,6 @@ void crear_memoria_principal() {
 	MEMORIA_PRINCIPAL = datos;
 }
 
-
 void liberar_memoria_principal() {
 	free(MEMORIA_PRINCIPAL);
 }
@@ -94,7 +93,6 @@ void finalizar_programa(int pid){
 
 	list_remove_by_condition(lista_tabla_de_paginas, pid_iguales);
 
-
 }
 
 t_entrada_tabla_de_paginas* inicializar_paginas(int paginas_requeridas_del_proceso) {
@@ -109,7 +107,6 @@ t_entrada_tabla_de_paginas* inicializar_paginas(int paginas_requeridas_del_proce
 		i++;
 		//TODO INICIARLIZAR TODO LO QUE HAGA FALTA
 	}
-
 	return entradas;
 }
 
@@ -141,8 +138,6 @@ void asignar_frame_a_una_pagina(t_tabla_de_paginas* tabla, int frame_a_asignar,	
 
 }
 
-
-
 int devolver_frame_de_pagina(t_tabla_de_paginas* tabla, int pagina) {
 	// Cuando la pagina no tiene asignado frame es -1
 	return tabla->entradas[pagina].frame;
@@ -173,8 +168,6 @@ t_tabla_de_paginas* buscar_tabla_de_paginas_de_pid(int pid_buscado) {
 
 }
 
-
-
 void crear_lista_frames() {
 	sem_wait(&mut_lista_frames);
 	lista_frames = list_create();
@@ -193,8 +186,6 @@ void agregar_frame_a_lista_de_frames(int numero_de_frame) {
 	list_add(lista_frames, nuevo_frame);
 }
 
-
-
 void marcar_frame_como_libre(int numero_de_frame){
 	int frames_iguales(t_frame *frame) {
 					return (frame->frame == numero_de_frame);
@@ -202,8 +193,6 @@ void marcar_frame_como_libre(int numero_de_frame){
 	t_frame * frame_a_modificar = list_find(lista_frames, (void *)frames_iguales);
 	frame_a_modificar->asignado = 0;
 }
-
-
 
 int buscar_frame_de_una_pagina(t_tabla_de_paginas* tabla, int pagina){
 
@@ -234,8 +223,6 @@ int buscar_frame_de_una_pagina(t_tabla_de_paginas* tabla, int pagina){
 	return frame_de_pagina;
 
 }
-
-
 
 int cargar_nuevo_programa_en_swap(int pid, int paginas_requeridas_del_proceso, char *codigo_programa){
 
@@ -427,8 +414,8 @@ int buscar_pagina_de_frame_en_tabla_de_paginas(t_tabla_de_paginas * tabla, int f
 	return pagina;
 }
 
-
 int reemplazar_test(t_tabla_de_paginas * tabla);
+
 int seleccionar_pagina_victima(t_tabla_de_paginas* tabla)
 {
 	//ACA SELECCIONO EL FRAME CON CONTENIDO SEGUN ALGORITMO Y LO GUARDO EN SWAP. LUEGO DEVUELVO EL
@@ -544,8 +531,8 @@ int busco_cero_uno(t_tabla_de_paginas * tabla){
 }
 
 int reemplazar_clock_modificado(t_tabla_de_paginas * tabla){
-	int indice = tabla->indice_segunda_oportunidad;
 
+	int indice = tabla->indice_segunda_oportunidad;
 
 	int pagina_victima = busco_cero_cero(tabla);
 
@@ -567,13 +554,9 @@ int reemplazar_clock_modificado(t_tabla_de_paginas * tabla){
 	if (pagina_victima != -1)
 			return pagina_victima;
 
-
 	return -1; // el algoritmo no funciono
 
-
 }
-
-
 
 int reemplazar_clock(t_tabla_de_paginas * tabla){
 	int indice = tabla->indice_segunda_oportunidad;
@@ -658,7 +641,7 @@ int reemplazar_test(t_tabla_de_paginas * tabla){
 
 	int pagina=-1;
 	int i = 0;
-	for(i; i<tabla->paginas_totales; i++){
+	for(i=0; i<tabla->paginas_totales; i++){
 
 		if((tabla->entradas[i]).frame != -1){
 			pagina = i;
@@ -669,13 +652,13 @@ int reemplazar_test(t_tabla_de_paginas * tabla){
 }
 
 void actualizar_reemplazo(t_tabla_de_paginas* tabla, int frame_a_asignar,int pagina, int pagina_victima){
+
 	tabla->entradas[pagina].frame=frame_a_asignar;
 	tabla->entradas[pagina].segunda_oportunidad=1;
 	tabla->entradas[pagina].modificado=0;
 
 	//tabla->entradas[pagina].utilizado=1;
 	//tabla->frames_en_uso +=1;
-
 
 	tabla->entradas[pagina_victima].frame = -1;
 	tabla->entradas[pagina_victima].segunda_oportunidad = 1;

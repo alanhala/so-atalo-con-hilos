@@ -33,10 +33,10 @@ void *deserealizar_mensaje(uint8_t tipo, char* datos) {
 	case (6):
 			estructuraDestino = deserializar_respuesta_escribir_pagina_swap(datos);
 	        break;
-	case (8):
+	case (31):
 			estructuraDestino = deserializar_pedido_bytes_de_una_pagina_a_UMC(datos);
 			break;
-	case (10):
+	case (33):
 			estructuraDestino = deserializar_escribir_bytes_de_una_pagina_en_UMC(datos);
 			break;
 
@@ -120,7 +120,6 @@ t_escribir_bytes_de_una_pagina_en_UMC *deserializar_escribir_bytes_de_una_pagina
 	t_escribir_bytes_de_una_pagina_en_UMC *escritura = malloc(sizeof(t_escribir_bytes_de_una_pagina_en_UMC));
 	memset(escritura,0, sizeof(t_escribir_bytes_de_una_pagina_en_UMC));
 
-
 	memcpy(&escritura->pagina, datos+desplazamientoHeader, tmpsize = sizeof(uint32_t));
 	offset+=tmpsize;
 	offset+=desplazamientoHeader;
@@ -130,7 +129,6 @@ t_escribir_bytes_de_una_pagina_en_UMC *deserializar_escribir_bytes_de_una_pagina
 
 	memcpy(&escritura->size, datos+offset, tmpsize = sizeof(uint32_t));
 	offset+=tmpsize;
-
 
 	for(tamanoDato = 0; (datos+offset)[tamanoDato] != '\0';tamanoDato++);//incremento tamanoDato, hasta el tamaÃ±o del nombre
 
@@ -187,10 +185,10 @@ t_stream *serializar_mensaje(int tipo, void* unaEstructura) {
 	case (5):
 				stream = serializar_escribir_pagina_swap((t_escribir_pagina_swap *)unaEstructura);
 				break;
-	case (7):
+	case (32):
 			stream = serializar_respuesta_bytes_de_una_pagina_a_CPU((t_respuesta_bytes_de_una_pagina_a_CPU *)unaEstructura);
 			break;
-	case (9):
+	case (34):
 			stream = serializar_respuesta_escribir_bytes_de_una_pagina_en_UMC((t_respuesta_escribir_bytes_de_una_pagina_en_UMC *)unaEstructura);
 			break;
 	  }
@@ -348,6 +346,7 @@ t_stream * serializar_iniciar_programa_en_swap(t_iniciar_programa_en_swap * pedi
 }
 
 t_stream *serializar_respuesta_escribir_bytes_de_una_pagina_en_UMC(t_respuesta_escribir_bytes_de_una_pagina_en_UMC *respuesta){
+
 		uint32_t 	tmpsize = 0,
 					offset = 0;
 
@@ -360,18 +359,18 @@ t_stream *serializar_respuesta_escribir_bytes_de_una_pagina_en_UMC(t_respuesta_e
 		t_stream *stream = malloc(streamSize);
 
 		memset(stream, 0,streamSize);
-		stream->size = size_respuesta;
+		stream->size = streamSize;
 		stream->datos = malloc(streamSize);
 		memset(stream->datos,0,streamSize);
 
 
-		uint8_t tipo = 2; 	//Tipo del Mensaje . Fijado estaticamente segun protocolo
+		uint8_t tipo = 34; 	//Tipo del Mensaje . Fijado estaticamente segun protocolo
 		uint32_t escritura_resultado = respuesta->escritura_correcta;
 
 		memcpy(stream->datos,&tipo,tmpsize=sizeof(uint8_t));
 		offset+=tmpsize;
 
-		memcpy(stream->datos+offset,&size_respuesta,tmpsize=sizeof(uint32_t));
+		memcpy(stream->datos+offset,&streamSize,tmpsize=sizeof(uint32_t));
 		offset+=tmpsize;
 
 		memcpy(stream->datos+offset,&escritura_resultado,tmpsize=sizeof(uint32_t));
@@ -402,12 +401,12 @@ t_stream *serializar_respuesta_bytes_de_una_pagina_a_CPU(t_respuesta_bytes_de_un
  	char* aux = malloc(streamSize);
  	char *respuesta_aux = unaEstructura->bytes_de_una_pagina;
 
-	uint8_t tipo = 3; 	//Tipo del Mensaje . Fijado estaticamente segun protocolo
+	uint8_t tipo = 32; 	//Tipo del Mensaje . Fijado estaticamente segun protocolo
 
 	memcpy(aux,&tipo,tmpsize=sizeof(uint8_t));
 	offset+=tmpsize;
 
-	memcpy(aux+offset,&size_bytes_de_una_pagina,tmpsize=sizeof(uint32_t));
+	memcpy(aux+offset,&streamSize,tmpsize=sizeof(uint32_t));
 	offset+=tmpsize;
 
 	memcpy(aux+offset,respuesta_aux,tmpsize=size_bytes_de_una_pagina);

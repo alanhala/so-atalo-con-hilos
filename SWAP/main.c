@@ -103,7 +103,7 @@ void UMC_connection(t_swap* swap) {
 
 			t_stream *buffer = serializar_mensaje(4,respuesta_bytes);
 
-			int bytes_sent= send(umc_socket_descriptor, buffer->datos, buffer->size, 0);
+			int bytes_sent = send(umc_socket_descriptor, buffer->datos, buffer->size, 0);
 
 		}
 

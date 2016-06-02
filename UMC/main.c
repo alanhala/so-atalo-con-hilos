@@ -59,12 +59,10 @@ typedef struct umcConfigFile {
 char* leer_string(t_config *config, char* key);
 
 unsigned leerUnsigned(t_config *config, char* key);
-
 void levantaConfigFileEnVariables(UMCConfigFile *ptrvaloresConfigFile,t_config *ptrConfig);
 void liberaVariables(t_log* traceLogger, t_config* ptrConfig, t_log* errorLogger, t_config* ptrConfigUpdate);
 void detectaCambiosEnConfigFile();
 void cargar_variables_productivas(UMCConfigFile *ptrvaloresConfigFile);
-
 void interprete_de_comandos();
 
 int main(int argc, char **argv) {
@@ -73,7 +71,73 @@ int main(int argc, char **argv) {
 		if(strcmp(argv[1], "-testMock") == 0)
 			set_test();//para usar mock
 
-		simulaciones();
+	int cpu_socket_descriptor = create_server_socket_descriptor("192.168.0.33",5000,BACKLOG);
+
+	while (1) {
+
+		t_header *aHeader = malloc(sizeof(t_header));
+
+		char 	buffer_header[5];	//Buffer donde se almacena el header recibido
+
+		int 	bytes_recibidos_header,	//Cantidad de bytes recibidos en el recv() que recibe el header
+				bytes_recibidos;		//Cantidad de bytes recibidos en el recv() que recibe el mensaje completo
+
+		bytes_recibidos_header = recv(cpu_socket_descriptor, buffer_header, 5, MSG_PEEK);
+
+		char buffer_recv[buffer_header[1]]; 	//El buffer para recibir el mensaje se crea con la longitud recibida
+
+		if(buffer_header[0] == 31) {
+
+			int bytes_recibidos = recv(cpu_socket_descriptor,buffer_recv,buffer_header[1],0);
+
+			t_solicitar_bytes_de_una_pagina_a_UMC *bytes_de_una_pagina = malloc(sizeof(t_solicitar_bytes_de_una_pagina_a_UMC));
+
+			bytes_de_una_pagina = (t_solicitar_bytes_de_una_pagina_a_UMC *)deserealizar_mensaje(buffer_header[0],buffer_recv);
+
+			char *datos_de_lectura = leer_pagina_de_programa(
+					1,
+					bytes_de_una_pagina->pagina,
+					bytes_de_una_pagina->offset,
+					bytes_de_una_pagina->size);
+
+			t_respuesta_bytes_de_una_pagina_a_CPU *respuesta_bytes = malloc(sizeof(t_respuesta_bytes_de_una_pagina_a_CPU));
+
+			memset(respuesta_bytes,0,sizeof(t_respuesta_bytes_de_una_pagina_a_CPU));
+
+			respuesta_bytes->bytes_de_una_pagina = datos_de_lectura;
+
+			t_stream *buffer = (t_stream*)serializar_mensaje(32,respuesta_bytes);
+
+			int bytes_sent = send(cpu_socket_descriptor,buffer->datos,buffer->size,0);
+
+		}
+
+		if(buffer_header[0] == 33) {
+
+			int bytes_recibidos = recv(cpu_socket_descriptor,buffer_recv,buffer_header[1],0);
+
+			t_escribir_bytes_de_una_pagina_en_UMC *bytes_de_una_pagina = malloc(sizeof(t_escribir_bytes_de_una_pagina_en_UMC));
+
+			bytes_de_una_pagina = (t_escribir_bytes_de_una_pagina_en_UMC *)deserealizar_mensaje(buffer_header[0],buffer_recv);
+
+			int estado_escritura = escribir_pagina_de_programa(
+					1,
+					bytes_de_una_pagina->pagina,
+					bytes_de_una_pagina->offset,
+					bytes_de_una_pagina->size,
+					bytes_de_una_pagina->buffer);
+
+			t_respuesta_escribir_bytes_de_una_pagina_en_UMC *respuesta_escritura = malloc(sizeof(t_respuesta_escribir_bytes_de_una_pagina_en_UMC));
+
+			respuesta_escritura->escritura_correcta = estado_escritura;
+
+			t_stream *buffer = (t_stream*)serializar_mensaje(34,respuesta_escritura);
+
+			int bytes_sent = send(cpu_socket_descriptor,buffer->datos,buffer->size,0);
+		}
+
+
+		//simulaciones();
 
 		//correr_swap_mock_test();
 
@@ -371,4 +435,5 @@ void interprete_de_comandos(){
 
 	}
 
+}
 }

@@ -55,22 +55,20 @@ int main(int argc, char **argv) {
 }
 
 void connect_to_UMC() {
-	int umc_socket_descriptor = create_client_socket_descriptor(UMCIP,
-    			UMCPORT);
 
-
+	int umc_socket_descriptor = create_client_socket_descriptor(UMCIP, UMCPORT);
 
 	set_umc_socket_descriptor(umc_socket_descriptor);
+
 
 }
 
 
 
 void connect_to_Kernel() {
+
 	int kernel_socket_descriptor =create_client_socket_descriptor("localhost", KERNELPORT);
 
 	set_kernel_socket_descriptor(kernel_socket_descriptor);
-
-
 }
 

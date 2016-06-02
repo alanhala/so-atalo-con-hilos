@@ -90,43 +90,72 @@ void asignar(t_puntero direccion_variable, t_valor_variable valor) {
 t_respuesta_bytes_de_una_pagina_a_CPU* leer_memoria_de_umc(t_dato_en_memoria dato) {
 
     t_solicitar_bytes_de_una_pagina_a_UMC *pedido = malloc(sizeof(t_solicitar_bytes_de_una_pagina_a_UMC));
+
     memset(pedido,0,sizeof(t_solicitar_bytes_de_una_pagina_a_UMC));
 
     pedido->pagina = dato.direccion.pagina;
     pedido->offset = dato.direccion.offset;
     pedido->size = dato.size;
 
-    t_stream *buffer = (t_stream*)serializar_mensaje(2,pedido);
-    send(UMC_DESCRIPTOR, buffer->datos, 20, 0);
+    t_stream *buffer = (t_stream*)serializar_mensaje(31,pedido);
 
-    char recv_buffer[50];
-    recv(UMC_DESCRIPTOR, recv_buffer, 50, 0);
+    send(UMC_DESCRIPTOR, buffer->datos, buffer->size, 0);
+
+    t_header *aHeader = malloc(sizeof(t_header));
+
+    char 	buffer_header[5];	//Buffer donde se almacena el header recibido
+
+    int 	bytes_recibidos_header,	//Cantidad de bytes recibidos en el recv() que recibe el header
+        	bytes_recibidos;		//Cantidad de bytes recibidos en el recv() que recibe el mensaje completo
+
+    recv(UMC_DESCRIPTOR, buffer_header, 5, MSG_PEEK);
+
+    char buffer_recv[buffer_header[1]];
+
+    recv(UMC_DESCRIPTOR, buffer_recv, buffer_header[1], 0);
 
     t_respuesta_bytes_de_una_pagina_a_CPU *respuesta = malloc(sizeof(t_respuesta_bytes_de_una_pagina_a_CPU));
-    respuesta = (t_respuesta_bytes_de_una_pagina_a_CPU*)deserealizar_mensaje(3, recv_buffer);
+
+    respuesta = (t_respuesta_bytes_de_una_pagina_a_CPU*)deserealizar_mensaje(buffer_header[0], buffer_recv);
 
     return respuesta;
 }
 
 t_respuesta_escribir_bytes_de_una_pagina_en_UMC* escribir_en_umc(t_dato_en_memoria dato, void* valor) {
+
     int umc_socket_descriptor = create_client_socket_descriptor("localhost","2007");
-    char * bytes_de_la_pagina = (char*)valor;
+
+    char *bytes_de_la_pagina = (char *)valor;
+
     t_escribir_bytes_de_una_pagina_en_UMC *escritura_bytes = malloc(sizeof(t_escribir_bytes_de_una_pagina_en_UMC));
+
     memset(escritura_bytes,0,sizeof(t_escribir_bytes_de_una_pagina_en_UMC));
+
     escritura_bytes->pagina = dato.direccion.pagina;
     escritura_bytes->offset = dato.direccion.offset;
     escritura_bytes->size= dato.size;
     escritura_bytes->buffer = bytes_de_la_pagina;
 
-    t_stream *buffer = serializar_mensaje(10,escritura_bytes);
+    t_stream *buffer = serializar_mensaje(33,escritura_bytes);
 
-    int bytes= send(umc_socket_descriptor, buffer->datos, 70, 0);
+    int bytes = send(umc_socket_descriptor, buffer->datos, buffer->size, 0);
 
-    char recv_buffer[20];
-    recv(umc_socket_descriptor, recv_buffer, 20, 0);
+    t_header *aHeader = malloc(sizeof(t_header));
+
+    char 	buffer_header[5];	//Buffer donde se almacena el header recibido
+
+    int 	bytes_recibidos_header,	//Cantidad de bytes recibidos en el recv() que recibe el header
+            bytes_recibidos;		//Cantidad de bytes recibidos en el recv() que recibe el mensaje completo
+
+    recv(umc_socket_descriptor, buffer_header, 5, MSG_PEEK);
+
+    char buffer_recv[buffer_header[1]];
+
+    recv(UMC_DESCRIPTOR, buffer_recv, buffer_header[1], 0);
 
     t_respuesta_escribir_bytes_de_una_pagina_en_UMC * respuesta = malloc(sizeof(t_respuesta_escribir_bytes_de_una_pagina_en_UMC));
-    return (t_respuesta_escribir_bytes_de_una_pagina_en_UMC*)deserealizar_mensaje(11, recv_buffer);
+
+    return (t_respuesta_escribir_bytes_de_una_pagina_en_UMC*)deserealizar_mensaje(34, buffer_recv);
 }
 
 void incrementar_next_free_space(uint32_t size) {
