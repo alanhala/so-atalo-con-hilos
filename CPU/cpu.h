@@ -80,4 +80,6 @@ void asignar(t_puntero direccion_variable, t_valor_variable valor);
 t_respuesta_bytes_de_una_pagina_a_CPU* leer_memoria_de_umc(t_dato_en_memoria dato);
 t_respuesta_escribir_bytes_de_una_pagina_en_UMC* escribir_en_umc(t_dato_en_memoria dato, void* valor);
 
+char* ejecutar_lectura_de_dato_con_iteraciones(void*(*lectura)(t_dato_en_memoria*), t_dato_en_memoria* dato, uint32_t tamanio_pagina);
+
 #endif /* CPU_H_ */

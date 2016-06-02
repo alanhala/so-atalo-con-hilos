@@ -123,8 +123,6 @@ t_respuesta_bytes_de_una_pagina_a_CPU* leer_memoria_de_umc(t_dato_en_memoria dat
 
 t_respuesta_escribir_bytes_de_una_pagina_en_UMC* escribir_en_umc(t_dato_en_memoria dato, void* valor) {
 
-    int umc_socket_descriptor = create_client_socket_descriptor("localhost","2007");
-
     char *bytes_de_la_pagina = (char *)valor;
 
     t_escribir_bytes_de_una_pagina_en_UMC *escritura_bytes = malloc(sizeof(t_escribir_bytes_de_una_pagina_en_UMC));
@@ -138,7 +136,7 @@ t_respuesta_escribir_bytes_de_una_pagina_en_UMC* escribir_en_umc(t_dato_en_memor
 
     t_stream *buffer = serializar_mensaje(33,escritura_bytes);
 
-    int bytes = send(umc_socket_descriptor, buffer->datos, buffer->size, 0);
+    int bytes = send(UMC_DESCRIPTOR, buffer->datos, buffer->size, 0);
 
     t_header *aHeader = malloc(sizeof(t_header));
 
@@ -147,7 +145,7 @@ t_respuesta_escribir_bytes_de_una_pagina_en_UMC* escribir_en_umc(t_dato_en_memor
     int 	bytes_recibidos_header,	//Cantidad de bytes recibidos en el recv() que recibe el header
             bytes_recibidos;		//Cantidad de bytes recibidos en el recv() que recibe el mensaje completo
 
-    recv(umc_socket_descriptor, buffer_header, 5, MSG_PEEK);
+    recv(UMC_DESCRIPTOR, buffer_header, 5, MSG_PEEK);
 
     char buffer_recv[buffer_header[1]];
 
@@ -199,7 +197,32 @@ t_stack_element* create_stack_element() {
 }
 
 
+char* ejecutar_lectura_de_dato_con_iteraciones(void*(*closure_lectura)(t_dato_en_memoria*), t_dato_en_memoria* dato, uint32_t tamanio_pagina) {
+    if(dato->direccion.offset + dato->size < tamanio_pagina) {
+	return closure_lectura(dato);
+    }
 
+    char *result = malloc(sizeof(char) * dato->size);
+    t_dato_en_memoria aux_dato = *dato;
+    int remaining_size = dato->size;
+    int desplazamiento_acumulado = 0;
+
+    while(remaining_size > 0) {
+	if(remaining_size > tamanio_pagina) {
+	    aux_dato.size = tamanio_pagina - aux_dato.direccion.offset;
+	} else {
+	    aux_dato.size = remaining_size;
+	}
+
+	memcpy(result+desplazamiento_acumulado, closure_lectura(&aux_dato), aux_dato.size);
+
+	desplazamiento_acumulado += aux_dato.size;
+	aux_dato.direccion.offset = 0;
+	remaining_size -= aux_dato.size;
+    }
+
+    return result;
+}
 
 set_umc_socket_descriptor(int socket_descriptor){
 

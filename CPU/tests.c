@@ -16,6 +16,7 @@ int correrTest(){
 	CU_add_test(prueba, "dos", test_definir_variable);
 	CU_add_test(prueba, "tres", test_obtener_posicion_variable);
 	CU_add_test(prueba, "cuatro", test_actualizar_next_free_space);
+	CU_add_test(prueba, "cinco", test_leer_data_de_memoria_con_iteraciones);
 
 	CU_basic_set_mode(CU_BRM_VERBOSE);
 	CU_basic_run_tests();
@@ -129,5 +130,20 @@ void mockear_pcb() {
     list_add(pcb->stack, stack_element);
 
     set_PCB(pcb);
+}
+
+void test_leer_data_de_memoria_con_iteraciones() {
+    char* leer_memoria(t_dato_en_memoria *dato) {
+	return "0123456789";
+    }
+
+    t_dato_en_memoria *dato = malloc(sizeof(t_dato_en_memoria));
+    dato->size = 15;
+    dato->direccion.offset=2;
+    dato->direccion.pagina=1;
+
+    char* result = ejecutar_lectura_de_dato_con_iteraciones(leer_memoria, dato, 5);
+
+    CU_ASSERT_STRING_EQUAL(result, "012012340123401");
 }
 
