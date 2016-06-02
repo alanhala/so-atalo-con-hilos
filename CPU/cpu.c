@@ -219,6 +219,7 @@ char* ejecutar_lectura_de_dato_con_iteraciones(void*(*closure_lectura)(t_dato_en
 	desplazamiento_acumulado += aux_dato.size;
 	aux_dato.direccion.offset = 0;
 	remaining_size -= aux_dato.size;
+	aux_dato.direccion.pagina++;
     }
 
     return result;

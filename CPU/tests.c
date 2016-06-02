@@ -134,7 +134,12 @@ void mockear_pcb() {
 
 void test_leer_data_de_memoria_con_iteraciones() {
     char* leer_memoria(t_dato_en_memoria *dato) {
-	return "0123456789";
+	switch(dato->direccion.pagina) {
+	    case (1): return "0123456789";
+	    case (2):
+	    case(4): return "abcdefgh";
+	    case (3): return "987654";
+	}
     }
 
     t_dato_en_memoria *dato = malloc(sizeof(t_dato_en_memoria));
@@ -144,6 +149,6 @@ void test_leer_data_de_memoria_con_iteraciones() {
 
     char* result = ejecutar_lectura_de_dato_con_iteraciones(leer_memoria, dato, 5);
 
-    CU_ASSERT_STRING_EQUAL(result, "012012340123401");
+    CU_ASSERT_STRING_EQUAL(result, "012abcde98765ab");
 }
 
