@@ -32,12 +32,12 @@ void connect_to_Kernel();
 
 int main(int argc, char **argv) {
 
-	/*if (argc == 3) {
+	if (argc == 3) {
 	    if (strcmp(argv[2], "-conexiones") == 0){
     		connect_to_UMC();
     		//connect_to_Kernel();
     	    }
-	}*/
+	}
 
 	if (strcmp(argv[1], "-test") == 0){
 		 correrTest();
@@ -45,8 +45,8 @@ int main(int argc, char **argv) {
 		 return 0;
 	}
 
-	connect_to_UMC();
-	    	connect_to_Kernel();
+	//connect_to_UMC();
+	//connect_to_Kernel();
 
 	while (1) { // para que no se cierren los threads
 		sleep(10);

@@ -79,8 +79,8 @@ int main(int argc, char **argv) {
 		//correrTestSerializacion();
 	}
 
-	int cpu_socket_descriptor = create_server_socket_descriptor("localhost","5000",BACKLOG);
-
+	int server_socket_descriptor = create_server_socket_descriptor(NULL,"5000",BACKLOG);
+	int cpu_socket_descriptor = accept_connection(server_socket_descriptor);
 	while (1) {
 
 		t_header *aHeader = malloc(sizeof(t_header));
