@@ -68,18 +68,20 @@ void interprete_de_comandos();
 
 int main(int argc, char **argv) {
 
-	if (strcmp(argv[1], "-test") == 0 || strcmp(argv[1], "-testMock") == 0){
-		if(strcmp(argv[1], "-testMock") == 0)
-			set_test();//para usar mock
+	//if (strcmp(argv[1], "-test") == 0 || strcmp(argv[1], "-testMock") == 0){
+//		if(strcmp(argv[1], "-testMock") == 0)
+	//		set_test();//para usar mock
 		//simulaciones();
 
 		//correr_swap_mock_test();
 
 		//correrTest();
 		//correrTestSerializacion();
-	}
-	set_test();
-	crear_swap_mock();
+	//}
+	//set_test();
+	//crear_swap_mock();
+	int swap_socket = create_client_socket_descriptor("localhost", "6000");
+	set_socket_descriptor(swap_socket);
 	inicializar_estructuras();
 	cargar_nuevo_programa(1, 50, "cargo un programa");
 	int server_socket_descriptor = create_server_socket_descriptor(NULL,"5000",BACKLOG);
