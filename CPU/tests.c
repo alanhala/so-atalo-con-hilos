@@ -17,6 +17,7 @@ int correrTest(){
 	CU_add_test(prueba, "tres", test_obtener_posicion_variable);
 	CU_add_test(prueba, "cuatro", test_actualizar_next_free_space);
 	CU_add_test(prueba, "cinco", test_leer_data_de_memoria_con_iteraciones);
+	CU_add_test(prueba, "seis", test_asignar_y_leer_valor);
 
 	CU_basic_set_mode(CU_BRM_VERBOSE);
 	CU_basic_run_tests();
