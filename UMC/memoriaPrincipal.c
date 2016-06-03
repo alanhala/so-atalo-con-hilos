@@ -257,7 +257,7 @@ int cargar_nuevo_programa_en_swap(int pid, int paginas_requeridas_del_proceso, c
 
 		respuesta = (t_respuesta_iniciar_programa_en_swap*)deserealizar_mensaje(buffer_header[0], buffer_recv);
 
-	return respuesta;
+	return respuesta->cargado_correctamente;
 }
 
 char * leer_pagina_de_swap(int pid, int pagina){

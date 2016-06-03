@@ -6,6 +6,9 @@
  *      Author: utnso
  */
 #include "cpu.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <commons/collections/list.h>
 
 AnSISOP_funciones functions = {
@@ -76,18 +79,21 @@ t_puntero obtenerPosicionVariable(t_nombre_variable identificador_variable) {
 t_valor_variable dereferenciar(t_puntero direccion_variable) {
     t_dato_en_memoria *direccion = (t_dato_en_memoria*) direccion_variable;
 
-    t_respuesta_bytes_de_una_pagina_a_CPU* respuesta = leer_memoria_de_umc(*direccion);
-
-    return (t_valor_variable)respuesta;
+    char* respuesta = leer_memoria_de_umc(*direccion);
+    int valor;
+    char * ptr;
+    valor = strtol(respuesta, &ptr, 10);
+    return valor;
 }
 
 void asignar(t_puntero direccion_variable, t_valor_variable valor) {
     t_dato_en_memoria *direccion = (t_variable*) direccion_variable;
 
-    escribir_en_umc(*direccion, valor);
+    char * str =string_itoa(valor);
+    int resultado_escritura = escribir_en_umc(direccion, str);
 }
 
-t_respuesta_bytes_de_una_pagina_a_CPU* leer_memoria_de_umc(t_dato_en_memoria dato) {
+char* leer_memoria_de_umc(t_dato_en_memoria dato) {
 
     t_solicitar_bytes_de_una_pagina_a_UMC *pedido = malloc(sizeof(t_solicitar_bytes_de_una_pagina_a_UMC));
 
@@ -118,21 +124,21 @@ t_respuesta_bytes_de_una_pagina_a_CPU* leer_memoria_de_umc(t_dato_en_memoria dat
 
     respuesta = (t_respuesta_bytes_de_una_pagina_a_CPU*)deserealizar_mensaje(buffer_header[0], buffer_recv);
 
-    return respuesta;
+    return respuesta->bytes_de_una_pagina;
 }
 
-t_respuesta_escribir_bytes_de_una_pagina_en_UMC* escribir_en_umc(t_dato_en_memoria dato, void* valor) {
+int escribir_en_umc(t_dato_en_memoria * dato, char* valor) {
 
-    char *bytes_de_la_pagina = (char *)valor;
+    //char *bytes_de_la_pagina = (char *)valor;
 
     t_escribir_bytes_de_una_pagina_en_UMC *escritura_bytes = malloc(sizeof(t_escribir_bytes_de_una_pagina_en_UMC));
 
     memset(escritura_bytes,0,sizeof(t_escribir_bytes_de_una_pagina_en_UMC));
 
-    escritura_bytes->pagina = dato.direccion.pagina;
-    escritura_bytes->offset = dato.direccion.offset;
-    escritura_bytes->size= dato.size;
-    escritura_bytes->buffer = bytes_de_la_pagina;
+    escritura_bytes->pagina = (dato->direccion).pagina;
+    escritura_bytes->offset = (dato->direccion).offset;
+    escritura_bytes->size= strlen(valor);
+    escritura_bytes->buffer = valor;
 
     t_stream *buffer = serializar_mensaje(33,escritura_bytes);
 
@@ -153,7 +159,8 @@ t_respuesta_escribir_bytes_de_una_pagina_en_UMC* escribir_en_umc(t_dato_en_memor
 
     t_respuesta_escribir_bytes_de_una_pagina_en_UMC * respuesta = malloc(sizeof(t_respuesta_escribir_bytes_de_una_pagina_en_UMC));
 
-    return (t_respuesta_escribir_bytes_de_una_pagina_en_UMC*)deserealizar_mensaje(34, buffer_recv);
+    respuesta =(t_respuesta_escribir_bytes_de_una_pagina_en_UMC*)deserealizar_mensaje(34, buffer_recv);
+    return respuesta->escritura_correcta;
 }
 
 void incrementar_next_free_space(uint32_t size) {

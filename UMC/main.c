@@ -78,7 +78,10 @@ int main(int argc, char **argv) {
 		//correrTest();
 		//correrTestSerializacion();
 	}
-
+	set_test();
+	crear_swap_mock();
+	inicializar_estructuras();
+	cargar_nuevo_programa(1, 50, "cargo un programa");
 	int server_socket_descriptor = create_server_socket_descriptor(NULL,"5000",BACKLOG);
 	int cpu_socket_descriptor = accept_connection(server_socket_descriptor);
 	while (1) {
