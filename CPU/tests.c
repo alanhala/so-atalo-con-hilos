@@ -17,7 +17,8 @@ int correrTest(){
 	CU_add_test(prueba, "tres", test_obtener_posicion_variable);
 	CU_add_test(prueba, "cuatro", test_actualizar_next_free_space);
 	CU_add_test(prueba, "cinco", test_leer_data_de_memoria_con_iteraciones);
-	CU_add_test(prueba, "seis", test_asignar_y_leer_valor);
+	CU_add_test(prueba, "seis", test_asignar_y_leer_valor_de_una_sola_pagina);
+	CU_add_test(prueba, "siete", test_asignar_y_leer_valor_de_varias_paginas);
 
 	CU_basic_set_mode(CU_BRM_VERBOSE);
 	CU_basic_run_tests();
@@ -68,12 +69,27 @@ void test_obtener_posicion_variable() {
 
     t_dato_en_memoria *dato = obtenerPosicionVariable('a');
     CU_ASSERT_EQUAL(dato->size, sizeof(uint32_t));
-    CU_ASSERT_EQUAL(dato->direccion.pagina, 8);
+    CU_ASSERT_EQUAL(dato->direccion.pagina, 3);
     CU_ASSERT_EQUAL(dato->direccion.offset, 30);
 }
 
-void test_asignar_y_leer_valor() {
+void test_asignar_y_leer_valor_de_una_sola_pagina() {
     mockear_pcb();
+    definirVariable('a');
+    t_dato_en_memoria *dato_en_memoria = obtenerPosicionVariable('a');
+    asignar(dato_en_memoria, 1234);
+    t_valor_variable valor = dereferenciar(dato_en_memoria);
+
+    CU_ASSERT_EQUAL(valor, 1234);
+}
+
+void test_asignar_y_leer_valor_de_varias_paginas() {
+    mockear_pcb();
+
+    t_PCB *pcb = get_PCB();
+    pcb->stack_next_free_space.offset = 39;
+    set_PCB(pcb);
+
     definirVariable('a');
     t_dato_en_memoria *dato_en_memoria = obtenerPosicionVariable('a');
     asignar(dato_en_memoria, 1234);
@@ -90,12 +106,12 @@ void test_actualizar_next_free_space() {
     t_PCB *pcb = get_PCB();
 
     CU_ASSERT_EQUAL(pcb->stack_next_free_space.offset, 0);
-    CU_ASSERT_EQUAL(pcb->stack_next_free_space.pagina, 9);
+    CU_ASSERT_EQUAL(pcb->stack_next_free_space.pagina, 4);
 
     incrementar_next_free_space(sizeof(t_variable));
 
     CU_ASSERT_EQUAL(pcb->stack_next_free_space.offset, sizeof(t_variable));
-    CU_ASSERT_EQUAL(pcb->stack_next_free_space.pagina, 9);
+    CU_ASSERT_EQUAL(pcb->stack_next_free_space.pagina, 4);
 }
 
 
@@ -123,7 +139,7 @@ void mockear_pcb() {
 
     t_direccion_virtual_memoria *free_space = malloc(sizeof(t_direccion_virtual_memoria));
     free_space->offset = 30;
-    free_space->pagina = 8;
+    free_space->pagina = 3;
 
     pcb->stack_next_free_space = *free_space;
 
@@ -152,4 +168,3 @@ void test_leer_data_de_memoria_con_iteraciones() {
 
     CU_ASSERT_STRING_EQUAL(result, "012abcde98765ab");
 }
-

@@ -13,17 +13,12 @@
 int correrTest();
 
 void mockear_pcb();
-
 void obtener_siguiente_instruccion();
-
 void test_definir_variable();
-
 void test_obtener_posicion_variable();
-
 void test_actualizar_next_free_space();
-
-void test_asignar_y_leer_valor();
-
+void test_asignar_y_leer_valor_de_una_sola_pagina();
 void test_leer_data_de_memoria_con_iteraciones();
+void test_asignar_y_leer_valor_de_varias_paginas();
 
 #endif /* TESTS_H_ */
