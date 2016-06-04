@@ -63,6 +63,8 @@ void connect_to_UMC() {
 	int umc_socket_descriptor = create_client_socket_descriptor(UMCIP, UMCPORT);
 
 	set_umc_socket_descriptor(umc_socket_descriptor);
+	int a =1;
+	send(umc_socket_descriptor, &a, sizeof(int), 0);
 
 
 }
