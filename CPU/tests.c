@@ -15,7 +15,7 @@ int correrTest(){
 	CU_add_test(prueba, "uno", obtener_siguiente_instruccion);
 	CU_add_test(prueba, "dos", test_definir_variable);
 	CU_add_test(prueba, "tres", test_obtener_posicion_variable);
-	//CU_add_test(prueba, "cuatro", test_actualizar_next_free_space);
+	CU_add_test(prueba, "cuatro", test_actualizar_next_free_space);
 	CU_add_test(prueba, "cinco", test_leer_data_de_memoria_con_iteraciones);
 	CU_add_test(prueba, "seis", test_asignar_y_leer_valor_de_una_sola_pagina);
 	CU_add_test(prueba, "siete", test_asignar_y_leer_valor_de_varias_paginas);
@@ -101,17 +101,17 @@ void test_asignar_y_leer_valor_de_varias_paginas() {
 void test_actualizar_next_free_space() {
     mockear_pcb();
 
-    incrementar_next_free_space(sizeof(t_variable));
+    incrementar_next_free_space(4);
 
     t_PCB *pcb = get_PCB();
 
-    CU_ASSERT_EQUAL(pcb->stack_next_free_space.offset, 0);
+    CU_ASSERT_EQUAL(pcb->stack_next_free_space.offset, 2);
     CU_ASSERT_EQUAL(pcb->stack_next_free_space.pagina, 4);
 
-    incrementar_next_free_space(sizeof(t_variable));
+    incrementar_next_free_space(4);
 
-    CU_ASSERT_EQUAL(pcb->stack_next_free_space.offset, sizeof(t_variable));
-    CU_ASSERT_EQUAL(pcb->stack_next_free_space.pagina, 4);
+    CU_ASSERT_EQUAL(pcb->stack_next_free_space.offset, 1);
+    CU_ASSERT_EQUAL(pcb->stack_next_free_space.pagina, 5);
 }
 
 

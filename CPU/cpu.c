@@ -164,13 +164,13 @@ int escribir_en_umc(t_dato_en_memoria * dato, char* valor) {
 }
 
 void incrementar_next_free_space(uint32_t size) {
-    /*t_direccion_virtual_memoria direccion = pcb->stack_next_free_space;
-    if(direccion.offset + 1 >= tamanio_pagina) {
-	pcb->stack_next_free_space.pagina++;
-	pcb->stack_next_free_space.offset = 0;
-    } else {
-	pcb->stack_next_free_space.offset += size;
-    }*/
+    int absolute_offset = (tamanio_pagina * pcb->stack_next_free_space.pagina ) + pcb->stack_next_free_space.offset + size;
+
+    int new_pages = absolute_offset / tamanio_pagina;
+    int new_offset = absolute_offset - (new_pages * tamanio_pagina);
+
+    pcb->stack_next_free_space.pagina = new_pages;
+    pcb->stack_next_free_space.offset = new_offset;
 };
 
 void free_stack_element_memory(t_stack_element *element) {
