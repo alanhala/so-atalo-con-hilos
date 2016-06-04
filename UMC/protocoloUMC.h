@@ -24,6 +24,14 @@ typedef struct {
 }__attribute__((packed)) t_header;
 
 typedef struct {
+	uint32_t un_numero;
+}__attribute__((packed)) t_cambio_de_proceso;
+
+typedef struct {
+	uint32_t un_numero;
+}__attribute__((packed)) t_respuesta_cambio_de_proceso;
+
+typedef struct {
 	uint32_t pagina;	//Numero de pagina
 	uint32_t offset;	//Offset de la pagina
 	uint32_t size; 		//Tamano de los datos a escribir
@@ -50,9 +58,6 @@ t_stream *serializar_respuesta_escribir_bytes_de_una_pagina_en_UMC(t_respuesta_e
 t_escribir_bytes_de_una_pagina_en_UMC * deserializar_escribir_bytes_de_una_pagina_en_UMC(datos);
 
 
-
-
-
 // UMC - SWAP
 
 typedef struct {
@@ -64,6 +69,12 @@ typedef struct {
 typedef struct {
   int cargado_correctamente; // 0 si ok, -1 si no ok
 }__attribute__((packed)) t_respuesta_iniciar_programa_en_swap;
+
+typedef struct {
+	uint32_t process_id;
+	uint32_t cantidad_de_paginas;
+	char *codigo_de_programa;
+}__attribute__((packed)) t_inicio_de_programa_en_UMC;
 
 t_stream * serializar_iniciar_programa_en_swap(t_iniciar_programa_en_swap *pedido);
 t_respuesta_iniciar_programa_en_swap * deserializar_respuesta_iniciar_programa_en_swap(char* datos);

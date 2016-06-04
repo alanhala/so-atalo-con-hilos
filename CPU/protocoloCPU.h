@@ -17,6 +17,10 @@ typedef struct {
 }__attribute__((packed)) t_solicitar_bytes_de_una_pagina_a_UMC;
 
 typedef struct {
+	uint32_t un_numero;
+}__attribute__((packed)) t_respuesta_cambio_de_proceso;
+
+typedef struct {
 	uint32_t pagina;	//Numero de pagina
 	uint32_t offset;	//Offset de la pagina
 	uint32_t size; 		//Tamano de los datos a escribir
@@ -31,6 +35,10 @@ typedef struct {
 	uint8_t tipo;
 	uint32_t length;
 }__attribute__((packed)) t_header;
+
+typedef struct {
+	uint32_t un_numero;
+}__attribute__((packed)) t_cambio_de_proceso;
 
 typedef struct {
 	uint32_t size;

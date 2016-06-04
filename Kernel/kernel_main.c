@@ -66,11 +66,35 @@ void *cpu_connection(int socket_descriptor) {
 	while (1) {
 		int client_socket_descriptor = accept_connection(
 				socket_descriptor);
-		printf("Se conection una CPU");
-		fflush(stdout);
+		//printf("Se conection una CPU");
+		//fflush(stdout);
 	}
-}
 
+}
+/*
+void *umc_connection(int socket_descriptor) {
+	while (1) {
+		int client_socket_descriptor = accept_connection(
+				socket_descriptor);
+		//printf("Se conection una CPU");
+		//fflush(stdout);
+
+		t_header *aHeader = malloc(sizeof(t_header));
+
+		char 	buffer_header[5];	//Buffer donde se almacena el header recibido
+
+		int 	bytes_recibidos_header,	//Cantidad de bytes recibidos en el recv() que recibe el header
+				bytes_recibidos;		//Cantidad de bytes recibidos en el recv() que recibe el mensaje completo
+
+		bytes_recibidos_header = recv(client_socket_descriptor, buffer_header, 5, MSG_PEEK);
+
+		char buffer_recv[buffer_header[1]]; 	//El buffer para recibir el mensaje se crea con la longitud recibida
+
+		if (buffer_header[0] == 1)
+	}
+
+}
+*/
 void *console_connection(int socket_desciptor) {
 	while (1) {
 		int client_socket_descriptor = accept_connection(socket_desciptor);

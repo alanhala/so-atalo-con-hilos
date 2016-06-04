@@ -39,27 +39,64 @@ void *deserealizar_mensaje(uint8_t tipo, char* datos) {
 	case (33):
 			estructuraDestino = deserializar_escribir_bytes_de_una_pagina_en_UMC(datos);
 			break;
-
+	case(35):
+			estructuraDestino = deserealizar_cambio_de_proceso(datos);
+			break;
+	case(61):
+			estructuraDestino = deserealizar_inicio_de_programa_en_UMC(datos);
+			break;
 	}
 
 	return estructuraDestino;
 }
 
-t_respuesta_escribir_pagina_swap * deserializar_respuesta_escribir_pagina_swap(char *datos){
-			int		tmpsize = 0,
-					offset = 0;
+t_inicio_de_programa_en_UMC *deserealizar_inicio_de_programa_en_UMC(char *datos) {
+	int	tmpsize = 0,
+		offset = 0;
 
-			const int desplazamientoHeader = 5;		//Offset inicial para no deserealizar tipo (1 byte) y length (4 bytes)
+	int tamanoDato;
 
-			t_respuesta_escribir_pagina_swap *respuesta = malloc(sizeof(t_respuesta_escribir_pagina_swap));
-			memset(respuesta,0, sizeof(t_respuesta_escribir_pagina_swap));
+	const int desplazamiento_header = 5;		//Offset inicial para no deserealizar tipo (1 byte) y length (4 bytes)
 
-			memcpy(&respuesta->escritura_correcta, datos+desplazamientoHeader, tmpsize = sizeof(uint32_t));
-			offset+=tmpsize;
-			offset+=desplazamientoHeader;
+	t_inicio_de_programa_en_UMC *inicio_de_programa = malloc(sizeof(t_inicio_de_programa_en_UMC));
+	memset(inicio_de_programa,0, sizeof(t_inicio_de_programa_en_UMC));
 
+	memcpy(inicio_de_programa->process_id,datos+desplazamiento_header,tmpsize = sizeof(uint32_t));
+	offset+=desplazamiento_header;
+	offset+=tmpsize;
 
-			return respuesta;
+	memcpy(inicio_de_programa->cantidad_de_paginas,datos+offset,tmpsize = sizeof(uint32_t));
+	offset+=tmpsize;
+
+	for(tamanoDato = 0; (datos+offset)[tamanoDato] != '\0';tamanoDato++);//incremento tamanoDato, hasta el tamaÃ±o del nombre
+
+	inicio_de_programa->codigo_de_programa = malloc(tamanoDato+1);
+	memset(inicio_de_programa->codigo_de_programa,0,tamanoDato+1);
+
+	memcpy(inicio_de_programa->codigo_de_programa,datos+offset,tmpsize = sizeof(uint32_t));
+	offset+=tmpsize;
+
+	char endString = '\0';
+	memcpy(inicio_de_programa->codigo_de_programa,&endString,tamanoDato+1);
+
+	return inicio_de_programa;
+}
+
+t_respuesta_escribir_pagina_swap *deserializar_respuesta_escribir_pagina_swap(char *datos){
+
+	int		tmpsize = 0,
+			offset = 0;
+
+	const int desplazamientoHeader = 5;		//Offset inicial para no deserealizar tipo (1 byte) y length (4 bytes)
+
+	t_respuesta_escribir_pagina_swap *respuesta = malloc(sizeof(t_respuesta_escribir_pagina_swap));
+	memset(respuesta,0, sizeof(t_respuesta_escribir_pagina_swap));
+
+	memcpy(&respuesta->escritura_correcta, datos+desplazamientoHeader, tmpsize = sizeof(uint32_t));
+	offset+=tmpsize;
+	offset+=desplazamientoHeader;
+
+	return respuesta;
 
 }
 
@@ -150,6 +187,7 @@ t_escribir_bytes_de_una_pagina_en_UMC *deserializar_escribir_bytes_de_una_pagina
 
 
 t_solicitar_bytes_de_una_pagina_a_UMC *deserializar_pedido_bytes_de_una_pagina_a_UMC(char *datos){
+
 	int		tmpsize = 0,
 			offset = 0;
 
@@ -171,6 +209,23 @@ t_solicitar_bytes_de_una_pagina_a_UMC *deserializar_pedido_bytes_de_una_pagina_a
 	return pedido;
 }
 
+t_cambio_de_proceso *deserealizar_cambio_de_proceso(char *datos) {
+
+	int tmpsize = 0,
+		offset = 0;
+
+	const int desplazamiento_header = 5;
+
+	t_cambio_de_proceso *un_cambio_de_proceso = malloc(sizeof(t_cambio_de_proceso));
+	memset(un_cambio_de_proceso,0,sizeof(t_cambio_de_proceso));
+
+	memcpy(&un_cambio_de_proceso->un_numero,datos+desplazamiento_header,tmpsize = sizeof(uint32_t));
+	offset+=desplazamiento_header;
+	offset+=tmpsize;
+
+	return un_cambio_de_proceso;
+}
+
 t_stream *serializar_mensaje(int tipo, void* unaEstructura) {
 
 	t_stream *stream;
@@ -190,6 +245,9 @@ t_stream *serializar_mensaje(int tipo, void* unaEstructura) {
 			break;
 	case (34):
 			stream = serializar_respuesta_escribir_bytes_de_una_pagina_en_UMC((t_respuesta_escribir_bytes_de_una_pagina_en_UMC *)unaEstructura);
+			break;
+	case(36):
+			stream = serializar_respuesta_cambio_de_proceso((t_respuesta_cambio_de_proceso *)unaEstructura);
 			break;
 	  }
 
@@ -221,10 +279,8 @@ t_stream * serializar_escribir_pagina_swap(t_escribir_pagina_swap * escritura){
 	    uint32_t pid = escritura->pid;
 	    uint32_t pagina = escritura->pagina;
 
-
-	    char* aux = malloc(streamSize);
+	    char *aux = malloc(streamSize);
 	    char *escritura_aux = escritura->datos;
-
 
 	    memcpy(aux,&tipo,tmpsize=sizeof(uint8_t));
 	    offset+=tmpsize;
@@ -416,6 +472,38 @@ t_stream *serializar_respuesta_bytes_de_una_pagina_a_CPU(t_respuesta_bytes_de_un
 	memcpy(aux+offset,&endString,1);
 
 	stream->datos = aux;
+
+	return stream;
+}
+
+t_stream *serializar_respuesta_cambio_de_proceso(t_respuesta_cambio_de_proceso respuesta_cambio_de_proceso){
+
+	uint32_t 	tmpsize = 0,
+				offset = 0;
+
+	uint32_t 	size_entero_cambio_de_proceso = sizeof(uint32_t);
+
+	uint32_t 	streamSize =	sizeof(uint8_t)	+				//Tamano del tipo
+								sizeof(uint32_t)+				//Tamano del largo del stream
+								size_entero_cambio_de_proceso;	//Tamano del entero de cambio de proceso
+
+	t_stream *stream = malloc(streamSize);
+
+	memset(stream, 0,streamSize);
+	stream->size = streamSize;
+	stream->datos = malloc(streamSize);
+	memset(stream->datos,0,streamSize);
+
+	uint8_t tipo = 36; 	//Tipo del Mensaje . Fijado estaticamente segun protocolo
+	uint32_t entero_cambio_de_proceso = respuesta_cambio_de_proceso.un_numero;
+
+	memcpy(stream->datos,&tipo,tmpsize = sizeof(uint8_t));
+	offset+=tmpsize;
+
+	memcpy(stream->datos+offset,&streamSize, tmpsize = sizeof(uint32_t));
+	offset+=tmpsize;
+
+	memcpy(stream->datos+offset,&entero_cambio_de_proceso,tmpsize = sizeof(uint32_t));
 
 	return stream;
 }
