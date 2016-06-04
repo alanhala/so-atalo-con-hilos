@@ -25,17 +25,16 @@ int correrTest(){
 	CU_cleanup_registry();
 
 	return CU_get_error();
-
 }
 
 void obtener_siguiente_instruccion() {
 	mockear_pcb();
 
-	t_indice_instrucciones_elemento next_instruction = get_next_instruction();
+	t_dato_en_memoria next_instruction = get_next_instruction();
 
-	CU_ASSERT_EQUAL(next_instruction.instruccion.offset, 32);
-	CU_ASSERT_EQUAL(next_instruction.instruccion.start, 16);
-	CU_ASSERT_EQUAL(next_instruction.numero_pagina, 1);
+	CU_ASSERT_EQUAL(next_instruction.size, 32);
+	CU_ASSERT_EQUAL(next_instruction.direccion.offset, 1);
+	CU_ASSERT_EQUAL(next_instruction.direccion.pagina, 3);
 }
 
 void test_definir_variable() {
@@ -59,7 +58,6 @@ void test_definir_variable() {
     CU_ASSERT_EQUAL(list_size(stack_element->variables), 2);
 }
 
-
 void test_obtener_posicion_variable() {
     mockear_pcb();
 
@@ -75,6 +73,11 @@ void test_obtener_posicion_variable() {
 
 void test_asignar_y_leer_valor_de_una_sola_pagina() {
     mockear_pcb();
+    t_PCB * pcb=get_PCB();
+    pcb->pid = 1;
+    set_PCB(pcb);
+
+    cambiar_contexto(pcb->pid);
     definirVariable('a');
     t_dato_en_memoria *dato_en_memoria = obtenerPosicionVariable('a');
     asignar(dato_en_memoria, 1234);
@@ -85,11 +88,11 @@ void test_asignar_y_leer_valor_de_una_sola_pagina() {
 
 void test_asignar_y_leer_valor_de_varias_paginas() {
     mockear_pcb();
-
-    t_PCB *pcb = get_PCB();
+    t_PCB * pcb=get_PCB();
+    pcb->pid = 1;
     pcb->stack_next_free_space.offset = 3;
     set_PCB(pcb);
-
+    cambiar_contexto(pcb->pid);
     definirVariable('a');
     t_dato_en_memoria *dato_en_memoria = obtenerPosicionVariable('a');
     asignar(dato_en_memoria, 1234);
@@ -119,19 +122,17 @@ void mockear_pcb() {
     t_PCB *pcb = malloc(sizeof(t_PCB));
     pcb->indice_instrucciones = malloc(sizeof(t_indice_instrucciones_elemento)*2);
 
-    t_indice_instrucciones_elemento *indice = pcb->indice_instrucciones;
+    t_intructions *indice = pcb->indice_instrucciones;
 
     pcb->program_counter = 1;
 
-    indice->numero_pagina = 0;
-    indice->instruccion.offset = 15;
-    indice->instruccion.start = 0;
+    indice->start = 0;
+    indice->offset = 16;
 
     indice++;
 
-    indice->numero_pagina = 1;
-    indice->instruccion.offset = 32;
-    indice->instruccion.start = 16;
+    indice->start = 16;
+    indice->offset = 32;
 
     pcb->stack = list_create();
 

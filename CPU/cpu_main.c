@@ -32,11 +32,13 @@ void connect_to_Kernel();
 int main(int argc, char **argv) {
 
 
+
 	correr_simulacion();
 	while(1){
 			sleep(1000);
 		}
 	return 0;
+
 
 	if (argc == 3) {
 	    if (strcmp(argv[2], "-conexiones") == 0){

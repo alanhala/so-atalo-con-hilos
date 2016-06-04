@@ -91,6 +91,7 @@ int main(int argc, char **argv) {
 
 	int server_socket_descriptor = create_server_socket_descriptor(NULL,"5000",BACKLOG);
 
+
 	while (1) {
 			int client_socket_descriptor = accept_connection(server_socket_descriptor);
 
@@ -191,7 +192,7 @@ void manejo_de_solicitudes(int socket_descriptor) {
 	}
 	if(handshake == 2) //KERNEL
 	{
-		cargar_nuevo_programa(1, 50, "cargo un programa");
+		cargar_nuevo_programa(1, 50, "begin\nvariables a, b\na=1\nb=2\nend\0");
 		cargar_nuevo_programa(2, 50, "cargo un programa");
 	}
 
