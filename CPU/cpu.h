@@ -55,7 +55,7 @@ typedef struct {
 	uint32_t program_counter;
 	uint32_t paginas_codigo;
 	uint32_t cantidad_instrucciones;
-	t_indice_instrucciones_elemento* indice_instrucciones;
+	t_intructions* indice_instrucciones;
 	uint32_t cantidad_etiquetas;
 	//t_indice_etiqueta TODO: implementar esto
 	t_list *stack;
@@ -65,8 +65,8 @@ typedef struct {
 } t_PCB;
 
 void execute_next_instruction_for_process();
-t_indice_instrucciones_elemento get_next_instruction();
-char* obtener_instruccion_de_umc(t_indice_instrucciones_elemento instruccion);
+t_dato_en_memoria get_next_instruction();
+char* obtener_instruccion_de_umc(t_dato_en_memoria *instruccion);
 void incrementar_next_free_space();
 void set_PCB(t_PCB *pcb);
 t_PCB* get_PCB();

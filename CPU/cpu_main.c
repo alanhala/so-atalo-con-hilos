@@ -31,6 +31,15 @@ void connect_to_Kernel();
 
 int main(int argc, char **argv) {
 
+
+
+	correr_simulacion();
+	while(1){
+			sleep(1000);
+		}
+	return 0;
+
+
 	if (argc == 3) {
 	    if (strcmp(argv[2], "-conexiones") == 0){
     		connect_to_UMC();
@@ -59,6 +68,8 @@ void connect_to_UMC() {
 	int umc_socket_descriptor = create_client_socket_descriptor(UMCIP, UMCPORT);
 
 	set_umc_socket_descriptor(umc_socket_descriptor);
+	int a =1;
+	send(umc_socket_descriptor, &a, sizeof(int), 0);
 
 
 }

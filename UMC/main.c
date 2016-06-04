@@ -65,8 +65,7 @@ void liberaVariables(t_log* traceLogger, t_config* ptrConfig, t_log* errorLogger
 void detectaCambiosEnConfigFile();
 void cargar_variables_productivas(UMCConfigFile *ptrvaloresConfigFile);
 void interprete_de_comandos();
-
-
+void manejo_de_solicitudes(int cpu_socket_descriptor);
 
 
 int main(int argc, char **argv) {
@@ -81,103 +80,35 @@ int main(int argc, char **argv) {
 		//correrTest();
 		//correrTestSerializacion();
 	//}
-	//set_test();
-	//crear_swap_mock();
+
 	set_algoritmo_reemplazo("test");
-	int swap_socket = create_client_socket_descriptor("localhost", "6000");
-	set_socket_descriptor(swap_socket);
 	inicializar_estructuras();
-	cargar_nuevo_programa(1, 50, "cargo un programa");
+	//int swap_socket = create_client_socket_descriptor("localhost", "6000");
+	//set_socket_descriptor(swap_socket);
+	set_test();
+	crear_swap_mock();
+
+
 	int server_socket_descriptor = create_server_socket_descriptor(NULL,"5000",BACKLOG);
-	int cpu_socket_descriptor = accept_connection(server_socket_descriptor);
-	t_cpu_context * nueva_cpu;
-	nueva_cpu->cpu_id = cpu_socket_descriptor;
-	nueva_cpu->pid_active = -1;
-	list_add(lista_cpu_context, nueva_cpu);
 
-	int pid_active = dame_pid_activo(cpu_socket_descriptor);
+
 	while (1) {
+			int client_socket_descriptor = accept_connection(server_socket_descriptor);
 
-		t_header *aHeader = malloc(sizeof(t_header));
-
-		char 	buffer_header[5];	//Buffer donde se almacena el header recibido
-
-		int 	bytes_recibidos_header,	//Cantidad de bytes recibidos en el recv() que recibe el header
-				bytes_recibidos;		//Cantidad de bytes recibidos en el recv() que recibe el mensaje completo
-
-		bytes_recibidos_header = recv(cpu_socket_descriptor, buffer_header, 5, MSG_PEEK);
-
-		char buffer_recv[buffer_header[1]]; 	//El buffer para recibir el mensaje se crea con la longitud recibida
-
-		if(buffer_header[0] == 31) {
-
-			int bytes_recibidos = recv(cpu_socket_descriptor,buffer_recv,buffer_header[1],0);
-
-			t_solicitar_bytes_de_una_pagina_a_UMC *bytes_de_una_pagina = malloc(sizeof(t_solicitar_bytes_de_una_pagina_a_UMC));
-
-			bytes_de_una_pagina = (t_solicitar_bytes_de_una_pagina_a_UMC *)deserealizar_mensaje(buffer_header[0],buffer_recv);
-
-			char *datos_de_lectura = leer_pagina_de_programa(
-					pid_active,
-					bytes_de_una_pagina->pagina,
-					bytes_de_una_pagina->offset,
-					bytes_de_una_pagina->size);
-
-			t_respuesta_bytes_de_una_pagina_a_CPU *respuesta_bytes = malloc(sizeof(t_respuesta_bytes_de_una_pagina_a_CPU));
-
-			memset(respuesta_bytes,0,sizeof(t_respuesta_bytes_de_una_pagina_a_CPU));
-
-			respuesta_bytes->bytes_de_una_pagina = datos_de_lectura;
-
-			t_stream *buffer = (t_stream*)serializar_mensaje(32,respuesta_bytes);
-
-			int bytes_sent = send(cpu_socket_descriptor,buffer->datos,buffer->size,0);
+			pthread_t thread;
+			int thread_result = pthread_create(&thread, NULL,
+					&kernel_and_cpu_connection_handler, client_socket_descriptor);
+			if (thread_result) {
+				// TODO LOGUEAR ERROR
+				// TODO Analizar el tratamiento que desea darse
+				printf("Error - pthread_create() return code: %d\n", thread_result);
+				exit(1);
+			}
+			//printf("Hilo creado \n"); //TODO BORRAR LINEA
 
 		}
 
-		if(buffer_header[0] == 33) {
 
-			int bytes_recibidos = recv(cpu_socket_descriptor,buffer_recv,buffer_header[1],0);
-
-			t_escribir_bytes_de_una_pagina_en_UMC *bytes_de_una_pagina = malloc(sizeof(t_escribir_bytes_de_una_pagina_en_UMC));
-
-			bytes_de_una_pagina = (t_escribir_bytes_de_una_pagina_en_UMC *)deserealizar_mensaje(buffer_header[0],buffer_recv);
-
-			int estado_escritura = escribir_pagina_de_programa(
-					pid_active,
-					bytes_de_una_pagina->pagina,
-					bytes_de_una_pagina->offset,
-					bytes_de_una_pagina->size,
-					bytes_de_una_pagina->buffer);
-
-			t_respuesta_escribir_bytes_de_una_pagina_en_UMC *respuesta_escritura = malloc(sizeof(t_respuesta_escribir_bytes_de_una_pagina_en_UMC));
-
-			respuesta_escritura->escritura_correcta = estado_escritura;
-
-			t_stream *buffer = (t_stream*)serializar_mensaje(34,respuesta_escritura);
-
-			int bytes_sent = send(cpu_socket_descriptor,buffer->datos,buffer->size,0);
-		}
-		if(buffer_header[0] == 35){
-
-			int bytes_recibidos = recv(cpu_socket_descriptor,buffer_recv,buffer_header[1],0);
-
-			t_cambio_de_proceso *cambio_de_proceso = malloc(sizeof(t_cambio_de_proceso));
-
-			cambio_de_proceso = (t_cambio_de_proceso *)deserealizar_mensaje(buffer_header[0],buffer_recv);
-
-			t_respuesta_cambio_de_proceso *respuesta_c_de_proceso = malloc(sizeof(t_respuesta_cambio_de_proceso));
-
-			int respuesta_temp = cambio_contexto(cpu_socket_descriptor, pid_active);
-			respuesta_c_de_proceso->cambio_correcto = respuesta_temp;
-
-			t_stream *buffer = (t_stream*)serializar_mensaje(36,respuesta_c_de_proceso);
-
-			int bytes_sent = send(cpu_socket_descriptor,buffer->datos,buffer->size,0);
-		}
-
-
-	}
 	//connect_to_SWAP();
 	//kernel_and_cpu_connections();
 
@@ -204,22 +135,7 @@ void *kernel_and_cpu_connection_thread() {
 	int server_socket_descriptor = create_server_socket_descriptor("localhost", LISTENPORT,
 	BACKLOG);
 
-	while (1) {
-		int client_socket_descriptor = accept_connection(
-				server_socket_descriptor);
 
-		pthread_t thread;
-		int thread_result = pthread_create(&thread, NULL,
-				&kernel_and_cpu_connection_handler, client_socket_descriptor);
-		if (thread_result) {
-			// TODO LOGUEAR ERROR
-			// TODO Analizar el tratamiento que desea darse
-			printf("Error - pthread_create() return code: %d\n", thread_result);
-			exit(1);
-		}
-		printf("Hilo creado \n"); //TODO BORRAR LINEA
-
-	}
 }
 
 void connect_to_SWAP(){
@@ -258,17 +174,133 @@ void *connect_to_SWAP_thread() {
 }
 
 void *kernel_and_cpu_connection_handler(int client_socket_descriptor) {
-	//TODO aca deberia ir el handshake para ver si lo trato como kernel o como cpu
-	char message[] = "bienvenido \n";
+	manejo_de_solicitudes(client_socket_descriptor);
+	return 0;
+}
+
+
+
+void manejo_de_solicitudes(int socket_descriptor) {
+	int handshake = -1;
+	recv(socket_descriptor, &handshake, sizeof(int), 0);
+	if(handshake == 1) //CPU
+	{
+		t_cpu_context * nueva_cpu = malloc(sizeof(t_cpu_context));
+		nueva_cpu->cpu_id = socket_descriptor;
+		nueva_cpu->pid_active = -1;
+		list_add(lista_cpu_context, nueva_cpu);
+	}
+	if(handshake == 2) //KERNEL
+	{
+		cargar_nuevo_programa(1, 50, "begin\nvariables a, b\na=1\nb=2\nend\0");
+		cargar_nuevo_programa(2, 50, "cargo un programa");
+	}
+
 	while (1) {
-		char recvBuffer[19];
-		recv(client_socket_descriptor, recvBuffer, 19, 0);
-		printf(recvBuffer);
-		fflush(stdout);
-		send(client_socket_descriptor, message, 12, 0);
-		sleep(1);
+
+		t_header *aHeader = malloc(sizeof(t_header));
+
+		char buffer_header[5];	//Buffer donde se almacena el header recibido
+
+		int bytes_recibidos_header,	//Cantidad de bytes recibidos en el recv() que recibe el header
+				bytes_recibidos;//Cantidad de bytes recibidos en el recv() que recibe el mensaje completo
+
+		bytes_recibidos_header = recv(socket_descriptor, buffer_header, 5,
+				MSG_PEEK);
+
+		char buffer_recv[buffer_header[1]]; //El buffer para recibir el mensaje se crea con la longitud recibida
+
+		if (buffer_header[0] == 31) {
+
+			int bytes_recibidos = recv(socket_descriptor, buffer_recv,
+					buffer_header[1], 0);
+
+			t_solicitar_bytes_de_una_pagina_a_UMC *bytes_de_una_pagina = malloc(
+					sizeof(t_solicitar_bytes_de_una_pagina_a_UMC));
+
+			bytes_de_una_pagina =
+					(t_solicitar_bytes_de_una_pagina_a_UMC *) deserealizar_mensaje(
+							buffer_header[0], buffer_recv);
+			int pid_active = dame_pid_activo(socket_descriptor);
+			char *datos_de_lectura = leer_pagina_de_programa(pid_active,
+					bytes_de_una_pagina->pagina, bytes_de_una_pagina->offset,
+					bytes_de_una_pagina->size);
+
+			t_respuesta_bytes_de_una_pagina_a_CPU *respuesta_bytes = malloc(
+					sizeof(t_respuesta_bytes_de_una_pagina_a_CPU));
+
+			memset(respuesta_bytes, 0,
+					sizeof(t_respuesta_bytes_de_una_pagina_a_CPU));
+
+			respuesta_bytes->bytes_de_una_pagina = datos_de_lectura;
+
+			t_stream *buffer = (t_stream*) serializar_mensaje(32,
+					respuesta_bytes);
+
+			int bytes_sent = send(socket_descriptor, buffer->datos,
+					buffer->size, 0);
+
+		}
+
+		if (buffer_header[0] == 33) {
+
+			int bytes_recibidos = recv(socket_descriptor, buffer_recv,
+					buffer_header[1], 0);
+
+			t_escribir_bytes_de_una_pagina_en_UMC *bytes_de_una_pagina = malloc(
+					sizeof(t_escribir_bytes_de_una_pagina_en_UMC));
+
+			bytes_de_una_pagina =
+					(t_escribir_bytes_de_una_pagina_en_UMC *) deserealizar_mensaje(
+							buffer_header[0], buffer_recv);
+			int pid_active = dame_pid_activo(socket_descriptor);
+			int estado_escritura = escribir_pagina_de_programa(pid_active,
+					bytes_de_una_pagina->pagina, bytes_de_una_pagina->offset,
+					bytes_de_una_pagina->size, bytes_de_una_pagina->buffer);
+
+			t_respuesta_escribir_bytes_de_una_pagina_en_UMC *respuesta_escritura =
+					malloc(
+							sizeof(t_respuesta_escribir_bytes_de_una_pagina_en_UMC));
+
+			respuesta_escritura->escritura_correcta = estado_escritura;
+
+			t_stream *buffer = (t_stream*) serializar_mensaje(34,
+					respuesta_escritura);
+
+			int bytes_sent = send(socket_descriptor, buffer->datos,
+					buffer->size, 0);
+		}
+		if (buffer_header[0] == 35) {
+
+			int bytes_recibidos = recv(socket_descriptor, buffer_recv,
+					buffer_header[1], 0);
+
+			t_cambio_de_proceso *cambio_de_proceso = malloc(
+					sizeof(t_cambio_de_proceso));
+
+			cambio_de_proceso = (t_cambio_de_proceso *) deserealizar_mensaje(
+					buffer_header[0], buffer_recv);
+			int respuesta_temp = cambio_contexto(socket_descriptor,
+					cambio_de_proceso->pid);
+			t_respuesta_cambio_de_proceso *respuesta_c_de_proceso = malloc(
+					sizeof(t_respuesta_cambio_de_proceso));
+
+			respuesta_c_de_proceso->cambio_correcto = respuesta_temp;
+
+			t_stream *buffer = (t_stream*) serializar_mensaje(36,
+					respuesta_c_de_proceso);
+
+			int bytes_sent = send(socket_descriptor, buffer->datos,
+					buffer->size, 0);
+		}
+
 	}
 }
+
+
+
+
+
 
 int cargar_configuracion(){
 	t_log *errorLogger, *traceLogger;
