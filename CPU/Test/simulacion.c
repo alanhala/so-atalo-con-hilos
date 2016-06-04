@@ -45,4 +45,18 @@ void simulacion_uno() {
 	CU_ASSERT_EQUAL(valor, 1234);
 
 
+    mockear_pcb();
+
+    t_PCB *pcb_dos = get_PCB();
+    pcb_dos->stack_next_free_space.offset = 3;
+    pcb_dos->pid = 2;
+    set_PCB(pcb_dos);
+    cambiar_contexto(pcb_dos->pid);
+    definirVariable('a');
+    t_dato_en_memoria *dato_en_memoria_dos = obtenerPosicionVariable('a');
+    asignar(dato_en_memoria_dos, 1234);
+    t_valor_variable valor_dos = dereferenciar(dato_en_memoria_dos);
+
+    CU_ASSERT_EQUAL(valor_dos, 1234);
+
 }
