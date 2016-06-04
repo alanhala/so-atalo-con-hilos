@@ -75,6 +75,12 @@ void test_obtener_posicion_variable() {
 
 void test_asignar_y_leer_valor_de_una_sola_pagina() {
     mockear_pcb();
+    t_PCB * pcb=get_PCB();
+    pcb->pid = 1;
+    set_PCB(pcb);
+
+
+    cambiar_contexto(pcb->pid);
     definirVariable('a');
     t_dato_en_memoria *dato_en_memoria = obtenerPosicionVariable('a');
     asignar(dato_en_memoria, 1234);
@@ -85,11 +91,11 @@ void test_asignar_y_leer_valor_de_una_sola_pagina() {
 
 void test_asignar_y_leer_valor_de_varias_paginas() {
     mockear_pcb();
-
-    t_PCB *pcb = get_PCB();
+    t_PCB * pcb=get_PCB();
+    pcb->pid = 1;
     pcb->stack_next_free_space.offset = 3;
     set_PCB(pcb);
-
+    cambiar_contexto(pcb->pid);
     definirVariable('a');
     t_dato_en_memoria *dato_en_memoria = obtenerPosicionVariable('a');
     asignar(dato_en_memoria, 1234);

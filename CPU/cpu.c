@@ -119,7 +119,7 @@ t_valor_variable dereferenciar(t_puntero direccion_variable) {
 }
 
 void asignar(t_puntero direccion_variable, t_valor_variable valor) {
-    t_dato_en_memoria *direccion = (t_variable*) direccion_variable;
+    t_dato_en_memoria *direccion = (t_dato_en_memoria*) direccion_variable;
 
     char * str =string_itoa(valor);
     int resultado_escritura = ejecutar_escritura_de_dato_con_iteraciones(direccion, str, tamanio_pagina);

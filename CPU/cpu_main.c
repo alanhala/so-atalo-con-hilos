@@ -32,8 +32,8 @@ void connect_to_Kernel();
 int main(int argc, char **argv) {
 
 
-	correr_simulacion();
-	return 0;
+	//correr_simulacion();
+	//return 0;
 
 	if (argc == 3) {
 	    if (strcmp(argv[2], "-conexiones") == 0){
