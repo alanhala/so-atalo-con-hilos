@@ -168,7 +168,7 @@ int main(int argc, char **argv) {
 
 			t_respuesta_cambio_de_proceso *respuesta_c_de_proceso = malloc(sizeof(t_respuesta_cambio_de_proceso));
 
-			int respuesta_temp = 9999;
+			int respuesta_temp = cambio_contexto(cpu_socket_descriptor, pid_active);
 			respuesta_c_de_proceso->cambio_correcto = respuesta_temp;
 
 			t_stream *buffer = (t_stream*)serializar_mensaje(36,respuesta_c_de_proceso);
@@ -178,8 +178,8 @@ int main(int argc, char **argv) {
 
 
 	}
-	connect_to_SWAP();
-		kernel_and_cpu_connections();
+	//connect_to_SWAP();
+	//kernel_and_cpu_connections();
 
 		while (1) {
 			sleep(10);

@@ -32,6 +32,10 @@ void *cpu_connection(int socket_descriptor);
 void *console_connection(int socket_descriptor);
 
 int main(int argc, char **argv) {
+
+
+
+
 	if (strcmp(argv[1], "-test") == 0){
 		 correrTest();
 		 return 0;
