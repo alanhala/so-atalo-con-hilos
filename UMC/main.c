@@ -66,6 +66,9 @@ void detectaCambiosEnConfigFile();
 void cargar_variables_productivas(UMCConfigFile *ptrvaloresConfigFile);
 void interprete_de_comandos();
 
+
+
+
 int main(int argc, char **argv) {
 
 	//if (strcmp(argv[1], "-test") == 0 || strcmp(argv[1], "-testMock") == 0){
@@ -87,6 +90,12 @@ int main(int argc, char **argv) {
 	cargar_nuevo_programa(1, 50, "cargo un programa");
 	int server_socket_descriptor = create_server_socket_descriptor(NULL,"5000",BACKLOG);
 	int cpu_socket_descriptor = accept_connection(server_socket_descriptor);
+	t_cpu_context * nueva_cpu;
+	nueva_cpu->cpu_id = cpu_socket_descriptor;
+	nueva_cpu->pid_active = -1;
+	list_add(lista_cpu_context, nueva_cpu);
+
+	int pid_active = dame_pid_activo(cpu_socket_descriptor);
 	while (1) {
 
 		t_header *aHeader = malloc(sizeof(t_header));

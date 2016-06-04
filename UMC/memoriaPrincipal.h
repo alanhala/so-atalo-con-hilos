@@ -26,6 +26,7 @@ t_list* lista_tabla_de_paginas;
 sem_t mut_tabla_de_paginas;
 
 
+
 int SWAP_MOCK_ENABLE;
 
 
@@ -63,6 +64,16 @@ typedef struct tlb {
 	entrada_tlb* entradas;
 } tabla_tlb;
 
+
+
+typedef struct cpu_cont {
+	int cpu_id;
+	int pid_active;
+} t_cpu_context;
+
+t_list* lista_cpu_context;
+
+
 // Inteface Nucleo - UMC
 int cargar_nuevo_programa(int pid, int paginas_requeridas_del_proceso, char * codigo_programa);
 void finalizar_programa(int pid);
@@ -71,6 +82,7 @@ void finalizar_programa(int pid);
 // Interface CPU - UMC
 int escribir_pagina_de_programa(int pid, int pagina, int offset, int size, char * buffer);
 char* leer_pagina_de_programa(int pid, int pagina, int offset, int size);
+int cambio_contexto(int cpu_id, int pid);
 // Fin Interface CPU - UMC
 
 //Interfaz UMC - SWAP

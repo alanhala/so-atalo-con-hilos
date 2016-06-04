@@ -20,6 +20,7 @@
 #include "protocoloUMC.h"
 
 int inicializar_estructuras() {
+	lista_cpu_context = list_create();
 	int result = cargar_configuracion();
 	inicializar_semaforos();
 	TAMANIO_MEMORIA_PRINCIPAL = TAMANIO_FRAME * CANTIDAD_FRAMES;
@@ -713,6 +714,28 @@ char* leer_pagina_de_programa(int pid, int pagina, int offset, int size){
 		{
 			return "~/-1"; //no pude leer memoria
 		}
+}
+
+int dame_pid_activo(int cpu_socket_descriptor){
+	int cpu_id_iguales(t_cpu_context *cpu_context) {
+			return (cpu_context->cpu_id == cpu_socket_descriptor);
+		}
+
+		t_cpu_context* cpu = list_find(lista_cpu_context,(void*) cpu_id_iguales);
+
+		return cpu->pid_active;
+}
+int cambio_contexto(int cpu_id, int pid){
+	int cpu_id_iguales(t_cpu_context *cpu_context) {
+		if (cpu_context->cpu_id == cpu_id)
+			cpu_context->pid_active = pid;
+			return (cpu_context->cpu_id == cpu_id);
+	}
+
+	t_cpu_context* cpu = list_find(lista_cpu_context,(void*) cpu_id_iguales);
+	if (cpu->pid_active != pid)
+		return -1;
+	return 0;
 }
 
 // TLB
