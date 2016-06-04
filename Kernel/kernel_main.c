@@ -25,7 +25,7 @@
 #define CPULISTEN  "8002"
 #define CONSOLELISTEN "8001"
 #define UMCIP  "localhost"
-#define UMCPORT  "21000"
+#define UMCPORT  "5000"
 #define BACKLOG 10
 
 void *cpu_connection(int socket_descriptor);
@@ -33,7 +33,15 @@ void *console_connection(int socket_descriptor);
 
 int main(int argc, char **argv) {
 
+	int umc = create_client_socket_descriptor("localhost", "5000");
 
+	int a =2;
+	send(umc, &a, sizeof(int), 0);
+	printf("conectado con umc y mande handshake");
+	fflush(stdout);
+	while(1){
+		sleep(1000);
+	}
 
 
 	if (strcmp(argv[1], "-test") == 0){
@@ -50,7 +58,7 @@ int main(int argc, char **argv) {
 	pthread_t cpu_thread;
 	pthread_t console_thread;
 
-
+	/*
 	cpu_socket_descriptor = create_server_socket_descriptor(CPULISTEN, 4);
 	if (pthread_create(&cpu_thread, NULL, &cpu_connection, cpu_socket_descriptor)) {
 		printf("No se pudo crear el thread");
@@ -63,7 +71,8 @@ int main(int argc, char **argv) {
 		fflush(stdout);
 		exit(1);
 	}
-	while (1);
+
+	while (1); */
 }
 
 void *cpu_connection(int socket_descriptor) {
