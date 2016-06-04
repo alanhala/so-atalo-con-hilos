@@ -81,21 +81,21 @@ int main(int argc, char **argv) {
 		//correrTest();
 		//correrTestSerializacion();
 	//}
-	//set_test();
-	//crear_swap_mock();
+	set_test();
+	crear_swap_mock();
 	set_algoritmo_reemplazo("test");
-	int swap_socket = create_client_socket_descriptor("localhost", "6000");
-	set_socket_descriptor(swap_socket);
+	//int swap_socket = create_client_socket_descriptor("localhost", "6000");
+	//set_socket_descriptor(swap_socket);
 	inicializar_estructuras();
 	cargar_nuevo_programa(1, 50, "cargo un programa");
 	int server_socket_descriptor = create_server_socket_descriptor(NULL,"5000",BACKLOG);
 	int cpu_socket_descriptor = accept_connection(server_socket_descriptor);
-	t_cpu_context * nueva_cpu;
+	t_cpu_context * nueva_cpu = malloc(sizeof(t_cpu_context));
 	nueva_cpu->cpu_id = cpu_socket_descriptor;
 	nueva_cpu->pid_active = -1;
 	list_add(lista_cpu_context, nueva_cpu);
 
-	int pid_active = dame_pid_activo(cpu_socket_descriptor);
+
 	while (1) {
 
 		t_header *aHeader = malloc(sizeof(t_header));
@@ -116,7 +116,7 @@ int main(int argc, char **argv) {
 			t_solicitar_bytes_de_una_pagina_a_UMC *bytes_de_una_pagina = malloc(sizeof(t_solicitar_bytes_de_una_pagina_a_UMC));
 
 			bytes_de_una_pagina = (t_solicitar_bytes_de_una_pagina_a_UMC *)deserealizar_mensaje(buffer_header[0],buffer_recv);
-
+			int pid_active = dame_pid_activo(cpu_socket_descriptor);
 			char *datos_de_lectura = leer_pagina_de_programa(
 					pid_active,
 					bytes_de_una_pagina->pagina,
@@ -142,7 +142,7 @@ int main(int argc, char **argv) {
 			t_escribir_bytes_de_una_pagina_en_UMC *bytes_de_una_pagina = malloc(sizeof(t_escribir_bytes_de_una_pagina_en_UMC));
 
 			bytes_de_una_pagina = (t_escribir_bytes_de_una_pagina_en_UMC *)deserealizar_mensaje(buffer_header[0],buffer_recv);
-
+			int pid_active = dame_pid_activo(cpu_socket_descriptor);
 			int estado_escritura = escribir_pagina_de_programa(
 					pid_active,
 					bytes_de_una_pagina->pagina,
@@ -165,10 +165,10 @@ int main(int argc, char **argv) {
 			t_cambio_de_proceso *cambio_de_proceso = malloc(sizeof(t_cambio_de_proceso));
 
 			cambio_de_proceso = (t_cambio_de_proceso *)deserealizar_mensaje(buffer_header[0],buffer_recv);
-
+			int respuesta_temp = cambio_contexto(cpu_socket_descriptor, cambio_de_proceso->pid);
 			t_respuesta_cambio_de_proceso *respuesta_c_de_proceso = malloc(sizeof(t_respuesta_cambio_de_proceso));
 
-			int respuesta_temp = cambio_contexto(cpu_socket_descriptor, pid_active);
+
 			respuesta_c_de_proceso->cambio_correcto = respuesta_temp;
 
 			t_stream *buffer = (t_stream*)serializar_mensaje(36,respuesta_c_de_proceso);
