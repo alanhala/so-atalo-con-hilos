@@ -24,11 +24,11 @@ typedef struct {
 }__attribute__((packed)) t_header;
 
 typedef struct {
-	uint32_t un_numero;
+	uint32_t pid;
 }__attribute__((packed)) t_cambio_de_proceso;
 
 typedef struct {
-	uint32_t un_numero;
+	uint32_t cambio_correcto;
 }__attribute__((packed)) t_respuesta_cambio_de_proceso;
 
 typedef struct {
@@ -43,6 +43,13 @@ typedef struct {
 }__attribute__((packed)) t_respuesta_escribir_bytes_de_una_pagina_en_UMC;
 
 
+typedef struct {
+	uint32_t process_id;
+	uint32_t cantidad_de_paginas;
+	char *codigo_de_programa;
+}__attribute__((packed)) t_inicio_de_programa_en_UMC;
+
+
 
 typedef struct {
 	uint32_t size;
@@ -53,11 +60,11 @@ t_solicitar_bytes_de_una_pagina_a_UMC *deserializar_pedido_bytes_de_una_pagina_a
 void *deserealizar_mensaje(uint8_t tipo, char* datos);
 t_stream *serializar_respuesta_bytes_de_una_pagina_a_CPU(t_respuesta_bytes_de_una_pagina_a_CPU *unaEstructura);
 t_stream *serializar_respuesta_escribir_bytes_de_una_pagina_en_UMC(t_respuesta_escribir_bytes_de_una_pagina_en_UMC *unaEstructura);
-
+t_stream *serializar_respuesta_cambio_de_proceso(t_respuesta_cambio_de_proceso* unaEstructura);
 
 t_escribir_bytes_de_una_pagina_en_UMC * deserializar_escribir_bytes_de_una_pagina_en_UMC(datos);
-
-
+t_inicio_de_programa_en_UMC *deserealizar_inicio_de_programa_en_UMC(char *datos);
+t_cambio_de_proceso *deserealizar_cambio_de_proceso(char *datos);
 // UMC - SWAP
 
 typedef struct {
@@ -70,11 +77,6 @@ typedef struct {
   int cargado_correctamente; // 0 si ok, -1 si no ok
 }__attribute__((packed)) t_respuesta_iniciar_programa_en_swap;
 
-typedef struct {
-	uint32_t process_id;
-	uint32_t cantidad_de_paginas;
-	char *codigo_de_programa;
-}__attribute__((packed)) t_inicio_de_programa_en_UMC;
 
 t_stream * serializar_iniciar_programa_en_swap(t_iniciar_programa_en_swap *pedido);
 t_respuesta_iniciar_programa_en_swap * deserializar_respuesta_iniciar_programa_en_swap(char* datos);

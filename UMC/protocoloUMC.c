@@ -219,7 +219,7 @@ t_cambio_de_proceso *deserealizar_cambio_de_proceso(char *datos) {
 	t_cambio_de_proceso *un_cambio_de_proceso = malloc(sizeof(t_cambio_de_proceso));
 	memset(un_cambio_de_proceso,0,sizeof(t_cambio_de_proceso));
 
-	memcpy(&un_cambio_de_proceso->un_numero,datos+desplazamiento_header,tmpsize = sizeof(uint32_t));
+	memcpy(&un_cambio_de_proceso->pid,datos+desplazamiento_header,tmpsize = sizeof(uint32_t));
 	offset+=desplazamiento_header;
 	offset+=tmpsize;
 
@@ -476,7 +476,7 @@ t_stream *serializar_respuesta_bytes_de_una_pagina_a_CPU(t_respuesta_bytes_de_un
 	return stream;
 }
 
-t_stream *serializar_respuesta_cambio_de_proceso(t_respuesta_cambio_de_proceso respuesta_cambio_de_proceso){
+t_stream *serializar_respuesta_cambio_de_proceso(t_respuesta_cambio_de_proceso* respuesta_cambio_de_proceso){
 
 	uint32_t 	tmpsize = 0,
 				offset = 0;
@@ -495,7 +495,7 @@ t_stream *serializar_respuesta_cambio_de_proceso(t_respuesta_cambio_de_proceso r
 	memset(stream->datos,0,streamSize);
 
 	uint8_t tipo = 36; 	//Tipo del Mensaje . Fijado estaticamente segun protocolo
-	uint32_t entero_cambio_de_proceso = respuesta_cambio_de_proceso.un_numero;
+	uint32_t entero_cambio_de_proceso = respuesta_cambio_de_proceso->cambio_correcto;
 
 	memcpy(stream->datos,&tipo,tmpsize = sizeof(uint8_t));
 	offset+=tmpsize;

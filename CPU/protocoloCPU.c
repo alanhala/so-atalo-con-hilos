@@ -30,10 +30,11 @@ t_stream *serializar_mensaje(int tipo,void* unaEstructura) {
 	case (33):
 			stream = serializar_escribir_bytes_de_una_pagina_en_UMC((t_escribir_bytes_de_una_pagina_en_UMC *)unaEstructura);
 			break;
-	}
+
 
 	case (35):
 			stream = serializar_cambio_de_proceso((t_cambio_de_proceso *)unaEstructura);
+	}
 
 	return stream;
 }
@@ -141,7 +142,7 @@ t_stream *serializar_pedido_bytes_de_una_pagina_a_UMC(t_solicitar_bytes_de_una_p
 	return stream;
 }
 
-t_stream serializar_cambio_de_proceso (t_cambio_de_proceso unCambioDeProceso){
+t_stream* serializar_cambio_de_proceso (t_cambio_de_proceso* unCambioDeProceso){
 
 	uint32_t 	tmpsize = 0,
 				offset = 0;
@@ -160,7 +161,7 @@ t_stream serializar_cambio_de_proceso (t_cambio_de_proceso unCambioDeProceso){
 	memset(stream->datos,0,streamSize);
 
 	uint8_t tipo = 35; 	//Tipo del Mensaje . Fijado estaticamente segun protocolo
-	uint32_t entero_cambio_de_proceso = unCambioDeProceso.un_numero;
+	uint32_t entero_cambio_de_proceso = unCambioDeProceso->pid;
 
 	memcpy(stream->datos,&tipo,tmpsize = sizeof(uint8_t));
 	offset+=tmpsize;
@@ -185,7 +186,7 @@ void *deserealizar_mensaje(uint8_t tipo, char* datos) {
 			estructuraDestino = deserializar_respuesta_escribir_bytes_de_una_pagina_en_UMC (datos);
 			break;
 	case(36):
-			estructuraDestino = deserealizar_respuesta_inicio_de_programa (datos);
+			estructuraDestino = deserealizar_respuesta_cambio_de_proceso(datos);
 			break;
 	}
 
@@ -234,7 +235,7 @@ t_respuesta_bytes_de_una_pagina_a_CPU *deserializar_respuesta_bytes_de_una_pagin
 	return respuesta;
 }
 
-t_respuesta_cambio_de_proceso deserealizar_respuesta_inicio_de_programa (char *datos){
+t_respuesta_cambio_de_proceso* deserealizar_respuesta_cambio_de_proceso(char *datos){
 
 		int tmpsize = 0,
 			offset = 0;

@@ -37,7 +37,7 @@ typedef struct {
 }__attribute__((packed)) t_header;
 
 typedef struct {
-	uint32_t un_numero;
+	uint32_t pid;
 }__attribute__((packed)) t_cambio_de_proceso;
 
 typedef struct {
@@ -56,8 +56,13 @@ void *serealizar_mensaje(uint8_t tipo, char* datos);
 void *deserealizar_mensaje(uint8_t tipo, char* datos);
 t_respuesta_bytes_de_una_pagina_a_CPU *deserializar_respuesta_bytes_de_una_pagina_a_CPU(char *datos);
 t_respuesta_escribir_bytes_de_una_pagina_en_UMC * deserializar_respuesta_escribir_bytes_de_una_pagina_en_UMC(char *datos);
+t_respuesta_cambio_de_proceso* deserealizar_respuesta_cambio_de_proceso(char *datos);
+
 
 t_stream *serializar_escribir_bytes_de_una_pagina_en_UMC(t_escribir_bytes_de_una_pagina_en_UMC * unaEstructura);
+t_stream *serializar_cambio_de_proceso (t_cambio_de_proceso* unCambioDeProceso);
+
+
 
 #endif /* PROTOCOLOCPU_H_ */
 

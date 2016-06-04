@@ -118,7 +118,7 @@ int main(int argc, char **argv) {
 			bytes_de_una_pagina = (t_solicitar_bytes_de_una_pagina_a_UMC *)deserealizar_mensaje(buffer_header[0],buffer_recv);
 
 			char *datos_de_lectura = leer_pagina_de_programa(
-					1,
+					pid_active,
 					bytes_de_una_pagina->pagina,
 					bytes_de_una_pagina->offset,
 					bytes_de_una_pagina->size);
@@ -144,7 +144,7 @@ int main(int argc, char **argv) {
 			bytes_de_una_pagina = (t_escribir_bytes_de_una_pagina_en_UMC *)deserealizar_mensaje(buffer_header[0],buffer_recv);
 
 			int estado_escritura = escribir_pagina_de_programa(
-					1,
+					pid_active,
 					bytes_de_una_pagina->pagina,
 					bytes_de_una_pagina->offset,
 					bytes_de_una_pagina->size,
@@ -158,6 +158,24 @@ int main(int argc, char **argv) {
 
 			int bytes_sent = send(cpu_socket_descriptor,buffer->datos,buffer->size,0);
 		}
+		if(buffer_header[0] == 35){
+
+			int bytes_recibidos = recv(cpu_socket_descriptor,buffer_recv,buffer_header[1],0);
+
+			t_cambio_de_proceso *cambio_de_proceso = malloc(sizeof(t_cambio_de_proceso));
+
+			cambio_de_proceso = (t_cambio_de_proceso *)deserealizar_mensaje(buffer_header[0],buffer_recv);
+
+			t_respuesta_cambio_de_proceso *respuesta_c_de_proceso = malloc(sizeof(t_respuesta_cambio_de_proceso));
+
+			int respuesta_temp = 9999;
+			respuesta_c_de_proceso->cambio_correcto = respuesta_temp;
+
+			t_stream *buffer = (t_stream*)serializar_mensaje(36,respuesta_c_de_proceso);
+
+			int bytes_sent = send(cpu_socket_descriptor,buffer->datos,buffer->size,0);
+		}
+
 
 	}
 	connect_to_SWAP();

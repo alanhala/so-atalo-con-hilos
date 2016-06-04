@@ -39,6 +39,38 @@ char* obtener_instruccion_de_umc(t_indice_instrucciones_elemento instruccion) {
 	return "a = a + b";
 }
 
+
+int cambiar_contexto(int pid){
+
+	t_cambio_de_proceso * cambio_proceso = malloc(sizeof(t_cambio_de_proceso));
+	memset(cambio_proceso,0,sizeof(t_cambio_de_proceso));
+
+	cambio_proceso->pid = pid;
+
+	t_stream *buffer = (t_stream*)serializar_mensaje(35,cambio_proceso);
+
+	send(UMC_DESCRIPTOR,buffer->datos,buffer->size,0);
+
+	t_header *a_header = malloc(sizeof(t_header));
+
+	char	buffer_header[5];	//Buffer donde se almacena el header recibido
+
+	int		bytes_recibidos_header,	//Cantidad de bytes recibidos en el recv() que recibe el header
+	 		bytes_recibidos;		//Cantidad de bytes recibidos en el recv() que recibe el mensaje completo
+
+	recv(UMC_DESCRIPTOR, buffer_header, 5, MSG_PEEK);
+
+	char buffer_recv[buffer_header[1]];
+
+	recv(UMC_DESCRIPTOR, buffer_recv, buffer_header[1], 0);
+
+	t_respuesta_cambio_de_proceso *respuesta = malloc(sizeof(t_respuesta_cambio_de_proceso));
+
+	respuesta = (t_respuesta_cambio_de_proceso*)deserealizar_mensaje(buffer_header[0], buffer_recv);
+
+	return respuesta->un_numero;
+}
+
 t_indice_instrucciones_elemento get_next_instruction() {
 	t_indice_instrucciones_elemento *indice = pcb->indice_instrucciones;
 
