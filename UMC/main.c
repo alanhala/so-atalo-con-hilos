@@ -80,6 +80,7 @@ int main(int argc, char **argv) {
 	//}
 	//set_test();
 	//crear_swap_mock();
+	set_algoritmo_reemplazo("test");
 	int swap_socket = create_client_socket_descriptor("localhost", "6000");
 	set_socket_descriptor(swap_socket);
 	inicializar_estructuras();
