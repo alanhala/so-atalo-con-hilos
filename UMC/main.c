@@ -92,13 +92,12 @@ int main(int argc, char **argv) {
 	int cpu_socket_descriptor = accept_connection(server_socket_descriptor);
 
 
-	cargar_nuevo_programa(1, 50, "cargo un programa");
+	cargar_nuevo_programa(1, 50, "begin\nvariables a, b\na=1\nb=2\nend\0");
 	cargar_nuevo_programa(2, 50, "cargo un programa");
 	t_cpu_context * nueva_cpu = malloc(sizeof(t_cpu_context));
 	nueva_cpu->cpu_id = cpu_socket_descriptor;
 	nueva_cpu->pid_active = -1;
 	list_add(lista_cpu_context, nueva_cpu);
-
 
 	while (1) {
 

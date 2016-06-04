@@ -27,18 +27,17 @@ t_PCB *pcb;
 uint32_t tamanio_pagina;
 
 void execute_next_instruction_for_process() {
-	t_indice_instrucciones_elemento instruccion = get_next_instruction();
+	t_dato_en_memoria instruccion = get_next_instruction();
 
-	char *instruccion_string = obtener_instruccion_de_umc(instruccion);
+	char *instruccion_string = obtener_instruccion_de_umc(&instruccion);
 
 	analizadorLinea(strdup(instruccion_string), &functions, &kernel_functions);
 };
 
 
-char* obtener_instruccion_de_umc(t_indice_instrucciones_elemento instruccion) {
+char* obtener_instruccion_de_umc(t_dato_en_memoria *instruccion) {
 	return "a = a + b";
 }
-
 
 int cambiar_contexto(int pid){
 
@@ -71,12 +70,22 @@ int cambiar_contexto(int pid){
 	return respuesta->un_numero;
 }
 
-t_indice_instrucciones_elemento get_next_instruction() {
-	t_indice_instrucciones_elemento *indice = pcb->indice_instrucciones;
+t_dato_en_memoria get_next_instruction() {
+    t_intructions *indice = pcb->indice_instrucciones;
 
-	indice += pcb->program_counter;
+    indice += pcb->program_counter;
 
-	return *indice;
+    t_intructions instruccion = *indice;
+
+    int pagina = instruccion.start / tamanio_pagina;
+
+    t_dato_en_memoria *result = malloc(sizeof(t_dato_en_memoria));
+
+    result->direccion.offset = instruccion.start - (pagina * tamanio_pagina);
+    result->direccion.pagina = pagina;
+    result->size = instruccion.offset;
+
+    return *result;
 }
 
 t_puntero definirVariable(t_nombre_variable variable) {
