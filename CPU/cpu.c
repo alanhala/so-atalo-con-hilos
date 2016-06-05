@@ -29,7 +29,7 @@ uint32_t tamanio_pagina;
 void execute_next_instruction_for_process() {
 	t_dato_en_memoria instruccion = get_next_instruction();
 
-	char *instruccion_string = obtener_instruccion_de_umc(&instruccion);
+	char *instruccion_string = ejecutar_lectura_de_dato_con_iteraciones(leer_memoria_de_umc, &instruccion, tamanio_pagina);
 
 	analizadorLinea(strdup(instruccion_string), &functions, &kernel_functions);
 };

@@ -20,5 +20,6 @@ void test_actualizar_next_free_space();
 void test_asignar_y_leer_valor_de_una_sola_pagina();
 void test_leer_data_de_memoria_con_iteraciones();
 void test_asignar_y_leer_valor_de_varias_paginas();
+void test_ejecutar_programa_en_memoria();
 
 #endif /* TESTS_H_ */
