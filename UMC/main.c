@@ -135,7 +135,6 @@ void *kernel_and_cpu_connection_thread() {
 	int server_socket_descriptor = create_server_socket_descriptor("localhost", LISTENPORT,
 	BACKLOG);
 
-
 }
 
 void connect_to_SWAP(){
@@ -293,6 +292,29 @@ void manejo_de_solicitudes(int socket_descriptor) {
 			int bytes_sent = send(socket_descriptor, buffer->datos,
 					buffer->size, 0);
 		}
+		if(buffer_header[0] == 61){
+
+				   int bytes_recibidos = recv(socket_descriptor,buffer_recv,buffer_header[1],0);
+
+				   t_inicio_de_programa_en_UMC *inicio_programa_en_UMC = malloc(sizeof(t_inicio_de_programa_en_UMC));
+
+				   inicio_programa_en_UMC = (t_inicio_de_programa_en_UMC *)deserealizar_mensaje(buffer_header[0],buffer_recv);
+
+
+				   int respuesta_tmp = cargar_nuevo_programa(inicio_programa_en_UMC->process_id,
+						   	   	   	   	   	   	   	   	   	 inicio_programa_en_UMC->cantidad_de_paginas,
+															 inicio_programa_en_UMC->codigo_de_programa);
+
+
+				   t_respuesta_inicio_de_programa_en_UMC *respuesta = malloc(sizeof(t_respuesta_inicio_de_programa_en_UMC));
+
+				   respuesta->respuesta_correcta = respuesta_tmp;
+
+				   t_stream *buffer = (t_stream*)serializar_mensaje(62,respuesta);
+
+				   int bytes_sent = send(socket_descriptor,buffer->datos,buffer->size,0);
+
+			   }
 
 	}
 }

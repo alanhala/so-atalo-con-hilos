@@ -73,11 +73,12 @@ t_inicio_de_programa_en_UMC *deserealizar_inicio_de_programa_en_UMC(char *datos)
 	inicio_de_programa->codigo_de_programa = malloc(tamanoDato+1);
 	memset(inicio_de_programa->codigo_de_programa,0,tamanoDato+1);
 
-	memcpy(inicio_de_programa->codigo_de_programa,datos+offset,tmpsize = sizeof(uint32_t));
+	memcpy(inicio_de_programa->codigo_de_programa,datos+offset,tamanoDato+1);
 	offset+=tmpsize;
 
 	char endString = '\0';
-	memcpy(inicio_de_programa->codigo_de_programa,&endString,tamanoDato+1);
+	memcpy(inicio_de_programa->codigo_de_programa+tamanoDato+1,&endString,tamanoDato+1);
+
 
 	return inicio_de_programa;
 }
@@ -249,10 +250,48 @@ t_stream *serializar_mensaje(int tipo, void* unaEstructura) {
 	case(36):
 			stream = serializar_respuesta_cambio_de_proceso((t_respuesta_cambio_de_proceso *)unaEstructura);
 			break;
-	  }
+	case(62):
+		   stream = serializar_respuesta_inicio_de_programa_en_UMC((t_respuesta_inicio_de_programa_en_UMC *)unaEstructura);
+ 		   break;
+
+	}
 
 	return stream;
 }
+
+t_stream *serializar_respuesta_inicio_de_programa_en_UMC(t_respuesta_inicio_de_programa_en_UMC *respuesta){
+
+       int tmpsize = 0,
+               offset = 0;
+
+       uint32_t size_respuesta_correcta = sizeof(uint32_t);
+
+       uint32_t stream_size =  sizeof(uint8_t) +       //Tamano del tipo
+                                                       sizeof(uint32_t) +      //Tamano del largo del stream
+                                                       sizeof(uint32_t);       //Tamano de la respuesta
+
+       t_stream *stream = malloc(stream_size);
+       memset(stream, 0,stream_size);
+       stream->size = stream_size;
+       stream->datos = malloc(stream_size);
+       memset(stream->datos,0,stream_size);
+
+       uint8_t tipo = 62;
+       uint32_t respuesta_correcta = respuesta->respuesta_correcta;
+
+       memcpy(stream->datos,&tipo,tmpsize = sizeof(uint8_t));
+       offset+=tmpsize;
+
+       memcpy(stream->datos+offset,&stream_size,tmpsize = sizeof(uint32_t));
+       offset+=tmpsize;
+
+       memcpy(stream->datos+offset,&respuesta_correcta,tmpsize = sizeof(uint32_t));
+
+       return stream;
+}
+
+
+
 t_stream * serializar_escribir_pagina_swap(t_escribir_pagina_swap * escritura){
 
 		uint32_t 	tmpsize = 0,

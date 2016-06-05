@@ -20,7 +20,7 @@
 #include <pthread.h>
 #include "socket.h"
 #include "tests.h"
-
+#include "protocoloKernel.h"
 
 #define CPULISTEN  "8002"
 #define CONSOLELISTEN "8001"
@@ -33,12 +33,42 @@ void *console_connection(int socket_descriptor);
 
 int main(int argc, char **argv) {
 
-	int umc = create_client_socket_descriptor("localhost", "5000");
+	int umc_socket_descriptor = create_client_socket_descriptor("localhost", "5000");
 
 	int a =2;
-	send(umc, &a, sizeof(int), 0);
+	send(umc_socket_descriptor, &a, sizeof(int), 0);
 	printf("conectado con umc y mande handshake");
 	fflush(stdout);
+
+    t_inicio_de_programa_en_UMC *iniciar_programa_en_UMC = malloc(sizeof(t_inicio_de_programa_en_UMC));
+	   memset(iniciar_programa_en_UMC,0,sizeof(t_inicio_de_programa_en_UMC));
+
+	   iniciar_programa_en_UMC->process_id = 22;
+	   iniciar_programa_en_UMC->cantidad_de_paginas = 4;
+	   iniciar_programa_en_UMC->codigo_de_programa = malloc(5);
+	   char unChar[5] = "Hola";
+	   memcpy(iniciar_programa_en_UMC->codigo_de_programa,&unChar,5);
+
+	   t_stream *buffer = malloc(sizeof(t_stream));
+
+	   buffer = serializar_mensaje(61,iniciar_programa_en_UMC);
+
+	   int bytes_enviados = send(umc_socket_descriptor,buffer->datos,buffer->size,0);
+
+	   char buffer_header[5];
+
+	   int bytes_header = recv(umc_socket_descriptor,buffer_header,5,MSG_PEEK);
+
+	   char buffer_recv[buffer_header[1]];
+
+	   int bytes_recibidos = recv(umc_socket_descriptor,buffer_recv,buffer_header[1],0);
+
+	   t_respuesta_iniciar_programa_en_UMC *respuesta = malloc(sizeof(t_respuesta_iniciar_programa_en_UMC));
+	   memset(respuesta,0,sizeof(t_respuesta_iniciar_programa_en_UMC));
+	   respuesta = deserealizar_mensaje(buffer_header[0],buffer_recv);
+
+
+
 	while(1){
 		sleep(1000);
 	}

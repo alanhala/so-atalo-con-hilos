@@ -9,6 +9,18 @@
 #define PROTOCOLOUMC_H_
 
 typedef struct {
+       uint32_t respuesta_correcta;
+}__attribute__((packed)) t_respuesta_inicio_de_programa_en_UMC;
+
+typedef struct {
+       uint32_t process_id;
+       uint32_t cantidad_de_paginas;
+       char *codigo_de_programa;
+}__attribute__((packed)) t_inicio_de_programa_en_UMC;
+
+
+
+typedef struct {
 	uint32_t pagina;	//Numero de pagina
 	uint32_t offset;	//Offset de la pagina
 	uint32_t size; 		//Tamano de los datos a escribir
@@ -44,14 +56,6 @@ typedef struct {
 
 
 typedef struct {
-	uint32_t process_id;
-	uint32_t cantidad_de_paginas;
-	char *codigo_de_programa;
-}__attribute__((packed)) t_inicio_de_programa_en_UMC;
-
-
-
-typedef struct {
 	uint32_t size;
 	char *datos;
 } t_stream;
@@ -61,7 +65,7 @@ void *deserealizar_mensaje(uint8_t tipo, char* datos);
 t_stream *serializar_respuesta_bytes_de_una_pagina_a_CPU(t_respuesta_bytes_de_una_pagina_a_CPU *unaEstructura);
 t_stream *serializar_respuesta_escribir_bytes_de_una_pagina_en_UMC(t_respuesta_escribir_bytes_de_una_pagina_en_UMC *unaEstructura);
 t_stream *serializar_respuesta_cambio_de_proceso(t_respuesta_cambio_de_proceso* unaEstructura);
-
+t_stream *serializar_respuesta_inicio_de_programa_en_UMC(t_respuesta_inicio_de_programa_en_UMC *respuesta);
 t_escribir_bytes_de_una_pagina_en_UMC * deserializar_escribir_bytes_de_una_pagina_en_UMC(datos);
 t_inicio_de_programa_en_UMC *deserealizar_inicio_de_programa_en_UMC(char *datos);
 t_cambio_de_proceso *deserealizar_cambio_de_proceso(char *datos);
