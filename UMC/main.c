@@ -192,7 +192,7 @@ void manejo_de_solicitudes(int socket_descriptor) {
 	if(handshake == 2) //KERNEL
 	{
 		cargar_nuevo_programa(1, 50, "begin\nvariables c, d\nc=1234\nd=4321\nend\0");
-		//cargar_nuevo_programa(2, 50, "cargo un programa");
+		cargar_nuevo_programa(2, 50, "cargo un programa");
 	}
 
 	while (1) {
