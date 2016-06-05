@@ -33,11 +33,11 @@ int main(int argc, char **argv) {
 
 
 
-	correr_simulacion();
-	while(1){
-			sleep(1000);
-		}
-	return 0;
+//	correr_simulacion();
+//	while(1){
+//			sleep(1000);
+//		}
+//	return 0;
 
 
 	if (argc == 3) {

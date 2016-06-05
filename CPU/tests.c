@@ -13,14 +13,15 @@ int correrTest(){
 
 	CU_initialize_registry();
 	CU_pSuite prueba = CU_add_suite("Suite de prueba", NULL, NULL);
-//	CU_add_test(prueba, "uno", obtener_siguiente_instruccion);
-//	CU_add_test(prueba, "dos", test_definir_variable);
-//	CU_add_test(prueba, "tres", test_obtener_posicion_variable);
-//	CU_add_test(prueba, "cuatro", test_actualizar_next_free_space);
-//	CU_add_test(prueba, "cinco", test_leer_data_de_memoria_con_iteraciones);
-//	CU_add_test(prueba, "seis", test_asignar_y_leer_valor_de_una_sola_pagina);
-//	CU_add_test(prueba, "siete", test_asignar_y_leer_valor_de_varias_paginas);
 	CU_add_test(prueba, "ocho", test_ejecutar_programa_en_memoria);
+
+	CU_add_test(prueba, "uno", obtener_siguiente_instruccion);
+	CU_add_test(prueba, "dos", test_definir_variable);
+	CU_add_test(prueba, "tres", test_obtener_posicion_variable);
+	CU_add_test(prueba, "cuatro", test_actualizar_next_free_space);
+	CU_add_test(prueba, "cinco", test_leer_data_de_memoria_con_iteraciones);
+	CU_add_test(prueba, "seis", test_asignar_y_leer_valor_de_una_sola_pagina);
+	CU_add_test(prueba, "siete", test_asignar_y_leer_valor_de_varias_paginas);
 
 	CU_basic_set_mode(CU_BRM_VERBOSE);
 	CU_basic_run_tests();
@@ -40,23 +41,40 @@ void obtener_siguiente_instruccion() {
 }
 
 void test_ejecutar_programa_en_memoria() {
-   mockear_pcb();
-
-   t_PCB * pcb=get_PCB();
-   pcb->pid = 1;
-   pcb->stack_next_free_space.offset = 3;
-   set_PCB(pcb);
-   cambiar_contexto(pcb->pid);
-
+    //inicializo PCB
+    mockear_pcb();
+    t_PCB * pcb=get_PCB();
+    pcb->pid = 1;
+    pcb->stack_next_free_space.offset = 3;
     pcb->program_counter = 0;
-    t_metadata_program *metadata = metadata_desde_literal("begin\nvariables a, b\na=1\nb=2\nend\0");
-    pcb->indice_instrucciones = metadata->instrucciones_serializado;
-    set_PCB(pcb);
+    pcb->stack_next_free_space.offset=0;
+    pcb->stack_next_free_space.pagina=20;
 
+    cambiar_contexto(pcb->pid);
+
+    //Cargo metadata de programa ANSISOP en PCB
+    t_metadata_program *metadata = metadata_desde_literal("begin\nvariables c, d\nc=1234\nd=4321\nend\0");
+    pcb->indice_instrucciones = metadata->instrucciones_serializado;
+
+    //Ejecuto primera instruccion variables c, d
     execute_next_instruction_for_process();
 
     t_stack_element *stack_element = list_get(pcb->stack, 0);
     CU_ASSERT_EQUAL(list_size(stack_element->variables), 2);
+    t_variable *variable = list_get(stack_element->variables, 0);
+    CU_ASSERT_EQUAL(variable->id, 'c');
+    variable = list_get(stack_element->variables, 1);
+    CU_ASSERT_EQUAL(variable->id, 'd');
+
+    //ejecuto segunda instruccion c=1234
+    pcb->program_counter++;
+    execute_next_instruction_for_process();
+    CU_ASSERT_EQUAL(dereferenciar(obtenerPosicionVariable('c')), 1234);
+
+    //ejecuto segunda instruccion d=4321
+    pcb->program_counter++;
+    execute_next_instruction_for_process();
+    CU_ASSERT_EQUAL(dereferenciar(obtenerPosicionVariable('d')), 4321);
 }
 
 void test_definir_variable() {
@@ -175,10 +193,10 @@ void mockear_pcb() {
 void test_leer_data_de_memoria_con_iteraciones() {
     char* leer_memoria(t_dato_en_memoria *dato) {
 	switch(dato->direccion.pagina) {
-	    case (1): return "0123456789";
-	    case (2):
-	    case(4): return "abcdefgh";
-	    case (3): return "987654";
+	    case (1): return "012";
+	    case (2): return "abcde";
+	    case(4): return "ab";
+	    case (3): return "98765";
 	}
     }
 

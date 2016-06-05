@@ -39,7 +39,7 @@ int main(int argc, char **argv) {
 	send(umc_socket_descriptor, &a, sizeof(int), 0);
 	printf("conectado con umc y mande handshake");
 	fflush(stdout);
-
+	/*
     t_inicio_de_programa_en_UMC *iniciar_programa_en_UMC = malloc(sizeof(t_inicio_de_programa_en_UMC));
 	   memset(iniciar_programa_en_UMC,0,sizeof(t_inicio_de_programa_en_UMC));
 
@@ -67,7 +67,7 @@ int main(int argc, char **argv) {
 	   memset(respuesta,0,sizeof(t_respuesta_iniciar_programa_en_UMC));
 	   respuesta = deserealizar_mensaje(buffer_header[0],buffer_recv);
 
-
+*/
 
 	while(1){
 		sleep(1000);

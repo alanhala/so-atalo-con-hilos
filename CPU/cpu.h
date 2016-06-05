@@ -35,8 +35,8 @@ typedef struct {
 typedef struct {
     uint32_t size;
     t_direccion_virtual_memoria direccion;
-} t_dato_en_memoria;
 
+} t_dato_en_memoria;
 typedef struct {
 	t_nombre_variable id;
 	t_dato_en_memoria dato;

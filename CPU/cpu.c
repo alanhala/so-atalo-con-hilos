@@ -98,7 +98,7 @@ t_puntero definirVariable(t_nombre_variable variable) {
 	new_variable->dato.direccion.pagina = pcb->stack_next_free_space.pagina;
 	new_variable->dato.direccion.offset = pcb->stack_next_free_space.offset;
 
-	incrementar_next_free_space(pcb);
+	incrementar_next_free_space(new_variable->dato.size);
 
 	list_add(stack_element->variables, new_variable);
 
@@ -263,8 +263,8 @@ char* ejecutar_lectura_de_dato_con_iteraciones(void*(*closure_lectura)(t_dato_en
 	    aux_dato.size = remaining_size;
 	}
 
-	memcpy(result+desplazamiento_acumulado, closure_lectura(&aux_dato), aux_dato.size);
-
+	//memcpy(result+desplazamiento_acumulado, closure_lectura(&aux_dato), aux_dato.size);
+	strcpy(result+desplazamiento_acumulado, closure_lectura(&aux_dato));
 	desplazamiento_acumulado += aux_dato.size;
 	aux_dato.direccion.offset = 0;
 	remaining_size -= aux_dato.size;

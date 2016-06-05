@@ -83,10 +83,10 @@ int main(int argc, char **argv) {
 
 	set_algoritmo_reemplazo("clock");
 	inicializar_estructuras();
-	int swap_socket = create_client_socket_descriptor("localhost", "6000");
-	set_socket_descriptor(swap_socket);
-	//set_test();
-	//crear_swap_mock();
+	//int swap_socket = create_client_socket_descriptor("localhost", "6000");
+	//set_socket_descriptor(swap_socket);
+	set_test();
+	crear_swap_mock();
 
 
 	int server_socket_descriptor = create_server_socket_descriptor(NULL,"5000",BACKLOG);
@@ -191,8 +191,8 @@ void manejo_de_solicitudes(int socket_descriptor) {
 	}
 	if(handshake == 2) //KERNEL
 	{
-		cargar_nuevo_programa(1, 50, "begin\nvariables a, b\na=1\nb=2\nend\0");
-		cargar_nuevo_programa(2, 50, "cargo un programa");
+		cargar_nuevo_programa(1, 50, "begin\nvariables c, d\nc=1234\nd=4321\nend\0");
+		//cargar_nuevo_programa(2, 50, "cargo un programa");
 	}
 
 	while (1) {
@@ -336,7 +336,7 @@ int cargar_configuracion(){
 
 	//Se asigna a ptrConfig el archivo de configuracion. Si no lo encuentra, finaliza
 	//y lo advierte en el log
-	ptrConfig = config_create("/home/utnso/GitHub/tp-2016-1c-Atalo-con-Hilos/UMC/Debug/umc.cfg");
+	ptrConfig = config_create("umc.cfg");
 	if (ptrConfig == NULL){
 		log_error(errorLogger,"Archivo de configuración no disponible. No puede ejecutar el UMC.\n");
 		return -1;
