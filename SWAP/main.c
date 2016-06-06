@@ -128,6 +128,27 @@ void UMC_connection(t_swap* swap) {
 			int bytes = send(umc_socket_descriptor, buffer_escritura->datos, buffer_escritura->size, 0);
 
 		}
+		if (buffer_header[0] == 7){
+
+			int bytes_recibidos = recv(umc_socket_descriptor, buffer_recv, buffer_header[1], 0);
+
+			t_finalizar_programa_en_swap *finalizar_programa = malloc(sizeof(t_finalizar_programa_en_swap));
+
+			finalizar_programa = (t_finalizar_programa_en_swap *)deserealizar_mensaje(7,buffer_recv);
+
+			t_respuesta_finalizar_programa_swap *respuesta_finalizar_programa_swap = malloc(sizeof(t_respuesta_finalizar_programa_swap));
+
+			memset(respuesta_finalizar_programa_swap,0,sizeof(t_respuesta_finalizar_programa_swap));
+
+			//HARDCODEADO. ASIGNAR VALOR CORRECTO
+			int resultado_temp = 1;
+			respuesta_finalizar_programa_swap->resultado=resultado_temp;
+
+			t_stream *buffer = serializar_mensaje(8,respuesta_finalizar_programa_swap);
+
+			int bytes_sent = send(umc_socket_descriptor, buffer->datos, buffer->size, 0);
+
+		}
 
 		if (buffer_header[0] == -1) {
 			break;

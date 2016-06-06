@@ -50,17 +50,16 @@ typedef struct {
 }__attribute__((packed)) t_respuesta_bytes_de_una_pagina_a_CPU;
 
 
-
-t_stream *serializar_pedido_bytes_de_una_pagina_a_UMC(t_solicitar_bytes_de_una_pagina_a_UMC *pedido);
-void *serealizar_mensaje(uint8_t tipo, char* datos);
 void *deserealizar_mensaje(uint8_t tipo, char* datos);
+t_header *deserializar_header(char *header);
 t_respuesta_bytes_de_una_pagina_a_CPU *deserializar_respuesta_bytes_de_una_pagina_a_CPU(char *datos);
-t_respuesta_escribir_bytes_de_una_pagina_en_UMC * deserializar_respuesta_escribir_bytes_de_una_pagina_en_UMC(char *datos);
-t_respuesta_cambio_de_proceso* deserealizar_respuesta_cambio_de_proceso(char *datos);
-
-
+t_respuesta_escribir_bytes_de_una_pagina_en_UMC *deserializar_respuesta_escribir_bytes_de_una_pagina_en_UMC(char *datos);
+t_respuesta_cambio_de_proceso *deserealizar_respuesta_cambio_de_proceso(char *datos);
 t_stream *serializar_escribir_bytes_de_una_pagina_en_UMC(t_escribir_bytes_de_una_pagina_en_UMC * unaEstructura);
 t_stream *serializar_cambio_de_proceso (t_cambio_de_proceso* unCambioDeProceso);
+t_stream *serializar_pedido_bytes_de_una_pagina_a_UMC(t_solicitar_bytes_de_una_pagina_a_UMC *pedido);
+t_stream *serializar_mensaje(int tipo,void* unaEstructura);
+
 
 
 

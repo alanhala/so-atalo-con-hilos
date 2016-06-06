@@ -339,6 +339,36 @@ int finalizar_programa_de_swap(int pid){
 	if(SWAP_MOCK_ENABLE)
 		return finalizar_programa_de_swap_mock(pid);
 	return -1;
+
+	t_finalizar_programa_en_swap *finalizar_programa = malloc(sizeof(t_finalizar_programa_en_swap));
+	memset(finalizar_programa,0,sizeof(t_finalizar_programa_en_swap));
+
+	//HARDCODEADO. MODIFICAR
+	finalizar_programa->process_id = 22;
+
+	t_stream *buffer = serializar_mensaje(7,finalizar_programa);
+
+	int bytes_enviados = send(SWAP_SOCKET_DESCRIPTOR,buffer->datos,buffer->size,0);
+
+	t_header *a_header = malloc(sizeof(t_header));
+
+	char buffer_header[5];	//Buffer donde se almacena el header recibido
+
+	int	bytes_recibidos_header,	//Cantidad de bytes recibidos en el recv() que recibe el header
+		bytes_recibidos;		//Cantidad de bytes recibidos en el recv() que recibe el mensaje
+
+	bytes_recibidos_header = recv(SWAP_SOCKET_DESCRIPTOR, buffer_header, 5, MSG_PEEK);
+
+	char	buffer_recv[buffer_header[1]];	//El buffer para recibir el mensaje se crea con la longitud recibida
+
+	bytes_recibidos = recv(SWAP_SOCKET_DESCRIPTOR,buffer_recv,buffer_header[1],0);
+
+	t_respuesta_finalizar_programa_swap *respuesta = malloc(sizeof(t_respuesta_finalizar_programa_swap));
+
+	respuesta = (t_respuesta_finalizar_programa_swap*)deserealizar_mensaje(8, buffer_recv);
+
+	return respuesta;
+
 }
 
 int buscar_en_tlb_frame_de_pagina(int pid, int pagina){

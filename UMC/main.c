@@ -300,11 +300,9 @@ void manejo_de_solicitudes(int socket_descriptor) {
 
 				   inicio_programa_en_UMC = (t_inicio_de_programa_en_UMC *)deserealizar_mensaje(buffer_header[0],buffer_recv);
 
-
 				   int respuesta_tmp = cargar_nuevo_programa(inicio_programa_en_UMC->process_id,
 						   	   	   	   	   	   	   	   	   	 inicio_programa_en_UMC->cantidad_de_paginas,
 															 inicio_programa_en_UMC->codigo_de_programa);
-
 
 				   t_respuesta_inicio_de_programa_en_UMC *respuesta = malloc(sizeof(t_respuesta_inicio_de_programa_en_UMC));
 
@@ -315,6 +313,25 @@ void manejo_de_solicitudes(int socket_descriptor) {
 				   int bytes_sent = send(socket_descriptor,buffer->datos,buffer->size,0);
 
 			   }
+		if(buffer_header[0]==63) {
+
+			int bytes_recibidos = recv(socket_descriptor,buffer_recv,buffer_header[1],0);
+
+			t_finalizar_programa_en_UMC *finalizar_programa_en_UMC = malloc(sizeof(t_finalizar_programa_en_UMC));
+
+			finalizar_programa_en_UMC = (t_finalizar_programa_en_UMC *)deserealizar_mensaje(63,buffer_recv);
+
+			t_respuesta_finalizar_programa_en_UMC *respuesta = malloc(sizeof(t_respuesta_finalizar_programa_en_UMC));
+
+			//HARDCODEADO. ESTA MAL
+			int respuesta_tmp = 1;
+			respuesta->respuesta_correcta = respuesta_tmp;
+
+			t_stream *buffer = (t_stream *)serializar_mensaje(64,respuesta);
+
+			int bytes_sent = send(socket_descriptor,buffer->datos,buffer->size,0);
+
+		}
 
 	}
 }

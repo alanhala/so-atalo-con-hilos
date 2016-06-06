@@ -26,9 +26,12 @@ typedef struct {
 	char *datos;
 } t_stream;
 
-t_stream *serializar_mensaje(int tipo, void* unaEstructura);
-t_stream *serializar_iniciar_programa_en_kernel(t_iniciar_programa_en_kernel *inicio_programa);
+
 void *deserealizar_mensaje(uint8_t tipo, char* datos);
 t_respuesta_iniciar_programa_en_kernel *deserealizar_respuesta_inicio_de_programa_en_kernel(char *datos);
+t_stream *serializar_mensaje(int tipo, void* unaEstructura);
+t_stream *serializar_iniciar_programa_en_kernel(t_iniciar_programa_en_kernel *inicio_programa);
+
+
 
 #endif /* PROTOCOLOCONSOLA_H_ */
