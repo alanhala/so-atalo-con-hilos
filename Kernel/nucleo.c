@@ -1,4 +1,21 @@
+/*
+  nucleo.c
+  Autor: Gustavo Boniscontro
+*/
 #include "nucleo.h"
+
+//valores de configuracion
+int puertoCPU,puertoCON,puertoUMC;
+char arrUMCip[10];
+
+static sem_t mut_new, mut_ready, mut_block, mut_exit, mut_cpu;
+static sem_t cant_new, cant_ready,
+        cant_block, cant_exit,cant_cpu;
+
+static void *pColaNew, *pColaReady,
+            *pColaExit, *pColaBlock,*pListaCpu;
+static int pid;
+
 
 
 
@@ -117,13 +134,13 @@ int conectarCPU(){
 void deReadyaExec(t_cpu *auxcpu ) {
 t_PCB *pcb;
 int idcpu ;
- 			sem_wait(&cant_cpu); //primero vemos que haya alguna cpu libre
 			sem_wait(&cant_ready);
 
 			sem_wait(&mut_ready);
 			pcb = queue_pop(pColaReady);
 			sem_post(&mut_ready);
 
+ 			sem_wait(&cant_cpu); //primero vemos que haya alguna cpu libre
 
 			sem_wait(&mut_cpu);
       pcb->estado=EXEC;

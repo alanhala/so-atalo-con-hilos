@@ -61,12 +61,6 @@ typedef struct {
 } t_cpu;
 
 
-static sem_t mut_new, mut_ready, mut_block, mut_exit, mut_cpu;
-static sem_t cant_new, cant_ready,  cant_block, cant_exit,cant_cpu;
-
-static void *pColaNew, *pColaReady, *pColaExit, *pColaBlock,*pListaCpu;
-static int pid;
-
 
 void *recNew();
 void *recReady();
@@ -81,3 +75,4 @@ void Planificacion();
 int obtener_cantidad_paginas_programa(t_metadata_program*, int bytes);
 
 #endif /* NUCLEO_H_ */
+
