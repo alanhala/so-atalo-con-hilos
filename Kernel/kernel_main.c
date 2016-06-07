@@ -21,6 +21,7 @@
 #include "socket.h"
 #include "tests.h"
 #include "protocoloKernel.h"
+#include "nucleo.h"
 
 #define CPULISTEN  "8002"
 #define CONSOLELISTEN "8001"
@@ -33,6 +34,9 @@ void *cpu_connection(int socket_descriptor);
 void console_connection(int socket_descriptor);
 
 int main(int argc, char **argv) {
+
+	iniciar_algoritmo_planificacion();
+
 
 	int console_socket_descriptor = create_server_socket_descriptor(NULL,"22000",10);
 	console_connection(console_socket_descriptor);
@@ -197,8 +201,7 @@ void *umc_connection(int socket_descriptor) {
 void console_connection(int socket_desciptor) {
 	//while (1) {
 		int client_socket_descriptor = accept_connection(socket_desciptor);
-		//printf("Se conectio una consola");
-		//fflush(stdout);
+
 
 		t_header *un_header = malloc(sizeof(t_header));
 		char buffer_header[5];
@@ -222,6 +225,14 @@ void console_connection(int socket_desciptor) {
 
 			printf("Kernel. El mensaje es: %s\n",iniciar_programa->codigo_de_programa);
 			printf("Kernel. El mensaje tiene de largo: %d\n",un_header->length);
+
+			// AGREGO EL CODIGO A LA COLA DE NEW
+			char * codigo_programa = iniciar_programa->codigo_de_programa;
+			sem_wait(&mut_new);
+			queue_push(estado_new, codigo_programa);
+			sem_post(&mut_new);
+			sem_post(&cant_new);
+			// FIN
 
 			t_respuesta_iniciar_programa_en_kernel *respuesta = malloc(sizeof(t_respuesta_iniciar_programa_en_kernel));
 			memset(respuesta,0,sizeof(t_respuesta_iniciar_programa_en_kernel));

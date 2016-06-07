@@ -2,62 +2,69 @@
   nucleo.c
   Autor: Gustavo Boniscontro
 */
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <errno.h>
+#include <string.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <netdb.h>
+#include <arpa/inet.h>
+#include <sys/wait.h>
+#include <signal.h>
+#include <pthread.h>
 #include "nucleo.h"
-
-//valores de configuracion
-int puertoCPU,puertoCON,puertoUMC;
-char arrUMCip[10];
-
-static sem_t mut_new, mut_ready, mut_block, mut_exit, mut_cpu;
-static sem_t cant_new, cant_ready,
-        cant_block, cant_exit,cant_cpu;
-
-static void *pColaNew, *pColaReady,
-            *pColaExit, *pColaBlock,*pListaCpu;
-static int pid;
+#include "protocoloKernel.h"
 
 
 
 
-void Planificacion() {
+void iniciar_algoritmo_planificacion() {
 
 	//5 estados new, ready , exec, exit, block
-	pColaNew = queue_create();
-	pColaReady = queue_create();
-	pColaExit = queue_create();
-	pColaBlock = queue_create();
-  pListaCpu = list_create();
-	pthread_t thReady, thNew, thExec, thBlock,thExit;
+	estado_new = queue_create();
+	estado_ready = queue_create();
+	estado_exit = queue_create();
+	estado_block = queue_create();
+	estado_ejecucion = queue_create();
+	cola_cpu_disponibles =queue_create();
+
+	pthread_t thReady, thNew, thEjecucion, thBlock,thExit;
 
 	sem_init(&mut_new, 0, 1);
 	sem_init(&mut_ready, 0, 1);
-	sem_init(&mut_cpu, 0, 1);
+	sem_init(&mut_ejecucion, 0, 1);
 	sem_init(&mut_block, 0, 1);
 	sem_init(&mut_exit, 0, 1);
+	sem_init(&mut_cpu_disponibles, 0, 1);
+
 
 	sem_init(&cant_new, 0, 0);
 	sem_init(&cant_ready, 0,0);
-	sem_init(&cant_cpu, 0, 0);
+	sem_init(&cant_ejecucion, 0, 0);
 	sem_init(&cant_block, 0, 0);
 	sem_init(&cant_exit, 0, 0);
+	sem_init(&cant_cpu_disponibles, 0, 0);
 
-	/* COMENTO PARA TEST, DESCOMENTAR*/
 
 	 pthread_create(&thNew, NULL, &recNew, NULL);
 	 pthread_create(&thReady, NULL, &recReady, NULL);
-	 pthread_create(&thExec, NULL, &recExec, NULL);
+	 pthread_create(&thEjecucion, NULL, &recExec, NULL);
+	 pthread_create(&thBlock, NULL, &recBlock, NULL);
 	 pthread_create(&thExit, NULL, &recExit, NULL);
 
-	 printf("Hilo creado \n"); //TODO BORRAR LINEA
 
 	 pthread_join(thNew, NULL);
 	 pthread_join(thReady, NULL);
-	 pthread_join(thExec, NULL);
-	 //  pthread_join( thBlock, NULL);
+	 pthread_join(thEjecucion, NULL);
+	 pthread_join(thBlock, NULL);
+	 pthread_join(thExit, NULL);
 	 exit(EXIT_SUCCESS);
 
 
-	 /*COMENTO PARA TEST, DESCOMENTAR */
+
 
 }
 
@@ -76,27 +83,35 @@ t_PCB *conectarConsola()
     return(pcb);
 }
 
-t_PCB *createPCB()
+t_PCB *createPCB(char *codigo_programa)
 {
 	  t_PCB *pcb;
     pcb = malloc(sizeof(t_PCB));
     pcb->pid = pid++ ;
     pcb->program_counter = 0;
+    pcb->codigo_programa = codigo_programa;
     return(pcb);
 }
 
+int iniciar_programa_en_umc(int pid, int cantidad_paginas_requeridas, char* codigo);
 void *recNew() {
-t_PCB *pcb;
+
 
 	while (1) {
-		pcb = conectarConsola();
-    sem_wait(&mut_new);
-    pcb->estado=NEW;
-		queue_push(pColaNew,pcb);
+		sem_wait(&cant_new);
+		sem_wait(&mut_new);
+		char * codigo_programa = queue_pop(estado_new);
 		sem_post(&mut_new);
-    sem_post(&cant_new);
 
-		sleep(2);   //este sleep para q 1 seg me crea proceso
+		t_PCB *pcb = createPCB(codigo_programa);
+
+		int inicio_correcto = iniciar_programa_en_umc(pcb->pid, pcb->paginas_codigo, pcb->codigo_programa);
+
+		sem_wait(&mut_ready);
+		pcb->estado = READY;
+		queue_push(estado_ready, pcb);
+		sem_post(&mut_ready);
+		sem_post(&cant_ready);
 	}
 
 }
@@ -105,143 +120,121 @@ t_PCB *pcb;
 
 
 void *recReady() {
-t_PCB *pcb;
+
 
 	while (1) {
-		sem_wait(&cant_new);
-		sem_wait(&mut_new);
-		pcb = queue_pop(pColaNew);
-		sem_post(&mut_new);
+
+
+		sem_wait(&cant_ready);
 		sem_wait(&mut_ready);
-		pcb->estado = READY;
-		queue_push(pColaReady, pcb);
+		t_PCB *pcb  = queue_pop(estado_ready);
 		sem_post(&mut_ready);
-		sem_post(&cant_ready);
 
-		sleep(1);
-	}
 
-}
-int conectarCPU(){
-  //TODO conectar con una cpu
-  //falta hacer este codigo
-  //aca tendria que
+		sem_wait(&cant_cpu_disponibles); //espero tener una cpu disponible
+		sem_post(&cant_cpu_disponibles);
 
-  sem_post(&cant_cpu);
 
-}
-
-void deReadyaExec(t_cpu *auxcpu ) {
-t_PCB *pcb;
-int idcpu ;
-			sem_wait(&cant_ready);
-
-			sem_wait(&mut_ready);
-			pcb = queue_pop(pColaReady);
-			sem_post(&mut_ready);
-
- 			sem_wait(&cant_cpu); //primero vemos que haya alguna cpu libre
-
-			sem_wait(&mut_cpu);
-      pcb->estado=EXEC;
-			//list_add_in_index(t_list *self, int index, void *data)
-      list_add_in_index(pListaCpu,idcpu, pcb);
-			sem_post(&mut_cpu);
-}
+		sem_wait(&mut_ejecucion);
+		pcb->estado = EXEC;
+		queue_push(estado_ejecucion, pcb);
+		sem_post(&mut_ejecucion);
+		sem_post(&cant_ejecucion);
 
 
 
 
-t_cpu *mensajeCPU()
-{
-    t_cpu *auxcpu = malloc(sizeof(t_msjcpu));
-    auxcpu->msj = (rand() % 4); //TODO RECIBIR POR SOCKET MSJ
-    auxcpu->id=1; //TODO recibir id de cpu;
-    //auxcpu->pcb =
-    return (auxcpu);
-
-}
-
-
-void *recExec() {
-t_PCB *pcb;
-int idcpu ;
-t_cpu *auxcpu;
-t_cpu *cpu_in_list;
-	while (1) {
-	   auxcpu = mensajeCPU();
-     switch(auxcpu->msj) {
-        case CPU_IDLE :
-           sem_post(&cant_cpu);
-           deReadyaExec(auxcpu);
-           break;
-        case CPU_PREEMPT :
-            sem_wait(&mut_cpu);
-            cpu_in_list = list_get(pListaCpu,auxcpu->id);
-            sem_post(&mut_cpu);
-            pcb = cpu_in_list->pcb;
-        		sem_wait(&mut_ready);
-        		pcb->estado = READY;
-        		queue_push(pColaReady, pcb);
-        		sem_post(&mut_ready);
-        		sem_post(&cant_ready);
-            sem_post(&cant_cpu);
-           break;
-        case CPU_BLOCK :
-            sem_wait(&mut_cpu);
-            cpu_in_list = list_get(pListaCpu,auxcpu->id);
-            sem_post(&mut_cpu);
-            pcb = cpu_in_list->pcb;
-        		sem_wait(&mut_block);
-        		pcb->estado = BLOCK;
-        		queue_push(pColaBlock, pcb);
-        		sem_post(&mut_block);
-        		sem_post(&cant_block);
-           break;
-        case CPU_EXIT :
-           //aca hay que liberar la cpu ponerla en idle y el proceso poner en cola exit
-            sem_wait(&mut_cpu);
-            cpu_in_list = list_get(pListaCpu,auxcpu->id);
-            cpu_in_list->msj = CPU_IDLE; //TODO este elemento se modifica directamente en la listacpu?? nose
-            //capaz hay que hacer
-            //list_add_in_index(cpu_in_list,auxcpu->id, cpu_in_list);
-            pcb = cpu_in_list->pcb;
-            sem_post(&mut_cpu);
-            sem_post(&cant_cpu);
-
-        		sem_wait(&mut_exit);
-        		pcb->estado = EXIT;
-        		queue_push(pColaExit, pcb);
-        		sem_post(&mut_exit);
-        		sem_post(&cant_exit);
-
-           break;
-      }
 
 	}
+
 }
+
+
+
+void * ejecutar_pcb_en_cpu(t_cpu *cpu){
+
+}
+
+void * recEjecucion() {
+	while(1){
+		sem_wait(&cant_cpu_disponibles);
+		sem_wait(&mut_cpu_disponibles);
+		t_cpu *cpu  = queue_pop(cola_cpu_disponibles);
+		sem_post(&mut_cpu_disponibles);
+
+
+		sem_wait(&cant_ejecucion);
+		sem_wait(&mut_ejecucion);
+		t_PCB *pcb  = queue_pop(estado_ejecucion);
+		sem_post(&mut_ejecucion);
+
+		cpu->pcb =pcb;
+		pthread_t th_ejecucion_pcb;
+		pthread_create(&th_ejecucion_pcb, NULL, &ejecutar_pcb_en_cpu, cpu);
+
+	}
+
+
+
+
+}
+
+
+
+int finalizar_programa_consola(t_PCB *pcb){
+
+}
+
+int finalizar_programa_umc(t_PCB *pcb){
+		t_finalizar_programa_en_UMC *finalizar_programa_en_UMC = malloc(sizeof(t_finalizar_programa_en_UMC));
+		memset(finalizar_programa_en_UMC,0,sizeof(t_finalizar_programa_en_UMC));
+
+
+
+		finalizar_programa_en_UMC->process_id = pcb->pid;
+
+		t_stream *buffer = malloc(sizeof(t_stream));
+
+		buffer = serializar_mensaje(63,finalizar_programa_en_UMC);
+
+		int bytes_enviados = send(umc_socket_descriptor,buffer->datos,buffer->size,0);
+
+		char buffer_header[5];
+
+		int bytes_header = recv(umc_socket_descriptor,buffer_header,5,MSG_PEEK);
+
+		char buffer_recv[buffer_header[1]];
+
+		int bytes_recibidos = recv(umc_socket_descriptor,buffer_recv,buffer_header[1],0);
+
+		t_respuesta_finalizar_programa_en_UMC *respuesta_finalizar_prog_UMC = malloc(sizeof(t_respuesta_finalizar_programa_en_UMC));
+
+		memset(respuesta_finalizar_prog_UMC,0,sizeof(t_respuesta_finalizar_programa_en_UMC));
+
+		respuesta_finalizar_prog_UMC = deserealizar_mensaje(64,buffer_recv);
+
+		return respuesta_finalizar_prog_UMC->respuesta_correcta;
+}
+
 
 void *recExit() {
-t_PCB *pcb;
+
 	while (1) {
 			sem_wait(&cant_exit);
 			sem_wait(&mut_exit);
-			pcb = queue_pop(pColaExit);
+			t_PCB *pcb = queue_pop(estado_exit);
 			sem_post(&mut_exit);
-		  //TODO llamar a consola y enviar pcb
+
+			int umc_finalizado =finalizar_programa_umc(pcb);
+			int consola_finalizado =finalizar_programa_consola(pcb);
+
+
 
 			free(pcb);// lo libero directamente creo q no es necesario hacer cola de exit
 
 
 	}
 }
-
-
-
-
-
-
-
 
 
 int obtener_cantidad_paginas_programa(t_metadata_program* metadata, int bytes_por_pagina) {
@@ -262,3 +255,37 @@ int obtener_cantidad_paginas_programa(t_metadata_program* metadata, int bytes_po
 	return total_paginas;
 }
 
+
+int iniciar_programa_en_umc(int pid, int cantidad_paginas_requeridas, char* codigo){
+
+	   t_inicio_de_programa_en_UMC *iniciar_programa_en_UMC = malloc(sizeof(t_inicio_de_programa_en_UMC));
+	   memset(iniciar_programa_en_UMC,0,sizeof(t_inicio_de_programa_en_UMC));
+
+	   iniciar_programa_en_UMC->process_id = pid;
+	   iniciar_programa_en_UMC->cantidad_de_paginas = cantidad_paginas_requeridas;
+	   iniciar_programa_en_UMC->codigo_de_programa = codigo;
+	   //char unChar[5] = "Hola";
+	   //memcpy(iniciar_programa_en_UMC->codigo_de_programa,&unChar,5);
+
+	   t_stream *buffer = malloc(sizeof(t_stream));
+
+	   buffer = serializar_mensaje(61,iniciar_programa_en_UMC);
+
+	   int bytes_enviados = send(umc_socket_descriptor,buffer->datos,buffer->size,0);
+
+	   char buffer_header[5];
+
+	   int bytes_header = recv(umc_socket_descriptor,buffer_header,5,MSG_PEEK);
+
+	   char buffer_recv[buffer_header[1]];
+
+	   int bytes_recibidos = recv(umc_socket_descriptor,buffer_recv,buffer_header[1],0);
+
+	   t_respuesta_iniciar_programa_en_UMC *respuesta = malloc(sizeof(t_respuesta_iniciar_programa_en_UMC));
+	   memset(respuesta,0,sizeof(t_respuesta_iniciar_programa_en_UMC));
+	   respuesta = deserealizar_mensaje(buffer_header[0],buffer_recv);
+
+	   return respuesta->respuesta_correcta;
+
+
+}

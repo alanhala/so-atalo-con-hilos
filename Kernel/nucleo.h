@@ -17,6 +17,21 @@
 #include <pthread.h>
 #include <semaphore.h>
 
+//valores de configuracion
+int puertoCPU,puertoCON,puertoUMC;
+char arrUMCip[10];
+
+sem_t mut_new, mut_ready, mut_block, mut_exit, mut_ejecucion, mut_cpu_disponibles;
+sem_t cant_new, cant_ready,
+        cant_block, cant_exit, cant_ejecucion, cant_cpu_disponibles;
+
+t_queue *estado_new, *estado_ready,
+            *estado_exit, *estado_block,*estado_ejecucion, *cola_cpu_disponibles;
+int pid;
+
+
+
+
 typedef enum {
     NEW = 0,
     READY,
@@ -39,6 +54,7 @@ typedef struct {
 typedef struct {
 	int pid;
 	t_estado estado;
+	char * codigo_programa;
 	int program_counter;
 	int paginas_codigo;
 	int cantidad_instrucciones;
@@ -55,9 +71,10 @@ typedef enum {
 } t_msjcpu;
 
 typedef struct {
-	int id;
-	t_msjcpu msj;
+	int cpu_socket_descriptor;
 	t_PCB *pcb;
+	t_msjcpu msj;
+
 } t_cpu;
 
 
@@ -73,6 +90,7 @@ void deReadyaExec();
 void Planificacion();
 
 int obtener_cantidad_paginas_programa(t_metadata_program*, int bytes);
+void iniciar_algoritmo_planificacion();
 
 #endif /* NUCLEO_H_ */
 
