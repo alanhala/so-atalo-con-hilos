@@ -64,10 +64,14 @@ typedef struct {
 	void* stack_index;
 } t_PCB;
 typedef enum {
-    CPU_IDLE = 0,
-    CPU_PREEMPT,
-    CPU_BLOCK,
-    CPU_EXIT
+    CPU_IDLE = 0, //compu nueva o cpu sin trabajar
+    fin_quantum, //fin quantum
+    fin_proceso,  //fin del proceso
+	obtener_valor,//obtener_valor [identificador de variable compartida]
+	grabar_valor,//grabar_valor [identificador de variable compartida] [valor a grabar]
+	cpuwait,//wait [identificador de semáforo]
+	cpusignal,//signal [identificador de semáforo]
+	entrada_salida //entrada_salida [identificador de dispositivo] [unidades de tiempo a utilizar]
 } t_msjcpu;
 
 typedef struct {

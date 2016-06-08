@@ -279,3 +279,80 @@ int iniciar_programa_en_umc(int pid, int cantidad_paginas_requeridas, char* codi
 
 
 }
+
+int atender_mensaje_cpu(int mensaje,char *identificador,char *valor)
+{
+/*
+al llamar en caso de que los valores no sean necesarios llenar con null
+obtener_valor [identificador de variable compartida]
+grabar_valor [identificador de variable compartida] [valor a grabar]
+wait [identificador de semáforo]
+signal [identificador de semáforo]
+entrada_salida [identificador de dispositivo] [unidades de tiempo a utilizar]
+*/
+     switch(mensaje) {
+        case CPU_IDLE :
+          // sem_post(&cant_cpu);
+           //deReadyaExec(auxcpu);
+           break;
+        case fin_quantum :
+           /* sem_wait(&mut_cpu);
+            cpu_in_list = list_get(pListaCpu,auxcpu->id);
+            sem_post(&mut_cpu);
+            pcb = cpu_in_list->pcb;
+        		sem_wait(&mut_ready);
+        		pcb->estado = READY;
+        		queue_push(pColaReady, pcb);
+        		sem_post(&mut_ready);
+        		sem_post(&cant_ready);
+            sem_post(&cant_cpu);    */
+           break;
+        case entrada_salida :
+           /* sem_wait(&mut_cpu);
+            cpu_in_list = list_get(pListaCpu,auxcpu->id);
+            sem_post(&mut_cpu);
+            pcb = cpu_in_list->pcb;
+        		sem_wait(&mut_block);
+        		pcb->estado = BLOCK;
+        		queue_push(pColaBlock, pcb);
+        		sem_post(&mut_block);
+        		sem_post(&cant_block);  */
+           break;
+        case fin_proceso :
+           //aca hay que liberar la cpu ponerla en idle y el proceso poner en cola exit
+           /* sem_wait(&mut_cpu);
+            cpu_in_list = list_get(pListaCpu,auxcpu->id);
+            cpu_in_list->msj = CPU_IDLE; //TODO este elemento se modifica directamente en la listacpu?? nose
+            //capaz hay que hacer
+            //list_add_in_index(cpu_in_list,auxcpu->id, cpu_in_list);
+            pcb = cpu_in_list->pcb;
+            sem_post(&mut_cpu);
+            sem_post(&cant_cpu);
+
+        		sem_wait(&mut_exit);
+        		pcb->estado = EXIT;
+        		queue_push(pColaExit, pcb);
+        		sem_post(&mut_exit);
+        		sem_post(&cant_exit);    */
+           break;
+        case obtener_valor:
+        //obtener_valor [identificador de variable compartida]
+        	break;
+		case grabar_valor:
+		//grabar_valor [identificador de variable compartida] [valor a grabar]
+			break;
+		case cpuwait:
+		//wait [identificador de semáforo]
+			break;
+		case cpusignal:
+		//signal [identificador de semáforo]
+			break;
+      }
+
+}
+
+int
+
+
+
+
