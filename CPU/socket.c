@@ -14,7 +14,7 @@ int create_server_socket_descriptor(char* ip, char *port, int backlog) {
 	int status, socket_descriptor;
 
 	memset(&sample, 0, sizeof sample);
-	sample.ai_family = AF_UNSPEC;
+	sample.ai_family = AF_INET;
 	sample.ai_socktype = SOCK_STREAM;
 
 	if ((status = getaddrinfo(ip, port, &sample, &server_info)) != 0) {
@@ -100,7 +100,7 @@ int create_client_socket_descriptor(char *ip, char *port) {
 	int status, socket_descriptor;
 
 	memset(&sample, 0, sizeof sample);
-	sample.ai_family = AF_UNSPEC;
+	sample.ai_family = AF_INET;
 	sample.ai_socktype = SOCK_STREAM;
 	if ((status = getaddrinfo(ip, port, &sample, &server_info)) != 0) {
 		printf("getaddrinfo: %s\n", gai_strerror(status));
