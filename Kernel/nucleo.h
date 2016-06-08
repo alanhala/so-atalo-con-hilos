@@ -81,6 +81,16 @@ typedef struct {
 
 } t_cpu;
 
+/*
+ * creo struct para manejar entrada salida
+ * una lista por dispositivo que adentro tiene una cola por cada uno.
+ */
+typedef struct {
+	char[20] dispositivo;
+	int sleep;
+	t_queue *cola;
+} t_entradasalida;
+
 
 
 void *recNew();
