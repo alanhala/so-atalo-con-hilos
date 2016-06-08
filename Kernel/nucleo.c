@@ -351,7 +351,7 @@ entrada_salida [identificador de dispositivo] [unidades de tiempo a utilizar]
 
 }
 
-int
+
 
 
 
