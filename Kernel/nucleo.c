@@ -18,7 +18,9 @@
 #include "nucleo.h"
 #include "protocoloKernel.h"
 
-
+void set_umc_socket_descriptor(int socket){
+	UMC_SOCKET_DESCRIPTOR = socket;
+}
 
 
 void iniciar_algoritmo_planificacion() {
@@ -51,7 +53,7 @@ void iniciar_algoritmo_planificacion() {
 
 	 pthread_create(&thNew, NULL, &recNew, NULL);
 	 pthread_create(&thReady, NULL, &recReady, NULL);
-	 pthread_create(&thEjecucion, NULL, &recExec, NULL);
+	 pthread_create(&thEjecucion, NULL, &recEjecucion, NULL);
 	 pthread_create(&thBlock, NULL, &recBlock, NULL);
 	 pthread_create(&thExit, NULL, &recExit, NULL);
 
@@ -70,22 +72,9 @@ void iniciar_algoritmo_planificacion() {
 
 
 
-t_PCB *conectarConsola()
-{
-	//aca falta conectarse con la consola y crear un nuevo PCB
-		//yo creo uno con solo un id para prueba
-		//int client_socket_descriptor = accept_connection(socket_desciptor);
-
-	  t_PCB *pcb;
-    pcb = malloc(sizeof(t_PCB));
-    pcb->pid = pid++ ;
-    pcb->program_counter = 0;
-    return(pcb);
-}
-
 t_PCB *createPCB(char *codigo_programa)
 {
-	  t_PCB *pcb;
+    t_PCB *pcb;
     pcb = malloc(sizeof(t_PCB));
     pcb->pid = pid++ ;
     pcb->program_counter = 0;
@@ -115,9 +104,6 @@ void *recNew() {
 	}
 
 }
-
-
-
 
 void *recReady() {
 
@@ -197,15 +183,15 @@ int finalizar_programa_umc(t_PCB *pcb){
 
 		buffer = serializar_mensaje(63,finalizar_programa_en_UMC);
 
-		int bytes_enviados = send(umc_socket_descriptor,buffer->datos,buffer->size,0);
+		int bytes_enviados = send(UMC_SOCKET_DESCRIPTOR,buffer->datos,buffer->size,0);
 
 		char buffer_header[5];
 
-		int bytes_header = recv(umc_socket_descriptor,buffer_header,5,MSG_PEEK);
+		int bytes_header = recv(UMC_SOCKET_DESCRIPTOR,buffer_header,5,MSG_PEEK);
 
 		char buffer_recv[buffer_header[1]];
 
-		int bytes_recibidos = recv(umc_socket_descriptor,buffer_recv,buffer_header[1],0);
+		int bytes_recibidos = recv(UMC_SOCKET_DESCRIPTOR,buffer_recv,buffer_header[1],0);
 
 		t_respuesta_finalizar_programa_en_UMC *respuesta_finalizar_prog_UMC = malloc(sizeof(t_respuesta_finalizar_programa_en_UMC));
 
@@ -216,7 +202,9 @@ int finalizar_programa_umc(t_PCB *pcb){
 		return respuesta_finalizar_prog_UMC->respuesta_correcta;
 }
 
+void * recBlock(){
 
+}
 void *recExit() {
 
 	while (1) {
@@ -271,15 +259,15 @@ int iniciar_programa_en_umc(int pid, int cantidad_paginas_requeridas, char* codi
 
 	   buffer = serializar_mensaje(61,iniciar_programa_en_UMC);
 
-	   int bytes_enviados = send(umc_socket_descriptor,buffer->datos,buffer->size,0);
+	   int bytes_enviados = send(UMC_SOCKET_DESCRIPTOR,buffer->datos,buffer->size,0);
 
 	   char buffer_header[5];
 
-	   int bytes_header = recv(umc_socket_descriptor,buffer_header,5,MSG_PEEK);
+	   int bytes_header = recv(UMC_SOCKET_DESCRIPTOR,buffer_header,5,MSG_PEEK);
 
 	   char buffer_recv[buffer_header[1]];
 
-	   int bytes_recibidos = recv(umc_socket_descriptor,buffer_recv,buffer_header[1],0);
+	   int bytes_recibidos = recv(UMC_SOCKET_DESCRIPTOR,buffer_recv,buffer_header[1],0);
 
 	   t_respuesta_iniciar_programa_en_UMC *respuesta = malloc(sizeof(t_respuesta_iniciar_programa_en_UMC));
 	   memset(respuesta,0,sizeof(t_respuesta_iniciar_programa_en_UMC));

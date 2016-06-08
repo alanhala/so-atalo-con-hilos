@@ -30,8 +30,8 @@ t_queue *estado_new, *estado_ready,
 int pid;
 
 
-
-
+int UMC_SOCKET_DESCRIPTOR;
+void set_umc_socket_descriptor(int socket);
 typedef enum {
     NEW = 0,
     READY,
@@ -83,7 +83,7 @@ void *recNew();
 void *recReady();
 void *recBlock();
 
-void *recExec(); //es el exec
+void *recEjecucion(); //es el exec
 void *recExit();
 
 void deReadyaExec();
