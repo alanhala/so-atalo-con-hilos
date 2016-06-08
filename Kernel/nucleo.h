@@ -86,7 +86,7 @@ typedef struct {
  * una lista por dispositivo que adentro tiene una cola por cada uno.
  */
 typedef struct {
-	char[20] dispositivo;
+	char* dispositivo;
 	int sleep;
 	t_queue *cola;
 } t_entradasalida;

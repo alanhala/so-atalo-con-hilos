@@ -309,10 +309,11 @@ entrada_salida [identificador de dispositivo] [unidades de tiempo a utilizar]
            break;
         case entrada_salida :
         	//todo necesito tener creada la listadispositivos desde el archivo de configuracion
-        	extern t_list *listadispositivos ;
+        	/*extern t_list *listadispositivos ;
         	t_entradasalida *io;
         	io = list_find(listadispositivos,strcmp(this->dispositivo,identificador));
         	queue_push(io->cola,pcb);
+        	*/
         	//cada pcb se pone en cada cola de cada dispositivo
 
            /* sem_wait(&mut_cpu);
