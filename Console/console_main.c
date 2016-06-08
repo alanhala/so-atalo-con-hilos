@@ -40,9 +40,8 @@ int main(int argc, char **argv) {
 	memset(iniciar_programa,0,sizeof(t_iniciar_programa_en_kernel));
 
 	char * codigo = "begin\nvariables c, d\nc=1234\nd=4321\nend\0";
-	iniciar_programa->codigo_de_programa = malloc(sizeof(codigo));
-	memcpy(iniciar_programa->codigo_de_programa, codigo, sizeof(codigo));
-
+	iniciar_programa->codigo_de_programa = malloc(strlen(codigo)+1);
+	memcpy(iniciar_programa->codigo_de_programa, codigo, strlen(codigo)+1);
 
 	t_stream *buffer = malloc(sizeof(t_stream));
 
