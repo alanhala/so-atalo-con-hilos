@@ -40,23 +40,24 @@ int main(int argc, char **argv) {
 //	return 0;
 
 
-	if (argc == 3) {
-	    if (strcmp(argv[2], "-conexiones") == 0){
-    		connect_to_UMC();
-    		//connect_to_Kernel();
-    	    }
-	}
+//	if (argc == 3) {
+//	    if (strcmp(argv[2], "-conexiones") == 0){
+//    		connect_to_UMC();
+//    		//connect_to_Kernel();
+//    	    }
+//	}
+//
+//	if (strcmp(argv[1], "-test") == 0){
+//		 correrTest();
+//		 //correrTestSerializacion();
+//		 return 0;
+//	}
 
-	if (strcmp(argv[1], "-test") == 0){
-		 correrTest();
-		 //correrTestSerializacion();
-		 return 0;
-	}
+	connect_to_UMC();
+	connect_to_Kernel();
 
-	//connect_to_UMC();
-	//connect_to_Kernel();
-
-	while (1) { // para que no se cierren los threads
+	while (1) {
+		//aca hago un while de lo que voy recibiendo de kernel y ejecuto
 		sleep(10);
 	}
 
@@ -78,8 +79,10 @@ void connect_to_UMC() {
 
 void connect_to_Kernel() {
 
-	int kernel_socket_descriptor =create_client_socket_descriptor("localhost", KERNELPORT);
+	int kernel_socket_descriptor =create_client_socket_descriptor(KERNELIP, KERNELPORT);
 
 	set_kernel_socket_descriptor(kernel_socket_descriptor);
+	int a =1;
+	send(kernel_socket_descriptor, &a, sizeof(int), 0);
 }
 

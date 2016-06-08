@@ -4,7 +4,7 @@
  *  Created on: 6/5/2016
  *      Author: utnso
  */
-//pruebo con extern para ver si corren los test
+
 
 int SWAP_SOCKET_DESCRIPTOR;
 

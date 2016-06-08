@@ -58,12 +58,12 @@ void iniciar_algoritmo_planificacion() {
 	 pthread_create(&thExit, NULL, &recExit, NULL);
 
 
-	 pthread_join(thNew, NULL);
-	 pthread_join(thReady, NULL);
-	 pthread_join(thEjecucion, NULL);
-	 pthread_join(thBlock, NULL);
-	 pthread_join(thExit, NULL);
-	 exit(EXIT_SUCCESS);
+//	 pthread_join(thNew, NULL);
+//	 pthread_join(thReady, NULL);
+//	 pthread_join(thEjecucion, NULL);
+//	 pthread_join(thBlock, NULL);
+//	 pthread_join(thExit, NULL);
+//	 exit(EXIT_SUCCESS);
 
 
 
@@ -76,10 +76,11 @@ t_PCB *createPCB(char *codigo_programa)
 {
     t_PCB *pcb;
     pcb = malloc(sizeof(t_PCB));
-    pcb->pid = pid++ ;
+    pcb->pid = 10 ;
     pcb->program_counter = 0;
     pcb->codigo_programa = codigo_programa;
-    return(pcb);
+    pcb->paginas_codigo = 50;
+	return(pcb);
 }
 
 int iniciar_programa_en_umc(int pid, int cantidad_paginas_requeridas, char* codigo);
@@ -95,7 +96,8 @@ void *recNew() {
 		t_PCB *pcb = createPCB(codigo_programa);
 
 		int inicio_correcto = iniciar_programa_en_umc(pcb->pid, pcb->paginas_codigo, pcb->codigo_programa);
-
+		printf("resultado inicio programa en umc : %d", inicio_correcto); //TODO sacar este comentario
+		fflush(stdout);
 		sem_wait(&mut_ready);
 		pcb->estado = READY;
 		queue_push(estado_ready, pcb);

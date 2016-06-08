@@ -83,13 +83,13 @@ int main(int argc, char **argv) {
 
 	set_algoritmo_reemplazo("clock");
 	inicializar_estructuras();
-	//int swap_socket = create_client_socket_descriptor("localhost", "6000");
-	//set_socket_descriptor(swap_socket);
-	set_test();
-	crear_swap_mock();
+	int swap_socket = create_client_socket_descriptor("localhost", "6000");
+	set_socket_descriptor(swap_socket);
+	//set_test();
+	//crear_swap_mock();
 
 
-	int server_socket_descriptor = create_server_socket_descriptor(NULL,"5000",BACKLOG);
+	int server_socket_descriptor = create_server_socket_descriptor("localhost","5000",BACKLOG);
 
 
 	while (1) {
@@ -104,7 +104,7 @@ int main(int argc, char **argv) {
 				printf("Error - pthread_create() return code: %d\n", thread_result);
 				exit(1);
 			}
-			//printf("Hilo creado \n"); //TODO BORRAR LINEA
+
 
 		}
 
@@ -191,7 +191,7 @@ void manejo_de_solicitudes(int socket_descriptor) {
 	}
 	if(handshake == 2) //KERNEL
 	{
-		cargar_nuevo_programa(1, 50, "begin\nvariables c, d\nc=1234\nd=4321\nend\0");
+		//cargar_nuevo_programa(1, 50, "begin\nvariables c, d\nc=1234\nd=4321\nend\0");
 		cargar_nuevo_programa(2, 50, "cargo un programa");
 	}
 
