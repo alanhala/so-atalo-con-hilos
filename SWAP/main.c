@@ -45,7 +45,7 @@ int main(int argc, char *argv[]) {
 void UMC_connection(t_swap* swap) {
 	//Solo se va a conectar un proceso UMC
 
-	int server_socket_descriptor = create_server_socket_descriptor(NULL,
+	int server_socket_descriptor = create_server_socket_descriptor("192.168.0.108",
 			"6000",	10);
 
 	int umc_socket_descriptor = accept_connection(server_socket_descriptor);
