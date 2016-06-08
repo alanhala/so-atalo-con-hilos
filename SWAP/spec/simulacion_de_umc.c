@@ -38,48 +38,29 @@ void simulacion_3(){
 		int resultado_carga =initialize_program(swap, 0, paginas_necesarias, codigo_pid0);
 		int resultado_carga_pid5 =initialize_program(swap, 5, paginas_necesarias, codigo_pid5);
 
-
-
-
-		int lecturas=0;
-		int resultado_lectura = 0;
-		for(lecturas; lecturas < 15; lecturas ++){
-			char * lo_que_leo =  read_page(swap, 0, lecturas);
-			printf("%s\n", lo_que_leo);
-		}
-
-
-		int lecturas_pid5=0;
-		int resultado_lectura_pid5 = 0;
-		for(lecturas_pid5; lecturas_pid5 < 15; lecturas_pid5 ++){
-			char *lo_que_leo_pid5  = read_page(swap, 5, lecturas_pid5);
-			printf("%s\n", lo_que_leo_pid5);
-
-		}
-
 		char * lectura_una_pagina =  read_page(swap, 0, 0);
 		char * lectura_una_pagina_2 =  read_page(swap, 0, 2);
 		char * lectura_una_pagina_10 = read_page(swap, 0, 10);
 
-		CU_ASSERT_EQUAL(strcmp(lectura_una_pagina, "0pg00") , 0);
-		CU_ASSERT_EQUAL(strcmp(lectura_una_pagina_2, "0pg02") , 0);
-		CU_ASSERT_EQUAL(strcmp(lectura_una_pagina_10, "0pg10") , 0);
+		CU_ASSERT_NSTRING_EQUAL(lectura_una_pagina, "0pg00", 5);
+		CU_ASSERT_NSTRING_EQUAL(lectura_una_pagina_2, "0pg02", 5);
+		CU_ASSERT_NSTRING_EQUAL(lectura_una_pagina_10, "0pg10", 5);
 
 		write_page(swap, 0, 12, "piatt");
 
 		char * lectura_una_pagina_12 =  read_page(swap, 0, 12);
-		CU_ASSERT_EQUAL(strcmp(lectura_una_pagina_12, "piatt") , 0);
+		CU_ASSERT_NSTRING_EQUAL(lectura_una_pagina_12, "piatt", 5);
 
-		/*
-		escribir_pagina_de_programa(5, 8, 0, TAMANIO_FRAME, "tony");
-		escribir_pagina_de_programa(5, 10, 0, TAMANIO_FRAME, "to10");
-		escribir_pagina_de_programa(5, 3, 0, TAMANIO_FRAME, "ton3");
-		char * lectura_una_pagina_8_pid5 =  leer_pagina_de_programa(5, 8, 0, TAMANIO_FRAME);
-		char * lectura_una_pagina_10_pid5 =  leer_pagina_de_programa(5, 10, 0, TAMANIO_FRAME);
-		char * lectura_una_pagina_3_pid5 =  leer_pagina_de_programa(5, 3, 0, TAMANIO_FRAME);
-		CU_ASSERT_EQUAL(strcmp(lectura_una_pagina_8_pid5, "tony") , 0);
-		CU_ASSERT_EQUAL(strcmp(lectura_una_pagina_10_pid5, "to10") , 0);
-		CU_ASSERT_EQUAL(strcmp(lectura_una_pagina_3_pid5, "ton3") , 0);
-		*/
+
+		write_page(swap, 5, 8, "tony");
+		write_page(swap, 5, 10, "to10");
+		write_page(swap, 5, 3, "ton3");
+		char * lectura_una_pagina_8_pid5 =  read_page(swap, 5, 8);
+		char * lectura_una_pagina_10_pid5 =  read_page(swap, 5, 10);
+		char * lectura_una_pagina_3_pid5 =  read_page(swap, 5, 3);
+		CU_ASSERT_NSTRING_EQUAL(lectura_una_pagina_8_pid5, "tony", 4);
+		CU_ASSERT_NSTRING_EQUAL(lectura_una_pagina_10_pid5, "to10", 4);
+		CU_ASSERT_NSTRING_EQUAL(lectura_una_pagina_3_pid5, "ton3", 4);
+
 
 }

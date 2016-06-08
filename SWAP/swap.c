@@ -82,7 +82,7 @@ void add_program_to_bitmap(t_swap* self, unsigned int pages_amount, unsigned int
 
 void write_swap_file(t_swap* self, int first_page_location, unsigned int pages_amount, char * program) {
 	int i;
-	if (fseek(self->file, first_page_location * self->page_size, SEEK_SET) == 0) {
+	if (fseek(self->file, first_page_location, SEEK_SET) == 0) {
 		fwrite(program, strlen(program), 1, self->file);
 		int not_written_bytes = pages_amount * self->page_size - strlen(program);
 		if (not_written_bytes > 0) {
@@ -95,12 +95,12 @@ void write_swap_file(t_swap* self, int first_page_location, unsigned int pages_a
 }
 
 int initialize_program(t_swap* self, unsigned int pid, unsigned int pages_amount, char* program) {
-	int first_page_location = check_space_available(self, pages_amount);
-	if (first_page_location != -1) {
+	int first_page = check_space_available(self, pages_amount);
+	if (first_page != -1) {
 		t_pages_table* pages_table = create_pages_table(pid, pages_amount,
-				self->page_size, first_page_location);
-		add_program_to_bitmap(self, pages_amount, first_page_location);
-		write_swap_file(self, first_page_location, pages_amount, program);
+				self->page_size, first_page);
+		add_program_to_bitmap(self, pages_amount, first_page);
+		write_swap_file(self, first_page * self->page_size, pages_amount, program);
 		list_add(self->pages_table_list, pages_table);
 		return 0;
 	}

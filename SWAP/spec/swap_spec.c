@@ -176,7 +176,7 @@ void add_program_to_bitmap_2() {
 void write_swap_file_1() {
 	t_swap* swap = create_swap("./spec/config_file_test.txt");
 	write_swap_file(swap, 0, 1, "12345");
-	write_swap_file(swap, 3, 3, "qwertyuiopasdfg");
+	write_swap_file(swap, 15, 3, "qwertyuiopasdfg");
 	char* first_char = malloc(15);
 	fseek(swap->file, 15, SEEK_SET);
 	fread(first_char, 15, 1, swap->file);
