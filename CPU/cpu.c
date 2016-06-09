@@ -94,7 +94,7 @@ t_puntero definirVariable(t_nombre_variable variable) {
 	t_variable *new_variable = malloc(sizeof(t_variable));
 
 	new_variable->id = variable;
-	new_variable->dato.size = sizeof(uint32_t);
+	new_variable->dato.size = sizeof(int);
 	new_variable->dato.direccion.pagina = pcb->stack_next_free_space.pagina;
 	new_variable->dato.direccion.offset = pcb->stack_next_free_space.offset;
 
@@ -122,16 +122,14 @@ t_valor_variable dereferenciar(t_puntero direccion_variable) {
 
     char* respuesta = ejecutar_lectura_de_dato_con_iteraciones(leer_memoria_de_umc, direccion, tamanio_pagina);
     int valor;
-    char * ptr;
-    valor = strtol(respuesta, &ptr, 10);
+    memcpy(&valor, respuesta, direccion->size);
     return valor;
 }
 
 void asignar(t_puntero direccion_variable, t_valor_variable valor) {
     t_dato_en_memoria *direccion = (t_dato_en_memoria*) direccion_variable;
 
-    char * str =string_itoa(valor);
-    int resultado_escritura = ejecutar_escritura_de_dato_con_iteraciones(direccion, str, tamanio_pagina);
+    int resultado_escritura = ejecutar_escritura_de_dato_con_iteraciones(direccion, (char*) &valor, tamanio_pagina);
 }
 
 char* leer_memoria_de_umc(t_dato_en_memoria *dato) {
@@ -178,7 +176,7 @@ int escribir_en_umc(t_dato_en_memoria * dato, char* valor) {
 
     escritura_bytes->pagina = (dato->direccion).pagina;
     escritura_bytes->offset = (dato->direccion).offset;
-    escritura_bytes->size= strlen(valor);
+    escritura_bytes->size= dato->size;
     escritura_bytes->buffer = valor;
 
     t_stream *buffer = serializar_mensaje(33,escritura_bytes);
@@ -293,7 +291,7 @@ int ejecutar_escritura_de_dato_con_iteraciones(t_dato_en_memoria *dato, char* va
 	    aux_dato.size = remaining_size;
 	}
 
-	char *data_to_write = malloc(sizeof(char) * aux_dato.size);
+	char *data_to_write = malloc(aux_dato.size);
 	memcpy(data_to_write, valor+desplazamiento_acumulado, aux_dato.size);
 	escribir_en_umc(&aux_dato, data_to_write);
 	free(data_to_write);

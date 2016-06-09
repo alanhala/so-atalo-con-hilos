@@ -13,8 +13,6 @@ int correrTest(){
 
 	CU_initialize_registry();
 	CU_pSuite prueba = CU_add_suite("Suite de prueba", NULL, NULL);
-	CU_add_test(prueba, "ocho", test_ejecutar_programa_en_memoria);
-
 	CU_add_test(prueba, "uno", obtener_siguiente_instruccion);
 	CU_add_test(prueba, "dos", test_definir_variable);
 	CU_add_test(prueba, "tres", test_obtener_posicion_variable);
@@ -22,6 +20,7 @@ int correrTest(){
 	CU_add_test(prueba, "cinco", test_leer_data_de_memoria_con_iteraciones);
 	CU_add_test(prueba, "seis", test_asignar_y_leer_valor_de_una_sola_pagina);
 	CU_add_test(prueba, "siete", test_asignar_y_leer_valor_de_varias_paginas);
+	CU_add_test(prueba, "ocho", test_ejecutar_programa_en_memoria);
 
 	CU_basic_set_mode(CU_BRM_VERBOSE);
 	CU_basic_run_tests();
@@ -45,15 +44,12 @@ void test_ejecutar_programa_en_memoria() {
     mockear_pcb();
     t_PCB * pcb=get_PCB();
     pcb->pid = 1;
-    pcb->stack_next_free_space.offset = 3;
     pcb->program_counter = 0;
-    pcb->stack_next_free_space.offset=0;
-    pcb->stack_next_free_space.pagina=20;
 
     cambiar_contexto(pcb->pid);
 
     //Cargo metadata de programa ANSISOP en PCB
-    t_metadata_program *metadata = metadata_desde_literal("begin\nvariables c, d\nc=1234\nd=4321\nend\0");
+    t_metadata_program *metadata = metadata_desde_literal("begin\nvariables c, d\nc=2147483647\nd=224947129\nend\0");
     pcb->indice_instrucciones = metadata->instrucciones_serializado;
 
     //Ejecuto primera instruccion variables c, d
@@ -69,12 +65,12 @@ void test_ejecutar_programa_en_memoria() {
     //ejecuto segunda instruccion c=1234
     pcb->program_counter++;
     execute_next_instruction_for_process();
-    CU_ASSERT_EQUAL(dereferenciar(obtenerPosicionVariable('c')), 1234);
+    CU_ASSERT_EQUAL(dereferenciar(obtenerPosicionVariable('c')), 2147483647);
 
     //ejecuto segunda instruccion d=4321
     pcb->program_counter++;
     execute_next_instruction_for_process();
-    CU_ASSERT_EQUAL(dereferenciar(obtenerPosicionVariable('d')), 4321);
+    CU_ASSERT_EQUAL(dereferenciar(obtenerPosicionVariable('d')), 224947129);
 }
 
 void test_definir_variable() {
@@ -107,7 +103,7 @@ void test_obtener_posicion_variable() {
 
     t_dato_en_memoria *dato = obtenerPosicionVariable('a');
     CU_ASSERT_EQUAL(dato->size, sizeof(uint32_t));
-    CU_ASSERT_EQUAL(dato->direccion.pagina, 3);
+    CU_ASSERT_EQUAL(dato->direccion.pagina, 20);
     CU_ASSERT_EQUAL(dato->direccion.offset, 3);
 }
 
@@ -120,10 +116,10 @@ void test_asignar_y_leer_valor_de_una_sola_pagina() {
     cambiar_contexto(pcb->pid);
     definirVariable('a');
     t_dato_en_memoria *dato_en_memoria = obtenerPosicionVariable('a');
-    asignar(dato_en_memoria, 1234);
+    asignar(dato_en_memoria, 123456789);
     t_valor_variable valor = dereferenciar(dato_en_memoria);
 
-    CU_ASSERT_EQUAL(valor, 1234);
+    CU_ASSERT_EQUAL(valor, 123456789);
 }
 
 void test_asignar_y_leer_valor_de_varias_paginas() {
@@ -135,10 +131,10 @@ void test_asignar_y_leer_valor_de_varias_paginas() {
     cambiar_contexto(pcb->pid);
     definirVariable('a');
     t_dato_en_memoria *dato_en_memoria = obtenerPosicionVariable('a');
-    asignar(dato_en_memoria, 1234);
+    asignar(dato_en_memoria, 123456789);
     t_valor_variable valor = dereferenciar(dato_en_memoria);
 
-    CU_ASSERT_EQUAL(valor, 1234);
+    CU_ASSERT_EQUAL(valor, 123456789);
 }
 
 void test_actualizar_next_free_space() {
@@ -149,12 +145,12 @@ void test_actualizar_next_free_space() {
     t_PCB *pcb = get_PCB();
 
     CU_ASSERT_EQUAL(pcb->stack_next_free_space.offset, 2);
-    CU_ASSERT_EQUAL(pcb->stack_next_free_space.pagina, 4);
+    CU_ASSERT_EQUAL(pcb->stack_next_free_space.pagina, 21);
 
     incrementar_next_free_space(4);
 
     CU_ASSERT_EQUAL(pcb->stack_next_free_space.offset, 1);
-    CU_ASSERT_EQUAL(pcb->stack_next_free_space.pagina, 5);
+    CU_ASSERT_EQUAL(pcb->stack_next_free_space.pagina, 22);
 }
 
 
@@ -180,7 +176,7 @@ void mockear_pcb() {
 
     t_direccion_virtual_memoria *free_space = malloc(sizeof(t_direccion_virtual_memoria));
     free_space->offset = 3;
-    free_space->pagina = 3;
+    free_space->pagina = 20;
 
     pcb->stack_next_free_space = *free_space;
 
