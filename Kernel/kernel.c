@@ -13,15 +13,15 @@ t_kernel* create_kernel(char* config_file_path) {
 	return kernel;
 }
 
-t_pcb* initialize_program(t_kernel* self, char* program) {
+t_PCB* initialize_program(t_kernel* self, char* program) {
 	t_metadata_program* metadata = metadata_desde_literal(program);
-	t_pcb* pcb = create_pcb(self, metadata);
+	t_PCB* pcb = create_pcb(self, metadata);
 	self->programs_number += 1;
 	return pcb;
 }
 
-t_pcb* create_pcb(t_kernel* kernel, t_metadata_program* metadata) {
-	t_pcb* pcb = malloc(sizeof(t_pcb));
+t_PCB* create_pcb(t_kernel* kernel, t_metadata_program* metadata) {
+	t_PCB* pcb = malloc(sizeof(t_PCB));
 	pcb->pid = kernel->programs_number;
 	pcb->program_counter = metadata->instruccion_inicio;
 	pcb->stack_index = list_create();

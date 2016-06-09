@@ -40,7 +40,7 @@ void initialize_program_1() {
 
 void initialize_program_2() {
 	t_kernel* kernel = create_kernel("./spec/kernel_config_spec.txt");
-	t_pcb* pcb = initialize_program(kernel, "begin\nvariables c, d\nc=1234\nd=4321\nend\0");
+	t_PCB* pcb = initialize_program(kernel, "begin\nvariables c, d\nc=1234\nd=4321\nend\0");
 	CU_ASSERT_EQUAL(pcb->pid, 0);
 	CU_ASSERT_EQUAL(pcb->instructions_size, 4);
 	CU_ASSERT_EQUAL(pcb->instructions_index->start, 6);
@@ -56,7 +56,7 @@ void initialize_program_2() {
 
 void initialize_program_3() {
 	t_kernel* kernel = create_kernel("./spec/kernel_config_spec.txt");
-	t_pcb* pcb = initialize_program(kernel, "begin\nvariables i,b\ni = 1\n:inicio_for\ni = i + 1\nprint i\nb = i - 10\njnz b inicio_for\n#fuera del for\nend");
+	t_PCB* pcb = initialize_program(kernel, "begin\nvariables i,b\ni = 1\n:inicio_for\ni = i + 1\nprint i\nb = i - 10\njnz b inicio_for\n#fuera del for\nend");
 
 }
 

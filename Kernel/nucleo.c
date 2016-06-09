@@ -16,14 +16,17 @@
 #include <signal.h>
 #include <pthread.h>
 #include "nucleo.h"
+#include "kernel.h"
 #include "protocoloKernel.h"
 
 void set_umc_socket_descriptor(int socket){
 	UMC_SOCKET_DESCRIPTOR = socket;
 }
-
+t_kernel* KERNEL;
 
 void iniciar_algoritmo_planificacion() {
+
+	KERNEL = create_kernel("./kernel_config.txt");
 
 	//5 estados new, ready , exec, exit, block
 	estado_new = queue_create();
@@ -72,16 +75,6 @@ void iniciar_algoritmo_planificacion() {
 
 
 
-t_PCB *createPCB(char *codigo_programa)
-{
-    t_PCB *pcb;
-    pcb = malloc(sizeof(t_PCB));
-    pcb->pid = 10 ;
-    pcb->program_counter = 0;
-    pcb->codigo_programa = codigo_programa;
-    pcb->paginas_codigo = 50;
-	return(pcb);
-}
 
 int iniciar_programa_en_umc(int pid, int cantidad_paginas_requeridas, char* codigo);
 void *recNew() {
@@ -93,13 +86,14 @@ void *recNew() {
 		char * codigo_programa = queue_pop(estado_new);
 		sem_post(&mut_new);
 
-		t_PCB *pcb = createPCB(codigo_programa);
+		t_PCB *pcb = initialize_program(KERNEL,codigo_programa);
 
-		int inicio_correcto = iniciar_programa_en_umc(pcb->pid, pcb->paginas_codigo, pcb->codigo_programa);
+		int inicio_correcto = iniciar_programa_en_umc(pcb->pid, pcb->used_pages, codigo_programa);
 		printf("resultado inicio programa en umc : %d", inicio_correcto); //TODO sacar este comentario
 		fflush(stdout);
+
 		sem_wait(&mut_ready);
-		pcb->estado = READY;
+		pcb->state = "Ready";
 		queue_push(estado_ready, pcb);
 		sem_post(&mut_ready);
 		sem_post(&cant_ready);
@@ -124,7 +118,7 @@ void *recReady() {
 
 
 		sem_wait(&mut_ejecucion);
-		pcb->estado = EXEC;
+		pcb->state = "Ejecutando";
 		queue_push(estado_ejecucion, pcb);
 		sem_post(&mut_ejecucion);
 		sem_post(&cant_ejecucion);
@@ -140,6 +134,7 @@ void *recReady() {
 
 
 void * ejecutar_pcb_en_cpu(t_PCB *pcb){
+	/*
 	int cpusocket = pcb->cpusocket;
 	send(cpusocket  ,pcb   ,sizeof(t_PCB) +1  ,0);
 
@@ -147,7 +142,7 @@ void * ejecutar_pcb_en_cpu(t_PCB *pcb){
 	if ( resul<=0)
 	{
 		//todo cpu desconectada o error implementar
-		/*aca segun dice el tp hay que verificar si hay otra cpu disponible para enviar el pcb*/
+		//aca segun dice el tp hay que verificar si hay otra cpu disponible para enviar el pcb
 
 	}
 	else
@@ -156,7 +151,7 @@ void * ejecutar_pcb_en_cpu(t_PCB *pcb){
 		atender_mensaje_cpu(pcb);
 	}
 
-
+*/
 }
 
 void * recEjecucion() {
@@ -169,13 +164,13 @@ void * recEjecucion() {
 
 		sem_wait(&cant_ejecucion);
 		sem_wait(&mut_ejecucion);
-		t_PCB *pcb  = queue_pop(estado_ejecucion);
+		//t_PCB *pcb  = queue_pop(estado_ejecucion);
 		sem_post(&mut_ejecucion);
-		pcb->cpusocket = cpu ;
+		//pcb->cpusocket = cpu ;
 		//pcb->quantum = gkernel->quantum;
-		pcb->msj = sin_mensaje;
+		//pcb->msj = sin_mensaje;
 		pthread_t th_ejecucion_pcb;
-		pthread_create(&th_ejecucion_pcb, NULL, &ejecutar_pcb_en_cpu, pcb);
+		//pthread_create(&th_ejecucion_pcb, NULL, &ejecutar_pcb_en_cpu, pcb);
 
 	}
 
@@ -296,90 +291,4 @@ int iniciar_programa_en_umc(int pid, int cantidad_paginas_requeridas, char* codi
 
 
 }
-
-int atender_mensaje_cpu(t_PCB *pcb)
-{
-	t_msjcpu mensaje = pcb->msj;
-	int cpusocket = pcb->cpusocket;
-
-/*
-al llamar en caso de que los valores no sean necesarios llenar con null
-obtener_valor [identificador de variable compartida]
-grabar_valor [identificador de variable compartida] [valor a grabar]
-wait [identificador de semáforo]
-signal [identificador de semáforo]
-entrada_salida [identificador de dispositivo] [unidades de tiempo a utilizar]
-*/
-     switch(mensaje) {
-        case sin_mensaje :
-          // sem_post(&cant_cpu);
-           //deReadyaExec(auxcpu);
-           break;
-        case fin_quantum :
-            sem_wait(&mut_cpu_disponibles);
-            queue_push(cola_cpu_disponibles,&cpusocket);
-            sem_post(&mut_cpu_disponibles);
-            sem_post(&cant_cpu_disponibles);
-
-			sem_wait(&mut_ready);
-			pcb->estado = READY;
-			queue_push(estado_ready, pcb);
-			sem_post(&mut_ready);
-			sem_post(&cant_ready);
-           break;
-        case entrada_salida :
-        	//todo necesito tener creada la listadispositivos desde el archivo de configuracion
-        	/*extern t_list *listadispositivos ;
-        	t_entradasalida *io;
-        	io = list_find(listadispositivos,strcmp(this->dispositivo,identificador));
-        	queue_push(io->cola,pcb);
-        	*/
-        	//cada pcb se pone en cada cola de cada dispositivo
-
-           /* sem_wait(&mut_cpu);
-            cpu_in_list = list_get(pListaCpu,auxcpu->id);
-            sem_post(&mut_cpu);
-            pcb = cpu_in_list->pcb;
-        		sem_wait(&mut_block);
-        		pcb->estado = BLOCK;
-        		queue_push(pColaBlock, pcb);
-        		sem_post(&mut_block);
-        		sem_post(&cant_block);  */
-           break;
-        case fin_proceso :
-           //aca hay que liberar la cpu ponerla en idle y el proceso poner en cola exit
-           /* sem_wait(&mut_cpu);
-            cpu_in_list = list_get(pListaCpu,auxcpu->id);
-            cpu_in_list->msj = CPU_IDLE; //TODO este elemento se modifica directamente en la listacpu?? nose
-            //capaz hay que hacer
-            //list_add_in_index(cpu_in_list,auxcpu->id, cpu_in_list);
-            pcb = cpu_in_list->pcb;
-            sem_post(&mut_cpu);
-            sem_post(&cant_cpu);
-
-        		sem_wait(&mut_exit);
-        		pcb->estado = EXIT;
-        		queue_push(pColaExit, pcb);
-        		sem_post(&mut_exit);
-        		sem_post(&cant_exit);    */
-           break;
-        case obtener_valor:
-        //obtener_valor [identificador de variable compartida]
-        	break;
-		case grabar_valor:
-		//grabar_valor [identificador de variable compartida] [valor a grabar]
-			break;
-		case cpuwait:
-		//wait [identificador de semáforo]
-			break;
-		case cpusignal:
-		//signal [identificador de semáforo]
-			break;
-      }
-
-}
-
-
-
-
 

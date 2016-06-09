@@ -22,6 +22,7 @@
 
 	typedef struct {
 		uint32_t pid;
+		char * state; //no serializar
 		uint32_t program_counter;
 		t_list* stack_index;
 		uint32_t stack_pointer;
@@ -31,12 +32,12 @@
 		t_intructions* instructions_index;
 //		uint32_t labels_size;
 	//		t_indice_etiqueta
-	} t_pcb;
+	} t_PCB;
 
-	t_pcb* create_pcb(t_kernel* kernel, t_metadata_program* metadata);
+	t_PCB* create_pcb(t_kernel* kernel, t_metadata_program* metadata);
 
 	t_kernel* create_kernel(char* config_file_path);
 
-	t_pcb* initialize_program(t_kernel* self, char* program);
+	t_PCB* initialize_program(t_kernel* self, char* program);
 
 #endif

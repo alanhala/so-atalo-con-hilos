@@ -64,32 +64,6 @@ typedef enum {
 	entrada_salida //entrada_salida [identificador de dispositivo] [unidades de tiempo a utilizar]
 } t_msjcpu;
 
-typedef struct {
-	int pid;
-	t_estado estado;
-
-	char * codigo_programa;
-	int program_counter;
-	int paginas_codigo;
-	int cantidad_instrucciones;
-	t_indice_instrucciones_elemento* indice_instrucciones;
-	int cantidad_etiquetas;
-	void* stack_index;
-
-	//lo siguiente es para implementar las syscall
-	//la idea es que la cpu devuelva el pcb con estos parametros completos
-	//en caso de que el msj tenga 0 quiere decir que no hay ningun mensaje
-	int cpusocket;
-	int quantum;
-	t_msjcpu msj;
-	char *param1;
-	char *param2;
-
-} t_PCB;
-
-
-
-
 /*
  * creo struct para manejar entrada salida
  * un diccionario por dispositivo que adentro tiene una cola por cada uno.
