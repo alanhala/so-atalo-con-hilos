@@ -55,7 +55,7 @@ t_stream *serializar_finalizar_programa_en_UMC(t_finalizar_programa_en_UMC *fina
 t_stream *serializar_respuesta_inicio_de_programa_en_kernel(t_respuesta_iniciar_programa_en_kernel *respuesta);
 t_stream *serializar_inicio_de_programa_en_UMC(t_inicio_de_programa_en_UMC *inicio_de_programa);
 t_stream *serializar_mensaje(int tipo, void *unaEstructura);
-t_stream *serializar_enviar_PCB_a_CPU(t_pcb *unPCB);
+t_stream *serializar_enviar_PCB_a_CPU(t_PCB *unPCB);
 
 
 

@@ -34,7 +34,7 @@ t_stream *serializar_mensaje(int tipo, void* unaEstructura) {
 	         stream = serializar_respuesta_inicio_de_programa_en_kernel((t_respuesta_iniciar_programa_en_kernel *)unaEstructura);
 	         break;
 	case(121):
-			 stream = serializar_enviar_PCB_a_CPU((t_pcb *)unaEstructura);
+			 stream = serializar_enviar_PCB_a_CPU((t_PCB *)unaEstructura);
 			 break;
 	       }
 
@@ -152,7 +152,7 @@ t_stream *serializar_respuesta_inicio_de_programa_en_kernel(t_respuesta_iniciar_
        return stream;
 }
 
-t_stream *serializar_enviar_PCB_a_CPU(t_pcb *unPCB){
+t_stream *serializar_enviar_PCB_a_CPU(t_PCB *unPCB){
 
 		uint32_t	tmpsize = 0,
 					offset = 0;
