@@ -44,7 +44,7 @@ int main(int argc, char **argv) {
 
 	while(1){
 		int client_socket_descriptor = accept_connection(server_socket_descritptor);
-
+		printf("consola conectada\n");
 
 		pthread_t thread;
 		int thread_result = pthread_create(&thread, NULL,

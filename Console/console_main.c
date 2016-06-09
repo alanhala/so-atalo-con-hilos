@@ -34,7 +34,8 @@ int connect_to_kernel();
 int main(int argc, char **argv) {
 
 	int sockfd = create_client_socket_descriptor("localhost", "9000");
-
+	int a =2;
+	send(sockfd, &a, sizeof(int), 0);
 
 	t_iniciar_programa_en_kernel *iniciar_programa = malloc(sizeof(t_iniciar_programa_en_kernel));
 	memset(iniciar_programa,0,sizeof(t_iniciar_programa_en_kernel));
