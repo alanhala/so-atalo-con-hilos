@@ -48,7 +48,7 @@ void simulacion_uno() {
     mockear_pcb();
 
     t_PCB *pcb_dos = get_PCB();
-    pcb_dos->stack_next_free_space.offset = 3;
+    pcb_dos->stack_free_space_pointer.offset = 3;
     pcb_dos->pid = 2;
     set_PCB(pcb_dos);
     cambiar_contexto(pcb_dos->pid);

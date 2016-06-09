@@ -53,15 +53,15 @@ typedef struct {
 typedef struct {
 	uint32_t pid;
 	uint32_t program_counter;
-	uint32_t paginas_codigo;
-	uint32_t cantidad_instrucciones;
-	t_intructions* indice_instrucciones;
-	uint32_t cantidad_etiquetas;
-	//t_indice_etiqueta TODO: implementar esto
 	t_list *stack;
 	t_direccion_virtual_memoria stack_pointer;
 	uint32_t stack_size;
-	t_direccion_virtual_memoria stack_next_free_space;
+	uint32_t used_pages;
+	uint32_t instructions_size;
+	t_intructions* instructions_index;
+	t_direccion_virtual_memoria stack_free_space_pointer;
+	//	uint32_t labels_size;
+	//	t_indice_etiqueta
 } t_PCB;
 
 void execute_next_instruction_for_process();

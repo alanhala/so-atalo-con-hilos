@@ -50,7 +50,7 @@ void test_ejecutar_programa_en_memoria() {
 
     //Cargo metadata de programa ANSISOP en PCB
     t_metadata_program *metadata = metadata_desde_literal("begin\nvariables c, d\nc=2147483647\nd=224947129\nend\0");
-    pcb->indice_instrucciones = metadata->instrucciones_serializado;
+    pcb->instructions_index = metadata->instrucciones_serializado;
 
     //Ejecuto primera instruccion variables c, d
     execute_next_instruction_for_process();
@@ -126,7 +126,7 @@ void test_asignar_y_leer_valor_de_varias_paginas() {
     mockear_pcb();
     t_PCB * pcb=get_PCB();
     pcb->pid = 1;
-    pcb->stack_next_free_space.offset = 3;
+    pcb->stack_free_space_pointer.offset = 3;
     set_PCB(pcb);
     cambiar_contexto(pcb->pid);
     definirVariable('a');
@@ -144,21 +144,21 @@ void test_actualizar_next_free_space() {
 
     t_PCB *pcb = get_PCB();
 
-    CU_ASSERT_EQUAL(pcb->stack_next_free_space.offset, 2);
-    CU_ASSERT_EQUAL(pcb->stack_next_free_space.pagina, 21);
+    CU_ASSERT_EQUAL(pcb->stack_free_space_pointer.offset, 2);
+    CU_ASSERT_EQUAL(pcb->stack_free_space_pointer.pagina, 21);
 
     incrementar_next_free_space(4);
 
-    CU_ASSERT_EQUAL(pcb->stack_next_free_space.offset, 1);
-    CU_ASSERT_EQUAL(pcb->stack_next_free_space.pagina, 22);
+    CU_ASSERT_EQUAL(pcb->stack_free_space_pointer.offset, 1);
+    CU_ASSERT_EQUAL(pcb->stack_free_space_pointer.pagina, 22);
 }
 
 
 void mockear_pcb() {
     t_PCB *pcb = malloc(sizeof(t_PCB));
-    pcb->indice_instrucciones = malloc(sizeof(t_indice_instrucciones_elemento)*2);
+    pcb->instructions_index = malloc(sizeof(t_indice_instrucciones_elemento)*2);
 
-    t_intructions *indice = pcb->indice_instrucciones;
+    t_intructions *indice = pcb->instructions_index;
 
     pcb->program_counter = 1;
 
@@ -178,7 +178,7 @@ void mockear_pcb() {
     free_space->offset = 3;
     free_space->pagina = 20;
 
-    pcb->stack_next_free_space = *free_space;
+    pcb->stack_free_space_pointer = *free_space;
 
     t_stack_element* stack_element = create_stack_element();
     list_add(pcb->stack, stack_element);

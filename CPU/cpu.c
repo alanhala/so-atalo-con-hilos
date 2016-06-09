@@ -71,7 +71,7 @@ int cambiar_contexto(int pid){
 }
 
 t_dato_en_memoria get_next_instruction() {
-    t_intructions *indice = pcb->indice_instrucciones;
+    t_intructions *indice = pcb->instructions_index;
 
     indice += pcb->program_counter;
 
@@ -95,8 +95,8 @@ t_puntero definirVariable(t_nombre_variable variable) {
 
 	new_variable->id = variable;
 	new_variable->dato.size = sizeof(int);
-	new_variable->dato.direccion.pagina = pcb->stack_next_free_space.pagina;
-	new_variable->dato.direccion.offset = pcb->stack_next_free_space.offset;
+	new_variable->dato.direccion.pagina = pcb->stack_free_space_pointer.pagina;
+	new_variable->dato.direccion.offset = pcb->stack_free_space_pointer.offset;
 
 	incrementar_next_free_space(new_variable->dato.size);
 
@@ -203,13 +203,13 @@ int escribir_en_umc(t_dato_en_memoria * dato, char* valor) {
 }
 
 void incrementar_next_free_space(uint32_t size) {
-    int absolute_offset = (tamanio_pagina * pcb->stack_next_free_space.pagina ) + pcb->stack_next_free_space.offset + size;
+    int absolute_offset = (tamanio_pagina * pcb->stack_free_space_pointer.pagina ) + pcb->stack_free_space_pointer.offset + size;
 
     int new_pages = absolute_offset / tamanio_pagina;
     int new_offset = absolute_offset - (new_pages * tamanio_pagina);
 
-    pcb->stack_next_free_space.pagina = new_pages;
-    pcb->stack_next_free_space.offset = new_offset;
+    pcb->stack_free_space_pointer.pagina = new_pages;
+    pcb->stack_free_space_pointer.offset = new_offset;
 };
 
 void free_stack_element_memory(t_stack_element *element) {
