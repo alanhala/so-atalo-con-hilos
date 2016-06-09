@@ -13,6 +13,7 @@ void create_file(t_swap* self) {
 	strcat(linux_instruction, destiny);
 	strcat(linux_instruction, self->swap_name);
 	system(linux_instruction);
+	free(linux_instruction);
 }
 
 void initialize_bitmap(t_swap* self) {
