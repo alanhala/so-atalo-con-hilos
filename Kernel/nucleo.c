@@ -301,6 +301,8 @@ int atender_mensaje_cpu(t_PCB *pcb)
 {
 	t_msjcpu mensaje = pcb->msj;
 	int cpusocket = pcb->cpusocket;
+	char *param1 = pcb->param1;
+	char *param2 = pcb->param2;
 
 /*
 al llamar en caso de que los valores no sean necesarios llenar con null
@@ -329,39 +331,25 @@ entrada_salida [identificador de dispositivo] [unidades de tiempo a utilizar]
            break;
         case entrada_salida :
         	//todo necesito tener creada la listadispositivos desde el archivo de configuracion
-        	/*extern t_list *listadispositivos ;
-        	t_entradasalida *io;
-        	io = list_find(listadispositivos,strcmp(this->dispositivo,identificador));
-        	queue_push(io->cola,pcb);
-        	*/
+
+        	//todo falla esta linea nose xq ? t_entradasalida *entradasalida =dictionary_get(dispositivos,param1);
+        	//queue_push(entradasalida->cola,pcb);
+
         	//cada pcb se pone en cada cola de cada dispositivo
 
-           /* sem_wait(&mut_cpu);
-            cpu_in_list = list_get(pListaCpu,auxcpu->id);
-            sem_post(&mut_cpu);
-            pcb = cpu_in_list->pcb;
-        		sem_wait(&mut_block);
-        		pcb->estado = BLOCK;
-        		queue_push(pColaBlock, pcb);
-        		sem_post(&mut_block);
-        		sem_post(&cant_block);  */
            break;
         case fin_proceso :
            //aca hay que liberar la cpu ponerla en idle y el proceso poner en cola exit
-           /* sem_wait(&mut_cpu);
-            cpu_in_list = list_get(pListaCpu,auxcpu->id);
-            cpu_in_list->msj = CPU_IDLE; //TODO este elemento se modifica directamente en la listacpu?? nose
-            //capaz hay que hacer
-            //list_add_in_index(cpu_in_list,auxcpu->id, cpu_in_list);
-            pcb = cpu_in_list->pcb;
-            sem_post(&mut_cpu);
-            sem_post(&cant_cpu);
+            sem_wait(&mut_cpu_disponibles);
+            queue_push(cola_cpu_disponibles,&cpusocket);
+            sem_post(&mut_cpu_disponibles);
+            sem_post(&cant_cpu_disponibles);
 
-        		sem_wait(&mut_exit);
-        		pcb->estado = EXIT;
-        		queue_push(pColaExit, pcb);
-        		sem_post(&mut_exit);
-        		sem_post(&cant_exit);    */
+			sem_wait(&mut_exit);
+			pcb->estado = EXIT;
+			queue_push(estado_exit, pcb);
+			sem_post(&mut_exit);
+			sem_post(&cant_exit);
            break;
         case obtener_valor:
         //obtener_valor [identificador de variable compartida]
