@@ -18,8 +18,8 @@
 int KERNEL_DESCRIPTOR;
 int UMC_DESCRIPTOR;
 
-set_umc_socket_descriptor(int socket_descriptor);
-set_kernel_socket_descriptor(int socket_descriptor);
+int set_umc_socket_descriptor(int socket_descriptor);
+int set_kernel_socket_descriptor(int socket_descriptor);
 
 
 typedef struct {
