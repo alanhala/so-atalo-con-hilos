@@ -17,6 +17,8 @@
 #include <pthread.h>
 #include <semaphore.h>
 
+
+
 //valores de configuracion
 int puertoCPU,puertoCON,puertoUMC;
 char arrUMCip[10];
@@ -51,20 +53,8 @@ typedef struct {
 
 } t_indice_etiqueta;
 
-typedef struct {
-	int pid;
-	t_estado estado;
-	char * codigo_programa;
-	int program_counter;
-	int paginas_codigo;
-	int cantidad_instrucciones;
-	t_indice_instrucciones_elemento* indice_instrucciones;
-	int cantidad_etiquetas;
-	//t_indice_etiqueta TODO: implementar esto
-	void* stack_index;
-} t_PCB;
 typedef enum {
-    CPU_IDLE = 0, //compu nueva o cpu sin trabajar
+    sin_mensaje = 0, //sin mensaje
     fin_quantum, //fin quantum
     fin_proceso,  //fin del proceso
 	obtener_valor,//obtener_valor [identificador de variable compartida]
@@ -75,15 +65,34 @@ typedef enum {
 } t_msjcpu;
 
 typedef struct {
-	int cpu_socket_descriptor;
-	t_PCB *pcb;
-	t_msjcpu msj;
+	int pid;
+	t_estado estado;
 
-} t_cpu;
+	char * codigo_programa;
+	int program_counter;
+	int paginas_codigo;
+	int cantidad_instrucciones;
+	t_indice_instrucciones_elemento* indice_instrucciones;
+	int cantidad_etiquetas;
+	void* stack_index;
+
+	//lo siguiente es para implementar las syscall
+	//la idea es que la cpu devuelva el pcb con estos parametros completos
+	//en caso de que el msj tenga 0 quiere decir que no hay ningun mensaje
+	int cpusocket;
+	int quantum;
+	t_msjcpu msj;
+	char *param1;
+	char *param2;
+
+} t_PCB;
+
+
+
 
 /*
  * creo struct para manejar entrada salida
- * una lista por dispositivo que adentro tiene una cola por cada uno.
+ * un diccionario por dispositivo que adentro tiene una cola por cada uno.
  */
 typedef struct {
 	char* dispositivo;

@@ -21,19 +21,25 @@
 #include "socket.h"
 #include "tests.h"
 #include "protocoloKernel.h"
+#include "kernel.h"
 #include "nucleo.h"
 
 #define CPULISTEN  "8000"
 #define UMCIP  "localhost"
 #define UMCPORT  "5000"
+#define CONFIGPATH "kernel_config.txt"
 #define BACKLOG 10
+//t_kernel * gkernel;
 
 void *cpu_connection(int socket_descriptor);
 void *console_and_cpu_connection_handler(int client_socket_descriptor);
 
 int main(int argc, char **argv) {
-
+	//todo me gustaria implementar  el archivo de configuracion asi empiezo a usarlo directamente
+	//pero me tira un par de errores cuando descomento las lineas que uso gkernel
+	//gkernel = create_kernel(CONFIGPATH);
 	iniciar_algoritmo_planificacion();
+
 	int umc_fd = create_client_socket_descriptor("localhost", "5000");
 	set_umc_socket_descriptor(umc_fd);
 	int a =2;

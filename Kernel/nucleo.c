@@ -139,26 +139,43 @@ void *recReady() {
 
 
 
-void * ejecutar_pcb_en_cpu(t_cpu *cpu){
+void * ejecutar_pcb_en_cpu(t_PCB *pcb){
+	int cpusocket = pcb->cpusocket;
+	send(cpusocket  ,pcb   ,sizeof(t_PCB) +1  ,0);
+
+	int resul =recv(cpusocket,pcb,sizeof(t_PCB) +1 	,0);
+	if ( resul<=0)
+	{
+		//todo cpu desconectada o error implementar
+		/*aca segun dice el tp hay que verificar si hay otra cpu disponible para enviar el pcb*/
+
+	}
+	else
+	{
+	//ok joya me devolvio el socket verificar que mensaje me envio y procesarlo
+		atender_mensaje_cpu(pcb);
+	}
+
 
 }
 
 void * recEjecucion() {
+	//extern *gkernel;
 	while(1){
 		sem_wait(&cant_cpu_disponibles);
 		sem_wait(&mut_cpu_disponibles);
-		t_cpu *cpu  = queue_pop(cola_cpu_disponibles);
+		int cpu  = queue_pop(cola_cpu_disponibles);
 		sem_post(&mut_cpu_disponibles);
-
 
 		sem_wait(&cant_ejecucion);
 		sem_wait(&mut_ejecucion);
 		t_PCB *pcb  = queue_pop(estado_ejecucion);
 		sem_post(&mut_ejecucion);
-
-		cpu->pcb =pcb;
+		pcb->cpusocket = cpu ;
+		//pcb->quantum = gkernel->quantum;
+		pcb->msj = sin_mensaje;
 		pthread_t th_ejecucion_pcb;
-		pthread_create(&th_ejecucion_pcb, NULL, &ejecutar_pcb_en_cpu, cpu);
+		pthread_create(&th_ejecucion_pcb, NULL, &ejecutar_pcb_en_cpu, pcb);
 
 	}
 
@@ -280,8 +297,11 @@ int iniciar_programa_en_umc(int pid, int cantidad_paginas_requeridas, char* codi
 
 }
 
-int atender_mensaje_cpu(int mensaje,char *identificador,char *valor)
+int atender_mensaje_cpu(t_PCB *pcb)
 {
+	t_msjcpu mensaje = pcb->msj;
+	int cpusocket = pcb->cpusocket;
+
 /*
 al llamar en caso de que los valores no sean necesarios llenar con null
 obtener_valor [identificador de variable compartida]
@@ -291,21 +311,21 @@ signal [identificador de semáforo]
 entrada_salida [identificador de dispositivo] [unidades de tiempo a utilizar]
 */
      switch(mensaje) {
-        case CPU_IDLE :
+        case sin_mensaje :
           // sem_post(&cant_cpu);
            //deReadyaExec(auxcpu);
            break;
         case fin_quantum :
-           /* sem_wait(&mut_cpu);
-            cpu_in_list = list_get(pListaCpu,auxcpu->id);
-            sem_post(&mut_cpu);
-            pcb = cpu_in_list->pcb;
-        		sem_wait(&mut_ready);
-        		pcb->estado = READY;
-        		queue_push(pColaReady, pcb);
-        		sem_post(&mut_ready);
-        		sem_post(&cant_ready);
-            sem_post(&cant_cpu);    */
+            sem_wait(&mut_cpu_disponibles);
+            queue_push(cola_cpu_disponibles,&cpusocket);
+            sem_post(&mut_cpu_disponibles);
+            sem_post(&cant_cpu_disponibles);
+
+			sem_wait(&mut_ready);
+			pcb->estado = READY;
+			queue_push(estado_ready, pcb);
+			sem_post(&mut_ready);
+			sem_post(&cant_ready);
            break;
         case entrada_salida :
         	//todo necesito tener creada la listadispositivos desde el archivo de configuracion
