@@ -10,12 +10,15 @@
 
 #include <commons/collections/queue.h>
 #include <commons/collections/list.h>
+#include <commons/collections/dictionary.h>
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <parser/metadata_program.h>
 #include <pthread.h>
 #include <semaphore.h>
+
+
 
 //valores de configuracion
 int puertoCPU,puertoCON,puertoUMC;
@@ -24,6 +27,9 @@ char arrUMCip[10];
 sem_t mut_new, mut_ready, mut_block, mut_exit, mut_ejecucion, mut_cpu_disponibles;
 sem_t cant_new, cant_ready,
         cant_block, cant_exit, cant_ejecucion, cant_cpu_disponibles;
+
+t_dictionary *dispositivos; //todo crear en configuracion
+
 
 t_queue *estado_new, *estado_ready,
             *estado_exit, *estado_block,*estado_ejecucion, *cola_cpu_disponibles;
@@ -51,20 +57,8 @@ typedef struct {
 
 } t_indice_etiqueta;
 
-typedef struct {
-	int pid;
-	t_estado estado;
-	char * codigo_programa;
-	int program_counter;
-	int paginas_codigo;
-	int cantidad_instrucciones;
-	t_indice_instrucciones_elemento* indice_instrucciones;
-	int cantidad_etiquetas;
-	//t_indice_etiqueta TODO: implementar esto
-	void* stack_index;
-} t_PCB;
 typedef enum {
-    CPU_IDLE = 0, //compu nueva o cpu sin trabajar
+    sin_mensaje = 0, //sin mensaje
     fin_quantum, //fin quantum
     fin_proceso,  //fin del proceso
 	obtener_valor,//obtener_valor [identificador de variable compartida]
@@ -75,20 +69,42 @@ typedef enum {
 } t_msjcpu;
 
 typedef struct {
-	int cpu_socket_descriptor;
-	t_PCB *pcb;
-	t_msjcpu msj;
+	int pid;
+	t_estado estado;
 
-} t_cpu;
+	char * codigo_programa;
+	int program_counter;
+	int paginas_codigo;
+	int cantidad_instrucciones;
+	t_indice_instrucciones_elemento* indice_instrucciones;
+	int cantidad_etiquetas;
+	void* stack_index;
+
+	//lo siguiente es para implementar las syscall
+	//la idea es que la cpu devuelva el pcb con estos parametros completos
+	//en caso de que el msj tenga 0 quiere decir que no hay ningun mensaje
+	int cpusocket;
+	int quantum;
+	t_msjcpu msj;
+	char *param1;
+	char *param2;
+
+} t_PCB;
+
+
+
 
 /*
  * creo struct para manejar entrada salida
- * una lista por dispositivo que adentro tiene una cola por cada uno.
+ * un diccionario por dispositivo que adentro tiene una cola por cada uno.
+ * ¡creo que hay que usar un mutex por la cola y me parece q tmb un mutex por el diccionario preguntar a ayudante?
  */
 typedef struct {
 	char* dispositivo;
 	int sleep;
 	t_queue *cola;
+	sem_t mut_cola;
+	sem_t cant_cola;
 } t_entradasalida;
 
 
