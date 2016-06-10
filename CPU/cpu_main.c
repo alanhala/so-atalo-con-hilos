@@ -35,7 +35,7 @@ void connect_to_Kernel();
 
 int main(int argc, char **argv) {
 
-	set_quantum(15); // me lo tiene qe mandar cpu en cada ejecucion
+	set_quantum(3); // me lo tiene qe mandar cpu en cada ejecucion
 	set_tamanio_pagina(5);
 //	correr_simulacion();
 //	while(1){

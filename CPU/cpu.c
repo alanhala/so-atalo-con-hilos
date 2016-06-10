@@ -330,6 +330,11 @@ int ejecutar_pcb(){
                execute_next_instruction_for_process();
                pcb->program_counter ++ ;
                printf("Instruccion %d del pid %d ejecutada", instruccion_ejecutada, pcb->pid);
+               fflush(stdout);
+       }
+       while(1){
+    		printf("ejecucion de programa finalizada");
+    		fflush(stdout);
        }
        return 0;
 
