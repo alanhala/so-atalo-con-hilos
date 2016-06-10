@@ -8,5 +8,6 @@
 	void initialize_program_1();
 	void initialize_program_2();
 	void initialize_program_3();
+	void initialize_program_4();
 
 #endif

@@ -12,8 +12,10 @@ int kernel_spec() {
 			initialize_program_1);
 	CU_add_test(initialize_program, "it creates the right pcb",
 			initialize_program_2);
-	CU_add_test(initialize_program, "having a program with labels, it assigns the right label index",
+	CU_add_test(initialize_program, "having a program with a label, it assigns the right label index",
 			initialize_program_3);
+	CU_add_test(initialize_program, "having a program with more than one label, it assigns the right label indexes",
+			initialize_program_4);
 
 	CU_basic_set_mode(CU_BRM_VERBOSE);
 	CU_basic_run_tests();
@@ -40,7 +42,7 @@ void initialize_program_1() {
 
 void initialize_program_2() {
 	t_kernel* kernel = create_kernel("./spec/kernel_config_spec.txt");
-	t_PCB* pcb = initialize_program(kernel, "begin\nvariables c, d\nc=1234\nd=4321\nend\0");
+	t_PCB* pcb = initialize_program(kernel, "begin\nvariables c, d\nc=1234\nd=4321\nend");
 	CU_ASSERT_EQUAL(pcb->pid, 0);
 	CU_ASSERT_EQUAL(pcb->instructions_size, 4);
 	CU_ASSERT_EQUAL(pcb->instructions_index->start, 6);
@@ -52,12 +54,28 @@ void initialize_program_2() {
 	CU_ASSERT_EQUAL((pcb->instructions_index)[3].start, 35);
 	CU_ASSERT_EQUAL((pcb->instructions_index)[3].offset, 4);
 	CU_ASSERT_EQUAL(pcb->program_counter, 0);
+	CU_ASSERT_EQUAL(pcb->stack_last_address->page, 7);
+	CU_ASSERT_EQUAL(pcb->stack_last_address->offset, 3);
 }
 
 void initialize_program_3() {
 	t_kernel* kernel = create_kernel("./spec/kernel_config_spec.txt");
 	t_PCB* pcb = initialize_program(kernel, "begin\nvariables i,b\ni = 1\n:inicio_for\ni = i + 1\nprint i\nb = i - 10\njnz b inicio_for\n#fuera del for\nend");
-
+	t_label_index* label_index = list_get(pcb->label_index, 0);
+	CU_ASSERT_STRING_EQUAL(label_index->name, "inicio_for");
+	CU_ASSERT_EQUAL(label_index->location, 2);
 }
+
+void initialize_program_4() {
+	t_kernel* kernel = create_kernel("./spec/kernel_config_spec.txt");
+	t_PCB* pcb = initialize_program(kernel, "begin\nf\nend\n\nfunction f\nvariables a\na=1\nprint a\ng\nend\n\nfunction g\nvariables a\na=0\nprint a\nf\nend");
+	t_label_index* label_index1 = list_get(pcb->label_index, 0);
+	t_label_index* label_index2 = list_get(pcb->label_index, 1);
+	CU_ASSERT_STRING_EQUAL(label_index1->name, "f");
+	CU_ASSERT_EQUAL(label_index1->location, 2);
+	CU_ASSERT_STRING_EQUAL(label_index2->name, "g");
+	CU_ASSERT_EQUAL(label_index2->location, 7);
+}
+
 
 

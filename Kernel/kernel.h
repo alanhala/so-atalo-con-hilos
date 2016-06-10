@@ -8,6 +8,16 @@
 	#include <parser/metadata_program.h>
 
 	typedef struct {
+		uint32_t page;
+		uint32_t offset;
+	} t_virtual_address;
+
+	typedef struct {
+		char* name;
+		uint32_t location;
+	} t_label_index;
+
+	typedef struct {
 		t_list* pcb_list;
 		uint32_t programs_number;
 		char* console_port;
@@ -27,19 +37,24 @@
 		int console_socket_descriptor; // no serializar
 		uint32_t program_counter;
 		t_list* stack_index;
+		t_virtual_address* stack_last_address;
 		uint32_t stack_pointer;
 		uint32_t stack_size;
 		uint32_t used_pages;
 		uint32_t instructions_size;
 		t_intructions* instructions_index;
-//		uint32_t labels_size;
-	//		t_indice_etiqueta
+		t_list* label_index;
 	} t_PCB;
 
-	t_PCB* create_pcb(t_kernel* kernel, t_metadata_program* metadata);
+	t_PCB* create_pcb(t_kernel* kernel, char* program);
 
 	t_kernel* create_kernel(char* config_file_path);
 
 	t_PCB* initialize_program(t_kernel* self, char* program);
 
+	t_virtual_address* get_stack_address(char* program);
+
+	t_list* get_label_index(t_metadata_program* metadata);
+
+	t_label_index* create_label_index(char* label_name, int label_location);
 #endif
