@@ -83,10 +83,10 @@ int main(int argc, char **argv) {
 
 	set_algoritmo_reemplazo("clock");
 	inicializar_estructuras();
-	int swap_socket = create_client_socket_descriptor("localhost", "6000");
-	set_socket_descriptor(swap_socket);
-	//set_test();
-	//crear_swap_mock();
+	//int swap_socket = create_client_socket_descriptor("localhost", "6000");
+	//set_socket_descriptor(swap_socket);
+	set_test();
+	crear_swap_mock();
 
 
 	int server_socket_descriptor = create_server_socket_descriptor("localhost","5000",BACKLOG);
@@ -191,7 +191,7 @@ void manejo_de_solicitudes(int socket_descriptor) {
 	}
 	if(handshake == 2) //KERNEL
 	{
-		//cargar_nuevo_programa(1, 50, "begin\nvariables c, d\nc=1234\nd=4321\nend\0");
+		cargar_nuevo_programa(1, 50, "begin\nvariables c, d\nc=2147483647\nd=224947129\nend\0");
 		cargar_nuevo_programa(2, 50, "cargo un programa");
 	}
 

@@ -54,7 +54,7 @@ typedef struct {
 	uint32_t pid;
 	uint32_t program_counter;
 	t_list *stack;
-	t_direccion_virtual_memoria stack_pointer;
+	uint32_t stack_pointer;
 	uint32_t stack_size;
 	uint32_t used_pages;
 	uint32_t instructions_size;
