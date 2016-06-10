@@ -89,7 +89,7 @@ void *recNew() {
 		t_PCB *pcb = initialize_program(KERNEL,codigo_programa);
 
 		int inicio_correcto = iniciar_programa_en_umc(pcb->pid, pcb->used_pages, codigo_programa);
-		printf("resultado inicio programa en umc : %d", inicio_correcto); //TODO sacar este comentario
+		printf("resultado inicio programa en umc : %d\n", inicio_correcto); //TODO sacar este comentario
 		fflush(stdout);
 
 		sem_wait(&mut_ready);
@@ -137,8 +137,9 @@ void ejecutar_pcb_en_cpu(t_PCB *pcb){
 
 	int bytes_enviados = send(pcb->cpu_socket_descriptor, buffer->datos, buffer->size, 0);
 	if (bytes_enviados == -1){
-		printf("error al enviar pcb");
+		printf("error al enviar pcb\n");
 	}
+	printf("pcb enviado a cpu \n ");
 	while(1){
 
 	}

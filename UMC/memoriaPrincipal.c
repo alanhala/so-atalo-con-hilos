@@ -19,10 +19,11 @@
 #include "memoriaPrincipal.h"
 #include "protocoloUMC.h"
 
+
 int inicializar_estructuras() {
+	inicializar_semaforos();
 	lista_cpu_context = list_create();
 	int result = cargar_configuracion();
-	inicializar_semaforos();
 	TAMANIO_MEMORIA_PRINCIPAL = TAMANIO_FRAME * CANTIDAD_FRAMES;
 	crear_memoria_principal();
 	TLB = crear_tlb();
@@ -34,6 +35,15 @@ int inicializar_estructuras() {
 void inicializar_semaforos() {
 	sem_init(&mut_tabla_de_paginas, 0, 1);
 	sem_init(&mut_lista_frames, 0, 1);
+
+	sem_init(&mut_lista_cpu_context, 0, 1);
+	sem_init(&mut_memoria_principal, 0, 1);
+	sem_init(&mut_swap, 0, 1);
+	sem_init(&mut_tlb, 0, 1);
+
+
+
+
 
 }
 
@@ -230,34 +240,36 @@ int cargar_nuevo_programa_en_swap(int pid, int paginas_requeridas_del_proceso, c
 	if (SWAP_MOCK_ENABLE)
 		return cargar_nuevo_programa_en_swap_mock(pid, paginas_requeridas_del_proceso, codigo_programa);
 
-		t_iniciar_programa_en_swap *carga = malloc(sizeof(t_iniciar_programa_en_swap));
-		memset(carga,0,sizeof(t_iniciar_programa_en_swap));
 
-		carga->pid = pid;
-		carga->paginas_necesarias = paginas_requeridas_del_proceso;
-		carga->codigo_programa= codigo_programa;
+	sem_wait(&mut_swap);
+	t_iniciar_programa_en_swap *carga = malloc(sizeof(t_iniciar_programa_en_swap));
+	memset(carga,0,sizeof(t_iniciar_programa_en_swap));
 
-		t_stream *buffer = serializar_mensaje(1,carga);
+	carga->pid = pid;
+	carga->paginas_necesarias = paginas_requeridas_del_proceso;
+	carga->codigo_programa= codigo_programa;
 
-		int bytes_enviados = send(SWAP_SOCKET_DESCRIPTOR, buffer->datos, buffer->size, 0);
+	t_stream *buffer = serializar_mensaje(1,carga);
 
-		t_header *aHeader = malloc(sizeof(t_header));
+	int bytes_enviados = send(SWAP_SOCKET_DESCRIPTOR, buffer->datos, buffer->size, 0);
 
-		char 	buffer_header[5];	//Buffer donde se almacena el header recibido
+	t_header *aHeader = malloc(sizeof(t_header));
 
-		int 	bytes_recibidos_header,	//Cantidad de bytes recibidos en el recv() que recibe el header
-				bytes_recibidos;		//Cantidad de bytes recibidos en el recv() que recibe el mensaje completo
+	char 	buffer_header[5];	//Buffer donde se almacena el header recibido
 
-		bytes_recibidos_header = recv(SWAP_SOCKET_DESCRIPTOR, buffer_header, 5, MSG_PEEK);
+	int 	bytes_recibidos_header,	//Cantidad de bytes recibidos en el recv() que recibe el header
+			bytes_recibidos;		//Cantidad de bytes recibidos en el recv() que recibe el mensaje completo
 
-		char buffer_recv[buffer_header[1]]; 	//El buffer para recibir el mensaje se crea con la longitud recibida
+	bytes_recibidos_header = recv(SWAP_SOCKET_DESCRIPTOR, buffer_header, 5, MSG_PEEK);
 
-		bytes_recibidos = recv(SWAP_SOCKET_DESCRIPTOR,buffer_recv,buffer_header[1],0);
+	char buffer_recv[buffer_header[1]]; 	//El buffer para recibir el mensaje se crea con la longitud recibida
 
-		t_respuesta_iniciar_programa_en_swap * respuesta = malloc(sizeof(t_respuesta_iniciar_programa_en_swap));
+	bytes_recibidos = recv(SWAP_SOCKET_DESCRIPTOR,buffer_recv,buffer_header[1],0);
 
-		respuesta = (t_respuesta_iniciar_programa_en_swap*)deserealizar_mensaje(buffer_header[0], buffer_recv);
+	t_respuesta_iniciar_programa_en_swap * respuesta = malloc(sizeof(t_respuesta_iniciar_programa_en_swap));
 
+	respuesta = (t_respuesta_iniciar_programa_en_swap*)deserealizar_mensaje(buffer_header[0], buffer_recv);
+	sem_post(&mut_swap);
 	return respuesta->cargado_correctamente;
 }
 
@@ -265,7 +277,7 @@ char * leer_pagina_de_swap(int pid, int pagina){
 
 	if(SWAP_MOCK_ENABLE)
 		return leer_pagina_de_swap_mock(pid, pagina);
-
+	sem_wait(&mut_swap);
 	t_leer_pagina_swap *lectura = malloc(sizeof(t_leer_pagina_swap));
 
 	memset(lectura,0,sizeof(t_leer_pagina_swap));
@@ -293,7 +305,7 @@ char * leer_pagina_de_swap(int pid, int pagina){
 	t_respuesta_leer_pagina_swap *respuesta = malloc(sizeof(t_respuesta_leer_pagina_swap));
 
 	respuesta = (t_respuesta_leer_pagina_swap*)deserealizar_mensaje(buffer_header[0], buffer_recv);
-
+	sem_post(&mut_swap);
 	return respuesta->datos; //debe devolver esto si no leyo bien "~/-1"
 }
 
@@ -301,7 +313,7 @@ int escribir_pagina_de_swap(int pid, int pagina, char * datos){
 
 	if (SWAP_MOCK_ENABLE)
 		return escribir_pagina_de_swap_mock(pid, pagina, datos);
-
+	sem_wait(&mut_swap);
 	t_escribir_pagina_swap *escritura = malloc(sizeof(t_escribir_pagina_swap));
 
 	memset(escritura,0,sizeof(t_escribir_pagina_swap));
@@ -330,7 +342,7 @@ int escribir_pagina_de_swap(int pid, int pagina, char * datos){
 	t_respuesta_escribir_pagina_swap *respuesta = malloc(sizeof(t_respuesta_escribir_pagina_swap));
 
 	respuesta = (t_respuesta_escribir_pagina_swap*)deserealizar_mensaje(buffer_header[0], buffer_recv);
-
+	sem_post(&mut_swap);
 	return respuesta->escritura_correcta;
 }
 
@@ -338,13 +350,13 @@ int finalizar_programa_de_swap(int pid){
 
 	if(SWAP_MOCK_ENABLE)
 		return finalizar_programa_de_swap_mock(pid);
-	return -1;
+	sem_wait(&mut_swap);
 
 	t_finalizar_programa_en_swap *finalizar_programa = malloc(sizeof(t_finalizar_programa_en_swap));
 	memset(finalizar_programa,0,sizeof(t_finalizar_programa_en_swap));
 
-	//HARDCODEADO. MODIFICAR
-	finalizar_programa->process_id = 22;
+
+	finalizar_programa->process_id = pid;
 
 	t_stream *buffer = serializar_mensaje(7,finalizar_programa);
 
@@ -366,12 +378,13 @@ int finalizar_programa_de_swap(int pid){
 	t_respuesta_finalizar_programa_swap *respuesta = malloc(sizeof(t_respuesta_finalizar_programa_swap));
 
 	respuesta = (t_respuesta_finalizar_programa_swap*)deserealizar_mensaje(8, buffer_recv);
-
+	sem_post(&mut_swap);
 	return respuesta;
 
 }
 
 int buscar_en_tlb_frame_de_pagina(int pid, int pagina){
+	sem_wait(&mut_tlb);
 	int frame= -1;
 	int i= 0;
 	while(i < CANTIDAD_ENTRADAS_TLB){
@@ -381,6 +394,7 @@ int buscar_en_tlb_frame_de_pagina(int pid, int pagina){
 		}
 		i++;
 	}
+	sem_post(&mut_tlb);
 	return frame;
 }
 
@@ -747,22 +761,26 @@ char* leer_pagina_de_programa(int pid, int pagina, int offset, int size){
 }
 
 int dame_pid_activo(int cpu_socket_descriptor){
-	int cpu_id_iguales(t_cpu_context *cpu_context) {
+
+		sem_wait(&mut_lista_cpu_context);
+		int cpu_id_iguales(t_cpu_context *cpu_context) {
 			return (cpu_context->cpu_id == cpu_socket_descriptor);
 		}
 
 		t_cpu_context* cpu = list_find(lista_cpu_context,(void*) cpu_id_iguales);
-
+		sem_post(&mut_lista_cpu_context);
 		return cpu->pid_active;
 }
 int cambio_contexto(int cpu_id, int pid){
+
 	int cpu_id_iguales(t_cpu_context *cpu_context) {
 		if (cpu_context->cpu_id == cpu_id)
 			cpu_context->pid_active = pid;
 			return (cpu_context->cpu_id == cpu_id);
 	}
-
+	sem_wait(&mut_lista_cpu_context);
 	t_cpu_context* cpu = list_find(lista_cpu_context,(void*) cpu_id_iguales);
+	sem_post(&mut_lista_cpu_context);
 	if (cpu->pid_active != pid)
 		return -1;
 	return 0;
@@ -771,6 +789,7 @@ int cambio_contexto(int cpu_id, int pid){
 // TLB
 
 int buscar_victima_tlb_lru(int pid){
+	sem_wait(&mut_tlb);
 	int victima = -1;
 	int indice = 0;
 	int mas_viejo = -1;
@@ -784,10 +803,12 @@ int buscar_victima_tlb_lru(int pid){
 		}
 		indice ++;
 	}
+	sem_post(&mut_tlb);
 	return victima;
 }
 
 int buscar_entrada_tlb(int pid){
+	sem_wait(&mut_tlb);
 	int entrada_tlb = -1;
 	int i= 0;
 	while(i < CANTIDAD_ENTRADAS_TLB){
@@ -797,7 +818,7 @@ int buscar_entrada_tlb(int pid){
 		}
 		i++;
 	}
-
+	sem_post(&mut_tlb);
 	if (entrada_tlb == -1)
 		entrada_tlb = buscar_victima_tlb_lru(pid);
 
@@ -807,6 +828,7 @@ int buscar_entrada_tlb(int pid){
 }
 
 void lru_sumarle_uno_a_todos(){
+	sem_wait(&mut_tlb);
 	int i= 0;
 	while(i < CANTIDAD_ENTRADAS_TLB){
 		if((TLB->entradas[i]).pid != -1){
@@ -814,8 +836,10 @@ void lru_sumarle_uno_a_todos(){
 		}
 		i++;
 	}
+	sem_post(&mut_tlb);
 }
 int esta_presente_en_tlb(int pid, int pagina){
+	sem_wait(&mut_tlb);
 	int i= 0;
 	while(i < CANTIDAD_ENTRADAS_TLB){
 		if((TLB->entradas[i]).pid == pid && (TLB->entradas[i]).pagina == pagina){
@@ -823,6 +847,7 @@ int esta_presente_en_tlb(int pid, int pagina){
 		}
 		i++;
 	}
+	sem_post(&mut_tlb);
 	return  -1;
 }
 
@@ -834,11 +859,12 @@ void actualizar_tlb(int pid, int pagina, int frame){
 	if (entrada == -1)
 		entrada = buscar_entrada_tlb(pid);
 
+	sem_wait(&mut_tlb);
 	(TLB->entradas[entrada]).pid = pid;
 	(TLB->entradas[entrada]).lru = -1; // lo seteo en -1 para que cuando le sume uno a todos quede en 0
 	(TLB->entradas[entrada]).frame = frame;
 	(TLB->entradas[entrada]).pagina = pagina;
-
+	sem_post(&mut_tlb);
 	lru_sumarle_uno_a_todos();
 }
 
@@ -877,6 +903,7 @@ void flush_tlb(int pid){
 	{
 		void flush(t_tabla_de_paginas *tabla)
 		{
+
 			int i= 0;
 			while(i < CANTIDAD_ENTRADAS_TLB){
 				if((TLB->entradas[i]).pid == tabla->pid){
@@ -887,12 +914,15 @@ void flush_tlb(int pid){
 				}
 				i++;
 			}
+
 		}
+		sem_wait(&mut_tlb);
 		list_iterate(lista_tabla_de_paginas, (void*) flush);
+		sem_post(&mut_tlb);
 	}
 	else
 	{
-
+		sem_wait(&mut_tlb);
 		int i= 0;
 		while(i < CANTIDAD_ENTRADAS_TLB){
 			if((TLB->entradas[i]).pid == pid){
@@ -903,7 +933,7 @@ void flush_tlb(int pid){
 			}
 			i++;
 		}
-
+		sem_post(&mut_tlb);
 
 	}
 
@@ -930,10 +960,14 @@ void dump_memory(int pid){
 				}
 			}
 		}
+
+		sem_wait(&mut_tabla_de_paginas);
 		list_iterate(lista_tabla_de_paginas, (void*) dump);
+		sem_post(&mut_tabla_de_paginas);
 	}
 	else
 	{
+		//TODO VER SI PONGO MUTEX ACA O NO
 		t_tabla_de_paginas * tabla = buscar_tabla_de_paginas_de_pid(pid);
 		printf("Contenido en memoria de proceso %d\n", tabla->pid);
 		int i =0;
@@ -961,11 +995,13 @@ void flush_memory(int pid){
 					(tabla->entradas[i]).modificado = 1;
 				}
 			}
+			sem_wait(&mut_tabla_de_paginas);
 			list_iterate(lista_tabla_de_paginas, (void*) flush);
+			sem_post(&mut_tabla_de_paginas);
 		}
 	else
 	{
-
+		//TODO VER SI PONGO MUTEX ACA O NO
 		t_tabla_de_paginas * tabla = buscar_tabla_de_paginas_de_pid(pid);
 		int i =0;
 		for(i; i<tabla->paginas_totales; i++){
