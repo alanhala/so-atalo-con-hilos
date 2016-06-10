@@ -29,7 +29,6 @@
 //void cargaArray(char array[],  FILE* codeF);
 //void imprimeArray(const int cantCar,char array[]);
 //Agrega Newton -- Fin
-int connect_to_kernel();
 
 int main(int argc, char **argv) {
 

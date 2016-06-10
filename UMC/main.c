@@ -34,10 +34,6 @@
 
 int BACKLOG =10;
 
-void *kernel_and_cpu_connection_thread();
-void kernel_and_cpu_connections();
-void connect_to_SWAP();
-void *connect_to_SWAP_thread();
 void *kernel_and_cpu_connection_handler(int client_socket_descriptor);
 
 int huboUnCambio;
@@ -109,35 +105,12 @@ int main(int argc, char **argv) {
 		}
 
 
-	//connect_to_SWAP();
-	//kernel_and_cpu_connections();
-
 		while (1) {
 			sleep(10);
 		}
 
 		return 0;
 }
-void kernel_and_cpu_connections() {
-	pthread_t thread;
-	int thread_result = pthread_create(&thread, NULL,
-			&kernel_and_cpu_connection_thread, NULL);
-
-	if (thread_result) {
-		// TODO LOGUEAR ERROR
-		// TODO Analizar el tratamiento que desea darse
-		printf("Error - pthread_create() return code: %d\n", thread_result);
-		exit(1);
-	}
-}
-
-void *kernel_and_cpu_connection_thread() {
-	int server_socket_descriptor = create_server_socket_descriptor("localhost", LISTENPORT,
-	BACKLOG);
-
-}
-
-
 
 
 void *kernel_and_cpu_connection_handler(int client_socket_descriptor) {
@@ -171,10 +144,10 @@ void manejo_de_solicitudes(int socket_descriptor) {
 
 		char buffer_header[5];	//Buffer donde se almacena el header recibido
 
-		int bytes_recibidos_header,	//Cantidad de bytes recibidos en el recv() que recibe el header
-				bytes_recibidos;//Cantidad de bytes recibidos en el recv() que recibe el mensaje completo
+		//int bytes_recibidos_header = -1;	//Cantidad de bytes recibidos en el recv() que recibe el header
+		//int bytes_recibidos= -1;			//Cantidad de bytes recibidos en el recv() que recibe el mensaje completo
 
-		bytes_recibidos_header = recv(socket_descriptor, buffer_header, 5,
+		int bytes_recibidos_header = recv(socket_descriptor, buffer_header, 5,
 				MSG_PEEK);
 
 		char buffer_recv[buffer_header[1]]; //El buffer para recibir el mensaje se crea con la longitud recibida

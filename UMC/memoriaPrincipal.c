@@ -448,7 +448,7 @@ int buscar_pagina_de_frame_en_tabla_de_paginas(t_tabla_de_paginas * tabla, int f
 
 	int pagina = -1;
 	int i=0;
-	for (i; i < tabla->paginas_totales; i++){ //TODO testear si es menor o menor igual (creo que menor)
+	for (0; i < tabla->paginas_totales; i++){ //TODO testear si es menor o menor igual (creo que menor)
 		if ((tabla->entradas[i]).frame == frame_buscado && frame_buscado != -1){
 			//TODO IMPORTANTE && tabla->entradas[i]->asignado == 1 QUE ESTA ASIGNADO Y NO ES EL DRAFT QUE QUEDO
 			pagina = i;
@@ -950,7 +950,7 @@ void dump_memory(int pid){
 		{
 			printf("Contenido en memoria de proceso %d\n", tabla->pid);
 			int i =0;
-			for(i; i<tabla->paginas_totales; i++)
+			for(0; i<tabla->paginas_totales; i++)
 			{
 				int frame =(tabla->entradas[i]).frame ;
 				if (frame != -1)
@@ -971,7 +971,7 @@ void dump_memory(int pid){
 		t_tabla_de_paginas * tabla = buscar_tabla_de_paginas_de_pid(pid);
 		printf("Contenido en memoria de proceso %d\n", tabla->pid);
 		int i =0;
-		for(i; i<tabla->paginas_totales; i++)
+		for(0; i<tabla->paginas_totales; i++)
 		{
 			int frame =(tabla->entradas[i]).frame ;
 			if (frame != -1)
@@ -991,7 +991,7 @@ void flush_memory(int pid){
 			void flush(t_tabla_de_paginas *tabla)
 			{
 				int i =0;
-				for(i; i<tabla->paginas_totales; i++){
+				for(0; i<tabla->paginas_totales; i++){
 					(tabla->entradas[i]).modificado = 1;
 				}
 			}
@@ -1004,7 +1004,7 @@ void flush_memory(int pid){
 		//TODO VER SI PONGO MUTEX ACA O NO
 		t_tabla_de_paginas * tabla = buscar_tabla_de_paginas_de_pid(pid);
 		int i =0;
-		for(i; i<tabla->paginas_totales; i++){
+		for(0; i<tabla->paginas_totales; i++){
 			(tabla->entradas[i]).modificado = 1;
 		}
 	}

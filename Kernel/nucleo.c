@@ -162,7 +162,7 @@ void * recEjecucion() {
 
 
 		sem_wait(&mut_cpu_disponibles);
-		int cpu  = queue_pop(cola_cpu_disponibles);
+		int cpu  = (int )queue_pop(cola_cpu_disponibles);
 		sem_post(&mut_cpu_disponibles);
 
 
@@ -180,7 +180,7 @@ void * recEjecucion() {
 
 
 int finalizar_programa_consola(t_PCB *pcb){
-
+	return -1;
 }
 
 int finalizar_programa_umc(t_PCB *pcb){
@@ -215,7 +215,9 @@ int finalizar_programa_umc(t_PCB *pcb){
 }
 
 void * recBlock(){
+	while(1){
 
+	}
 }
 void *recExit() {
 

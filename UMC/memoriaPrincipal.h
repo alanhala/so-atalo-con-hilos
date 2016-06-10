@@ -121,8 +121,8 @@ int tiene_tabla_mas_paginas_para_pedir(t_tabla_de_paginas* tabla);
 int darle_frame_a_una_pagina(t_tabla_de_paginas* tabla, int pagina);
 int buscar_en_tlb_frame_de_pagina(int tabla, int pagina);
 
-
-
+void actualizar_tlb(int pid, int pagina, int frame);
+void actualizar_reemplazo(t_tabla_de_paginas* tabla, int frame_a_asignar,int pagina, int pagina_victima);
 int reemplazar_clock(t_tabla_de_paginas * tabla);
 int reemplazar_clock_modificado(t_tabla_de_paginas * tabla);
 
