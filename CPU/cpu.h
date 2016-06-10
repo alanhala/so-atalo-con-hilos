@@ -63,7 +63,9 @@ typedef struct {
 	//	uint32_t labels_size;
 	//	t_indice_etiqueta
 } t_PCB;
-
+int QUANTUM;
+void set_quantum(int quantum);
+int ejecutar_pcb();
 void execute_next_instruction_for_process();
 t_dato_en_memoria get_next_instruction();
 char* obtener_instruccion_de_umc(t_dato_en_memoria *instruccion);

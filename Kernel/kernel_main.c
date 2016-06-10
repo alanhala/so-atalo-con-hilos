@@ -50,7 +50,7 @@ int main(int argc, char **argv) {
 
 	while(1){
 		int client_socket_descriptor = accept_connection(server_socket_descritptor);
-		printf("consola conectada\n");
+
 
 		pthread_t thread;
 		int thread_result = pthread_create(&thread, NULL,
@@ -81,6 +81,7 @@ void manejo_de_solicitudes(int client_socket_descriptor) {
 	recv(client_socket_descriptor, &handshake, sizeof(int), 0);
 	if(handshake == 1) //CPU
 	{
+		printf("cpu conectada\n");
 		sem_wait(&mut_cpu_disponibles);
 		int cpu_socket_descriptor = client_socket_descriptor;
 		queue_push(cola_cpu_disponibles, cpu_socket_descriptor);
@@ -89,7 +90,7 @@ void manejo_de_solicitudes(int client_socket_descriptor) {
 	}
 	if(handshake == 2) //Consola
 	{
-
+		printf("consola conectada\n");
 	}
 
 

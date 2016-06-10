@@ -22,12 +22,13 @@ t_PCB* initialize_program(t_kernel* self, char* program) {
 
 t_PCB* create_pcb(t_kernel* kernel, t_metadata_program* metadata) {
 	t_PCB* pcb = malloc(sizeof(t_PCB));
-	pcb->pid = kernel->programs_number;
+	pcb->pid = 1;//hardcodea eze para ver si funca cpu kernel->programs_number;
 	pcb->program_counter = metadata->instruccion_inicio;
 	pcb->stack_index = list_create();
 	pcb->stack_size = kernel->stack_size;
 	pcb->instructions_index = metadata->instrucciones_serializado;
 	pcb->instructions_size = metadata->instrucciones_size;
+	pcb->used_pages = 100; // ESTO LO HARCODEO EZE. TIENE QE CALCULARSE A PARTIR DEL PROGRAMA Y EL STAACK. validar con mati
 //	TODO CACLULAR INICIO DEL STACK POINTER
 	return pcb;
 }

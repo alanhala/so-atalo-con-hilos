@@ -23,6 +23,8 @@
 	typedef struct {
 		uint32_t pid;
 		char * state; //no serializar
+		int cpu_socket_descriptor; //no serializar
+		int console_socket_descriptor; // no serializar
 		uint32_t program_counter;
 		t_list* stack_index;
 		uint32_t stack_pointer;

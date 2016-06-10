@@ -83,10 +83,10 @@ int main(int argc, char **argv) {
 
 	set_algoritmo_reemplazo("clock");
 	inicializar_estructuras();
-	int swap_socket = create_client_socket_descriptor("localhost", "6000");
-	set_socket_descriptor(swap_socket);
-	//set_test();
-	//crear_swap_mock();
+	//int swap_socket = create_client_socket_descriptor("localhost", "6000");
+	//set_socket_descriptor(swap_socket);
+	set_test();
+	crear_swap_mock();
 
 
 	int server_socket_descriptor = create_server_socket_descriptor("localhost","5000",BACKLOG);
@@ -137,40 +137,8 @@ void *kernel_and_cpu_connection_thread() {
 
 }
 
-void connect_to_SWAP(){
-	pthread_t thread;
-	int thread_result = pthread_create(&thread, NULL,
-			&connect_to_SWAP_thread, NULL);
 
-	if (thread_result) {
-		// TODO LOGUEAR ERROR
-		// TODO Analizar el tratamiento que desea darse
-		printf("Error - pthread_create() return code: %d\n", thread_result);
-		exit(1);
-	}
-}
 
-void *connect_to_SWAP_thread() {
-	int swap_socket_descriptor = create_client_socket_descriptor(SWAPIP,
-	SWAPPORT);
-	printf("Conectado al Swap");
-	fflush(stdout);
-	char message[] = "hola swap, soy umc\n";
-
-	while (1) { //TODO REVISAR por que hace print de lo que envia y de lo que recibe. puede que ser que sea por el socket?
-		//char header[1];
-		char recvBuffer[15];
-		send(swap_socket_descriptor, "hola swap, soy umc\n", 19, 0);
-		//recv(swap_socket_descriptor, header, 2, 0);
-		//char recvBuffer[header];
-		recv(swap_socket_descriptor, recvBuffer, 15, 0);
-
-		printf(recvBuffer);
-		fflush(stdout);
-		sleep(1);
-	}
-
-}
 
 void *kernel_and_cpu_connection_handler(int client_socket_descriptor) {
 	manejo_de_solicitudes(client_socket_descriptor);
@@ -191,8 +159,10 @@ void manejo_de_solicitudes(int socket_descriptor) {
 	}
 	if(handshake == 2) //KERNEL
 	{
+
+		//cargar_nuevo_programa(1, 50, "begin\nvariables c, d\nc=2147483647\nd=224947129\nend\0");
 		//cargar_nuevo_programa(1, 50, "begin\nvariables c, d\nc=1234\nd=4321\nend\0");
-		cargar_nuevo_programa(2, 50, "cargo un programa");
+		//cargar_nuevo_programa(2, 50, "cargo un programa");
 	}
 
 	while (1) {

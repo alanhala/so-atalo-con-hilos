@@ -114,7 +114,7 @@ void *recReady() {
 
 
 		sem_wait(&cant_cpu_disponibles); //espero tener una cpu disponible
-		sem_post(&cant_cpu_disponibles);
+
 
 
 		sem_wait(&mut_ejecucion);
@@ -124,53 +124,50 @@ void *recReady() {
 		sem_post(&cant_ejecucion);
 
 
-
-
-
 	}
 
 }
 
 
 
-void * ejecutar_pcb_en_cpu(t_PCB *pcb){
-	/*
-	int cpusocket = pcb->cpusocket;
-	send(cpusocket  ,pcb   ,sizeof(t_PCB) +1  ,0);
+void ejecutar_pcb_en_cpu(t_PCB *pcb){
 
-	int resul =recv(cpusocket,pcb,sizeof(t_PCB) +1 	,0);
-	if ( resul<=0)
-	{
-		//todo cpu desconectada o error implementar
-		//aca segun dice el tp hay que verificar si hay otra cpu disponible para enviar el pcb
+
+	t_stream *buffer = serializar_mensaje(121,pcb);
+
+	int bytes_enviados = send(pcb->cpu_socket_descriptor, buffer->datos, buffer->size, 0);
+	if (bytes_enviados == -1){
+		printf("error al enviar pcb");
+	}
+	while(1){
 
 	}
-	else
-	{
-	//ok joya me devolvio el socket verificar que mensaje me envio y procesarlo
-		atender_mensaje_cpu(pcb);
-	}
+	//while(1){
+		//aca tengo que hacer un while de todas las respuestas que me va mandando cpu
+		// entre ellas las de semaforos, dispositivos, terminar programa y termino ejecucion de
+		//quantum
+	//}
 
-*/
 }
 
 void * recEjecucion() {
-	//extern *gkernel;
+
 	while(1){
-		sem_wait(&cant_cpu_disponibles);
+
+		sem_wait(&cant_ejecucion);
+		sem_wait(&mut_ejecucion);
+		t_PCB *pcb  = queue_pop(estado_ejecucion);
+		sem_post(&mut_ejecucion);
+
+
 		sem_wait(&mut_cpu_disponibles);
 		int cpu  = queue_pop(cola_cpu_disponibles);
 		sem_post(&mut_cpu_disponibles);
 
-		sem_wait(&cant_ejecucion);
-		sem_wait(&mut_ejecucion);
-		//t_PCB *pcb  = queue_pop(estado_ejecucion);
-		sem_post(&mut_ejecucion);
-		//pcb->cpusocket = cpu ;
-		//pcb->quantum = gkernel->quantum;
-		//pcb->msj = sin_mensaje;
+
+		pcb->cpu_socket_descriptor = cpu;
 		pthread_t th_ejecucion_pcb;
-		//pthread_create(&th_ejecucion_pcb, NULL, &ejecutar_pcb_en_cpu, pcb);
+		pthread_create(&th_ejecucion_pcb, NULL, &ejecutar_pcb_en_cpu, pcb);
 
 	}
 
