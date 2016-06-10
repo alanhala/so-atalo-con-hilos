@@ -265,23 +265,30 @@ t_recibir_PCB_de_Kernel *deserealizar_enviar_PCB_a_CPU(char *datos){
 		t_recibir_PCB_de_Kernel *unPCB = malloc(sizeof(t_recibir_PCB_de_Kernel));
 		memset(unPCB,0,sizeof(t_recibir_PCB_de_Kernel));
 
-		uint32_t cantidad_elementos_stack = 0;
+		//uint32_t cantidad_elementos_stack = 0;
 
-		memcpy(&cantidad_elementos_stack,datos+desplazamiento_header,tmpsize=sizeof(uint32_t));
+		//memcpy(&cantidad_elementos_stack,datos+desplazamiento_header,tmpsize=sizeof(uint32_t));
+		//offset+=tmpsize;
+		//offset+=desplazamiento_header;
+
+		memcpy(&unPCB->pid,datos+desplazamiento_header,tmpsize=sizeof(uint32_t));
 		offset+=tmpsize;
 		offset+=desplazamiento_header;
-
-		memcpy(&unPCB->pid,datos+offset,tmpsize=sizeof(uint32_t));
-		offset+=tmpsize;
 
 		memcpy(&unPCB->program_counter,datos+offset,tmpsize=sizeof(uint32_t));
 		offset+=tmpsize;
 
+		t_list *stack_index = list_create();
+		unPCB->stack_index = stack_index;
+		t_stack_element* stack_element = create_stack_element();
+		list_add(unPCB->stack_index, stack_element);
+
+		/*
 		int contador_de_elementos_del_stack = 0;
 
 		while(contador_de_elementos_del_stack<cantidad_elementos_stack){
 
-			t_list *stack_index_tmp = malloc(sizeof(t_list));
+			t_list *stack_index_tmp = list_create();
 
 			int tmp_elemento_del_stack = 0;
 
@@ -294,6 +301,7 @@ t_recibir_PCB_de_Kernel *deserealizar_enviar_PCB_a_CPU(char *datos){
 
 			unPCB->stack_index = stack_index_tmp;
 		}
+		*/
 
 		memcpy(&unPCB->stack_pointer,datos+offset,tmpsize=sizeof(uint32_t));
 		offset+=tmpsize;
@@ -322,10 +330,10 @@ t_recibir_PCB_de_Kernel *deserealizar_enviar_PCB_a_CPU(char *datos){
 
 
 //Funciones Auxiliares
-
+//Dale Frabos
 t_list *arma_stack_del_PCB(int elemento_del_stack){
 
-	t_list *stack_element = malloc(sizeof(t_list));
+	t_list *stack_element = list_create();
 
 	stack_element->elements_count = elemento_del_stack;
 	stack_element->head = NULL;

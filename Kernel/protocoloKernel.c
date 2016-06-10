@@ -16,6 +16,7 @@
 #include <semaphore.h>
 #include "socket.h"
 #include "protocoloKernel.h"
+#include "kernel.h"
 
 
 //Serializacion
@@ -79,11 +80,11 @@ t_stream *serializar_inicio_de_programa_en_UMC(t_inicio_de_programa_en_UMC *inic
     memcpy(stream->datos+offset,&cantidad_de_paginas,tmpsize = sizeof(uint32_t));
     offset+=tmpsize;
 
-    memcpy(stream->datos+offset,inicio_de_programa->codigo_de_programa,tmpsize = sizeof(size_inicio_de_programa));
+    memcpy(stream->datos+offset,inicio_de_programa->codigo_de_programa,tmpsize=codigo_del_programa);
     offset+=tmpsize;
 
     char endString='\0';
-    memcpy(stream->datos+offset,&endString,1);
+    memcpy(stream->datos+offset-1,&endString,1);
 
     return stream;
 }
@@ -157,24 +158,23 @@ t_stream *serializar_enviar_PCB_a_CPU(t_PCB *unPCB){
 		uint32_t	tmpsize = 0,
 					offset = 0;
 
-		uint32_t cantidad_elementos_stack = obtiene_cantidad_elementos_stack(unPCB->stack_index);
-		uint32_t sizeof_stack = cantidad_elementos_stack * sizeof(int);
+		//uint32_t cantidad_elementos_stack = obtiene_cantidad_elementos_stack(unPCB->stack_index);
+		//uint32_t sizeof_stack = cantidad_elementos_stack * sizeof(int);
 
 		uint32_t sizeof_instruccion = obtiene_sizeof_instrucciones(unPCB->instructions_index);
 
 		uint32_t sizePCB =	sizeof(uint32_t) +
 							sizeof(uint32_t) +
-							sizeof_stack	 +
+							//sizeof_stack	 +
 							sizeof(uint32_t) +
 							sizeof(uint32_t) +
 							sizeof(uint32_t) +
 							sizeof(uint32_t) +
 							sizeof_instruccion;
-							//Lista t_instructions
 
 		uint32_t stream_size = 	sizeof(uint8_t) +	//Tamano del tipo
 								sizeof(uint32_t)+	//Tamano del length del mensaje
-								sizeof(uint32_t)+	//Tamano para la cantidad de elementos del stack
+								//sizeof(uint32_t)+	//Tamano para la cantidad de elementos del stack
 								sizePCB;
 
 		t_stream *stream = malloc(sizeof(t_stream));
@@ -200,8 +200,8 @@ t_stream *serializar_enviar_PCB_a_CPU(t_PCB *unPCB){
 		memcpy(stream->datos+offset,&stream_size,tmpsize=sizeof(uint32_t));
 		offset+=tmpsize;
 
-		memcpy(stream->datos+offset,&cantidad_elementos_stack,tmpsize=sizeof(uint32_t));
-		offset+=tmpsize;
+		//memcpy(stream->datos+offset,&cantidad_elementos_stack,tmpsize=sizeof(uint32_t));
+		//offset+=tmpsize;
 
 		memcpy(stream->datos+offset,&pid,tmpsize=sizeof(uint32_t));
 		offset+=tmpsize;
@@ -209,11 +209,11 @@ t_stream *serializar_enviar_PCB_a_CPU(t_PCB *unPCB){
 		memcpy(stream->datos+offset,&program_counter,tmpsize=sizeof(uint32_t));
 		offset+=tmpsize;
 
-		int elementos_del_stack_recorridos = 0;
-		int elementos_del_stack[cantidad_elementos_stack];
+		//int elementos_del_stack_recorridos = 0;
+		//int elementos_del_stack[cantidad_elementos_stack];
 
-		obtiene_elementos_del_stack(unPCB->stack_index,elementos_del_stack);
-
+		//obtiene_elementos_del_stack(unPCB->stack_index,elementos_del_stack);
+		/*
 		while (elementos_del_stack_recorridos<cantidad_elementos_stack){
 
 			memcpy(stream->datos+offset,&elementos_del_stack[elementos_del_stack_recorridos],tmpsize=sizeof(uint32_t));
@@ -221,7 +221,7 @@ t_stream *serializar_enviar_PCB_a_CPU(t_PCB *unPCB){
 
 			elementos_del_stack_recorridos++;
 		}
-
+		 */
 		memcpy(stream->datos+offset,&stack_pointer,tmpsize=sizeof(uint32_t));
 		offset+=tmpsize;
 
@@ -239,7 +239,7 @@ t_stream *serializar_enviar_PCB_a_CPU(t_PCB *unPCB){
 		offset+=tmpsize;
 
 		t_size offset_instruccion = obtiene_offset (unPCB->instructions_index);
-		memcpy(stream->datos+offset,&offset_instruccion,tmpsize=sizeof(t_size));
+		memcpy(stream->datos+offset,&offset_instruccion,sizeof(t_size));
 
 		return stream;
 }
