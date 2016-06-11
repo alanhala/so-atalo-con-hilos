@@ -155,93 +155,104 @@ t_stream *serializar_respuesta_inicio_de_programa_en_kernel(t_respuesta_iniciar_
 
 t_stream *serializar_enviar_PCB_a_CPU(t_PCB *unPCB){
 
-		uint32_t	tmpsize = 0,
-					offset = 0;
+	uint32_t	tmpsize = 0,
+				offset = 0;
 
-		//uint32_t cantidad_elementos_stack = obtiene_cantidad_elementos_stack(unPCB->stack_index);
-		//uint32_t sizeof_stack = cantidad_elementos_stack * sizeof(int);
+	uint32_t cantidad_elementos_stack = obtiene_cantidad_elementos_stack(unPCB->stack_index);
+	uint32_t sizeof_stack = cantidad_elementos_stack * sizeof(int);
 
-		uint32_t sizeof_instruccion = obtiene_sizeof_instrucciones(unPCB->instructions_index);
+	uint32_t sizeof_instruccion = unPCB->instructions_size * obtiene_sizeof_instrucciones(unPCB->instructions_index);
 
-		uint32_t sizePCB =	sizeof(uint32_t) +
-							sizeof(uint32_t) +
-							//sizeof_stack	 +
-							sizeof(uint32_t) +
-							sizeof(uint32_t) +
-							sizeof(uint32_t) +
-							sizeof(uint32_t) +
-							sizeof_instruccion;
+	uint32_t sizePCB =	sizeof(uint32_t) +
+						sizeof(uint32_t) +
+						//sizeof_stack	 +
+						sizeof(uint32_t) +
+						sizeof(uint32_t) +
+						sizeof(uint32_t) +
+						sizeof(uint32_t) +
+						sizeof_instruccion;
+						//Lista t_instructions
 
-		uint32_t stream_size = 	sizeof(uint8_t) +	//Tamano del tipo
-								sizeof(uint32_t)+	//Tamano del length del mensaje
-								//sizeof(uint32_t)+	//Tamano para la cantidad de elementos del stack
-								sizePCB;
+	uint32_t stream_size = 	sizeof(uint8_t) +	//Tamano del tipo
+							sizeof(uint32_t)+	//Tamano del length del mensaje
+							//sizeof(uint32_t)+	//Tamano para la cantidad de elementos del stack
+							sizePCB;
 
-		t_stream *stream = malloc(sizeof(t_stream));
-		memset(stream,0,sizeof(t_stream));
+	t_stream *stream = malloc(sizeof(t_stream));
+	memset(stream,0,sizeof(t_stream));
 
-		stream->size = stream_size;
+	stream->size = stream_size;
 
-		stream->datos = malloc(stream_size);
-		memset(stream->datos,0,stream_size);
+	stream->datos = malloc(stream_size);
+	memset(stream->datos,0,stream_size);
 
-		uint8_t		tipo = 121;
+	uint8_t		tipo = 121;
 
-		uint32_t 	pid = unPCB->pid,
-					program_counter = unPCB->program_counter,
-					stack_pointer = unPCB->stack_pointer,
-					stack_size = unPCB->stack_size,
-					used_pages = unPCB->used_pages,
-					instructions_size = unPCB->instructions_size;
+	uint32_t 	pid = unPCB->pid,
+				program_counter = unPCB->program_counter,
+				stack_pointer = unPCB->stack_pointer,
+				stack_size = unPCB->stack_size,
+				used_pages = unPCB->used_pages,
+				instructions_size = unPCB->instructions_size;
 
-		memcpy(stream->datos,&tipo,tmpsize=sizeof(uint8_t));
+	memcpy(stream->datos,&tipo,tmpsize=sizeof(uint8_t));
+	offset+=tmpsize;
+
+	memcpy(stream->datos+offset,&stream_size,tmpsize=sizeof(uint32_t));
+	offset+=tmpsize;
+
+	//memcpy(stream->datos+offset,&cantidad_elementos_stack,tmpsize=sizeof(uint32_t));
+	//offset+=tmpsize;
+
+	memcpy(stream->datos+offset,&pid,tmpsize=sizeof(uint32_t));
+	offset+=tmpsize;
+
+	memcpy(stream->datos+offset,&program_counter,tmpsize=sizeof(uint32_t));
+	offset+=tmpsize;
+
+	/*
+	int elementos_del_stack_recorridos = 0;
+	int elementos_del_stack[cantidad_elementos_stack];
+
+	obtiene_elementos_del_stack(unPCB->stack_index,elementos_del_stack);
+
+	while (elementos_del_stack_recorridos<cantidad_elementos_stack){
+
+		memcpy(stream->datos+offset,&elementos_del_stack[elementos_del_stack_recorridos],tmpsize=sizeof(uint32_t));
 		offset+=tmpsize;
 
-		memcpy(stream->datos+offset,&stream_size,tmpsize=sizeof(uint32_t));
-		offset+=tmpsize;
+		elementos_del_stack_recorridos++;
+	}
+	*/
 
-		//memcpy(stream->datos+offset,&cantidad_elementos_stack,tmpsize=sizeof(uint32_t));
-		//offset+=tmpsize;
+	memcpy(stream->datos+offset,&stack_pointer,tmpsize=sizeof(uint32_t));
+	offset+=tmpsize;
 
-		memcpy(stream->datos+offset,&pid,tmpsize=sizeof(uint32_t));
-		offset+=tmpsize;
+	memcpy(stream->datos+offset,&stack_size,tmpsize=sizeof(uint32_t));
+	offset+=tmpsize;
 
-		memcpy(stream->datos+offset,&program_counter,tmpsize=sizeof(uint32_t));
-		offset+=tmpsize;
+	memcpy(stream->datos+offset,&used_pages,tmpsize=sizeof(uint32_t));
+	offset+=tmpsize;
 
-		//int elementos_del_stack_recorridos = 0;
-		//int elementos_del_stack[cantidad_elementos_stack];
+	memcpy(stream->datos+offset,&instructions_size,tmpsize=sizeof(uint32_t));
+	offset+=tmpsize;
 
-		//obtiene_elementos_del_stack(unPCB->stack_index,elementos_del_stack);
-		/*
-		while (elementos_del_stack_recorridos<cantidad_elementos_stack){
+	int contador_de_instrucciones = 0;
 
-			memcpy(stream->datos+offset,&elementos_del_stack[elementos_del_stack_recorridos],tmpsize=sizeof(uint32_t));
-			offset+=tmpsize;
+	while (contador_de_instrucciones<instructions_size){
 
-			elementos_del_stack_recorridos++;
-		}
-		 */
-		memcpy(stream->datos+offset,&stack_pointer,tmpsize=sizeof(uint32_t));
-		offset+=tmpsize;
+	t_puntero_instruccion primera_instruccion = obtiene_primera_instruccion((unPCB->instructions_index)[contador_de_instrucciones]);
+	memcpy(stream->datos+offset,&primera_instruccion,tmpsize=sizeof(t_puntero_instruccion));
+	offset+=tmpsize;
 
-		memcpy(stream->datos+offset,&stack_size,tmpsize=sizeof(uint32_t));
-		offset+=tmpsize;
+	t_size offset_instruccion = obtiene_offset((unPCB->instructions_index)[contador_de_instrucciones]);
+	memcpy(stream->datos+offset,&offset_instruccion,tmpsize=sizeof(t_size));
+	offset+=tmpsize;
 
-		memcpy(stream->datos+offset,&used_pages,tmpsize=sizeof(uint32_t));
-		offset+=tmpsize;
+	contador_de_instrucciones++;
+	}
 
-		memcpy(stream->datos+offset,&instructions_size,tmpsize=sizeof(uint32_t));
-		offset+=tmpsize;
-
-		t_puntero_instruccion primera_instruccion = obtiene_primera_instruccion(unPCB->instructions_index);
-		memcpy(stream->datos+offset,&primera_instruccion,tmpsize=sizeof(t_puntero_instruccion));
-		offset+=tmpsize;
-
-		t_size offset_instruccion = obtiene_offset (unPCB->instructions_index);
-		memcpy(stream->datos+offset,&offset_instruccion,sizeof(t_size));
-
-		return stream;
+	return stream;
 }
 
 
@@ -374,16 +385,16 @@ void obtiene_elementos_del_stack(t_list *stack_index, int elementos_del_stack[])
 	}
 }
 
-t_puntero_instruccion obtiene_primera_instruccion(t_intructions *instruccion){
+t_puntero_instruccion obtiene_primera_instruccion(t_intructions instruccion){
 
-	t_puntero_instruccion una_instruccion = instruccion->start;
+	t_puntero_instruccion una_instruccion = instruccion.start;
 
 	return una_instruccion;
 }
 
-t_size obtiene_offset (t_intructions *instruccion){
+t_size obtiene_offset (t_intructions instruccion){
 
-	t_size offset = instruccion->offset;
+	t_size offset = instruccion.offset;
 
 	return offset;
 }

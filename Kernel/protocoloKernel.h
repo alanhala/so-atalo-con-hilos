@@ -63,7 +63,7 @@ t_stream *serializar_enviar_PCB_a_CPU(t_PCB *unPCB);
 uint32_t obtiene_cantidad_elementos_stack(t_list *stack_index);
 uint32_t obtiene_sizeof_instrucciones(t_intructions *instrucciones);
 void obtiene_elementos_del_stack(t_list *stack_index, int elementos_del_stack[]);
-t_puntero_instruccion obtiene_primera_instruccion(t_intructions *instruccion);
-t_size obtiene_offset (t_intructions *instruccion);
+t_puntero_instruccion obtiene_primera_instruccion(t_intructions instruccion);
+t_size obtiene_offset (t_intructions instruccion);
 
 #endif /* PROTOCOLOKERNEL_H_ */

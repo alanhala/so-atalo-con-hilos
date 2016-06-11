@@ -80,7 +80,7 @@ t_stream *serializar_mensaje(int tipo,void* unaEstructura);
 
 //Funciones Auxiliares
 t_list *arma_stack_del_PCB(int elemento_del_stack);
-t_intructions *carga_instructions_index(t_puntero_instruccion primera_instruccion,t_size offset_instrucciones);
+t_intructions carga_instructions_index(t_puntero_instruccion primera_instruccion,t_size offset_instrucciones);
 
 
 #endif /* PROTOCOLOCPU_H_ */

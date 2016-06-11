@@ -384,7 +384,7 @@ int finalizar_programa_de_swap(int pid){
 }
 
 int buscar_en_tlb_frame_de_pagina(int pid, int pagina){
-	sem_wait(&mut_tlb);
+	//sem_wait(&mut_tlb);
 	int frame= -1;
 	int i= 0;
 	while(i < CANTIDAD_ENTRADAS_TLB){
@@ -394,7 +394,7 @@ int buscar_en_tlb_frame_de_pagina(int pid, int pagina){
 		}
 		i++;
 	}
-	sem_post(&mut_tlb);
+	//sem_post(&mut_tlb);
 	return frame;
 }
 
@@ -839,15 +839,16 @@ void lru_sumarle_uno_a_todos(){
 	sem_post(&mut_tlb);
 }
 int esta_presente_en_tlb(int pid, int pagina){
-	sem_wait(&mut_tlb);
+	//TODO VER COMO USAR EL MUTEX
 	int i= 0;
 	while(i < CANTIDAD_ENTRADAS_TLB){
 		if((TLB->entradas[i]).pid == pid && (TLB->entradas[i]).pagina == pagina){
 			return i;
 		}
+
 		i++;
 	}
-	sem_post(&mut_tlb);
+
 	return  -1;
 }
 
