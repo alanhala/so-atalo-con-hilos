@@ -384,7 +384,7 @@ int finalizar_programa_de_swap(int pid){
 }
 
 int buscar_en_tlb_frame_de_pagina(int pid, int pagina){
-	sem_wait(&mut_tlb);
+	//sem_wait(&mut_tlb);
 	int frame= -1;
 	int i= 0;
 	while(i < CANTIDAD_ENTRADAS_TLB){
@@ -394,7 +394,7 @@ int buscar_en_tlb_frame_de_pagina(int pid, int pagina){
 		}
 		i++;
 	}
-	sem_post(&mut_tlb);
+	//sem_post(&mut_tlb);
 	return frame;
 }
 
@@ -789,7 +789,7 @@ int cambio_contexto(int cpu_id, int pid){
 // TLB
 
 int buscar_victima_tlb_lru(int pid){
-	sem_wait(&mut_tlb);
+	//sem_wait(&mut_tlb);
 	int victima = -1;
 	int indice = 0;
 	int mas_viejo = -1;
@@ -803,12 +803,12 @@ int buscar_victima_tlb_lru(int pid){
 		}
 		indice ++;
 	}
-	sem_post(&mut_tlb);
+	//sem_post(&mut_tlb);
 	return victima;
 }
 
 int buscar_entrada_tlb(int pid){
-	sem_wait(&mut_tlb);
+	//sem_wait(&mut_tlb);
 	int entrada_tlb = -1;
 	int i= 0;
 	while(i < CANTIDAD_ENTRADAS_TLB){
@@ -818,7 +818,7 @@ int buscar_entrada_tlb(int pid){
 		}
 		i++;
 	}
-	sem_post(&mut_tlb);
+	//sem_post(&mut_tlb);
 	if (entrada_tlb == -1)
 		entrada_tlb = buscar_victima_tlb_lru(pid);
 
@@ -828,7 +828,7 @@ int buscar_entrada_tlb(int pid){
 }
 
 void lru_sumarle_uno_a_todos(){
-	sem_wait(&mut_tlb);
+	//sem_wait(&mut_tlb);
 	int i= 0;
 	while(i < CANTIDAD_ENTRADAS_TLB){
 		if((TLB->entradas[i]).pid != -1){
@@ -836,10 +836,10 @@ void lru_sumarle_uno_a_todos(){
 		}
 		i++;
 	}
-	sem_post(&mut_tlb);
+	//sem_post(&mut_tlb);
 }
 int esta_presente_en_tlb(int pid, int pagina){
-	sem_wait(&mut_tlb);
+	//sem_wait(&mut_tlb);
 	int i= 0;
 	while(i < CANTIDAD_ENTRADAS_TLB){
 		if((TLB->entradas[i]).pid == pid && (TLB->entradas[i]).pagina == pagina){
@@ -847,7 +847,7 @@ int esta_presente_en_tlb(int pid, int pagina){
 		}
 		i++;
 	}
-	sem_post(&mut_tlb);
+	//sem_post(&mut_tlb);
 	return  -1;
 }
 
@@ -859,12 +859,12 @@ void actualizar_tlb(int pid, int pagina, int frame){
 	if (entrada == -1)
 		entrada = buscar_entrada_tlb(pid);
 
-	sem_wait(&mut_tlb);
+	//sem_wait(&mut_tlb);
 	(TLB->entradas[entrada]).pid = pid;
 	(TLB->entradas[entrada]).lru = -1; // lo seteo en -1 para que cuando le sume uno a todos quede en 0
 	(TLB->entradas[entrada]).frame = frame;
 	(TLB->entradas[entrada]).pagina = pagina;
-	sem_post(&mut_tlb);
+	//sem_post(&mut_tlb);
 	lru_sumarle_uno_a_todos();
 }
 
@@ -916,13 +916,13 @@ void flush_tlb(int pid){
 			}
 
 		}
-		sem_wait(&mut_tlb);
+		//sem_wait(&mut_tlb);
 		list_iterate(lista_tabla_de_paginas, (void*) flush);
-		sem_post(&mut_tlb);
+		//sem_post(&mut_tlb);
 	}
 	else
 	{
-		sem_wait(&mut_tlb);
+		//sem_wait(&mut_tlb);
 		int i= 0;
 		while(i < CANTIDAD_ENTRADAS_TLB){
 			if((TLB->entradas[i]).pid == pid){
@@ -933,7 +933,7 @@ void flush_tlb(int pid){
 			}
 			i++;
 		}
-		sem_post(&mut_tlb);
+		//sem_post(&mut_tlb);
 
 	}
 

@@ -54,7 +54,7 @@ void test_ejecutar_programa_en_memoria() {
     //inicializo PCB
     mockear_pcb();
     t_PCB * pcb=get_PCB();
-    pcb->pid = 1;
+    pcb->pid = 0;
     pcb->program_counter = 0;
 
     cambiar_contexto(pcb->pid);
@@ -121,7 +121,7 @@ void test_obtener_posicion_variable() {
 void test_asignar_y_leer_valor_de_una_sola_pagina() {
     mockear_pcb();
     t_PCB * pcb=get_PCB();
-    pcb->pid = 1;
+    pcb->pid = 0;
     set_PCB(pcb);
 
     cambiar_contexto(pcb->pid);
@@ -136,7 +136,7 @@ void test_asignar_y_leer_valor_de_una_sola_pagina() {
 void test_asignar_y_leer_valor_de_varias_paginas() {
     mockear_pcb();
     t_PCB * pcb=get_PCB();
-    pcb->pid = 1;
+    pcb->pid = 0;
     pcb->stack_free_space_pointer.offset = 3;
     set_PCB(pcb);
     cambiar_contexto(pcb->pid);
