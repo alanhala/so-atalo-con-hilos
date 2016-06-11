@@ -21,6 +21,10 @@ int UMC_DESCRIPTOR;
 int set_umc_socket_descriptor(int socket_descriptor);
 int set_kernel_socket_descriptor(int socket_descriptor);
 
+typedef struct {
+	char* name;
+	uint32_t location;
+} t_label_index;
 
 typedef struct {
 	uint32_t numero_pagina;
@@ -43,11 +47,10 @@ typedef struct {
 } t_variable;
 
 typedef struct {
-	t_list *argumentos;
+	//t_list *argumentos;
 	t_list *variables;
 	uint32_t posicion_retorno;
-	t_direccion_virtual_memoria valor_retorno;
-	t_direccion_virtual_memoria direccion_inicial;
+	t_dato_en_memoria valor_retorno;
 } t_stack_element;
 
 typedef struct {
@@ -60,8 +63,7 @@ typedef struct {
 	uint32_t instructions_size;
 	t_intructions* instructions_index;
 	t_direccion_virtual_memoria stack_free_space_pointer;
-	//	uint32_t labels_size;
-	//	t_indice_etiqueta
+	t_list* label_index;
 } t_PCB;
 int QUANTUM;
 void set_quantum(int quantum);
@@ -78,6 +80,11 @@ t_puntero obtenerPosicionVariable(t_nombre_variable identificador_variable);
 t_puntero definirVariable(t_nombre_variable variable);
 t_valor_variable dereferenciar(t_puntero puntero);
 void asignar(t_puntero direccion_variable, t_valor_variable valor);
+void imprimir(t_valor_variable valor_mostrar);
+void imprimirTexto(char* print_value);
+void irALabel(t_nombre_etiqueta t_nombre_etiqueta);
+void llamarConRetorno(t_nombre_etiqueta etiqueta, t_puntero donde_retornar);
+void retornar(t_valor_variable retorno);
 
 char* leer_memoria_de_umc(t_dato_en_memoria *dato);
 int escribir_en_umc(t_dato_en_memoria *dato, char* valor);

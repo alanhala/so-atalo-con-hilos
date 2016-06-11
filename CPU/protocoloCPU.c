@@ -188,9 +188,21 @@ void *deserealizar_mensaje(uint8_t tipo, char* datos) {
 	case(121):
 			estructuraDestino = deserealizar_enviar_PCB_a_CPU(datos);
 			break;
+	case(125):	estructuraDestino = deserealizar_int(datos);
+			break;
 	}
 
 	return estructuraDestino;
+}
+
+int deserealizar_int(char* datos) {
+	const int desplazamientoHeader = 5;		//Offset inicial para no deserealizar tipo (1 byte) y length (4 bytes)
+
+	uint32_t respuesta = 0;
+
+	memcpy(&respuesta, datos+desplazamientoHeader, sizeof(uint32_t));
+
+	return respuesta;
 }
 
 t_respuesta_bytes_de_una_pagina_a_CPU *deserializar_respuesta_bytes_de_una_pagina_a_CPU(char *datos){

@@ -13,14 +13,15 @@ int correrTest(){
 
 	CU_initialize_registry();
 	CU_pSuite prueba = CU_add_suite("Suite de prueba", NULL, NULL);
-//	CU_add_test(prueba, "uno", obtener_siguiente_instruccion);
-//	CU_add_test(prueba, "dos", test_definir_variable);
-//	CU_add_test(prueba, "tres", test_obtener_posicion_variable);
-//	CU_add_test(prueba, "cuatro", test_actualizar_next_free_space);
-//	CU_add_test(prueba, "cinco", test_leer_data_de_memoria_con_iteraciones);
-//	CU_add_test(prueba, "seis", test_asignar_y_leer_valor_de_una_sola_pagina);
-//	CU_add_test(prueba, "siete", test_asignar_y_leer_valor_de_varias_paginas);
+	CU_add_test(prueba, "uno", obtener_siguiente_instruccion);
+	CU_add_test(prueba, "dos", test_definir_variable);
+	CU_add_test(prueba, "tres", test_obtener_posicion_variable);
+	CU_add_test(prueba, "cuatro", test_actualizar_next_free_space);
+	CU_add_test(prueba, "cinco", test_leer_data_de_memoria_con_iteraciones);
+	CU_add_test(prueba, "seis", test_asignar_y_leer_valor_de_una_sola_pagina);
+	CU_add_test(prueba, "siete", test_asignar_y_leer_valor_de_varias_paginas);
 	CU_add_test(prueba, "ocho", test_ejecutar_programa_en_memoria);
+	CU_add_test(prueba, "nueve", test_ir_a_label);
 
 	CU_basic_set_mode(CU_BRM_VERBOSE);
 	CU_basic_run_tests();
@@ -37,6 +38,16 @@ void obtener_siguiente_instruccion() {
 	CU_ASSERT_EQUAL(next_instruction.size, 32);
 	CU_ASSERT_EQUAL(next_instruction.direccion.offset, 1);
 	CU_ASSERT_EQUAL(next_instruction.direccion.pagina, 3);
+}
+
+void test_ir_a_label() {
+    mockear_pcb();
+    t_PCB *pcb = get_PCB();
+    CU_ASSERT_EQUAL(pcb->program_counter, 1);
+
+    irALabel("segundo_label");
+
+    CU_ASSERT_EQUAL(pcb->program_counter, 3);
 }
 
 void test_ejecutar_programa_en_memoria() {
@@ -183,6 +194,17 @@ void mockear_pcb() {
     t_stack_element* stack_element = create_stack_element();
     list_add(pcb->stack, stack_element);
 
+    pcb->label_index = list_create();
+    t_label_index *label_index_element = malloc(sizeof(t_label_index));
+    label_index_element->location = 8;
+    label_index_element->name = "inicio";
+
+    list_add(pcb->label_index, label_index_element);
+
+    label_index_element = malloc(sizeof(t_label_index));
+    label_index_element->location = 3;
+    label_index_element->name = "segundo_label";
+    list_add(pcb->label_index, label_index_element);
     set_PCB(pcb);
 }
 

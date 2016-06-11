@@ -16,8 +16,11 @@ AnSISOP_funciones functions = {
 	.AnSISOP_obtenerPosicionVariable = obtenerPosicionVariable,
 	.AnSISOP_dereferenciar	= dereferenciar,
 	.AnSISOP_asignar	= asignar,
-	.AnSISOP_imprimir	= primitive_imprimir,
-	.AnSISOP_imprimirTexto	= primitive_imprimirTexto,
+	.AnSISOP_imprimir	= imprimir,
+	.AnSISOP_imprimirTexto	= imprimirTexto,
+	.AnSISOP_irAlLabel 	= irALabel,
+	.AnSISOP_llamarConRetorno = llamarConRetorno,
+	.AnSISOP_retornar = retornar
 };
 
 AnSISOP_kernel kernel_functions = { };
@@ -132,6 +135,75 @@ void asignar(t_puntero direccion_variable, t_valor_variable valor) {
     int resultado_escritura = ejecutar_escritura_de_dato_con_iteraciones(direccion, (char*) &valor, tamanio_pagina);
 }
 
+void imprimir(t_valor_variable valor_mostrar) {
+    char* print_value = string_itoa(valor_mostrar);
+
+    imprimirTexto(print_value);
+}
+
+void imprimirTexto(char* print_value) {
+    send_text_to_kernel(print_value, string_length(print_value));
+
+    free(print_value);
+}
+
+void irALabel(t_nombre_etiqueta nombre_etiqueta) {
+
+    int find_label(t_label_index *label_element) {
+	return !strcmp((char*)label_element->name, nombre_etiqueta);
+    }
+
+    t_label_index *label = list_find(pcb->label_index, (void*)find_label);
+
+    pcb->program_counter = label->location;
+}
+
+void llamarConRetorno(t_nombre_etiqueta etiqueta, t_puntero donde_retornar) {
+
+    t_stack_element *stack_element = create_stack_element();
+    stack_element->valor_retorno = *(t_dato_en_memoria*)donde_retornar;
+    stack_element->posicion_retorno = pcb->program_counter+1;
+
+    list_add(pcb->stack, stack_element);
+
+    irALabel(etiqueta);
+}
+
+void retornar(t_valor_variable retorno) {
+    t_stack_element *stack_element = list_get(pcb->stack, list_size(pcb->stack)-1);
+
+    ejecutar_escritura_de_dato_con_iteraciones(&(stack_element->valor_retorno), (char*) &retorno,  tamanio_pagina);
+
+    pcb->program_counter = stack_element->posicion_retorno;
+
+    list_remove(pcb->stack, list_size(pcb->stack)-1);
+    free_stack_element_memory(stack_element);
+}
+
+int send_text_to_kernel(char* print_value, uint32_t length) {
+    t_stream *buffer = malloc(sizeof(t_stream));
+
+    buffer->datos = print_value;
+    buffer->size = length;
+
+    send(KERNEL_DESCRIPTOR, buffer->datos, buffer->size, 0);
+
+    t_header *aHeader = malloc(sizeof(t_header));
+
+    char buffer_header[5];	//Buffer donde se almacena el header recibido
+
+    int bytes_recibidos_header,	//Cantidad de bytes recibidos en el recv() que recibe el header
+	bytes_recibidos;		//Cantidad de bytes recibidos en el recv() que recibe el mensaje completo
+
+    recv(KERNEL_DESCRIPTOR, buffer_header, 5, MSG_PEEK);
+
+    char buffer_recv[buffer_header[1]];
+
+    recv(KERNEL_DESCRIPTOR, buffer_recv, buffer_header[1], 0);
+
+    return deserealizar_mensaje(125, buffer_recv);
+}
+
 char* leer_memoria_de_umc(t_dato_en_memoria *dato) {
 
     t_solicitar_bytes_de_una_pagina_a_UMC *pedido = malloc(sizeof(t_solicitar_bytes_de_una_pagina_a_UMC));
@@ -162,7 +234,6 @@ char* leer_memoria_de_umc(t_dato_en_memoria *dato) {
     t_respuesta_bytes_de_una_pagina_a_CPU *respuesta = malloc(sizeof(t_respuesta_bytes_de_una_pagina_a_CPU));
 
     respuesta = (t_respuesta_bytes_de_una_pagina_a_CPU*)deserealizar_mensaje(buffer_header[0], buffer_recv);
-
     return respuesta->bytes_de_una_pagina;
 }
 
@@ -219,7 +290,6 @@ void free_stack_element_memory(t_stack_element *element) {
     }
 
     list_destroy_and_destroy_elements(element->variables, free_memory);
-    list_destroy_and_destroy_elements(element->argumentos, free_memory);
 };
 
 void set_PCB(t_PCB *new_pcb) {
@@ -237,7 +307,6 @@ void set_tamanio_pagina(uint32_t tamanio) {
 t_stack_element* create_stack_element() {
     t_stack_element *stack_element = malloc(sizeof(stack_element));
     stack_element->variables = list_create();
-    stack_element->argumentos = list_create();
 
     return stack_element;
 }
