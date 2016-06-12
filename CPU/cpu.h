@@ -85,6 +85,7 @@ void imprimir(t_valor_variable valor_mostrar);
 void imprimirTexto(char* print_value);
 void irALabel(t_nombre_etiqueta t_nombre_etiqueta);
 void llamarConRetorno(t_nombre_etiqueta etiqueta, t_puntero donde_retornar);
+void llamarSinRetorno(t_nombre_etiqueta etiqueta);
 void retornar(t_valor_variable retorno);
 
 char* leer_memoria_de_umc(t_dato_en_memoria *dato);

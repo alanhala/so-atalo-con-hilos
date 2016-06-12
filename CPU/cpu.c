@@ -19,6 +19,7 @@ AnSISOP_funciones functions = {
 	.AnSISOP_imprimir	= imprimir,
 	.AnSISOP_imprimirTexto	= imprimirTexto,
 	.AnSISOP_irAlLabel 	= irALabel,
+	.AnSISOP_llamarSinRetorno = llamarSinRetorno,
 	.AnSISOP_llamarConRetorno = llamarConRetorno,
 	.AnSISOP_retornar = retornar
 };
@@ -138,7 +139,7 @@ t_valor_variable dereferenciar(t_puntero direccion_variable) {
 void asignar(t_puntero direccion_variable, t_valor_variable valor) {
     t_dato_en_memoria *direccion = (t_dato_en_memoria*) direccion_variable;
 
-    int resultado_escritura = ejecutar_escritura_de_dato_con_iteraciones(direccion, (char*) &valor, tamanio_pagina);
+    ejecutar_escritura_de_dato_con_iteraciones(direccion, (char*) &valor, tamanio_pagina);
 }
 
 void imprimir(t_valor_variable valor_mostrar) {
@@ -154,14 +155,27 @@ void imprimirTexto(char* print_value) {
 }
 
 void irALabel(t_nombre_etiqueta nombre_etiqueta) {
+    char* etiqueta_limpia = (char*)nombre_etiqueta;
 
-    int find_label(t_label_index *label_element) {
-	return !strcmp((char*)label_element->name, nombre_etiqueta);
+    if(string_ends_with((char*) nombre_etiqueta, "\n")) {
+	etiqueta_limpia = string_substring_until(nombre_etiqueta, string_length((char*)nombre_etiqueta)-1);
     }
 
-    t_label_index *label = list_find(pcb->label_index, (void*)find_label);
+    int find_label(t_label_index *label_element) {
+	return !strcmp(label_element->name, etiqueta_limpia);
+    }
+
+    t_label_index *label = (t_label_index*)list_find(pcb->label_index, find_label);
 
     pcb->program_counter = label->location;
+}
+
+void llamarSinRetorno(t_nombre_etiqueta etiqueta) {
+    t_stack_element *stack_element = create_stack_element();
+
+    list_add(pcb->stack, stack_element);
+
+    irALabel(etiqueta);
 }
 
 void llamarConRetorno(t_nombre_etiqueta etiqueta, t_puntero donde_retornar) {
@@ -324,7 +338,7 @@ t_stack_element* create_stack_element() {
 
 char* ejecutar_lectura_de_dato_con_iteraciones(void*(*closure_lectura)(t_dato_en_memoria*), t_dato_en_memoria *dato, uint32_t tamanio_pagina) {
     int is_last_page = 0;
-    if(is_last_page = (dato->direccion.offset + dato->size < tamanio_pagina)) {
+    if(is_last_page = (dato->direccion.offset + dato->size <= tamanio_pagina)) {
 	return closure_lectura(dato);
     }
 
@@ -355,7 +369,7 @@ char* ejecutar_lectura_de_dato_con_iteraciones(void*(*closure_lectura)(t_dato_en
 
 int ejecutar_escritura_de_dato_con_iteraciones(t_dato_en_memoria *dato, char* valor, uint32_t tamanio_pagina) {
     int is_last_page = 0;
-    if(is_last_page = (dato->direccion.offset + dato->size < tamanio_pagina)) {
+    if(is_last_page = (dato->direccion.offset + dato->size <= tamanio_pagina)) {
 	return escribir_en_umc(dato, valor);
     }
 
