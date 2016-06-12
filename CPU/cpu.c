@@ -419,9 +419,10 @@ int ejecutar_pcb(){
        int instruccion_ejecutada = 0;
        while(instruccion_ejecutada <= QUANTUM){
                execute_next_instruction_for_process();
-               pcb->program_counter ++ ;
+               //pcb->program_counter ++ ;
                printf("Instruccion %d del pid %d ejecutada \n", instruccion_ejecutada, pcb->pid);
                fflush(stdout);
+               instruccion_ejecutada ++;
        }
        while(1){
     		printf("ejecucion de programa finalizada");

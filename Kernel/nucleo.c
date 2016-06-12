@@ -83,12 +83,12 @@ void *recNew() {
 	while (1) {
 		sem_wait(&cant_new);
 		sem_wait(&mut_new);
-		char * codigo_programa = queue_pop(estado_new);
+		t_new_program * nuevo_programa = queue_pop(estado_new);
 		sem_post(&mut_new);
 
-		t_PCB *pcb = initialize_program(KERNEL,codigo_programa);
-
-		int inicio_correcto = iniciar_programa_en_umc(pcb->pid, pcb->used_pages, codigo_programa);
+		t_PCB *pcb = initialize_program(KERNEL,nuevo_programa->codigo_programa);
+		pcb->console_socket_descriptor = nuevo_programa->console_socket_descriptor;
+		int inicio_correcto = iniciar_programa_en_umc(pcb->pid, pcb->used_pages, nuevo_programa->codigo_programa);
 		printf("resultado inicio programa en umc : %d\n", inicio_correcto); //TODO sacar este comentario
 		fflush(stdout);
 
@@ -141,6 +141,8 @@ void ejecutar_pcb_en_cpu(t_PCB *pcb){
 	}
 	printf("pcb enviado a cpu \n ");
 	while(1){
+
+
 
 	}
 	//while(1){

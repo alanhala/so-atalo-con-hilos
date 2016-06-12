@@ -54,6 +54,12 @@ typedef struct {
 } t_indice_instrucciones_elemento;
 
 typedef struct {
+	char* codigo_programa;
+	int console_socket_descriptor;
+} t_new_program;
+
+
+typedef struct {
 
 } t_indice_etiqueta;
 
