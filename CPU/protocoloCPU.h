@@ -63,6 +63,10 @@ typedef struct {
 	char *bytes_de_una_pagina;
 }__attribute__((packed)) t_respuesta_bytes_de_una_pagina_a_CPU;
 
+typedef struct {
+	char *texto_a_imprimir;
+}__attribute__((packed)) t_imprimir_texto_en_cpu;
+
 
 
 
@@ -77,7 +81,7 @@ t_stream *serializar_escribir_bytes_de_una_pagina_en_UMC(t_escribir_bytes_de_una
 t_stream *serializar_cambio_de_proceso (t_cambio_de_proceso* unCambioDeProceso);
 t_stream *serializar_pedido_bytes_de_una_pagina_a_UMC(t_solicitar_bytes_de_una_pagina_a_UMC *pedido);
 t_stream *serializar_mensaje(int tipo,void* unaEstructura);
-
+t_stream *serializar_imprimir_texto_a_cpu(t_imprimir_texto_en_cpu *unaEstructura);
 
 //Funciones Auxiliares
 t_list *arma_stack_del_PCB(int elemento_del_stack);

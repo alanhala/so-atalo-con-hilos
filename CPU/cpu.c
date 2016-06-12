@@ -148,8 +148,8 @@ void imprimir(t_valor_variable valor_mostrar) {
 }
 
 void imprimirTexto(char* print_value) {
-    send_text_to_kernel(print_value, string_length(print_value));
-
+    int enviado_correctamente = send_text_to_kernel(print_value, string_length(print_value));
+    //todo si se quiere validar que haya enviado correctmente
     free(print_value);
 }
 
@@ -192,27 +192,15 @@ void retornar(t_valor_variable retorno) {
 }
 
 int send_text_to_kernel(char* print_value, uint32_t length) {
-    t_stream *buffer = malloc(sizeof(t_stream));
 
-    buffer->datos = print_value;
-    buffer->size = length;
+	t_imprimir_texto_en_cpu *imprimir_en_cpu = malloc(sizeof(t_imprimir_texto_en_cpu));
+	imprimir_en_cpu->texto_a_imprimir = print_value;
+	t_stream *buffer = serializar_mensaje(132,imprimir_en_cpu);
 
-    send(KERNEL_DESCRIPTOR, buffer->datos, buffer->size, 0);
+	int bytes_enviados = send(KERNEL_DESCRIPTOR, buffer->datos, buffer->size, 0);
 
-    t_header *aHeader = malloc(sizeof(t_header));
 
-    char buffer_header[5];	//Buffer donde se almacena el header recibido
-
-    int bytes_recibidos_header,	//Cantidad de bytes recibidos en el recv() que recibe el header
-	bytes_recibidos;		//Cantidad de bytes recibidos en el recv() que recibe el mensaje completo
-
-    recv(KERNEL_DESCRIPTOR, buffer_header, 5, MSG_PEEK);
-
-    char buffer_recv[buffer_header[1]];
-
-    recv(KERNEL_DESCRIPTOR, buffer_recv, buffer_header[1], 0);
-
-    return deserealizar_mensaje(125, buffer_recv);
+    return bytes_enviados;
 }
 
 char* leer_memoria_de_umc(t_dato_en_memoria *dato) {
@@ -417,17 +405,17 @@ int ejecutar_pcb(){
        cambiar_contexto(pcb->pid);
 
        int instruccion_ejecutada = 0;
-       while(instruccion_ejecutada <= QUANTUM){
+       while(instruccion_ejecutada < pcb->instructions_size){ //TODO PONER QUANTUM
                execute_next_instruction_for_process();
                //pcb->program_counter ++ ;
                printf("Instruccion %d del pid %d ejecutada \n", instruccion_ejecutada, pcb->pid);
                fflush(stdout);
                instruccion_ejecutada ++;
        }
-       while(1){
-    		printf("ejecucion de programa finalizada");
-    		fflush(stdout);
-       }
+
+		printf("ejecucion de programa finalizada");
+		fflush(stdout);
+
        return 0;
 
 }

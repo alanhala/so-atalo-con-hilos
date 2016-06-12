@@ -266,12 +266,11 @@ void *deserealizar_mensaje(uint8_t tipo, char* datos) {
 		   estructuraDestino = deserealizar_respuesta_iniciar_programa_en_UMC(datos);
 		   break;
 	 case (64):
-			 estructuraDestino = deserealizar_respuesta_finalizar_programa_en_UMC(datos);
-	 	 	 break;
+		   estructuraDestino = deserealizar_respuesta_finalizar_programa_en_UMC(datos);
+		   break;
 	 case (91):
 		   estructuraDestino = deserealizar_iniciar_programa_en_kernel(datos);
 		   break;
-
 	}
 
 	return estructuraDestino;

@@ -142,6 +142,26 @@ void ejecutar_pcb_en_cpu(t_PCB *pcb){
 	printf("pcb enviado a cpu \n ");
 	while(1){
 
+			t_header *un_header = malloc(sizeof(t_header));
+			char buffer_header[5];
+
+			int	bytes_recibidos_header,
+				bytes_recibidos;
+
+			bytes_recibidos_header = recv(pcb->cpu_socket_descriptor,buffer_header,5,MSG_PEEK);
+
+			un_header = deserializar_header(buffer_header);
+
+			char buffer_recibidos[(un_header->length)];
+
+			if(un_header->tipo == 132){
+
+				int bytes_recibidos = recv(pcb->cpu_socket_descriptor,buffer_recibidos,un_header->length,0);
+
+
+				int bytes_sent = send(pcb->console_socket_descriptor,buffer_recibidos,buffer->size,0);
+				printf("Envio imprimir texto a consola\n");
+			}
 
 
 	}
