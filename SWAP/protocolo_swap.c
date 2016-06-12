@@ -66,11 +66,10 @@ t_iniciar_programa_en_swap *deserializar_iniciar_programa_en_swap(char *datos){
 	pedido->codigo_programa = malloc(tamanoDato+1);
 	memset(pedido->codigo_programa,0,tamanoDato+1);
 
-	memcpy(pedido->codigo_programa, datos+offset, tmpsize=tamanoDato+1);
-	offset+=tamanoDato+1;
+	memcpy(pedido->codigo_programa, datos+offset, tamanoDato+1);
 
 	char endString = '\0';
-	memcpy(pedido->codigo_programa+offset,&endString,1);
+	memcpy(pedido->codigo_programa+tamanoDato,&endString,1);
 
 	return pedido;
 }
@@ -118,10 +117,10 @@ t_escribir_pagina_swap * deserializar_escribir_pagina_swap(char *datos){
 	memset(escritura->datos,0,tamanoDato+1);
 
 	memcpy(escritura->datos, datos+offset, tmpsize=tamanoDato+1);
-	offset+=tamanoDato+1;
+	offset+=tmpsize;
 
 	char endString = '\0';
-	memcpy(escritura->datos+offset,&endString,1);
+	memcpy(escritura->datos+tamanoDato,&endString,1);
 
 	return escritura;
 }
@@ -213,24 +212,19 @@ t_stream * serializar_respuesta_leer_pagina_swap(t_respuesta_leer_pagina_swap *r
 		stream->datos = malloc(stream_size);
 		memset(stream->datos,0,stream_size);
 
-	 	char *aux = malloc(stream_size);
-	 	char *respuesta_aux = respuesta->datos;
-
 		uint8_t tipo = 4; 	//Tipo del Mensaje . Fijado estaticamente segun protocolo
 
-		memcpy(aux,&tipo,tmpsize=sizeof(uint8_t));
+		memcpy(stream->datos,&tipo,tmpsize=sizeof(uint8_t));
 		offset+=tmpsize;
 
-		memcpy(aux+offset,&stream_size,tmpsize=sizeof(uint32_t));
+		memcpy(stream->datos+offset,&stream_size,tmpsize=sizeof(uint32_t));
 		offset+=tmpsize;
 
-		memcpy(aux+offset,respuesta_aux,tmpsize=size_bytes_de_lectura);
+		memcpy(stream->datos+offset,respuesta->datos,tmpsize=size_bytes_de_lectura);
 		offset+=tmpsize;
 
 		char endString='\0';
-		memcpy(aux+offset,&endString,1);
-
-		stream->datos = aux;
+		memcpy(stream->datos+offset-1,&endString,1);
 
 		return stream;
 }

@@ -107,31 +107,26 @@ t_stream *serializar_escribir_bytes_de_una_pagina_en_UMC(t_escribir_bytes_de_una
 	uint32_t offset_pagina = escritura->offset;
 	uint32_t size_pagina = escritura->size;
 
-	char *aux = malloc(stream_size);
-	char *escritura_aux = escritura->buffer;
-
-	memcpy(aux,&tipo,tmpsize=sizeof(uint8_t));
+	memcpy(stream->datos,&tipo,tmpsize=sizeof(uint8_t));
 	offset+=tmpsize;
 
-	memcpy(aux+offset,&stream_size,tmpsize=sizeof(uint32_t));
+	memcpy(stream->datos+offset,&stream_size,tmpsize=sizeof(uint32_t));
 	offset+=tmpsize;
 
-	memcpy(aux+offset,&numero_pagina,tmpsize=sizeof(uint32_t));
+	memcpy(stream->datos+offset,&numero_pagina,tmpsize=sizeof(uint32_t));
 	offset+=tmpsize;
 
-	memcpy(aux+offset,&offset_pagina,tmpsize=sizeof(uint32_t));
+	memcpy(stream->datos+offset,&offset_pagina,tmpsize=sizeof(uint32_t));
 	offset+=tmpsize;
 
-	memcpy(aux+offset,&size_pagina,tmpsize=sizeof(uint32_t));
+	memcpy(stream->datos+offset,&size_pagina,tmpsize=sizeof(uint32_t));
 	offset+=tmpsize;
 
-	memcpy(aux+offset,escritura_aux,tmpsize=size_bytes_a_escribir);
+	memcpy(stream->datos+offset,escritura->buffer,tmpsize=size_bytes_a_escribir);
 	offset+=tmpsize;
 
 	char endString='\0';
-	memcpy(aux+offset,&endString,1);
-
-	stream->datos = aux;
+	memcpy(stream->datos+offset-1,&endString,1);
 
 	return stream;
 }
@@ -195,12 +190,13 @@ void *deserealizar_mensaje(uint8_t tipo, char* datos) {
 	return estructuraDestino;
 }
 
-int deserealizar_int(char* datos) {
+uint32_t deserealizar_int(char* datos) {
+
 	const int desplazamientoHeader = 5;		//Offset inicial para no deserealizar tipo (1 byte) y length (4 bytes)
 
 	uint32_t respuesta = 0;
 
-	memcpy(&respuesta, datos+desplazamientoHeader, sizeof(uint32_t));
+	memcpy(&respuesta,datos+desplazamientoHeader, sizeof(uint32_t));
 
 	return respuesta;
 }
@@ -223,7 +219,7 @@ t_respuesta_bytes_de_una_pagina_a_CPU *deserializar_respuesta_bytes_de_una_pagin
 	memcpy(respuesta->bytes_de_una_pagina, datos+desplazamientoHeader, tmpsize=tamanoDato+1);
 
 	char endString = '\0';
-	memcpy(respuesta->bytes_de_una_pagina+tmpsize,&endString,1);
+	memcpy(respuesta->bytes_de_una_pagina+tamanoDato,&endString,1);
 
 	return respuesta;
 }
@@ -277,7 +273,7 @@ t_recibir_PCB_de_Kernel *deserealizar_enviar_PCB_a_CPU(char *datos){
 	t_recibir_PCB_de_Kernel *unPCB = malloc(sizeof(t_recibir_PCB_de_Kernel));
 	memset(unPCB,0,sizeof(t_recibir_PCB_de_Kernel));
 
-	uint32_t cantidad_elementos_stack = 0;
+	//uint32_t cantidad_elementos_stack = 0;
 
 	//memcpy(&cantidad_elementos_stack,datos+desplazamiento_header,tmpsize=sizeof(uint32_t));
 	//offset+=tmpsize;
