@@ -72,6 +72,7 @@ t_respuesta_bytes_de_una_pagina_a_CPU *deserializar_respuesta_bytes_de_una_pagin
 t_respuesta_escribir_bytes_de_una_pagina_en_UMC *deserializar_respuesta_escribir_bytes_de_una_pagina_en_UMC(char *datos);
 t_respuesta_cambio_de_proceso *deserealizar_respuesta_cambio_de_proceso(char *datos);
 t_recibir_PCB_de_Kernel *deserealizar_enviar_PCB_a_CPU(char *datos);
+uint32_t deserealizar_int(char* datos);
 t_stream *serializar_escribir_bytes_de_una_pagina_en_UMC(t_escribir_bytes_de_una_pagina_en_UMC * unaEstructura);
 t_stream *serializar_cambio_de_proceso (t_cambio_de_proceso* unCambioDeProceso);
 t_stream *serializar_pedido_bytes_de_una_pagina_a_UMC(t_solicitar_bytes_de_una_pagina_a_UMC *pedido);

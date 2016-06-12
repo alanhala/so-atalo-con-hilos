@@ -62,7 +62,7 @@ t_stream *serializar_iniciar_programa_en_kernel(t_iniciar_programa_en_kernel *in
 	offset+=tmpsize;
 
 	char endString='\0';
-	memcpy(stream->datos+offset,&endString,1);
+	memcpy(stream->datos+offset-1,&endString,1);
 
 	return stream;
 }
