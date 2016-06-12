@@ -64,7 +64,7 @@ t_stream *serializar_finalizar_consola(t_finalizar_programa_en_consola *unaEstru
 	memset(stream->datos,0,streamSize);
 
 	uint8_t tipo = 133; 	//Tipo del Mensaje . Fijado estaticamente segun protocolo
-	uint32_t entero_finalizar = unaEstructura->finalizar;
+	uint32_t entero_finalizar = unaEstructura->motivo;
 
 	memcpy(stream->datos,&tipo,tmpsize = sizeof(uint8_t));
 	offset+=tmpsize;

@@ -10,6 +10,11 @@
 
 #include "kernel.h"
 
+
+typedef struct {
+       uint32_t motivo;
+}__attribute__((packed)) t_finalizar_programa_en_consola;
+
 typedef struct {
 	uint32_t process_id;
 	uint32_t cantidad_de_paginas;
@@ -37,9 +42,6 @@ typedef struct {
 }__attribute__((packed)) t_respuesta_iniciar_programa_en_UMC;
 
 
-typedef struct {
-       uint32_t motivo;
-}__attribute__((packed)) t_finalizar_programa_en_consola;
 
 typedef struct {
 	uint8_t tipo;
