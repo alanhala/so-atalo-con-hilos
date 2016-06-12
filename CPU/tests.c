@@ -60,7 +60,7 @@ void test_ejecutar_programa_en_memoria() {
     cambiar_contexto(pcb->pid);
 
     //Cargo metadata de programa ANSISOP en PCB
-    t_metadata_program *metadata = metadata_desde_literal("begin\nvariables c, d\nc=2147483647\nd=224947129\nf\nend\nfunction f\nvariables a\na=1\nend\0");
+    t_metadata_program *metadata = metadata_desde_literal("begin\nvariables c, d\nc=2147483647\nd=224947129\nf\nend\nfunction f\nvariables a\na=1\nend");
     pcb->instructions_index = metadata->instrucciones_serializado;
 
     //Ejecuto primera instruccion variables c, d

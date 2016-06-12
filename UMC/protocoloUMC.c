@@ -204,6 +204,7 @@ t_inicio_de_programa_en_UMC *deserealizar_inicio_de_programa_en_UMC(char *datos)
 	t_inicio_de_programa_en_UMC *inicio_de_programa = malloc(sizeof(t_inicio_de_programa_en_UMC));
 	memset(inicio_de_programa,0, sizeof(t_inicio_de_programa_en_UMC));
 
+
 	memcpy(&inicio_de_programa->process_id,datos+desplazamiento_header,tmpsize = sizeof(uint32_t));
 	offset+=desplazamiento_header;
 	offset+=tmpsize;
@@ -220,7 +221,7 @@ t_inicio_de_programa_en_UMC *deserealizar_inicio_de_programa_en_UMC(char *datos)
 	offset+=tmpsize;
 
 	char endString = '\0';
-	memcpy(inicio_de_programa->codigo_de_programa+tamanoDato+1,&endString,tamanoDato+1);
+	memcpy(inicio_de_programa->codigo_de_programa+tamanoDato+1,&endString,1);
 
 	return inicio_de_programa;
 }
@@ -296,6 +297,7 @@ t_stream * serializar_iniciar_programa_en_swap(t_iniciar_programa_en_swap * pedi
 
     memset(stream, 0, sizeof(t_stream));
     stream->size = stream_size;
+    //VER CON NEWTON
     stream->datos = malloc(stream_size);
     memset(stream->datos,0,stream_size);
 

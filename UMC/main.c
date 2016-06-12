@@ -182,7 +182,7 @@ void manejo_de_solicitudes(int socket_descriptor) {
 			int bytes_sent = send(socket_descriptor, buffer->datos,
 					buffer->size, 0);
 
-			free(bytes_de_una_pagina);
+
 
 		}
 
@@ -213,6 +213,8 @@ void manejo_de_solicitudes(int socket_descriptor) {
 
 			int bytes_sent = send(socket_descriptor, buffer->datos,
 					buffer->size, 0);
+
+
 		}
 		if (buffer_header[0] == 35) {
 
