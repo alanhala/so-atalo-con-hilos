@@ -158,24 +158,42 @@ t_stream *serializar_enviar_PCB_a_CPU(t_PCB *unPCB){
 	uint32_t	tmpsize = 0,
 				offset = 0;
 
-	//uint32_t cantidad_elementos_stack = obtiene_cantidad_elementos_stack(unPCB->stack_index);
-	//uint32_t sizeof_stack = cantidad_elementos_stack * sizeof(int);
+	uint32_t tamano_total_stack = 0;
+
+	uint32_t cantidad_elementos_stack = unPCB->stack_index->elements_count;
+
+	void calcular_tamano_de_un_elemento_del_stack(t_stack_element *stack_element){
+
+		uint32_t tamano_fijo_del_elemento =	sizeof(uint32_t) +	//Posicion de retorno
+											sizeof(uint32_t) +	//Size valor de retorno
+											sizeof(uint32_t) + 	//Pagina
+											sizeof(uint32_t) + 	//Offset
+											sizeof(uint32_t); 	//Cantidad de Variables
+
+		uint32_t cantidad_de_variables_del_elemento = stack_element->variables->elements_count;
+		uint32_t tamano_de_variables_del_elemento =	sizeof(t_variable) * cantidad_de_variables_del_elemento;
+
+		uint32_t tamano_del_elemento = tamano_fijo_del_elemento + tamano_de_variables_del_elemento;
+
+		tamano_total_stack += tamano_del_elemento;
+	}
+
+	list_iterate(unPCB->stack_index,(void *)calcular_tamano_de_un_elemento_del_stack);
 
 	uint32_t sizeof_instruccion = unPCB->instructions_size * obtiene_sizeof_instrucciones(unPCB->instructions_index);
 
-	uint32_t sizePCB =	sizeof(uint32_t) +
-						sizeof(uint32_t) +
-						//sizeof_stack	 +
-						sizeof(uint32_t) +
-						sizeof(uint32_t) +
-						sizeof(uint32_t) +
-						sizeof(uint32_t) +
-						sizeof_instruccion;
-						//Lista t_instructions
+	uint32_t sizePCB =	sizeof(uint32_t)  +		//Process ID
+						sizeof(uint32_t)  +		//Program Counter
+						tamano_total_stack+		//Tamano total de la lista de stack elements
+						sizeof(uint32_t)  +		//Stack Pointer
+						sizeof(uint32_t)  +		//Stack Size
+						sizeof(uint32_t)  +		//Used Pages
+						sizeof(uint32_t)  +		//Instructions Size
+						sizeof_instruccion;		//Tamano de las instrucciones
 
 	uint32_t stream_size = 	sizeof(uint8_t) +	//Tamano del tipo
 							sizeof(uint32_t)+	//Tamano del length del mensaje
-							//sizeof(uint32_t)+	//Tamano para la cantidad de elementos del stack
+							sizeof(uint32_t)+	//Tamano para la cantidad de elementos del stack
 							sizePCB;
 
 	t_stream *stream = malloc(sizeof(t_stream));
@@ -201,29 +219,71 @@ t_stream *serializar_enviar_PCB_a_CPU(t_PCB *unPCB){
 	memcpy(stream->datos+offset,&stream_size,tmpsize=sizeof(uint32_t));
 	offset+=tmpsize;
 
-	//memcpy(stream->datos+offset,&cantidad_elementos_stack,tmpsize=sizeof(uint32_t));
-	//offset+=tmpsize;
-
 	memcpy(stream->datos+offset,&pid,tmpsize=sizeof(uint32_t));
 	offset+=tmpsize;
 
 	memcpy(stream->datos+offset,&program_counter,tmpsize=sizeof(uint32_t));
 	offset+=tmpsize;
 
-	/*
-	int elementos_del_stack_recorridos = 0;
-	int elementos_del_stack[cantidad_elementos_stack];
+	memcpy(stream->datos+offset,&cantidad_elementos_stack,tmpsize=sizeof(int));
+	offset+=tmpsize;
 
-	obtiene_elementos_del_stack(unPCB->stack_index,elementos_del_stack);
+	void serializa_lista_de_elementos_de_la_pila(t_stack_element *stack_element){
 
-	while (elementos_del_stack_recorridos<cantidad_elementos_stack){
+		uint32_t posicion_retorno = stack_element->posicion_retorno;
 
-		memcpy(stream->datos+offset,&elementos_del_stack[elementos_del_stack_recorridos],tmpsize=sizeof(uint32_t));
+		t_dato_en_memoria valor_de_retorno = stack_element->valor_retorno;
+		uint32_t size_valor_de_retorno = valor_de_retorno.size;
+
+		t_virtual_address direccion_del_dato = valor_de_retorno.direccion;
+		uint32_t pagina_direccion_del_dato = direccion_del_dato.page;
+		uint32_t offset_direccion_del_dato = direccion_del_dato.offset;
+
+		int cantidad_de_variables_en_elemento_del_stack = stack_element->variables->elements_count;
+
+		memcpy(stream->datos+offset,&posicion_retorno,tmpsize=sizeof(uint32_t));
 		offset+=tmpsize;
 
-		elementos_del_stack_recorridos++;
+		memcpy(stream->datos+offset,&size_valor_de_retorno,tmpsize=sizeof(uint32_t));
+		offset+=tmpsize;
+
+		memcpy(stream->datos+offset,&pagina_direccion_del_dato,tmpsize=sizeof(uint32_t));
+		offset+=tmpsize;
+
+		memcpy(stream->datos+offset,&offset_direccion_del_dato,tmpsize=sizeof(uint32_t));
+		offset+=tmpsize;
+
+		memcpy(stream->datos+offset,&cantidad_de_variables_en_elemento_del_stack,tmpsize=sizeof(int));
+		offset+=tmpsize;
+
+		void serializa_lista_de_variables_del_elemento_de_la_pila(t_variable *una_variable){
+
+			char id = una_variable->id;
+
+			t_dato_en_memoria dato = una_variable->dato;
+			uint32_t size_dato = dato.size;
+
+			t_virtual_address virtual_address = dato.direccion;
+			uint32_t page_virtual_address = virtual_address.page;
+			uint32_t offset_virtual_address = virtual_address.offset;
+
+			memcpy(stream->datos+offset,&id,tmpsize=sizeof(char));
+			offset+=tmpsize;
+
+			memcpy(stream->datos+offset,&size_dato,tmpsize=sizeof(uint32_t));
+			offset+=tmpsize;
+
+			memcpy(stream->datos+offset,&page_virtual_address,tmpsize=sizeof(uint32_t));
+			offset+=tmpsize;
+
+			memcpy(stream->datos+offset,&offset_virtual_address,tmpsize=sizeof(uint32_t));
+			offset+=tmpsize;
+		}
+
+		list_iterate(stack_element->variables,(void *)serializa_lista_de_variables_del_elemento_de_la_pila);
 	}
-	*/
+
+	list_iterate(unPCB->stack_index,(void*)serializa_lista_de_elementos_de_la_pila);
 
 	memcpy(stream->datos+offset,&stack_pointer,tmpsize=sizeof(uint32_t));
 	offset+=tmpsize;
@@ -340,7 +400,6 @@ t_header *deserializar_header(char *header){
 }
 
 
-
 //Funciones Auxiliares
 
 uint32_t obtiene_sizeof_instrucciones(t_intructions *instrucciones){
@@ -350,38 +409,6 @@ uint32_t obtiene_sizeof_instrucciones(t_intructions *instrucciones){
 
 	return (sizeof_puntero_primera_instruccion+sizeof_offset);
 }
-
-/*
-uint32_t obtiene_cantidad_elementos_stack(t_list *stack_index){
-
-	uint32_t cuenta_elementos_de_la_lista = 0;	//Lo empiezo en 1 por como aumento el contador
-
-	t_list *aux = stack_index;	//Recorro la lista con un puntero auxiliar para no desreferenciar la lista
-
-	while(aux!=NULL){
-		cuenta_elementos_de_la_lista++;
-		aux = aux->head;	//Avanzo el puntero a t_list
-	}
-
-	return cuenta_elementos_de_la_lista;
-}
-
-void obtiene_elementos_del_stack(t_list *stack_index, int elementos_del_stack[]){
-
-	t_list *aux = stack_index;	//Recorro la lista con un puntero auxiliar para no desreferenciar la lista
-
-	int i = 0;
-
-	while (aux!=NULL){
-
-		elementos_del_stack[i] = aux->elements_count;
-
-		i++;
-
-		aux = aux->head;	//Avanzo el puntero a t_list
-	}
-}
-*/
 
 t_puntero_instruccion obtiene_primera_instruccion(t_intructions instruccion){
 

@@ -183,22 +183,12 @@ void *deserealizar_mensaje(uint8_t tipo, char* datos) {
 	case(121):
 			estructuraDestino = deserealizar_enviar_PCB_a_CPU(datos);
 			break;
-	case(125):	estructuraDestino = deserealizar_int(datos);
+	case(125):
+			estructuraDestino = deserealizar_int(datos);
 			break;
 	}
 
 	return estructuraDestino;
-}
-
-uint32_t deserealizar_int(char* datos) {
-
-	const int desplazamientoHeader = 5;		//Offset inicial para no deserealizar tipo (1 byte) y length (4 bytes)
-
-	uint32_t respuesta = 0;
-
-	memcpy(&respuesta,datos+desplazamientoHeader, sizeof(uint32_t));
-
-	return respuesta;
 }
 
 t_respuesta_bytes_de_una_pagina_a_CPU *deserializar_respuesta_bytes_de_una_pagina_a_CPU(char *datos){
@@ -273,12 +263,6 @@ t_recibir_PCB_de_Kernel *deserealizar_enviar_PCB_a_CPU(char *datos){
 	t_recibir_PCB_de_Kernel *unPCB = malloc(sizeof(t_recibir_PCB_de_Kernel));
 	memset(unPCB,0,sizeof(t_recibir_PCB_de_Kernel));
 
-	//uint32_t cantidad_elementos_stack = 0;
-
-	//memcpy(&cantidad_elementos_stack,datos+desplazamiento_header,tmpsize=sizeof(uint32_t));
-	//offset+=tmpsize;
-	//offset+=desplazamiento_header;
-
 	memcpy(&unPCB->pid,datos+desplazamiento_header,tmpsize=sizeof(uint32_t));
 	offset+=desplazamiento_header;
 	offset+=tmpsize;
@@ -286,29 +270,86 @@ t_recibir_PCB_de_Kernel *deserealizar_enviar_PCB_a_CPU(char *datos){
 	memcpy(&unPCB->program_counter,datos+offset,tmpsize=sizeof(uint32_t));
 	offset+=tmpsize;
 
-	unPCB->stack_index = list_create();
-	t_stack_element* stack_element = create_stack_element();
-	list_add(unPCB->stack_index, stack_element);
+	uint32_t cantidad_elementos_del_stack = 0;
 
-	/*
+	memcpy(&cantidad_elementos_del_stack,datos+offset,tmpsize=sizeof(uint32_t));
+	offset+=tmpsize;
+
 	int contador_de_elementos_del_stack = 0;
 
-	while(contador_de_elementos_del_stack<cantidad_elementos_stack){
+	unPCB->stack_index = list_create();
 
-		t_list *stack_index_tmp = malloc(sizeof(t_list));
+	while(contador_de_elementos_del_stack<cantidad_elementos_del_stack){
 
-		int tmp_elemento_del_stack = 0;
+		uint32_t	posicion_retorno = 0,
+					size_valor_de_retorno = 0,
+					pagina_direccion_del_dato = 0,
+					offset_direccion_del_dato = 0;
 
-		memcpy(&tmp_elemento_del_stack,datos+offset,tmpsize=sizeof(int));
+		int cantidad_de_variables_en_elemento_del_stack = 0;
+
+		memcpy(&posicion_retorno,datos+offset,tmpsize=sizeof(uint32_t));
 		offset+=tmpsize;
 
-		stack_index_tmp->head = arma_stack_del_PCB(tmp_elemento_del_stack);
+		memcpy(&size_valor_de_retorno,datos+offset,tmpsize=sizeof(uint32_t));
+		offset+=tmpsize;
+
+		memcpy(&pagina_direccion_del_dato,datos+offset,tmpsize=sizeof(uint32_t));
+		offset+=tmpsize;
+
+		memcpy(&offset_direccion_del_dato,datos+offset,tmpsize=sizeof(uint32_t));
+		offset+=tmpsize;
+
+		memcpy(&cantidad_de_variables_en_elemento_del_stack,datos+offset,tmpsize=sizeof(int));
+		offset+=tmpsize;
+
+		t_stack_element *stack_element = malloc(sizeof(t_stack_element));
+
+		stack_element->posicion_retorno = posicion_retorno;
+		stack_element->valor_retorno.size = size_valor_de_retorno;
+		stack_element->valor_retorno.direccion.offset = offset_direccion_del_dato;
+		stack_element->valor_retorno.direccion.pagina = pagina_direccion_del_dato;
+		stack_element->variables = list_create();
+
+		int contador_de_variables_en_el_elemento_del_stack = 0;
+
+		while(contador_de_variables_en_el_elemento_del_stack < cantidad_de_variables_en_elemento_del_stack){
+
+			char id;
+
+			uint32_t 	size_dato = 0,
+						page_virtual_address = 0,
+						offset_virtual_address = 0;
+
+			memcpy(&id,datos+offset,tmpsize=sizeof(char));
+			offset+=tmpsize;
+
+			memcpy(&size_dato,datos+offset,tmpsize=sizeof(uint32_t));
+			offset+=tmpsize;
+
+			memcpy(&page_virtual_address,datos+offset,tmpsize=sizeof(uint32_t));
+			offset+=tmpsize;
+
+			memcpy(&offset_virtual_address,datos+offset,tmpsize=sizeof(uint32_t));
+			offset+=tmpsize;
+
+			contador_de_variables_en_el_elemento_del_stack++;
+
+			t_variable *una_variable = malloc(sizeof(t_variable));
+
+			una_variable->id = id;
+			una_variable->dato.size = size_dato;
+			una_variable->dato.direccion.offset = offset_virtual_address;
+			una_variable->dato.direccion.pagina = page_virtual_address;
+
+			list_add(stack_element->variables,una_variable);
+
+		}
+
+		list_add(unPCB->stack_index,stack_element);
 
 		contador_de_elementos_del_stack++;
-
-		unPCB->stack = stack_index_tmp;
 	}
-	*/
 
 	memcpy(&unPCB->stack_pointer,datos+offset,tmpsize=sizeof(uint32_t));
 	offset+=tmpsize;
@@ -345,6 +386,17 @@ t_recibir_PCB_de_Kernel *deserealizar_enviar_PCB_a_CPU(char *datos){
 	}
 
 	return unPCB;
+}
+
+uint32_t deserealizar_int(char* datos) {
+
+	const int desplazamientoHeader = 5;		//Offset inicial para no deserealizar tipo (1 byte) y length (4 bytes)
+
+	uint32_t respuesta = 0;
+
+	memcpy(&respuesta,datos+desplazamientoHeader, sizeof(uint32_t));
+
+	return respuesta;
 }
 
 

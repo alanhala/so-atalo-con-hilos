@@ -65,5 +65,6 @@ uint32_t obtiene_sizeof_instrucciones(t_intructions *instrucciones);
 void obtiene_elementos_del_stack(t_list *stack_index, int elementos_del_stack[]);
 t_puntero_instruccion obtiene_primera_instruccion(t_intructions instruccion);
 t_size obtiene_offset (t_intructions instruccion);
+void serializa_lista_de_elementos_de_la_pila(t_list *stack_element);
 
 #endif /* PROTOCOLOKERNEL_H_ */
