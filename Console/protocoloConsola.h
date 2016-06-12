@@ -20,6 +20,9 @@ typedef struct {
 	char *texto_a_imprimir;
 }__attribute__((packed)) t_imprimir_texto_en_consola;
 
+typedef struct {
+       uint32_t motivo;
+}__attribute__((packed)) t_finalizar_programa_en_consola;
 
 typedef struct {
 	uint8_t tipo;

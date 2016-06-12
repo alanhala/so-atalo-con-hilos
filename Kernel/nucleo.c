@@ -202,7 +202,17 @@ void * recEjecucion() {
 
 
 int finalizar_programa_consola(t_PCB *pcb){
-	return -1;
+	t_finalizar_programa_en_consola * finalizar_consola = malloc(sizeof(t_finalizar_programa_en_consola));
+	memset(finalizar_consola,0,sizeof(t_finalizar_programa_en_consola));
+
+	finalizar_consola->motivo = 0;
+	t_stream *buffer = malloc(sizeof(t_stream));
+
+	buffer = serializar_mensaje(133,finalizar_consola);
+
+	int bytes_enviados = send(pcb->console_socket_descriptor,buffer->datos,buffer->size,0);
+
+	return bytes_enviados;
 }
 
 int finalizar_programa_umc(t_PCB *pcb){
@@ -251,8 +261,6 @@ void *recExit() {
 
 			int umc_finalizado =finalizar_programa_umc(pcb);
 			int consola_finalizado =finalizar_programa_consola(pcb);
-
-
 
 			free(pcb);// lo libero directamente creo q no es necesario hacer cola de exit
 
