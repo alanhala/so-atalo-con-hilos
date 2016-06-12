@@ -158,8 +158,8 @@ t_stream *serializar_enviar_PCB_a_CPU(t_PCB *unPCB){
 	uint32_t	tmpsize = 0,
 				offset = 0;
 
-	uint32_t cantidad_elementos_stack = obtiene_cantidad_elementos_stack(unPCB->stack_index);
-	uint32_t sizeof_stack = cantidad_elementos_stack * sizeof(int);
+	//uint32_t cantidad_elementos_stack = obtiene_cantidad_elementos_stack(unPCB->stack_index);
+	//uint32_t sizeof_stack = cantidad_elementos_stack * sizeof(int);
 
 	uint32_t sizeof_instruccion = unPCB->instructions_size * obtiene_sizeof_instrucciones(unPCB->instructions_index);
 
@@ -303,9 +303,7 @@ t_respuesta_finalizar_programa_en_UMC *deserealizar_respuesta_finalizar_programa
 
 t_iniciar_programa_en_kernel *deserealizar_iniciar_programa_en_kernel (char *datos){
 
-	int	tmpsize = 0,
-		offset = 0,
-        tamano_dato = 0;
+	int	tamano_dato = 0;
 
 	const int desplazamiento_header = 5;    //Offset inicial para no deserealizar tipo (1 byte) y length (4 bytes)
 
@@ -317,12 +315,10 @@ t_iniciar_programa_en_kernel *deserealizar_iniciar_programa_en_kernel (char *dat
     iniciar_programa_en_kernel->codigo_de_programa = malloc(tamano_dato+1);
     memset(iniciar_programa_en_kernel->codigo_de_programa,0,tamano_dato+1);
 
-    memcpy(iniciar_programa_en_kernel->codigo_de_programa,datos+desplazamiento_header,tmpsize=tamano_dato+1);
-    offset+=tamano_dato+1;
-    offset+=desplazamiento_header;
+    memcpy(iniciar_programa_en_kernel->codigo_de_programa,datos+desplazamiento_header,(tamano_dato+1));
 
     char endString = '\0';
-    memcpy(iniciar_programa_en_kernel->codigo_de_programa+tamano_dato+1,&endString,1);
+    memcpy(iniciar_programa_en_kernel->codigo_de_programa+tamano_dato,&endString,1);
 
     return iniciar_programa_en_kernel;
 }
@@ -347,6 +343,15 @@ t_header *deserializar_header(char *header){
 
 //Funciones Auxiliares
 
+uint32_t obtiene_sizeof_instrucciones(t_intructions *instrucciones){
+
+	uint32_t sizeof_puntero_primera_instruccion = sizeof(instrucciones->start);
+	uint32_t sizeof_offset = sizeof(instrucciones->offset);
+
+	return (sizeof_puntero_primera_instruccion+sizeof_offset);
+}
+
+/*
 uint32_t obtiene_cantidad_elementos_stack(t_list *stack_index){
 
 	uint32_t cuenta_elementos_de_la_lista = 0;	//Lo empiezo en 1 por como aumento el contador
@@ -359,14 +364,6 @@ uint32_t obtiene_cantidad_elementos_stack(t_list *stack_index){
 	}
 
 	return cuenta_elementos_de_la_lista;
-}
-
-uint32_t obtiene_sizeof_instrucciones(t_intructions *instrucciones){
-
-	uint32_t sizeof_puntero_primera_instruccion = sizeof(instrucciones->start);
-	uint32_t sizeof_offset = sizeof(instrucciones->offset);
-
-	return (sizeof_puntero_primera_instruccion+sizeof_offset);
 }
 
 void obtiene_elementos_del_stack(t_list *stack_index, int elementos_del_stack[]){
@@ -384,6 +381,7 @@ void obtiene_elementos_del_stack(t_list *stack_index, int elementos_del_stack[])
 		aux = aux->head;	//Avanzo el puntero a t_list
 	}
 }
+*/
 
 t_puntero_instruccion obtiene_primera_instruccion(t_intructions instruccion){
 
