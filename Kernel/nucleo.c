@@ -83,12 +83,12 @@ void *recNew() {
 	while (1) {
 		sem_wait(&cant_new);
 		sem_wait(&mut_new);
-		char * codigo_programa = queue_pop(estado_new);
+		t_new_program * nuevo_programa = queue_pop(estado_new);
 		sem_post(&mut_new);
 
-		t_PCB *pcb = initialize_program(KERNEL,codigo_programa);
-
-		int inicio_correcto = iniciar_programa_en_umc(pcb->pid, pcb->used_pages, codigo_programa);
+		t_PCB *pcb = initialize_program(KERNEL,nuevo_programa->codigo_programa);
+		pcb->console_socket_descriptor = nuevo_programa->console_socket_descriptor;
+		int inicio_correcto = iniciar_programa_en_umc(pcb->pid, pcb->used_pages, nuevo_programa->codigo_programa);
 		printf("resultado inicio programa en umc : %d\n", inicio_correcto); //TODO sacar este comentario
 		fflush(stdout);
 
@@ -142,6 +142,28 @@ void ejecutar_pcb_en_cpu(t_PCB *pcb){
 	printf("pcb enviado a cpu \n ");
 	while(1){
 
+			t_header *un_header = malloc(sizeof(t_header));
+			char buffer_header[5];
+
+			int	bytes_recibidos_header,
+				bytes_recibidos;
+
+			bytes_recibidos_header = recv(pcb->cpu_socket_descriptor,buffer_header,5,MSG_PEEK);
+
+			un_header = deserializar_header(buffer_header);
+
+			char buffer_recibidos[(un_header->length)];
+
+			if(un_header->tipo == 132){
+
+				int bytes_recibidos = recv(pcb->cpu_socket_descriptor,buffer_recibidos,un_header->length,0);
+
+
+				int bytes_sent = send(pcb->console_socket_descriptor,buffer_recibidos,buffer->size,0);
+				printf("Envio imprimir texto a consola\n");
+			}
+
+
 	}
 	//while(1){
 		//aca tengo que hacer un while de todas las respuestas que me va mandando cpu
@@ -180,7 +202,17 @@ void * recEjecucion() {
 
 
 int finalizar_programa_consola(t_PCB *pcb){
-	return -1;
+	t_finalizar_programa_en_consola * finalizar_consola = malloc(sizeof(t_finalizar_programa_en_consola));
+	memset(finalizar_consola,0,sizeof(t_finalizar_programa_en_consola));
+
+	finalizar_consola->motivo = 0;
+	t_stream *buffer = malloc(sizeof(t_stream));
+
+	buffer = serializar_mensaje(133,finalizar_consola);
+
+	int bytes_enviados = send(pcb->console_socket_descriptor,buffer->datos,buffer->size,0);
+
+	return bytes_enviados;
 }
 
 int finalizar_programa_umc(t_PCB *pcb){
@@ -229,8 +261,6 @@ void *recExit() {
 
 			int umc_finalizado =finalizar_programa_umc(pcb);
 			int consola_finalizado =finalizar_programa_consola(pcb);
-
-
 
 			free(pcb);// lo libero directamente creo q no es necesario hacer cola de exit
 

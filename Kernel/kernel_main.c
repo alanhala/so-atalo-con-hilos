@@ -118,9 +118,12 @@ void manejo_de_solicitudes(int client_socket_descriptor) {
 				printf("Kernel. El mensaje tiene de largo: %d\n",un_header->length);
 
 				// AGREGO EL CODIGO A LA COLA DE NEW
-				char * codigo_programa = iniciar_programa->codigo_de_programa;
+				t_new_program * nuevo_programa = malloc(sizeof(t_new_program));
+				nuevo_programa->codigo_programa = iniciar_programa->codigo_de_programa;
+				nuevo_programa->console_socket_descriptor = client_socket_descriptor;
+				//char * codigo_programa = iniciar_programa->codigo_de_programa;
 				sem_wait(&mut_new);
-				queue_push(estado_new, codigo_programa);
+				queue_push(estado_new, nuevo_programa);
 				sem_post(&mut_new);
 				sem_post(&cant_new);
 				// FIN

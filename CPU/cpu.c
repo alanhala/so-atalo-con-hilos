@@ -19,7 +19,9 @@ AnSISOP_funciones functions = {
 	.AnSISOP_imprimir	= imprimir,
 	.AnSISOP_imprimirTexto	= imprimirTexto,
 	.AnSISOP_irAlLabel 	= irALabel,
+	.AnSISOP_llamarSinRetorno = llamarSinRetorno,
 	.AnSISOP_llamarConRetorno = llamarConRetorno,
+	.AnSISOP_finalizar = finalizar,
 	.AnSISOP_retornar = retornar
 };
 
@@ -135,10 +137,21 @@ t_valor_variable dereferenciar(t_puntero direccion_variable) {
     return valor;
 }
 
+void go_back_to_previous_stack_element(t_stack_element *current_stack_element) {
+    int i;
+    for(i=0; i<list_size(current_stack_element->variables); i++) {
+	decrementar_next_free_space(sizeof(int));
+    }
+
+    list_remove(pcb->stack, list_size(pcb->stack)-1);
+
+    free_stack_element_memory(current_stack_element);
+}
+
 void asignar(t_puntero direccion_variable, t_valor_variable valor) {
     t_dato_en_memoria *direccion = (t_dato_en_memoria*) direccion_variable;
 
-    int resultado_escritura = ejecutar_escritura_de_dato_con_iteraciones(direccion, (char*) &valor, tamanio_pagina);
+    ejecutar_escritura_de_dato_con_iteraciones(direccion, (char*) &valor, tamanio_pagina);
 }
 
 void imprimir(t_valor_variable valor_mostrar) {
@@ -148,20 +161,33 @@ void imprimir(t_valor_variable valor_mostrar) {
 }
 
 void imprimirTexto(char* print_value) {
-    send_text_to_kernel(print_value, string_length(print_value));
-
+    int enviado_correctamente = send_text_to_kernel(print_value, string_length(print_value));
+    //todo si se quiere validar que haya enviado correctmente
     free(print_value);
 }
 
 void irALabel(t_nombre_etiqueta nombre_etiqueta) {
+    char* etiqueta_limpia = (char*)nombre_etiqueta;
 
-    int find_label(t_label_index *label_element) {
-	return !strcmp((char*)label_element->name, nombre_etiqueta);
+    if(string_ends_with((char*) nombre_etiqueta, "\n")) {
+	etiqueta_limpia = string_substring_until(nombre_etiqueta, string_length((char*)nombre_etiqueta)-1);
     }
 
-    t_label_index *label = list_find(pcb->label_index, (void*)find_label);
+    int find_label(t_label_index *label_element) {
+	return !strcmp(label_element->name, etiqueta_limpia);
+    }
+
+    t_label_index *label = (t_label_index*)list_find(pcb->label_index, find_label);
 
     pcb->program_counter = label->location;
+}
+
+void llamarSinRetorno(t_nombre_etiqueta etiqueta) {
+    t_stack_element *stack_element = create_stack_element();
+
+    list_add(pcb->stack, stack_element);
+
+    irALabel(etiqueta);
 }
 
 void llamarConRetorno(t_nombre_etiqueta etiqueta, t_puntero donde_retornar) {
@@ -175,44 +201,36 @@ void llamarConRetorno(t_nombre_etiqueta etiqueta, t_puntero donde_retornar) {
     irALabel(etiqueta);
 }
 
+void finalizar(void) {
+    t_stack_element *stack_element = list_get(pcb->stack, list_size(pcb->stack)-1);
+
+    if(stack_element->posicion_retorno) {
+	pcb->program_counter = stack_element->posicion_retorno;
+    }
+
+    if(list_size(pcb->stack) == 1) {
+	pcb->program_finished = 1;
+    }
+
+    go_back_to_previous_stack_element(stack_element);
+}
+
 void retornar(t_valor_variable retorno) {
     t_stack_element *stack_element = list_get(pcb->stack, list_size(pcb->stack)-1);
 
     ejecutar_escritura_de_dato_con_iteraciones(&(stack_element->valor_retorno), (char*) &retorno,  tamanio_pagina);
-
-    pcb->program_counter = stack_element->posicion_retorno;
-    int i;
-    for(i=0; i<list_size(stack_element->variables); i++) {
-	decrementar_next_free_space(sizeof(int));
-    }
-
-    list_remove(pcb->stack, list_size(pcb->stack)-1);
-
-    free_stack_element_memory(stack_element);
 }
 
 int send_text_to_kernel(char* print_value, uint32_t length) {
-    t_stream *buffer = malloc(sizeof(t_stream));
 
-    buffer->datos = print_value;
-    buffer->size = length;
+	t_imprimir_texto_en_cpu *imprimir_en_cpu = malloc(sizeof(t_imprimir_texto_en_cpu));
+	imprimir_en_cpu->texto_a_imprimir = print_value;
+	t_stream *buffer = serializar_mensaje(132,imprimir_en_cpu);
 
-    send(KERNEL_DESCRIPTOR, buffer->datos, buffer->size, 0);
+	int bytes_enviados = send(KERNEL_DESCRIPTOR, buffer->datos, buffer->size, 0);
 
-    t_header *aHeader = malloc(sizeof(t_header));
 
-    char buffer_header[5];	//Buffer donde se almacena el header recibido
-
-    int bytes_recibidos_header,	//Cantidad de bytes recibidos en el recv() que recibe el header
-	bytes_recibidos;		//Cantidad de bytes recibidos en el recv() que recibe el mensaje completo
-
-    recv(KERNEL_DESCRIPTOR, buffer_header, 5, MSG_PEEK);
-
-    char buffer_recv[buffer_header[1]];
-
-    recv(KERNEL_DESCRIPTOR, buffer_recv, buffer_header[1], 0);
-
-    return deserealizar_mensaje(125, buffer_recv);
+    return bytes_enviados;
 }
 
 char* leer_memoria_de_umc(t_dato_en_memoria *dato) {
@@ -329,6 +347,7 @@ void set_tamanio_pagina(uint32_t tamanio) {
 t_stack_element* create_stack_element() {
     t_stack_element *stack_element = malloc(sizeof(stack_element));
     stack_element->variables = list_create();
+    stack_element->posicion_retorno = 0;
 
     return stack_element;
 }
@@ -336,7 +355,7 @@ t_stack_element* create_stack_element() {
 
 char* ejecutar_lectura_de_dato_con_iteraciones(void*(*closure_lectura)(t_dato_en_memoria*), t_dato_en_memoria *dato, uint32_t tamanio_pagina) {
     int is_last_page = 0;
-    if(is_last_page = (dato->direccion.offset + dato->size < tamanio_pagina)) {
+    if(is_last_page = (dato->direccion.offset + dato->size <= tamanio_pagina)) {
 	return closure_lectura(dato);
     }
 
@@ -367,7 +386,7 @@ char* ejecutar_lectura_de_dato_con_iteraciones(void*(*closure_lectura)(t_dato_en
 
 int ejecutar_escritura_de_dato_con_iteraciones(t_dato_en_memoria *dato, char* valor, uint32_t tamanio_pagina) {
     int is_last_page = 0;
-    if(is_last_page = (dato->direccion.offset + dato->size < tamanio_pagina)) {
+    if(is_last_page = (dato->direccion.offset + dato->size <= tamanio_pagina)) {
 	return escribir_en_umc(dato, valor);
     }
 
@@ -417,16 +436,17 @@ int ejecutar_pcb(){
        cambiar_contexto(pcb->pid);
 
        int instruccion_ejecutada = 0;
-       while(instruccion_ejecutada <= QUANTUM){
+       while(instruccion_ejecutada < pcb->instructions_size){ //TODO PONER QUANTUM
                execute_next_instruction_for_process();
-               pcb->program_counter ++ ;
+               //pcb->program_counter ++ ;
                printf("Instruccion %d del pid %d ejecutada \n", instruccion_ejecutada, pcb->pid);
                fflush(stdout);
+               instruccion_ejecutada ++;
        }
-       while(1){
-    		printf("ejecucion de programa finalizada");
-    		fflush(stdout);
-       }
+
+		printf("ejecucion de programa finalizada");
+		fflush(stdout);
+
        return 0;
 
 }

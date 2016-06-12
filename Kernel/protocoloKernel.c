@@ -37,9 +37,45 @@ t_stream *serializar_mensaje(int tipo, void* unaEstructura) {
 	case(121):
 			 stream = serializar_enviar_PCB_a_CPU((t_PCB *)unaEstructura);
 			 break;
+	case(133):
+			 stream = serializar_finalizar_consola((t_finalizar_programa_en_consola *)unaEstructura);
+			 break;
 	       }
 
 	return stream;
+}
+
+t_stream *serializar_finalizar_consola(t_finalizar_programa_en_consola *unaEstructura){
+
+	uint32_t 	tmpsize = 0,
+				offset = 0;
+
+	uint32_t 	size_entero_finalizar = sizeof(uint32_t);
+
+	uint32_t 	streamSize =	sizeof(uint8_t)	+				//Tamano del tipo
+								sizeof(uint32_t)+				//Tamano del largo del stream
+								size_entero_finalizar;	//Tamano del entero de cambio de proceso
+
+	t_stream *stream = malloc(sizeof(t_stream));
+	memset(stream, 0,sizeof(t_stream));
+
+	stream->size = streamSize;
+	stream->datos = malloc(streamSize);
+	memset(stream->datos,0,streamSize);
+
+	uint8_t tipo = 133; 	//Tipo del Mensaje . Fijado estaticamente segun protocolo
+	uint32_t entero_finalizar = unaEstructura->motivo;
+
+	memcpy(stream->datos,&tipo,tmpsize = sizeof(uint8_t));
+	offset+=tmpsize;
+
+	memcpy(stream->datos+offset,&streamSize,tmpsize=sizeof(uint32_t));
+	offset+=tmpsize;
+
+	memcpy(stream->datos+offset,&entero_finalizar,sizeof(uint32_t));
+
+	return stream;
+
 }
 
 t_stream *serializar_inicio_de_programa_en_UMC(t_inicio_de_programa_en_UMC *inicio_de_programa) {
@@ -326,12 +362,11 @@ void *deserealizar_mensaje(uint8_t tipo, char* datos) {
 		   estructuraDestino = deserealizar_respuesta_iniciar_programa_en_UMC(datos);
 		   break;
 	 case (64):
-			 estructuraDestino = deserealizar_respuesta_finalizar_programa_en_UMC(datos);
-	 	 	 break;
+		   estructuraDestino = deserealizar_respuesta_finalizar_programa_en_UMC(datos);
+		   break;
 	 case (91):
 		   estructuraDestino = deserealizar_iniciar_programa_en_kernel(datos);
 		   break;
-
 	}
 
 	return estructuraDestino;
