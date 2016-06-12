@@ -140,7 +140,7 @@ void manejo_de_solicitudes(int socket_descriptor) {
 
 	while (1) {
 
-		//t_header *aHeader = malloc(sizeof(t_header));
+		t_header *a_header = malloc(sizeof(t_header));
 
 		char buffer_header[5];	//Buffer donde se almacena el header recibido
 
@@ -150,19 +150,24 @@ void manejo_de_solicitudes(int socket_descriptor) {
 		int bytes_recibidos_header = recv(socket_descriptor, buffer_header, 5,
 				MSG_PEEK);
 
-		char buffer_recv[buffer_header[1]]; //El buffer para recibir el mensaje se crea con la longitud recibida
+		a_header = deserializar_header(buffer_header);
 
-		if (buffer_header[0] == 31) {
+		char buffer_recv[a_header->length]; //El buffer para recibir el mensaje se crea con la longitud recibida
+
+		int tipo = a_header->tipo;
+		int length = a_header->length;
+
+		if (tipo == 31) {
 
 			int bytes_recibidos = recv(socket_descriptor, buffer_recv,
-					buffer_header[1], 0);
+				length, 0);
 
 			t_solicitar_bytes_de_una_pagina_a_UMC *bytes_de_una_pagina = malloc(
 					sizeof(t_solicitar_bytes_de_una_pagina_a_UMC));
 
 			bytes_de_una_pagina =
 					(t_solicitar_bytes_de_una_pagina_a_UMC *) deserealizar_mensaje(
-							buffer_header[0], buffer_recv);
+							tipo, buffer_recv);
 			int pid_active = dame_pid_activo(socket_descriptor);
 			char *datos_de_lectura = leer_pagina_de_programa(pid_active,
 					bytes_de_una_pagina->pagina, bytes_de_una_pagina->offset,
@@ -186,10 +191,10 @@ void manejo_de_solicitudes(int socket_descriptor) {
 
 		}
 
-		if (buffer_header[0] == 33) {
+		if (tipo == 33) {
 
 			int bytes_recibidos = recv(socket_descriptor, buffer_recv,
-					buffer_header[1], 0);
+					length, 0);
 
 			t_escribir_bytes_de_una_pagina_en_UMC *bytes_de_una_pagina = malloc(
 					sizeof(t_escribir_bytes_de_una_pagina_en_UMC));
@@ -216,10 +221,10 @@ void manejo_de_solicitudes(int socket_descriptor) {
 
 
 		}
-		if (buffer_header[0] == 35) {
+		if (tipo == 35) {
 
 			int bytes_recibidos = recv(socket_descriptor, buffer_recv,
-					buffer_header[1], 0);
+					length, 0);
 
 			t_cambio_de_proceso *cambio_de_proceso = malloc(
 					sizeof(t_cambio_de_proceso));
@@ -239,9 +244,9 @@ void manejo_de_solicitudes(int socket_descriptor) {
 			int bytes_sent = send(socket_descriptor, buffer->datos,
 					buffer->size, 0);
 		}
-		if(buffer_header[0] == 61){
+		if(tipo == 61){
 
-				   int bytes_recibidos = recv(socket_descriptor,buffer_recv,buffer_header[1],0);
+				   int bytes_recibidos = recv(socket_descriptor,buffer_recv,length,0);
 
 				   t_inicio_de_programa_en_UMC *inicio_programa_en_UMC = malloc(sizeof(t_inicio_de_programa_en_UMC));
 
@@ -260,9 +265,9 @@ void manejo_de_solicitudes(int socket_descriptor) {
 				   int bytes_sent = send(socket_descriptor,buffer->datos,buffer->size,0);
 
 			   }
-		if(buffer_header[0]==63) {
+		if(tipo==63) {
 
-			int bytes_recibidos = recv(socket_descriptor,buffer_recv,buffer_header[1],0);
+			int bytes_recibidos = recv(socket_descriptor,buffer_recv,length,0);
 
 			t_finalizar_programa_en_UMC *finalizar_programa_en_UMC = malloc(sizeof(t_finalizar_programa_en_UMC));
 

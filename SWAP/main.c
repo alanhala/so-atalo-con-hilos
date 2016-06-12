@@ -52,7 +52,7 @@ void UMC_connection(t_swap* swap) {
 
 	while (1) {
 
-		t_header *aHeader = malloc(sizeof(t_header));
+		t_header *a_header = malloc(sizeof(t_header));
 
 		char 	buffer_header[5];	//Buffer donde se almacena el header recibido
 
@@ -61,11 +61,16 @@ void UMC_connection(t_swap* swap) {
 
 		bytes_recibidos_header = recv(umc_socket_descriptor, buffer_header, 5, MSG_PEEK);
 
-		char buffer_recv[buffer_header[1]]; 	//El buffer para recibir el mensaje se crea con la longitud recibida
+		a_header = deserializar_header(buffer_header);
 
-		if (buffer_header[0] == 1) {
+		int tipo = a_header->tipo;
+		int length = a_header->length;
 
-			int bytes_recibidos = recv(umc_socket_descriptor, buffer_recv, buffer_header[1], 0);
+		char buffer_recv[length]; 	//El buffer para recibir el mensaje se crea con la longitud recibida
+
+		if (tipo == 1) {
+
+			int bytes_recibidos = recv(umc_socket_descriptor, buffer_recv, length, 0);
 
 			t_iniciar_programa_en_swap *carga = malloc(sizeof(t_iniciar_programa_en_swap));
 
@@ -85,9 +90,9 @@ void UMC_connection(t_swap* swap) {
 
 		}
 
-		if (buffer_header[0] == 3) {
+		if (tipo == 3) {
 
-			int bytes_recibidos = recv(umc_socket_descriptor, buffer_recv, buffer_header[1], 0);
+			int bytes_recibidos = recv(umc_socket_descriptor, buffer_recv, length, 0);
 
 			t_leer_pagina_swap *lectura = malloc(sizeof(t_leer_pagina_swap));
 
@@ -107,9 +112,9 @@ void UMC_connection(t_swap* swap) {
 
 		}
 
-		if (buffer_header[0] == 5) {
+		if (tipo == 5) {
 
-			int bytes_recibidos = recv(umc_socket_descriptor, buffer_recv, buffer_header[1], 0);
+			int bytes_recibidos = recv(umc_socket_descriptor, buffer_recv, length, 0);
 
 			t_escribir_pagina_swap * carga = malloc(sizeof(t_escribir_pagina_swap));
 
@@ -128,9 +133,9 @@ void UMC_connection(t_swap* swap) {
 			int bytes = send(umc_socket_descriptor, buffer_escritura->datos, buffer_escritura->size, 0);
 
 		}
-		if (buffer_header[0] == 7){
+		if (tipo == 7){
 
-			int bytes_recibidos = recv(umc_socket_descriptor, buffer_recv, buffer_header[1], 0);
+			int bytes_recibidos = recv(umc_socket_descriptor, buffer_recv, length, 0);
 
 			t_finalizar_programa_en_swap *finalizar_programa = malloc(sizeof(t_finalizar_programa_en_swap));
 
@@ -150,7 +155,7 @@ void UMC_connection(t_swap* swap) {
 
 		}
 
-		if (buffer_header[0] == -1) {
+		if (tipo == -1) {
 			break;
 		}
 

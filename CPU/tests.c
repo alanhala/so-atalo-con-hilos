@@ -60,7 +60,7 @@ void test_ejecutar_programa_en_memoria() {
     cambiar_contexto(pcb->pid);
 
     //Cargo metadata de programa ANSISOP en PCB
-    t_metadata_program *metadata = metadata_desde_literal("begin\nvariables c, d\nc=2147483647\nd=224947129\nf\nend\nfunction f\nvariables a\na=1\nend");
+    t_metadata_program *metadata = metadata_desde_literal("begin\nvariables c, d, e\nc=2147483647\nd=224947129\nf\ne <- g\nend\nfunction f\nvariables a\na=1\nend\nfunction g\nvariables a\na=2\nreturn a\nend");
     pcb->instructions_index = metadata->instrucciones_serializado;
     pcb->label_index = get_label_index(metadata);
 
@@ -93,6 +93,9 @@ void test_ejecutar_programa_en_memoria() {
 
     execute_next_instruction_for_process();
     CU_ASSERT_EQUAL(dereferenciar(obtenerPosicionVariable('a')), 1);
+
+    execute_next_instruction_for_process();
+    CU_ASSERT_EQUAL(dereferenciar(obtenerPosicionVariable('e')), 2);
 
 }
 
