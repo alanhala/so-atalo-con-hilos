@@ -21,6 +21,7 @@ AnSISOP_funciones functions = {
 	.AnSISOP_irAlLabel 	= irALabel,
 	.AnSISOP_llamarSinRetorno = llamarSinRetorno,
 	.AnSISOP_llamarConRetorno = llamarConRetorno,
+	.AnSISOP_finalizar = finalizar,
 	.AnSISOP_retornar = retornar
 };
 
@@ -136,6 +137,17 @@ t_valor_variable dereferenciar(t_puntero direccion_variable) {
     return valor;
 }
 
+void go_back_to_previous_stack_element(t_stack_element *current_stack_element) {
+    int i;
+    for(i=0; i<list_size(current_stack_element->variables); i++) {
+	decrementar_next_free_space(sizeof(int));
+    }
+
+    list_remove(pcb->stack, list_size(pcb->stack)-1);
+
+    free_stack_element_memory(current_stack_element);
+}
+
 void asignar(t_puntero direccion_variable, t_valor_variable valor) {
     t_dato_en_memoria *direccion = (t_dato_en_memoria*) direccion_variable;
 
@@ -189,20 +201,24 @@ void llamarConRetorno(t_nombre_etiqueta etiqueta, t_puntero donde_retornar) {
     irALabel(etiqueta);
 }
 
+void finalizar(void) {
+    t_stack_element *stack_element = list_get(pcb->stack, list_size(pcb->stack)-1);
+
+    if(stack_element->posicion_retorno) {
+	pcb->program_counter = stack_element->posicion_retorno;
+    }
+
+    if(list_size(pcb->stack) == 1) {
+	pcb->program_finished = 1;
+    }
+
+    go_back_to_previous_stack_element(stack_element);
+}
+
 void retornar(t_valor_variable retorno) {
     t_stack_element *stack_element = list_get(pcb->stack, list_size(pcb->stack)-1);
 
     ejecutar_escritura_de_dato_con_iteraciones(&(stack_element->valor_retorno), (char*) &retorno,  tamanio_pagina);
-
-    pcb->program_counter = stack_element->posicion_retorno;
-    int i;
-    for(i=0; i<list_size(stack_element->variables); i++) {
-	decrementar_next_free_space(sizeof(int));
-    }
-
-    list_remove(pcb->stack, list_size(pcb->stack)-1);
-
-    free_stack_element_memory(stack_element);
 }
 
 int send_text_to_kernel(char* print_value, uint32_t length) {
@@ -331,6 +347,7 @@ void set_tamanio_pagina(uint32_t tamanio) {
 t_stack_element* create_stack_element() {
     t_stack_element *stack_element = malloc(sizeof(stack_element));
     stack_element->variables = list_create();
+    stack_element->posicion_retorno = 0;
 
     return stack_element;
 }

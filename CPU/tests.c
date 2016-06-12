@@ -126,7 +126,7 @@ void test_obtener_posicion_variable() {
 
     t_dato_en_memoria *dato = obtenerPosicionVariable('a');
     CU_ASSERT_EQUAL(dato->size, sizeof(uint32_t));
-    CU_ASSERT_EQUAL(dato->direccion.pagina, 20);
+    CU_ASSERT_EQUAL(dato->direccion.pagina, 40);
     CU_ASSERT_EQUAL(dato->direccion.offset, 3);
 }
 
@@ -168,12 +168,12 @@ void test_actualizar_next_free_space() {
     t_PCB *pcb = get_PCB();
 
     CU_ASSERT_EQUAL(pcb->stack_free_space_pointer.offset, 2);
-    CU_ASSERT_EQUAL(pcb->stack_free_space_pointer.pagina, 21);
+    CU_ASSERT_EQUAL(pcb->stack_free_space_pointer.pagina, 41);
 
     incrementar_next_free_space(4);
 
     CU_ASSERT_EQUAL(pcb->stack_free_space_pointer.offset, 1);
-    CU_ASSERT_EQUAL(pcb->stack_free_space_pointer.pagina, 22);
+    CU_ASSERT_EQUAL(pcb->stack_free_space_pointer.pagina, 42);
 }
 
 
@@ -199,7 +199,7 @@ void mockear_pcb() {
 
     t_direccion_virtual_memoria *free_space = malloc(sizeof(t_direccion_virtual_memoria));
     free_space->offset = 3;
-    free_space->pagina = 20;
+    free_space->pagina = 40;
 
     pcb->stack_free_space_pointer = *free_space;
 

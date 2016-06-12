@@ -64,6 +64,7 @@ typedef struct {
 	t_intructions* instructions_index;
 	t_direccion_virtual_memoria stack_free_space_pointer;
 	t_list* label_index;
+	uint32_t program_finished;
 } t_PCB;
 int QUANTUM;
 void set_quantum(int quantum);
@@ -87,6 +88,7 @@ void irALabel(t_nombre_etiqueta t_nombre_etiqueta);
 void llamarConRetorno(t_nombre_etiqueta etiqueta, t_puntero donde_retornar);
 void llamarSinRetorno(t_nombre_etiqueta etiqueta);
 void retornar(t_valor_variable retorno);
+void finalizar(void);
 
 char* leer_memoria_de_umc(t_dato_en_memoria *dato);
 int escribir_en_umc(t_dato_en_memoria *dato, char* valor);
