@@ -839,15 +839,19 @@ void lru_sumarle_uno_a_todos(){
 	//sem_post(&mut_tlb);
 }
 int esta_presente_en_tlb(int pid, int pagina){
+
+	//TODO VER COMO USAR EL MUTEX
+
 	//sem_wait(&mut_tlb);
+
 	int i= 0;
 	while(i < CANTIDAD_ENTRADAS_TLB){
 		if((TLB->entradas[i]).pid == pid && (TLB->entradas[i]).pagina == pagina){
 			return i;
 		}
+
 		i++;
 	}
-	//sem_post(&mut_tlb);
 	return  -1;
 }
 
