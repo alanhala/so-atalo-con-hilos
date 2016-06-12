@@ -36,6 +36,11 @@ typedef struct {
        uint32_t respuesta_correcta;
 }__attribute__((packed)) t_respuesta_iniciar_programa_en_UMC;
 
+
+typedef struct {
+       uint32_t motivo;
+}__attribute__((packed)) t_finalizar_programa_en_consola;
+
 typedef struct {
 	uint8_t tipo;
 	uint32_t length;
@@ -56,6 +61,7 @@ t_stream *serializar_respuesta_inicio_de_programa_en_kernel(t_respuesta_iniciar_
 t_stream *serializar_inicio_de_programa_en_UMC(t_inicio_de_programa_en_UMC *inicio_de_programa);
 t_stream *serializar_mensaje(int tipo, void *unaEstructura);
 t_stream *serializar_enviar_PCB_a_CPU(t_PCB *unPCB);
+t_stream *serializar_finalizar_consola(t_finalizar_programa_en_consola *unaEstructura);
 
 
 

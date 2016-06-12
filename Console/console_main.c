@@ -99,9 +99,24 @@ int main(int argc, char **argv) {
 
 
 		}
+		if(un_header->tipo == 133){
 
+				int bytes_recibidos = recv(kernel_socket_descriptor,buffer_recibidos,un_header->length,0);
 
+				t_finalizar_programa_en_consola *finalizar = malloc(sizeof(t_finalizar_programa_en_consola));
 
+				finalizar = (t_finalizar_programa_en_consola *)deserealizar_mensaje(133,buffer_recibidos);
+
+				if (finalizar->motivo == 0){
+					printf("El programa finalizo correctamente\n");
+					fflush(stdout);
+				}
+				else{
+					printf("El programa no pudo finalizar correctamente\n");
+					fflush(stdout);
+				}
+				break;
+		}
 	}
 
 	return 0;

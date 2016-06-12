@@ -78,9 +78,23 @@ void *deserealizar_mensaje(uint8_t tipo, char* datos) {
 	case(132):
 			estructuraDestino = deserealizar_imprimir_texto_en_consola(datos);
 			break;
+	case(133):
+			estructuraDestino = deserealizar_finalizar_consola(datos);
+			break;
 	}
 
 	return estructuraDestino;
+}
+
+t_finalizar_programa_en_consola * deserealizar_finalizar_consola(char *datos){
+		const int desplazamiento_header = 5;
+
+		t_finalizar_programa_en_consola *finalizar = malloc(sizeof(t_finalizar_programa_en_consola));
+		memset(finalizar,0,sizeof(t_finalizar_programa_en_consola));
+
+		memcpy(&finalizar->motivo,datos+desplazamiento_header,sizeof(uint32_t));
+
+		return finalizar;
 }
 
 t_imprimir_texto_en_consola *  deserealizar_imprimir_texto_en_consola(char *datos){
