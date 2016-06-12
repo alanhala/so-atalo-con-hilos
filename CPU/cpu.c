@@ -34,7 +34,13 @@ void execute_next_instruction_for_process() {
 
 	char *instruccion_string = ejecutar_lectura_de_dato_con_iteraciones(leer_memoria_de_umc, &instruccion, tamanio_pagina);
 
+	int program_counter = pcb->program_counter;
 	analizadorLinea(strdup(instruccion_string), &functions, &kernel_functions);
+
+	if(program_counter == pcb->program_counter) {
+	    pcb->program_counter++;
+	}
+
 };
 
 
@@ -175,8 +181,13 @@ void retornar(t_valor_variable retorno) {
     ejecutar_escritura_de_dato_con_iteraciones(&(stack_element->valor_retorno), (char*) &retorno,  tamanio_pagina);
 
     pcb->program_counter = stack_element->posicion_retorno;
+    int i;
+    for(i=0; i<list_size(stack_element->variables); i++) {
+	decrementar_next_free_space(sizeof(int));
+    }
 
     list_remove(pcb->stack, list_size(pcb->stack)-1);
+
     free_stack_element_memory(stack_element);
 }
 
@@ -283,6 +294,16 @@ void incrementar_next_free_space(uint32_t size) {
     pcb->stack_free_space_pointer.offset = new_offset;
 };
 
+void decrementar_next_free_space(uint32_t size) {
+    int absolute_offset = (tamanio_pagina * pcb->stack_free_space_pointer.pagina ) + pcb->stack_free_space_pointer.offset - size;
+
+    int new_pages = absolute_offset / tamanio_pagina;
+    int new_offset = absolute_offset - (new_pages * tamanio_pagina);
+
+    pcb->stack_free_space_pointer.pagina = new_pages;
+    pcb->stack_free_space_pointer.offset = new_offset;
+};
+
 void free_stack_element_memory(t_stack_element *element) {
 
     void free_memory(void *variable) {
@@ -290,6 +311,7 @@ void free_stack_element_memory(t_stack_element *element) {
     }
 
     list_destroy_and_destroy_elements(element->variables, free_memory);
+    free(element);
 };
 
 void set_PCB(t_PCB *new_pcb) {

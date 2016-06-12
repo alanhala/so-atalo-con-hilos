@@ -60,7 +60,7 @@ void test_ejecutar_programa_en_memoria() {
     cambiar_contexto(pcb->pid);
 
     //Cargo metadata de programa ANSISOP en PCB
-    t_metadata_program *metadata = metadata_desde_literal("begin\nvariables c, d\nc=2147483647\nd=224947129\nend\0");
+    t_metadata_program *metadata = metadata_desde_literal("begin\nvariables c, d\nc=2147483647\nd=224947129\nf\nend\nfunction f\nvariables a\na=1\nend\0");
     pcb->instructions_index = metadata->instrucciones_serializado;
 
     //Ejecuto primera instruccion variables c, d
@@ -74,12 +74,10 @@ void test_ejecutar_programa_en_memoria() {
     CU_ASSERT_EQUAL(variable->id, 'd');
 
     //ejecuto segunda instruccion c=1234
-    pcb->program_counter++;
     execute_next_instruction_for_process();
     CU_ASSERT_EQUAL(dereferenciar(obtenerPosicionVariable('c')), 2147483647);
 
     //ejecuto segunda instruccion d=4321
-    pcb->program_counter++;
     execute_next_instruction_for_process();
     CU_ASSERT_EQUAL(dereferenciar(obtenerPosicionVariable('d')), 224947129);
 }

@@ -77,7 +77,7 @@ int main(int argc, char **argv) {
 		//correrTestSerializacion();
 	//}
 
-	set_algoritmo_reemplazo("test");
+	set_algoritmo_reemplazo("clock");
 	inicializar_estructuras();
 	int swap_socket = create_client_socket_descriptor("localhost", "6000");
 	set_socket_descriptor(swap_socket);
@@ -134,13 +134,13 @@ void manejo_de_solicitudes(int socket_descriptor) {
 	{
 
 		//cargar_nuevo_programa(1, 50, "begin\nvariables c, d\nc=2147483647\nd=224947129\nend\0");
-		cargar_nuevo_programa(1, 50, "begin\nvariables c, d\nc=1234\nd=4321\nend\0");
+		//cargar_nuevo_programa(1, 50, "begin\nvariables c, d\nc=1234\nd=4321\nend\0");
 		//cargar_nuevo_programa(2, 50, "cargo un programa");
 	}
 
 	while (1) {
 
-		t_header *aHeader = malloc(sizeof(t_header));
+		//t_header *aHeader = malloc(sizeof(t_header));
 
 		char buffer_header[5];	//Buffer donde se almacena el header recibido
 
@@ -181,6 +181,8 @@ void manejo_de_solicitudes(int socket_descriptor) {
 
 			int bytes_sent = send(socket_descriptor, buffer->datos,
 					buffer->size, 0);
+
+			free(bytes_de_una_pagina);
 
 		}
 

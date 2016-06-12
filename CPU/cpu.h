@@ -72,6 +72,7 @@ void execute_next_instruction_for_process();
 t_dato_en_memoria get_next_instruction();
 char* obtener_instruccion_de_umc(t_dato_en_memoria *instruccion);
 void incrementar_next_free_space();
+void decrementar_next_free_space();
 void set_PCB(t_PCB *pcb);
 t_PCB* get_PCB();
 t_stack_element* create_stack_element();
