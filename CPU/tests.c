@@ -13,13 +13,13 @@ int correrTest(){
 
 	CU_initialize_registry();
 	CU_pSuite prueba = CU_add_suite("Suite de prueba", NULL, NULL);
-//	CU_add_test(prueba, "uno", obtener_siguiente_instruccion);
-//	CU_add_test(prueba, "dos", test_definir_variable);
-//	CU_add_test(prueba, "tres", test_obtener_posicion_variable);
-//	CU_add_test(prueba, "cuatro", test_actualizar_next_free_space);
-//	CU_add_test(prueba, "cinco", test_leer_data_de_memoria_con_iteraciones);
-//	CU_add_test(prueba, "seis", test_asignar_y_leer_valor_de_una_sola_pagina);
-//	CU_add_test(prueba, "siete", test_asignar_y_leer_valor_de_varias_paginas);
+	CU_add_test(prueba, "uno", obtener_siguiente_instruccion);
+	CU_add_test(prueba, "dos", test_definir_variable);
+	CU_add_test(prueba, "tres", test_obtener_posicion_variable);
+	CU_add_test(prueba, "cuatro", test_actualizar_next_free_space);
+	CU_add_test(prueba, "cinco", test_leer_data_de_memoria_con_iteraciones);
+	CU_add_test(prueba, "seis", test_asignar_y_leer_valor_de_una_sola_pagina);
+	CU_add_test(prueba, "siete", test_asignar_y_leer_valor_de_varias_paginas);
 	CU_add_test(prueba, "ocho", test_ejecutar_programa_en_memoria);
 	CU_add_test(prueba, "nueve", test_ir_a_label);
 
