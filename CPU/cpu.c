@@ -10,7 +10,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <commons/collections/list.h>
-
+#include "protocoloCPU.h"
 AnSISOP_funciones functions = {
 	.AnSISOP_definirVariable	= definirVariable,
 	.AnSISOP_obtenerPosicionVariable = obtenerPosicionVariable,

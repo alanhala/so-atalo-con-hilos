@@ -80,9 +80,9 @@ int main(int argc, char **argv) {
 			int bytes_recibidos = recv(KERNEL_DESCRIPTOR, buffer_recv,
 					buffer_header[1], 0);
 
-			t_recibir_PCB_de_Kernel *recibir_pcb = malloc(sizeof(t_recibir_PCB_de_Kernel));
+			t_PCB_serializacion *recibir_pcb = malloc(sizeof(t_PCB_serializacion));
 
-			recibir_pcb = (t_recibir_PCB_de_Kernel * ) deserealizar_mensaje(buffer_header[0], buffer_recv);
+			recibir_pcb = (t_PCB_serializacion * ) deserealizar_mensaje(buffer_header[0], buffer_recv);
 
 			t_PCB *pcb = malloc(sizeof(t_PCB));
 			pcb->instructions_index = recibir_pcb->instructions_index;

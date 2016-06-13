@@ -13,13 +13,19 @@
 #include "primitive.h"
 #include <commons/collections/list.h>
 #include <netdb.h>
-#include "protocoloCPU.h"
+//#include "protocoloCPU.h"
 
 int KERNEL_DESCRIPTOR;
 int UMC_DESCRIPTOR;
 
 int set_umc_socket_descriptor(int socket_descriptor);
 int set_kernel_socket_descriptor(int socket_descriptor);
+
+typedef struct {
+	uint32_t pagina;
+	uint32_t offset;
+} t_direccion_virtual_memoria;
+
 
 typedef struct {
 	char* name;
@@ -31,10 +37,6 @@ typedef struct {
 	t_intructions instruccion;
 } t_indice_instrucciones_elemento;
 
-typedef struct {
-	uint32_t pagina;
-	uint32_t offset;
-} t_direccion_virtual_memoria;
 
 typedef struct {
     uint32_t size;
@@ -53,6 +55,7 @@ typedef struct {
 	t_dato_en_memoria valor_retorno;
 } t_stack_element;
 
+
 typedef struct {
 	uint32_t pid;
 	uint32_t program_counter;
@@ -66,6 +69,8 @@ typedef struct {
 	t_list* label_index;
 	uint32_t program_finished;
 } t_PCB;
+
+
 
 int QUANTUM;
 void set_quantum(int quantum);

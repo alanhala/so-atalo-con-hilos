@@ -33,6 +33,9 @@ t_stream *serializar_mensaje(int tipo,void* unaEstructura) {
 	case (35):
 			stream = serializar_cambio_de_proceso((t_cambio_de_proceso *)unaEstructura);
 			break;
+	case (121):
+			stream = serializar_PCB((t_PCB_serializacion *)unaEstructura);
+			break;
 	case (132):
 			stream = serializar_imprimir_texto_a_cpu((t_imprimir_texto_en_cpu *)unaEstructura);
 			break;
@@ -202,6 +205,177 @@ t_stream* serializar_cambio_de_proceso (t_cambio_de_proceso* unCambioDeProceso){
 	return stream;
 }
 
+t_stream *serializar_PCB(t_PCB_serializacion *unPCB){
+
+	uint32_t	tmpsize = 0,
+				offset = 0;
+
+	uint32_t tamano_total_stack = 0;
+
+	uint32_t cantidad_elementos_stack = unPCB->stack_index->elements_count;
+
+	void calcular_tamano_de_un_elemento_del_stack(t_stack_element *stack_element){
+
+		uint32_t tamano_fijo_del_elemento =	sizeof(uint32_t) +	//Posicion de retorno
+											sizeof(uint32_t) +	//Size valor de retorno
+											sizeof(uint32_t) + 	//Pagina
+											sizeof(uint32_t) + 	//Offset
+											sizeof(uint32_t); 	//Cantidad de Variables
+
+		uint32_t cantidad_de_variables_del_elemento = stack_element->variables->elements_count;
+		uint32_t tamano_de_variables_del_elemento =	sizeof(t_variable) * cantidad_de_variables_del_elemento;
+
+		uint32_t tamano_del_elemento = tamano_fijo_del_elemento + tamano_de_variables_del_elemento;
+
+		tamano_total_stack += tamano_del_elemento;
+	}
+
+	list_iterate(unPCB->stack_index,(void *)calcular_tamano_de_un_elemento_del_stack);
+
+	uint32_t sizeof_instruccion = unPCB->instructions_size * obtiene_sizeof_instrucciones(unPCB->instructions_index);
+
+	uint32_t sizePCB =	sizeof(uint32_t)  +		//Process ID
+						sizeof(uint32_t)  +		//Program Counter
+						tamano_total_stack+		//Tamano total de la lista de stack elements
+						sizeof(uint32_t)  +		//Stack Pointer
+						sizeof(uint32_t)  +		//Stack Size
+						sizeof(uint32_t)  +		//Used Pages
+						sizeof(uint32_t)  +		//Instructions Size
+						sizeof_instruccion+		//Tamano de las instrucciones
+						sizeof(uint32_t)  +		//Tamano del flag program_finished
+						sizeof(uint32_t);
+
+	uint32_t stream_size = 	sizeof(uint8_t) +	//Tamano del tipo
+							sizeof(uint32_t)+	//Tamano del length del mensaje
+							sizeof(uint32_t)+	//Tamano para la cantidad de elementos del stack
+							sizePCB;
+
+	t_stream *stream = malloc(sizeof(t_stream));
+	memset(stream,0,sizeof(t_stream));
+
+	stream->size = stream_size;
+
+	stream->datos = malloc(stream_size);
+	memset(stream->datos,0,stream_size);
+
+	uint8_t		tipo = 121;
+
+	uint32_t 	pid = unPCB->pid,
+				program_counter = unPCB->program_counter,
+				stack_pointer = unPCB->stack_pointer,
+				stack_size = unPCB->stack_size,
+				used_pages = unPCB->used_pages,
+				instructions_size = unPCB->instructions_size,
+				program_finished = unPCB->program_finished,
+				quantum = unPCB->quantum;
+
+	memcpy(stream->datos,&tipo,tmpsize=sizeof(uint8_t));
+	offset+=tmpsize;
+
+	memcpy(stream->datos+offset,&stream_size,tmpsize=sizeof(uint32_t));
+	offset+=tmpsize;
+
+	memcpy(stream->datos+offset,&pid,tmpsize=sizeof(uint32_t));
+	offset+=tmpsize;
+
+	memcpy(stream->datos+offset,&program_counter,tmpsize=sizeof(uint32_t));
+	offset+=tmpsize;
+
+	memcpy(stream->datos+offset,&cantidad_elementos_stack,tmpsize=sizeof(int));
+	offset+=tmpsize;
+
+	void serializa_lista_de_elementos_de_la_pila(t_stack_element *stack_element){
+
+		uint32_t posicion_retorno = stack_element->posicion_retorno;
+
+		t_dato_en_memoria valor_de_retorno = stack_element->valor_retorno;
+		uint32_t size_valor_de_retorno = valor_de_retorno.size;
+
+		t_direccion_virtual_memoria direccion_del_dato = valor_de_retorno.direccion;
+		uint32_t pagina_direccion_del_dato = direccion_del_dato.pagina;
+		uint32_t offset_direccion_del_dato = direccion_del_dato.offset;
+
+		int cantidad_de_variables_en_elemento_del_stack = stack_element->variables->elements_count;
+
+		memcpy(stream->datos+offset,&posicion_retorno,tmpsize=sizeof(uint32_t));
+		offset+=tmpsize;
+
+		memcpy(stream->datos+offset,&size_valor_de_retorno,tmpsize=sizeof(uint32_t));
+		offset+=tmpsize;
+
+		memcpy(stream->datos+offset,&pagina_direccion_del_dato,tmpsize=sizeof(uint32_t));
+		offset+=tmpsize;
+
+		memcpy(stream->datos+offset,&offset_direccion_del_dato,tmpsize=sizeof(uint32_t));
+		offset+=tmpsize;
+
+		memcpy(stream->datos+offset,&cantidad_de_variables_en_elemento_del_stack,tmpsize=sizeof(int));
+		offset+=tmpsize;
+
+		void serializa_lista_de_variables_del_elemento_de_la_pila(t_variable *una_variable){
+
+			char id = una_variable->id;
+
+			t_dato_en_memoria dato = una_variable->dato;
+			uint32_t size_dato = dato.size;
+
+			t_direccion_virtual_memoria virtual_address = dato.direccion;
+			uint32_t page_virtual_address = virtual_address.pagina;
+			uint32_t offset_virtual_address = virtual_address.offset;
+
+			memcpy(stream->datos+offset,&id,tmpsize=sizeof(char));
+			offset+=tmpsize;
+
+			memcpy(stream->datos+offset,&size_dato,tmpsize=sizeof(uint32_t));
+			offset+=tmpsize;
+
+			memcpy(stream->datos+offset,&page_virtual_address,tmpsize=sizeof(uint32_t));
+			offset+=tmpsize;
+
+			memcpy(stream->datos+offset,&offset_virtual_address,tmpsize=sizeof(uint32_t));
+			offset+=tmpsize;
+		}
+
+		list_iterate(stack_element->variables,(void *)serializa_lista_de_variables_del_elemento_de_la_pila);
+	}
+
+	list_iterate(unPCB->stack_index,(void*)serializa_lista_de_elementos_de_la_pila);
+
+	memcpy(stream->datos+offset,&stack_pointer,tmpsize=sizeof(uint32_t));
+	offset+=tmpsize;
+
+	memcpy(stream->datos+offset,&stack_size,tmpsize=sizeof(uint32_t));
+	offset+=tmpsize;
+
+	memcpy(stream->datos+offset,&used_pages,tmpsize=sizeof(uint32_t));
+	offset+=tmpsize;
+
+	memcpy(stream->datos+offset,&instructions_size,tmpsize=sizeof(uint32_t));
+	offset+=tmpsize;
+
+	int contador_de_instrucciones = 0;
+
+	while (contador_de_instrucciones<instructions_size){
+
+	t_puntero_instruccion primera_instruccion = obtiene_primera_instruccion((unPCB->instructions_index)[contador_de_instrucciones]);
+	memcpy(stream->datos+offset,&primera_instruccion,tmpsize=sizeof(t_puntero_instruccion));
+	offset+=tmpsize;
+
+	t_size offset_instruccion = obtiene_offset((unPCB->instructions_index)[contador_de_instrucciones]);
+	memcpy(stream->datos+offset,&offset_instruccion,tmpsize=sizeof(t_size));
+	offset+=tmpsize;
+
+	contador_de_instrucciones++;
+	}
+
+	memcpy(stream->datos+offset,&program_finished,tmpsize=sizeof(uint32_t));
+	offset+=tmpsize;
+
+	memcpy(stream->datos+offset,&quantum,sizeof(uint32_t));
+
+	return stream;
+}
+
 
 
 //Deserealizar Mensaje
@@ -220,7 +394,7 @@ void *deserealizar_mensaje(uint8_t tipo, char* datos) {
 			estructuraDestino = deserealizar_respuesta_cambio_de_proceso(datos);
 			break;
 	case(121):
-			estructuraDestino = deserealizar_enviar_PCB_a_CPU(datos);
+			estructuraDestino = deserializar_PCB(datos);
 			break;
 	}
 	return estructuraDestino;
@@ -289,15 +463,15 @@ t_header *deserializar_header(char *header){
 	return un_header;
 }
 
-t_recibir_PCB_de_Kernel *deserealizar_enviar_PCB_a_CPU(char *datos){
+t_PCB_serializacion *deserializar_PCB(char *datos){
 
 	uint32_t	tmpsize = 0,
 				offset = 0;
 
 	const int desplazamiento_header = 5;	//Offset inicial para no deserealizar tipo (1 byte) y length (4 bytes)
 
-	t_recibir_PCB_de_Kernel *unPCB = malloc(sizeof(t_recibir_PCB_de_Kernel));
-	memset(unPCB,0,sizeof(t_recibir_PCB_de_Kernel));
+	t_PCB_serializacion *unPCB = malloc(sizeof(t_PCB_serializacion));
+	memset(unPCB,0,sizeof(t_PCB_serializacion));
 
 	memcpy(&unPCB->pid,datos+desplazamiento_header,tmpsize=sizeof(uint32_t));
 	offset+=desplazamiento_header;
@@ -421,6 +595,11 @@ t_recibir_PCB_de_Kernel *deserealizar_enviar_PCB_a_CPU(char *datos){
 
 	}
 
+	memcpy(&unPCB->program_finished,datos+offset,tmpsize=sizeof(uint32_t));
+	offset+=tmpsize;
+
+	memcpy(&unPCB->quantum,datos+offset,sizeof(uint32_t));
+
 	return unPCB;
 }
 
@@ -458,5 +637,26 @@ t_intructions carga_instructions_index(t_puntero_instruccion primera_instruccion
 	return instrucciones;
 }
 
+t_puntero_instruccion obtiene_primera_instruccion(t_intructions instruccion){
+
+	t_puntero_instruccion una_instruccion = instruccion.start;
+
+	return una_instruccion;
+}
+
+t_size obtiene_offset (t_intructions instruccion){
+
+	t_size offset = instruccion.offset;
+
+	return offset;
+}
+
+uint32_t obtiene_sizeof_instrucciones(t_intructions *instrucciones){
+
+	uint32_t sizeof_puntero_primera_instruccion = sizeof(instrucciones->start);
+	uint32_t sizeof_offset = sizeof(instrucciones->offset);
+
+	return (sizeof_puntero_primera_instruccion+sizeof_offset);
+}
 
 
