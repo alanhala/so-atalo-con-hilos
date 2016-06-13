@@ -13,15 +13,15 @@ int correrTest(){
 
 	CU_initialize_registry();
 	CU_pSuite prueba = CU_add_suite("Suite de prueba", NULL, NULL);
-	CU_add_test(prueba, "uno", obtener_siguiente_instruccion);
-	CU_add_test(prueba, "dos", test_definir_variable);
-	CU_add_test(prueba, "tres", test_obtener_posicion_variable);
-	CU_add_test(prueba, "cuatro", test_actualizar_next_free_space);
-	//CU_add_test(prueba, "cinco", test_leer_data_de_memoria_con_iteraciones);
-//	CU_add_test(prueba, "seis", test_asignar_y_leer_valor_de_una_sola_pagina);
-//	CU_add_test(prueba, "siete", test_asignar_y_leer_valor_de_varias_paginas);
+//	CU_add_test(prueba, "uno", obtener_siguiente_instruccion);
+//	CU_add_test(prueba, "dos", test_definir_variable);
+//	CU_add_test(prueba, "tres", test_obtener_posicion_variable);
+//	CU_add_test(prueba, "cuatro", test_actualizar_next_free_space);
+//	CU_add_test(prueba, "cinco", test_leer_data_de_memoria_con_iteraciones);
+	CU_add_test(prueba, "seis", test_asignar_y_leer_valor_de_una_sola_pagina);
+	//CU_add_test(prueba, "siete", test_asignar_y_leer_valor_de_varias_paginas);
 	//CU_add_test(prueba, "ocho", test_ejecutar_programa_en_memoria);
-	//CU_add_test(prueba, "nueve", test_ir_a_label);
+//	CU_add_test(prueba, "nueve", test_ir_a_label);
 
 	CU_basic_set_mode(CU_BRM_VERBOSE);
 	CU_basic_run_tests();
@@ -150,9 +150,19 @@ void test_asignar_y_leer_valor_de_una_sola_pagina() {
     cambiar_contexto(pcb->pid);
     definirVariable('a');
     t_dato_en_memoria *dato_en_memoria = obtenerPosicionVariable('a');
-    asignar(dato_en_memoria, 123456789);
+	asignar(dato_en_memoria, 123456789);
     t_valor_variable valor = dereferenciar(dato_en_memoria);
-
+    //    t_dato_en_memoria *dato_en_memoria = malloc(sizeof(t_dato_en_memoria));
+    //    dato_en_memoria = obtenerPosicionVariable('a');
+    //
+    //    t_stack_element *stack_element = list_get(pcb->stack, list_size(pcb->stack) - 1);
+    //
+    //	int find_variable(t_variable *var) {
+    //		return var->id == 'a';
+    //	}
+    //
+    //	t_variable *variable = list_find(stack_element->variables, (void*)find_variable);
+    //	dato_en_memoria->direccion = variable->dato;
     CU_ASSERT_EQUAL(valor, 123456789);
 }
 
@@ -241,10 +251,13 @@ void test_leer_data_de_memoria_con_iteraciones() {
 	}
 }
 
+
+    t_direccion_virtual_memoria * direccion = malloc(sizeof(t_direccion_virtual_memoria));
+    direccion->offset=2;
+    direccion->pagina=1;
     t_dato_en_memoria *dato = malloc(sizeof(t_dato_en_memoria));
-    dato->size = 15;
-    dato->direccion->offset=2;
-    dato->direccion->pagina=1;
+	dato->size = 15;
+	dato->direccion = direccion;
 
     char* result = ejecutar_lectura_de_dato_con_iteraciones(leer_memoria, dato, 5);
 
