@@ -135,7 +135,7 @@ t_valor_variable dereferenciar(t_puntero direccion_variable) {
 
     char* respuesta = ejecutar_lectura_de_dato_con_iteraciones(leer_memoria_de_umc, direccion, tamanio_pagina);
     int valor;
-    memcpy(valor, &respuesta, direccion->size);
+    memcpy(&valor, respuesta, direccion->size);
     return valor;
 }
 
@@ -152,7 +152,7 @@ void go_back_to_previous_stack_element(t_stack_element *current_stack_element) {
     free_stack_element_memory(current_stack_element);
 }
 
-void asignar(t_puntero direccion_variable, t_valor_variable valor) {
+/*void asignar(t_puntero direccion_variable, t_valor_variable valor) {
 	t_dato_en_memoria *direccion = malloc(sizeof(t_dato_en_memoria));
 	direccion->size = direccion_variable;
 	char * valor_convertido = malloc(sizeof(valor));
@@ -160,6 +160,12 @@ void asignar(t_puntero direccion_variable, t_valor_variable valor) {
 
 
     ejecutar_escritura_de_dato_con_iteraciones(direccion, valor_convertido, tamanio_pagina);
+}*/
+
+void asignar(t_puntero direccion_variable, t_valor_variable valor) {
+    t_dato_en_memoria *direccion = (t_dato_en_memoria*) direccion_variable;
+
+    ejecutar_escritura_de_dato_con_iteraciones(direccion, (char*) &valor, tamanio_pagina);
 }
 
 void imprimir(t_valor_variable valor_mostrar) {
@@ -370,7 +376,11 @@ char* ejecutar_lectura_de_dato_con_iteraciones(void*(*closure_lectura)(t_dato_en
 
     //char *result = malloc(sizeof(char) * dato->size);
     char *result = malloc(dato->size +1);
-    t_dato_en_memoria *aux_dato = dato;
+    t_dato_en_memoria *aux_dato = malloc(sizeof(t_dato_en_memoria));
+    aux_dato->direccion = malloc(sizeof(t_direccion_virtual_memoria));
+    aux_dato->size = dato->size;
+    aux_dato->direccion->offset = dato->direccion->offset;
+    aux_dato->direccion->pagina = dato->direccion->pagina;
     int remaining_size = dato->size;
     int desplazamiento_acumulado = 0;
 
@@ -390,7 +400,7 @@ char* ejecutar_lectura_de_dato_con_iteraciones(void*(*closure_lectura)(t_dato_en
 
 	is_last_page = (aux_dato->direccion->offset + remaining_size < tamanio_pagina);
     }
-
+    free(aux_dato);
     return result;
 }
 
@@ -400,7 +410,12 @@ int ejecutar_escritura_de_dato_con_iteraciones(t_dato_en_memoria *dato, char* va
 	return escribir_en_umc(dato, valor);
     }
 
-    t_dato_en_memoria *aux_dato = dato;
+    t_dato_en_memoria *aux_dato = malloc(sizeof(t_dato_en_memoria));
+    aux_dato->direccion = malloc(sizeof(t_direccion_virtual_memoria));
+    aux_dato->size = dato->size;
+    aux_dato->direccion->offset = dato->direccion->offset;
+    aux_dato->direccion->pagina = dato->direccion->pagina;
+
     int remaining_size = dato->size;
     int desplazamiento_acumulado = 0;
 
@@ -425,6 +440,8 @@ int ejecutar_escritura_de_dato_con_iteraciones(t_dato_en_memoria *dato, char* va
 
 	is_last_page = (aux_dato->direccion->offset + remaining_size < tamanio_pagina);
     }
+
+    free(aux_dato);
 
     return 0;
 }
