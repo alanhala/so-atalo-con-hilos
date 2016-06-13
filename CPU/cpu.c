@@ -153,9 +153,16 @@ void go_back_to_previous_stack_element(t_stack_element *current_stack_element) {
 }
 
 void asignar(t_puntero direccion_variable, t_valor_variable valor) {
-    t_dato_en_memoria *direccion = (t_dato_en_memoria*) direccion_variable;
+	//FRABOS: ACA NO SABEMOS QUE ESTAS QUERIENDO HACER. NO FUNCIONA. QUEDA
+	//LA DIRECCION VIRTUAL MEMORIA SIN REFERENCIA 0x0
 
-    ejecutar_escritura_de_dato_con_iteraciones(direccion, (char*) &valor, tamanio_pagina);
+	//ESTAMOS POR OTRO LADO TENIENDO PROBLEMAS CON LA PAGINA Y EL OFFSET, SIEMPRE ES 0 0 AMBOS VALORES.
+	//REVISALO.
+	t_dato_en_memoria *direccion = (t_dato_en_memoria*) direccion_variable;
+
+	char *un_valor = string_itoa(valor);
+	//FRABOS: ACA LO QUE HICIMOS FUE CONVERTIR EL VALOR A UN STRING Y PASARLO EN LA FUNCION.
+    ejecutar_escritura_de_dato_con_iteraciones(direccion, un_valor, tamanio_pagina);
 }
 
 void imprimir(t_valor_variable valor_mostrar) {
@@ -409,7 +416,7 @@ int ejecutar_escritura_de_dato_con_iteraciones(t_dato_en_memoria *dato, char* va
 
 	char *data_to_write = malloc(aux_dato->size);
 	memcpy(data_to_write, valor+desplazamiento_acumulado, aux_dato->size);
-	escribir_en_umc(&aux_dato, data_to_write);
+	escribir_en_umc(aux_dato, data_to_write);
 	free(data_to_write);
 
 	desplazamiento_acumulado += aux_dato->size;
