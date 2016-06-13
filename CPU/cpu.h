@@ -39,8 +39,8 @@ typedef struct {
 typedef struct {
     uint32_t size;
     t_direccion_virtual_memoria *direccion;
-
 } t_dato_en_memoria;
+
 typedef struct {
 	t_nombre_variable id;
 	t_dato_en_memoria* dato;
@@ -66,6 +66,7 @@ typedef struct {
 	t_list* label_index;
 	uint32_t program_finished;
 } t_PCB;
+
 int QUANTUM;
 void set_quantum(int quantum);
 int ejecutar_pcb();
