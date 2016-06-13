@@ -115,7 +115,7 @@ t_puntero definirVariable(t_nombre_variable variable) {
 
 	list_add(stack_element->variables, new_variable);
 
-	return (t_puntero)&new_variable->dato;
+	return (t_puntero)(new_variable->dato);
 }
 
 t_puntero obtenerPosicionVariable(t_nombre_variable identificador_variable) {
@@ -127,7 +127,7 @@ t_puntero obtenerPosicionVariable(t_nombre_variable identificador_variable) {
 
 	t_variable *variable = list_find(stack_element->variables, (void*)find_variable);
 
-	return (t_puntero) &variable->dato;
+	return (t_puntero)(variable->dato);
 }
 
 t_valor_variable dereferenciar(t_puntero direccion_variable) {
@@ -160,9 +160,9 @@ void asignar(t_puntero direccion_variable, t_valor_variable valor) {
 	//REVISALO.
 	t_dato_en_memoria *direccion = (t_dato_en_memoria*) direccion_variable;
 
-	char *un_valor = string_itoa(valor);
-	//FRABOS: ACA LO QUE HICIMOS FUE CONVERTIR EL VALOR A UN STRING Y PASARLO EN LA FUNCION.
-    ejecutar_escritura_de_dato_con_iteraciones(direccion, un_valor, tamanio_pagina);
+	//char *un_valor = string_itoa(valor);
+
+    ejecutar_escritura_de_dato_con_iteraciones(direccion, (char *)valor, tamanio_pagina);
 }
 
 void imprimir(t_valor_variable valor_mostrar) {
@@ -384,7 +384,7 @@ char* ejecutar_lectura_de_dato_con_iteraciones(void*(*closure_lectura)(t_dato_en
 	    aux_dato->size = remaining_size;
 	}
 
-	//memcpy(result+desplazamiento_acumulado, closure_lectura(&aux_dato), aux_dato.size);
+	//memcpy(result+desplazamiento_acumulado, closure_lectura(aux_dato), aux_dato->size);
 	strcpy(result+desplazamiento_acumulado, closure_lectura(aux_dato));
 	desplazamiento_acumulado += aux_dato->size;
 	aux_dato->direccion->offset = 0;
