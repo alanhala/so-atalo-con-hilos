@@ -32,9 +32,9 @@ t_PCB *pcb;
 uint32_t tamanio_pagina;
 
 void execute_next_instruction_for_process() {
-	t_dato_en_memoria instruccion = get_next_instruction();
+	t_dato_en_memoria *instruccion = get_next_instruction();
 
-	char *instruccion_string = ejecutar_lectura_de_dato_con_iteraciones(leer_memoria_de_umc, &instruccion, tamanio_pagina);
+	char *instruccion_string = ejecutar_lectura_de_dato_con_iteraciones(leer_memoria_de_umc, instruccion, tamanio_pagina);
 
 	int program_counter = pcb->program_counter;
 	analizadorLinea(strdup(instruccion_string), &functions, &kernel_functions);
@@ -81,35 +81,37 @@ int cambiar_contexto(int pid){
 	return respuesta->un_numero;
 }
 
-t_dato_en_memoria get_next_instruction() {
+t_dato_en_memoria* get_next_instruction() {
     t_intructions *indice = pcb->instructions_index;
 
     indice += pcb->program_counter;
 
-    t_intructions instruccion = *indice;
+    t_intructions *instruccion = indice;
 
-    int pagina = instruccion.start / tamanio_pagina;
+    int pagina = instruccion->start / tamanio_pagina;
 
     t_dato_en_memoria *result = malloc(sizeof(t_dato_en_memoria));
 
-    result->direccion.offset = instruccion.start - (pagina * tamanio_pagina);
-    result->direccion.pagina = pagina;
-    result->size = instruccion.offset;
+    result->direccion->offset = instruccion->start - (pagina * tamanio_pagina);
+    result->direccion->pagina = pagina;
+    result->size = instruccion->offset;
 
-    return *result;
+    return result;
 }
 
 t_puntero definirVariable(t_nombre_variable variable) {
 	t_stack_element *stack_element = list_get(pcb->stack, list_size(pcb->stack) - 1);
 
 	t_variable *new_variable = malloc(sizeof(t_variable));
+	new_variable->dato = malloc(sizeof(t_dato_en_memoria));
+	new_variable->dato->direccion = malloc(sizeof(t_direccion_virtual_memoria));
 
 	new_variable->id = variable;
-	new_variable->dato.size = sizeof(int);
-	new_variable->dato.direccion.pagina = pcb->stack_free_space_pointer.pagina;
-	new_variable->dato.direccion.offset = pcb->stack_free_space_pointer.offset;
+	((new_variable->dato)->direccion)->pagina = pcb->stack_free_space_pointer->pagina;
+	new_variable->dato->size = sizeof(int);
+	((new_variable->dato)->direccion)->offset = pcb->stack_free_space_pointer->offset;
 
-	incrementar_next_free_space(new_variable->dato.size);
+	incrementar_next_free_space(new_variable->dato->size);
 
 	list_add(stack_element->variables, new_variable);
 
@@ -142,6 +144,8 @@ void go_back_to_previous_stack_element(t_stack_element *current_stack_element) {
     for(i=0; i<list_size(current_stack_element->variables); i++) {
 	decrementar_next_free_space(sizeof(int));
     }
+
+    int j = list_size(pcb->stack);
 
     list_remove(pcb->stack, list_size(pcb->stack)-1);
 
@@ -184,7 +188,7 @@ void irALabel(t_nombre_etiqueta nombre_etiqueta) {
 
 void llamarSinRetorno(t_nombre_etiqueta etiqueta) {
     t_stack_element *stack_element = create_stack_element();
-
+    stack_element->posicion_retorno = pcb->program_counter+1;
     list_add(pcb->stack, stack_element);
 
     irALabel(etiqueta);
@@ -193,7 +197,7 @@ void llamarSinRetorno(t_nombre_etiqueta etiqueta) {
 void llamarConRetorno(t_nombre_etiqueta etiqueta, t_puntero donde_retornar) {
 
     t_stack_element *stack_element = create_stack_element();
-    stack_element->valor_retorno = *(t_dato_en_memoria*)donde_retornar;
+    memcpy(stack_element->valor_retorno, donde_retornar, sizeof(t_dato_en_memoria));
     stack_element->posicion_retorno = pcb->program_counter+1;
 
     list_add(pcb->stack, stack_element);
@@ -218,7 +222,7 @@ void finalizar(void) {
 void retornar(t_valor_variable retorno) {
     t_stack_element *stack_element = list_get(pcb->stack, list_size(pcb->stack)-1);
 
-    ejecutar_escritura_de_dato_con_iteraciones(&(stack_element->valor_retorno), (char*) &retorno,  tamanio_pagina);
+    ejecutar_escritura_de_dato_con_iteraciones(stack_element->valor_retorno, (char*) &retorno,  tamanio_pagina);
 }
 
 int send_text_to_kernel(char* print_value, uint32_t length) {
@@ -239,8 +243,8 @@ char* leer_memoria_de_umc(t_dato_en_memoria *dato) {
 
     memset(pedido,0,sizeof(t_solicitar_bytes_de_una_pagina_a_UMC));
 
-    pedido->pagina = dato->direccion.pagina;
-    pedido->offset = dato->direccion.offset;
+    pedido->pagina = dato->direccion->pagina;
+    pedido->offset = dato->direccion->offset;
     pedido->size = dato->size;
 
     t_stream *buffer = (t_stream*)serializar_mensaje(31,pedido);
@@ -274,8 +278,8 @@ int escribir_en_umc(t_dato_en_memoria * dato, char* valor) {
 
     memset(escritura_bytes,0,sizeof(t_escribir_bytes_de_una_pagina_en_UMC));
 
-    escritura_bytes->pagina = (dato->direccion).pagina;
-    escritura_bytes->offset = (dato->direccion).offset;
+    escritura_bytes->pagina = (dato->direccion)->pagina;
+    escritura_bytes->offset = (dato->direccion)->offset;
     escritura_bytes->size= dato->size;
     escritura_bytes->buffer = valor;
 
@@ -303,23 +307,23 @@ int escribir_en_umc(t_dato_en_memoria * dato, char* valor) {
 }
 
 void incrementar_next_free_space(uint32_t size) {
-    int absolute_offset = (tamanio_pagina * pcb->stack_free_space_pointer.pagina ) + pcb->stack_free_space_pointer.offset + size;
+    int absolute_offset = (tamanio_pagina * pcb->stack_free_space_pointer->pagina ) + pcb->stack_free_space_pointer->offset + size;
 
     int new_pages = absolute_offset / tamanio_pagina;
     int new_offset = absolute_offset - (new_pages * tamanio_pagina);
 
-    pcb->stack_free_space_pointer.pagina = new_pages;
-    pcb->stack_free_space_pointer.offset = new_offset;
+    pcb->stack_free_space_pointer->pagina = new_pages;
+    pcb->stack_free_space_pointer->offset = new_offset;
 };
 
 void decrementar_next_free_space(uint32_t size) {
-    int absolute_offset = (tamanio_pagina * pcb->stack_free_space_pointer.pagina ) + pcb->stack_free_space_pointer.offset - size;
+    int absolute_offset = (tamanio_pagina * pcb->stack_free_space_pointer->pagina ) + pcb->stack_free_space_pointer->offset - size;
 
     int new_pages = absolute_offset / tamanio_pagina;
     int new_offset = absolute_offset - (new_pages * tamanio_pagina);
 
-    pcb->stack_free_space_pointer.pagina = new_pages;
-    pcb->stack_free_space_pointer.offset = new_offset;
+    pcb->stack_free_space_pointer->pagina = new_pages;
+    pcb->stack_free_space_pointer->offset = new_offset;
 };
 
 void free_stack_element_memory(t_stack_element *element) {
@@ -348,6 +352,7 @@ t_stack_element* create_stack_element() {
     t_stack_element *stack_element = malloc(sizeof(stack_element));
     stack_element->variables = list_create();
     stack_element->posicion_retorno = 0;
+    stack_element->valor_retorno = malloc(sizeof(t_dato_en_memoria));
 
     return stack_element;
 }
@@ -355,30 +360,30 @@ t_stack_element* create_stack_element() {
 
 char* ejecutar_lectura_de_dato_con_iteraciones(void*(*closure_lectura)(t_dato_en_memoria*), t_dato_en_memoria *dato, uint32_t tamanio_pagina) {
     int is_last_page = 0;
-    if(is_last_page = (dato->direccion.offset + dato->size <= tamanio_pagina)) {
+    if(is_last_page = (dato->direccion->offset + dato->size <= tamanio_pagina)) {
 	return closure_lectura(dato);
     }
 
     char *result = malloc(sizeof(char) * dato->size);
-    t_dato_en_memoria aux_dato = *dato;
+    t_dato_en_memoria *aux_dato = dato;
     int remaining_size = dato->size;
     int desplazamiento_acumulado = 0;
 
     while(remaining_size > 0) {
 	if(!is_last_page || remaining_size > tamanio_pagina) {
-	    aux_dato.size = tamanio_pagina - aux_dato.direccion.offset;
+	    aux_dato->size = tamanio_pagina - aux_dato->direccion->offset;
 	} else {
-	    aux_dato.size = remaining_size;
+	    aux_dato->size = remaining_size;
 	}
 
 	//memcpy(result+desplazamiento_acumulado, closure_lectura(&aux_dato), aux_dato.size);
-	strcpy(result+desplazamiento_acumulado, closure_lectura(&aux_dato));
-	desplazamiento_acumulado += aux_dato.size;
-	aux_dato.direccion.offset = 0;
-	remaining_size -= aux_dato.size;
-	aux_dato.direccion.pagina++;
+	strcpy(result+desplazamiento_acumulado, closure_lectura(aux_dato));
+	desplazamiento_acumulado += aux_dato->size;
+	aux_dato->direccion->offset = 0;
+	remaining_size -= aux_dato->size;
+	aux_dato->direccion->pagina++;
 
-	is_last_page = (aux_dato.direccion.offset + remaining_size < tamanio_pagina);
+	is_last_page = (aux_dato->direccion->offset + remaining_size < tamanio_pagina);
     }
 
     return result;
@@ -386,32 +391,32 @@ char* ejecutar_lectura_de_dato_con_iteraciones(void*(*closure_lectura)(t_dato_en
 
 int ejecutar_escritura_de_dato_con_iteraciones(t_dato_en_memoria *dato, char* valor, uint32_t tamanio_pagina) {
     int is_last_page = 0;
-    if(is_last_page = (dato->direccion.offset + dato->size <= tamanio_pagina)) {
+    if(is_last_page = (dato->direccion->offset + dato->size <= tamanio_pagina)) {
 	return escribir_en_umc(dato, valor);
     }
 
-    t_dato_en_memoria aux_dato = *dato;
+    t_dato_en_memoria *aux_dato = dato;
     int remaining_size = dato->size;
     int desplazamiento_acumulado = 0;
 
     while(remaining_size > 0) {
 	if(!is_last_page || remaining_size > tamanio_pagina) {
-	    aux_dato.size = tamanio_pagina - aux_dato.direccion.offset;
+	    aux_dato->size = tamanio_pagina - aux_dato->direccion->offset;
 	} else {
-	    aux_dato.size = remaining_size;
+	    aux_dato->size = remaining_size;
 	}
 
-	char *data_to_write = malloc(aux_dato.size);
-	memcpy(data_to_write, valor+desplazamiento_acumulado, aux_dato.size);
+	char *data_to_write = malloc(aux_dato->size);
+	memcpy(data_to_write, valor+desplazamiento_acumulado, aux_dato->size);
 	escribir_en_umc(&aux_dato, data_to_write);
 	free(data_to_write);
 
-	desplazamiento_acumulado += aux_dato.size;
-	aux_dato.direccion.offset = 0;
-	remaining_size -= aux_dato.size;
-	aux_dato.direccion.pagina++;
+	desplazamiento_acumulado += aux_dato->size;
+	aux_dato->direccion->offset = 0;
+	remaining_size -= aux_dato->size;
+	aux_dato->direccion->pagina++;
 
-	is_last_page = (aux_dato.direccion.offset + remaining_size < tamanio_pagina);
+	is_last_page = (aux_dato->direccion->offset + remaining_size < tamanio_pagina);
     }
 
     return 0;

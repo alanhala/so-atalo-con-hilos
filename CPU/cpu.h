@@ -38,19 +38,19 @@ typedef struct {
 
 typedef struct {
     uint32_t size;
-    t_direccion_virtual_memoria direccion;
+    t_direccion_virtual_memoria *direccion;
 
 } t_dato_en_memoria;
 typedef struct {
 	t_nombre_variable id;
-	t_dato_en_memoria dato;
+	t_dato_en_memoria* dato;
 } t_variable;
 
 typedef struct {
 	//t_list *argumentos;
 	t_list *variables;
 	uint32_t posicion_retorno;
-	t_dato_en_memoria valor_retorno;
+	t_dato_en_memoria *valor_retorno;
 } t_stack_element;
 
 typedef struct {
@@ -62,7 +62,7 @@ typedef struct {
 	uint32_t used_pages;
 	uint32_t instructions_size;
 	t_intructions* instructions_index;
-	t_direccion_virtual_memoria stack_free_space_pointer;
+	t_direccion_virtual_memoria *stack_free_space_pointer;
 	t_list* label_index;
 	uint32_t program_finished;
 } t_PCB;
@@ -70,10 +70,11 @@ int QUANTUM;
 void set_quantum(int quantum);
 int ejecutar_pcb();
 void execute_next_instruction_for_process();
-t_dato_en_memoria get_next_instruction();
+t_dato_en_memoria* get_next_instruction();
 char* obtener_instruccion_de_umc(t_dato_en_memoria *instruccion);
 void incrementar_next_free_space();
 void decrementar_next_free_space();
+void free_stack_element_memory(t_stack_element *element);
 void set_PCB(t_PCB *pcb);
 t_PCB* get_PCB();
 t_stack_element* create_stack_element();

@@ -98,7 +98,7 @@ int main(int argc, char **argv) {
 			free_space->offset = 3;
 			free_space->pagina = 20;
 			//pcb->stack_pointer = recibir_pcb->stack_pointer;
-			pcb->stack_free_space_pointer = *free_space;
+			pcb->stack_free_space_pointer = free_space;
 			set_PCB(pcb);
 			int resultado_ejecucion = ejecutar_pcb();
 
