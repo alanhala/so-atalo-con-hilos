@@ -342,9 +342,9 @@ t_recibir_PCB_de_Kernel *deserealizar_enviar_PCB_a_CPU(char *datos){
 		t_stack_element *stack_element = malloc(sizeof(t_stack_element));
 
 		stack_element->posicion_retorno = posicion_retorno;
-		stack_element->valor_retorno.size = size_valor_de_retorno;
-		stack_element->valor_retorno.direccion.offset = offset_direccion_del_dato;
-		stack_element->valor_retorno.direccion.pagina = pagina_direccion_del_dato;
+		stack_element->valor_retorno->size = size_valor_de_retorno;
+		stack_element->valor_retorno->direccion->offset = offset_direccion_del_dato;
+		stack_element->valor_retorno->direccion->pagina = pagina_direccion_del_dato;
 		stack_element->variables = list_create();
 
 		int contador_de_variables_en_el_elemento_del_stack = 0;
@@ -374,9 +374,9 @@ t_recibir_PCB_de_Kernel *deserealizar_enviar_PCB_a_CPU(char *datos){
 			t_variable *una_variable = malloc(sizeof(t_variable));
 
 			una_variable->id = id;
-			una_variable->dato.size = size_dato;
-			una_variable->dato.direccion.offset = offset_virtual_address;
-			una_variable->dato.direccion.pagina = page_virtual_address;
+			una_variable->dato->size = size_dato;
+			una_variable->dato->direccion->offset = offset_virtual_address;
+			una_variable->dato->direccion->pagina = page_virtual_address;
 
 			list_add(stack_element->variables,una_variable);
 

@@ -91,7 +91,7 @@ t_dato_en_memoria* get_next_instruction() {
     int pagina = instruccion->start / tamanio_pagina;
 
     t_dato_en_memoria *result = malloc(sizeof(t_dato_en_memoria));
-
+    result->direccion = malloc(sizeof(t_direccion_virtual_memoria));
     result->direccion->offset = instruccion->start - (pagina * tamanio_pagina);
     result->direccion->pagina = pagina;
     result->size = instruccion->offset;
@@ -100,7 +100,7 @@ t_dato_en_memoria* get_next_instruction() {
 }
 
 t_puntero definirVariable(t_nombre_variable variable) {
-	t_stack_element *stack_element = list_get(pcb->stack, list_size(pcb->stack) - 1);
+	t_stack_element *stack_element =list_get(pcb->stack, list_size(pcb->stack) - 1);
 
 	t_variable *new_variable = malloc(sizeof(t_variable));
 	new_variable->dato = malloc(sizeof(t_dato_en_memoria));
@@ -349,7 +349,7 @@ void set_tamanio_pagina(uint32_t tamanio) {
 }
 
 t_stack_element* create_stack_element() {
-    t_stack_element *stack_element = malloc(sizeof(stack_element));
+    t_stack_element *stack_element = malloc(sizeof(t_stack_element));
     stack_element->variables = list_create();
     stack_element->posicion_retorno = 0;
     stack_element->valor_retorno = malloc(sizeof(t_dato_en_memoria));
@@ -364,7 +364,8 @@ char* ejecutar_lectura_de_dato_con_iteraciones(void*(*closure_lectura)(t_dato_en
 	return closure_lectura(dato);
     }
 
-    char *result = malloc(sizeof(char) * dato->size);
+    //char *result = malloc(sizeof(char) * dato->size);
+    char *result = malloc(dato->size +1);
     t_dato_en_memoria *aux_dato = dato;
     int remaining_size = dato->size;
     int desplazamiento_acumulado = 0;
