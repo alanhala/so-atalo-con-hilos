@@ -6,6 +6,7 @@
  */
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <ctype.h>
 #include <netinet/in.h>
 #include <netdb.h>
 #include <arpa/inet.h>
@@ -21,12 +22,15 @@
 #include "tlbTest.h"
 
 void tlb_test_1();
+void isPrint();
+
 
 int correr_test_tlb(){
 	CU_initialize_registry();
 
       CU_pSuite tlb = CU_add_suite("Suite de TLB", NULL, NULL);
-	  CU_add_test(tlb , "tlb test 1", tlb_test_1); //IMPORATENTE. CANTIDAD ENTRADAS TLB TIENE QUE SER 5
+	  //CU_add_test(tlb , "tlb test 1", tlb_test_1); //IMPORATENTE. CANTIDAD ENTRADAS TLB TIENE QUE SER 5
+      CU_add_test(tlb , "is print", isPrint);
 
 
 	  CU_basic_set_mode(CU_BRM_VERBOSE);
@@ -36,6 +40,57 @@ int correr_test_tlb(){
 
 
 	  return CU_get_error();
+
+}
+
+void isPrint(){
+		set_test();//para usar mock
+		set_cantidad_entradas_tlb(5);
+		inicializar_estructuras();
+		set_algoritmo_reemplazo("ClockM");
+		crear_swap_mock();
+
+		char * codigo_pid0= "0pg000pg010pg020pg030pg040pg050pg060pg070pg080pg090pg100pg110pg120pg130pg14";
+		char * codigo_pid5 = "5pg005pg015pg025pg035pg045pg055pg065pg075pg085pg095pg105pg115pg125pg135pg14";
+
+
+		int paginas_necesarias = (30);
+		set_max_frames_por_proceso(5);
+		cargar_nuevo_programa(0, paginas_necesarias, codigo_pid0);
+		cargar_nuevo_programa(5, paginas_necesarias, codigo_pid5);
+
+
+		char * lectura =  leer_pagina_de_programa(5, 3, 0, TAMANIO_FRAME);
+		printf("%s\n", lectura);
+		int i = 0;
+		while (lectura[i] != '\0') {
+		  if (isprint(lectura[i]))
+			  printf("%c    ", lectura[i]);
+		  else
+			  printf("~");
+		  i++;
+		}
+		printf("\n");
+		i = 0;
+		while (lectura[i] != '\0') {
+		  printf("%02x   ", (unsigned int) lectura[i]);
+		  i++;
+		}
+		printf("\n");
+//
+//		while(*lectura)
+//		    printf("%02x   ", (unsigned int) *lectura++);
+//		  printf("\n");
+//		if (isprint(lectura))
+//			printeable=1;
+
+//		lectura =  leer_pagina_de_programa(5, 6, 0, TAMANIO_FRAME);
+//		lectura =  leer_pagina_de_programa(0, 9, 0, TAMANIO_FRAME);
+//		lectura =  leer_pagina_de_programa(0, 8, 0, TAMANIO_FRAME);
+//		lectura =  leer_pagina_de_programa(0, 2, 0, TAMANIO_FRAME);
+//
+
+
 
 }
 

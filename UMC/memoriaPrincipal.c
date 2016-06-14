@@ -773,6 +773,7 @@ int dame_pid_activo(int cpu_socket_descriptor){
 }
 int cambio_contexto(int cpu_id, int pid){
 
+	flush_tlb(dame_pid_activo(cpu_id));
 	int cpu_id_iguales(t_cpu_context *cpu_context) {
 		if (cpu_context->cpu_id == cpu_id)
 			cpu_context->pid_active = pid;
@@ -952,15 +953,32 @@ void dump_memory(int pid){
 
 		void dump(t_tabla_de_paginas *tabla)
 		{
-			printf("Contenido en memoria de proceso %d\n", tabla->pid);
+			printf("			Contenido en memoria de proceso %d\n\n", tabla->pid);
 			int i =0;
 			for(0; i<tabla->paginas_totales; i++)
 			{
 				int frame =(tabla->entradas[i]).frame ;
 				if (frame != -1)
 				{
+					printf("Contenido de la entrada %d ubicada en el frame %d : \n",i, frame );
 					char *  contenido = leer_frame_de_memoria_principal(frame, 0, TAMANIO_FRAME);
-					printf("%s\n", contenido);
+					int i = 0;
+					while (contenido[i] != '\0') {
+					  if (isprint(contenido[i]))
+						  printf("%c    ", contenido[i]);
+					  else
+						  printf("~");
+					  i++;
+					}
+					printf("\n");
+					i = 0;
+					while (contenido[i] != '\0') {
+					  printf("%02x   ", (unsigned int) contenido[i]);
+					  i++;
+					}
+					printf("\n");
+					printf("\n");
+
 				}
 			}
 		}
