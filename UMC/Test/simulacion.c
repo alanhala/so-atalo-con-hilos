@@ -67,7 +67,11 @@ CU_initialize_registry();
 void comandos(){
 	simulacion_3();
 	dump_memory(-1);
-	flush_memory(0);
+	printf("\n\n AHORA HAGO UN DUMP SOLO DEL PROCESO 0 \n\n");
+	dump_memory(0);
+	printf("\n\n AHORA HAGO UN DUMP DE TODAS LAS ESTRUCTURAS \n\n");
+	dump_structs(-1);
+
 
 //	t_tabla_de_paginas * tabla = buscar_tabla_de_paginas_de_pid(0);
 //
