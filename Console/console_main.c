@@ -31,6 +31,28 @@
 //Agrega Newton -- Fin
 
 int main(int argc, char **argv) {
+	char * codigo;
+	FILE *fdarchivo;
+
+	if ((fdarchivo = fopen(argv[1], "rb")) == 0) {
+		//todo log el archivo esta vacio en este caso no se ejecuta consola
+		//return 0;
+		char * codigo = "begin\nvariables c, d, e\nc=2147483647\nd=224947129\nf\ne <- g\nend\nfunction f\nvariables a\na=1\nend\nfunction g\nvariables a\na=2\nreturn a\nend";
+
+	}
+	else{
+		fseek(fdarchivo, 0L, SEEK_END);
+		int tamanio = ftell(fdarchivo);
+		rewind(fdarchivo);
+		codigo = malloc(tamanio);
+		fread(codigo, tamanio, 1, fdarchivo);
+		//printf("  %s\n",  codigo);
+		//return 0;
+	}
+
+
+
+
 
 	int kernel_socket_descriptor = create_client_socket_descriptor("localhost", "9000");
 	int a =2;
