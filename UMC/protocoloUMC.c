@@ -398,6 +398,7 @@ t_stream * serializar_escribir_pagina_swap(t_escribir_pagina_swap * escritura){
 	memcpy(stream->datos+offset,&pagina,tmpsize=sizeof(uint32_t));
 	offset+=tmpsize;
 
+
 	memcpy(stream->datos+offset,escritura->datos,tmpsize=size_datos);
 	offset+=tmpsize;
 

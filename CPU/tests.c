@@ -13,13 +13,13 @@ int correrTest(){
 
 	CU_initialize_registry();
 	CU_pSuite prueba = CU_add_suite("Suite de prueba", NULL, NULL);
-//	CU_add_test(prueba, "uno", obtener_siguiente_instruccion);
-//	CU_add_test(prueba, "dos", test_definir_variable);
-//	CU_add_test(prueba, "tres", test_obtener_posicion_variable);
-//	CU_add_test(prueba, "cuatro", test_actualizar_next_free_space);
-//	CU_add_test(prueba, "cinco", test_leer_data_de_memoria_con_iteraciones);
-//	CU_add_test(prueba, "seis", test_asignar_y_leer_valor_de_una_sola_pagina);
-//	CU_add_test(prueba, "siete", test_asignar_y_leer_valor_de_varias_paginas);
+	CU_add_test(prueba, "uno", obtener_siguiente_instruccion);
+	CU_add_test(prueba, "dos", test_definir_variable);
+	CU_add_test(prueba, "tres", test_obtener_posicion_variable);
+	CU_add_test(prueba, "cuatro", test_actualizar_next_free_space);
+	CU_add_test(prueba, "cinco", test_leer_data_de_memoria_con_iteraciones);
+	CU_add_test(prueba, "seis", test_asignar_y_leer_valor_de_una_sola_pagina);
+	CU_add_test(prueba, "siete", test_asignar_y_leer_valor_de_varias_paginas);
 	CU_add_test(prueba, "ocho", test_ejecutar_programa_en_memoria);
 	CU_add_test(prueba, "nueve", test_ir_a_label);
 
@@ -60,7 +60,9 @@ void test_ejecutar_programa_en_memoria() {
     cambiar_contexto(pcb->pid);
 
     //Cargo metadata de programa ANSISOP en PCB
-    t_metadata_program *metadata = metadata_desde_literal("begin\nvariables c, d, e\nc=2147483647\nd=224947129\nf\ne <- g\nend\nfunction f\nvariables a\na=1234\nend\nfunction g\nvariables a\na=4321\nreturn a\nend");
+//    t_metadata_program *metadata = metadata_desde_literal("begin\nvariables c, d, e\nc=2147483647\nd=224947129\nf\ne <- g\nend\nfunction f\nvariables a\na=1234\nend\nfunction g\nvariables a\na=4321\nreturn a\nend");
+      t_metadata_program *metadata = metadata_desde_literal("begin\nvariables c, d, e\nc=2147483647\nd=224947129\nf\ne <- g\nend\nfunction f\nvariables a\na=1234\nend\nfunction g\nvariables a\na=2\nreturn a\nend");
+
     pcb->instructions_index = metadata->instrucciones_serializado;
     pcb->label_index = get_label_index(metadata);
 
@@ -100,7 +102,9 @@ void test_ejecutar_programa_en_memoria() {
     execute_next_instruction_for_process();
     execute_next_instruction_for_process();
     execute_next_instruction_for_process();
-    CU_ASSERT_EQUAL(dereferenciar(obtenerPosicionVariable('e')), 4321);
+    int valor_final_e = dereferenciar(obtenerPosicionVariable('e'));
+   // CU_ASSERT_EQUAL(valor_final_e, 4321);
+    CU_ASSERT_EQUAL(valor_final_e, 2);
 //    execute_next_instruction_for_process();
 //    execute_next_instruction_for_process();
 }
@@ -207,7 +211,7 @@ void mockear_pcb() {
     set_tamanio_pagina(5);
 
     t_direccion_virtual_memoria *free_space = malloc(sizeof(t_direccion_virtual_memoria));
-    free_space->offset =0;
+    free_space->offset =3;
     free_space->pagina = 40;
 
     pcb->stack_free_space_pointer = free_space;

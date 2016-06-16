@@ -134,7 +134,7 @@ t_valor_variable dereferenciar(t_puntero direccion_variable) {
     t_dato_en_memoria *direccion = (t_dato_en_memoria*) direccion_variable;
 
     char* respuesta = ejecutar_lectura_de_dato_con_iteraciones(leer_memoria_de_umc, direccion, tamanio_pagina);
-    int valor;
+    uint32_t valor;
     memcpy(&valor, respuesta, direccion->size);
     return valor;
 }
@@ -381,8 +381,8 @@ char* ejecutar_lectura_de_dato_con_iteraciones(void*(*closure_lectura)(t_dato_en
 	    aux_dato->size = remaining_size;
 	}
 
-	//memcpy(result+desplazamiento_acumulado, closure_lectura(aux_dato), aux_dato->size);
-	strcpy(result+desplazamiento_acumulado, closure_lectura(aux_dato));
+	memcpy(result+desplazamiento_acumulado, closure_lectura(aux_dato), aux_dato->size);
+	//strcpy(result+desplazamiento_acumulado, closure_lectura(aux_dato));
 	desplazamiento_acumulado += aux_dato->size;
 	aux_dato->direccion->offset = 0;
 	remaining_size -= aux_dato->size;
@@ -391,6 +391,8 @@ char* ejecutar_lectura_de_dato_con_iteraciones(void*(*closure_lectura)(t_dato_en
 	is_last_page = (aux_dato->direccion->offset + remaining_size < tamanio_pagina);
     }
     free(aux_dato);
+    char endString='\0';
+	memcpy(result+dato->size,&endString,1);
     return result;
 }
 

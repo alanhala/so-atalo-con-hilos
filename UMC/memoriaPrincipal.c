@@ -962,19 +962,21 @@ void dump_memory(int pid){
 				{
 					printf("Contenido de la entrada %d ubicada en el frame %d : \n",i, frame );
 					char *  contenido = leer_frame_de_memoria_principal(frame, 0, TAMANIO_FRAME);
-					int i = 0;
-					while (contenido[i] != '\0') {
-					  if (isprint(contenido[i]))
-						  printf("%c    ", contenido[i]);
+					int posicion = 0;
+					while (contenido[posicion] != '\0') {
+					  if (isprint(contenido[posicion]))
+						  printf("%c    ", contenido[posicion]);
 					  else
-						  printf("~");
-					  i++;
+						  printf("~    ");
+					  posicion++;
 					}
 					printf("\n");
-					i = 0;
-					while (contenido[i] != '\0') {
-					  printf("%02x   ", (unsigned int) contenido[i]);
-					  i++;
+					int poshex = 0;
+					while (contenido[poshex] != '\0') {
+					  //printf("%02x   ", (unsigned int) contenido[poshex]);
+					  printf("%x   ", contenido[poshex] & 0xff);
+					  fflush(stdout);
+					  poshex++;
 					}
 					printf("\n");
 					printf("\n");
@@ -1000,18 +1002,18 @@ void dump_memory(int pid){
 			{
 				printf("Contenido de la entrada %d ubicada en el frame %d : \n",i, frame );
 				char *  contenido = leer_frame_de_memoria_principal(frame, 0, TAMANIO_FRAME);
-				int i = 0;
-				while (contenido[i] != '\0') {
-				  if (isprint(contenido[i]))
-					  printf("%c    ", contenido[i]);
+				int posicion = 0;
+				while (contenido[posicion] != '\0') {
+				  if (isprint(contenido[posicion]))
+					  printf("%c    ", contenido[posicion]);
 				  else
 					  printf("~");
 				  i++;
 				}
 				printf("\n");
-				i = 0;
-				while (contenido[i] != '\0') {
-				  printf("%02x   ", (unsigned int) contenido[i]);
+				int poshex = 0;
+				while (contenido[poshex] != '\0') {
+				  printf("%02x   ", (unsigned int) contenido[poshex]);
 				  i++;
 				}
 				printf("\n");
