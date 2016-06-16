@@ -123,7 +123,7 @@ t_stream *serializar_escribir_bytes_de_una_pagina_en_UMC(t_escribir_bytes_de_una
 	uint32_t 	tmpsize = 0,
 				offset = 0;
 
-	size_t size_bytes_a_escribir = strlen(escritura->buffer)+1;
+	size_t size_bytes_a_escribir = escritura->size+1;	//El campo size es el tamano del string, sin el '\0'. Hablado con @Frabos
 
 	uint32_t 	size_escritura = 	sizeof(uint32_t) +	    //Tamano del numero de pagina
 									sizeof(uint32_t) +	    //Tamano del offset
