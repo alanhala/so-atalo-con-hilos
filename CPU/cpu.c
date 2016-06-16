@@ -152,20 +152,16 @@ void go_back_to_previous_stack_element(t_stack_element *current_stack_element) {
     free_stack_element_memory(current_stack_element);
 }
 
-/*void asignar(t_puntero direccion_variable, t_valor_variable valor) {
-	t_dato_en_memoria *direccion = malloc(sizeof(t_dato_en_memoria));
-	direccion->size = direccion_variable;
-	char * valor_convertido = malloc(sizeof(valor));
-	memcpy(valor_convertido, &valor, sizeof(valor));
-
-
-    ejecutar_escritura_de_dato_con_iteraciones(direccion, valor_convertido, tamanio_pagina);
-}*/
-
 void asignar(t_puntero direccion_variable, t_valor_variable valor) {
     t_dato_en_memoria *direccion = (t_dato_en_memoria*) direccion_variable;
 
     ejecutar_escritura_de_dato_con_iteraciones(direccion, (char*) &valor, tamanio_pagina);
+}
+
+void retornar(t_valor_variable retorno) {
+    t_stack_element *stack_element = list_get(pcb->stack, list_size(pcb->stack)-1);
+
+    asignar(stack_element->valor_retorno, retorno);
 }
 
 void imprimir(t_valor_variable valor_mostrar) {
@@ -207,7 +203,7 @@ void llamarSinRetorno(t_nombre_etiqueta etiqueta) {
 void llamarConRetorno(t_nombre_etiqueta etiqueta, t_puntero donde_retornar) {
 
     t_stack_element *stack_element = create_stack_element();
-    memcpy(stack_element->valor_retorno, donde_retornar, sizeof(t_dato_en_memoria));
+    stack_element->valor_retorno = (t_dato_en_memoria*)donde_retornar;
     stack_element->posicion_retorno = pcb->program_counter+1;
 
     list_add(pcb->stack, stack_element);
@@ -227,12 +223,6 @@ void finalizar(void) {
     }
 
     go_back_to_previous_stack_element(stack_element);
-}
-
-void retornar(t_valor_variable retorno) {
-    t_stack_element *stack_element = list_get(pcb->stack, list_size(pcb->stack)-1);
-
-    ejecutar_escritura_de_dato_con_iteraciones(stack_element->valor_retorno, (char*) &retorno,  tamanio_pagina);
 }
 
 int send_text_to_kernel(char* print_value, uint32_t length) {
@@ -343,7 +333,7 @@ void free_stack_element_memory(t_stack_element *element) {
     }
 
     list_destroy_and_destroy_elements(element->variables, free_memory);
-    free(element);
+    //free(element);
 };
 
 void set_PCB(t_PCB *new_pcb) {
@@ -428,7 +418,6 @@ int ejecutar_escritura_de_dato_con_iteraciones(t_dato_en_memoria *dato, char* va
 
 	char *data_to_write = malloc(aux_dato->size);
 	memcpy(data_to_write, valor+desplazamiento_acumulado, aux_dato->size);
-	//TODO FRABOS VER POR QUE DESPLAZAMIENTO ACUMULADO NUNCA SE USA
 
 	escribir_en_umc(aux_dato, data_to_write);
 	free(data_to_write);
