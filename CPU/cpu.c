@@ -22,14 +22,36 @@ AnSISOP_funciones functions = {
 	.AnSISOP_llamarSinRetorno = llamarSinRetorno,
 	.AnSISOP_llamarConRetorno = llamarConRetorno,
 	.AnSISOP_finalizar = finalizar,
-	.AnSISOP_retornar = retornar
+	.AnSISOP_retornar = retornar,
+	.AnSISOP_obtenerValorCompartida = obtenerValorCompartida,
+	.AnSISOP_asignarValorCompartida = asignarValorCompartida
 };
 
+AnSISOP_kernel kernel_functions = {
+	.AnSISOP_signal = signal,
+	.AnSISOP_wait = wait
+};
 AnSISOP_kernel kernel_functions = { };
 
 t_PCB *pcb;
 
 uint32_t tamanio_pagina;
+
+void wait(t_nombre_semaforo identificador_semaforo) {
+
+}
+
+void signal(t_nombre_semaforo identificador_semaforo) {
+
+}
+
+t_valor_variable obtenerValorCompartida(t_nombre_compartida variable) {
+
+}
+
+t_valor_variable asignarValorCompartida(t_nombre_compartida variable, t_valor_variable valor) {
+
+}
 
 void execute_next_instruction_for_process() {
 	t_dato_en_memoria *instruccion = get_next_instruction();
