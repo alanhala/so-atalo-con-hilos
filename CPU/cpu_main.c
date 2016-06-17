@@ -53,7 +53,8 @@ int main(int argc, char **argv) {
 //	}
 //
 //	if (strcmp(argv[1], "-test") == 0){
-		 correrTest();
+		 //correrTest();
+		correr_simulacion();
 		 return 0;
 //		 //correrTestSerializacion();
 //		 return 0;
