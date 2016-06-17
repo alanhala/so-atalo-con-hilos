@@ -35,6 +35,30 @@ void varios_programas_ansisop(){
 	    t_PCB * pcb_tres = mockear_pcb_simulacion();
 	    t_PCB * pcb_cuatro = mockear_pcb_simulacion();
 
+
+	    t_direccion_virtual_memoria *free_space = malloc(sizeof(t_direccion_virtual_memoria));
+	    free_space->offset =0;
+	    free_space->pagina = 40;
+	    pcb_uno->stack_free_space_pointer = free_space;
+
+
+	    t_direccion_virtual_memoria *free_space_dos = malloc(sizeof(t_direccion_virtual_memoria));
+	    free_space_dos->offset =1;
+	    free_space_dos->pagina = 40;
+	    pcb_dos->stack_free_space_pointer = free_space_dos;
+
+	    t_direccion_virtual_memoria *free_space_tres = malloc(sizeof(t_direccion_virtual_memoria));
+	    free_space_dos->offset =2;
+	    free_space_dos->pagina = 40;
+	    pcb_tres->stack_free_space_pointer = free_space_tres;
+
+	    t_direccion_virtual_memoria *free_space_cuatro = malloc(sizeof(t_direccion_virtual_memoria));
+		free_space_cuatro->offset =4;
+		free_space_cuatro->pagina = 40;
+		pcb_cuatro->stack_free_space_pointer = free_space_cuatro;
+
+
+
 	    pcb_uno->pid = 0;
 	    pcb_uno->program_counter = 0;
 	    pcb_dos->pid = 1;
