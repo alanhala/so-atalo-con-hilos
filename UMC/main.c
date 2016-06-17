@@ -9,6 +9,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 #include <errno.h>
 #include <string.h>
@@ -20,12 +21,13 @@
 #include <sys/wait.h>
 #include <signal.h>
 #include <pthread.h>
-#include<commons/config.h>
-#include<commons/error.h>
-#include<commons/log.h>
+#include <commons/config.h>
+#include <commons/error.h>
+#include <commons/log.h>
 #include <commons/collections/list.h>
-#include<sys/types.h>
-#include<sys/inotify.h>
+#include <commons/string.h>
+#include <sys/types.h>
+#include <sys/inotify.h>
 #include <semaphore.h>
 #include "socket.h"
 #include "memoriaPrincipal.h"
@@ -478,34 +480,39 @@ char* leer_string(t_config *config, char* key) {
 
 void* interprete_comando_thread(){
 
-	//TODO borrar esto y hacerlo bien
-	while(1){
-		sleep(60);
-
-		dump_memory(-1);
-
-	}
+//	//TODO borrar esto y hacerlo bien
+//	while(1){
+//		sleep(60);
+//
+//		dump_memory(-1);
+//
+//	}
 
 
 	while(1)
 	{
-		// leo una linea
+		char *comando = malloc(100);
+		char **comando_separado = malloc(100);
 
-		// si es "retardo xx"
-		//set_retardo(xx);
+		puts("Ingrese un comando:");
+		fgets(comando, 100,stdin);
 
-		// si es dumpstruct xx
-		// dump_structs(xx);
+		comando_separado = string_split(comando," ");
+		int  numero_del_comando = atoi(comando_separado[1]);
 
-		//si es dumpmemory xx
-		// dump_memory(xx);
-
-		//si es flushmemory xx
-		//flush_memory(xx)
-
-		//si es flushtlb xx
-		//flush_tlb(xx)
-
+		if(!strcasecmp("retardo", comando_separado[0])){
+			set_retardo(numero_del_comando);
+		} else if (!strcasecmp("dumpstruct", comando_separado[0])){
+			dump_structs(numero_del_comando);
+		} else if (!strcasecmp("dumpmemory", comando_separado[0])){
+			dump_memory(numero_del_comando);
+		} else if (!strcasecmp("flushmemory", comando_separado[0])){
+			flush_memory(numero_del_comando);
+		} else if (!strcasecmp("flushtlb", comando_separado[0])){
+			flush_tlb(numero_del_comando);
+		}
+		free(comando_separado);
+		free(comando);
 	}
 
 
