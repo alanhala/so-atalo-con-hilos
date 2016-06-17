@@ -126,7 +126,7 @@ t_stream *serializar_escribir_bytes_de_una_pagina_en_UMC(t_escribir_bytes_de_una
 	uint32_t 	tmpsize = 0,
 				offset = 0;
 
-	size_t size_bytes_a_escribir = strlen(escritura->buffer)+1;
+	size_t size_bytes_a_escribir = escritura->size+1;	//El campo size es el tamano del string, sin el '\0'. Hablado con @Frabos
 
 	uint32_t 	size_escritura = 	sizeof(uint32_t) +	    //Tamano del numero de pagina
 									sizeof(uint32_t) +	    //Tamano del offset
@@ -516,9 +516,9 @@ t_PCB_serializacion *deserializar_PCB(char *datos){
 		t_stack_element *stack_element = malloc(sizeof(t_stack_element));
 
 		stack_element->posicion_retorno = posicion_retorno;
-		stack_element->valor_retorno.size = size_valor_de_retorno;
-		stack_element->valor_retorno.direccion.offset = offset_direccion_del_dato;
-		stack_element->valor_retorno.direccion.pagina = pagina_direccion_del_dato;
+		stack_element->valor_retorno->size = size_valor_de_retorno;
+		stack_element->valor_retorno->direccion->offset = offset_direccion_del_dato;
+		stack_element->valor_retorno->direccion->pagina = pagina_direccion_del_dato;
 		stack_element->variables = list_create();
 
 		int contador_de_variables_en_el_elemento_del_stack = 0;
@@ -548,9 +548,9 @@ t_PCB_serializacion *deserializar_PCB(char *datos){
 			t_variable *una_variable = malloc(sizeof(t_variable));
 
 			una_variable->id = id;
-			una_variable->dato.size = size_dato;
-			una_variable->dato.direccion.offset = offset_virtual_address;
-			una_variable->dato.direccion.pagina = page_virtual_address;
+			una_variable->dato->size = size_dato;
+			una_variable->dato->direccion->offset = offset_virtual_address;
+			una_variable->dato->direccion->pagina = page_virtual_address;
 
 			list_add(stack_element->variables,una_variable);
 

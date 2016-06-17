@@ -773,6 +773,7 @@ int dame_pid_activo(int cpu_socket_descriptor){
 }
 int cambio_contexto(int cpu_id, int pid){
 
+	flush_tlb(dame_pid_activo(cpu_id));
 	int cpu_id_iguales(t_cpu_context *cpu_context) {
 		if (cpu_context->cpu_id == cpu_id)
 			cpu_context->pid_active = pid;
@@ -952,15 +953,34 @@ void dump_memory(int pid){
 
 		void dump(t_tabla_de_paginas *tabla)
 		{
-			printf("Contenido en memoria de proceso %d\n", tabla->pid);
+			printf("			Contenido en memoria de proceso %d\n\n", tabla->pid);
 			int i =0;
 			for(0; i<tabla->paginas_totales; i++)
 			{
 				int frame =(tabla->entradas[i]).frame ;
 				if (frame != -1)
 				{
+					printf("Contenido de la entrada %d ubicada en el frame %d : \n",i, frame );
 					char *  contenido = leer_frame_de_memoria_principal(frame, 0, TAMANIO_FRAME);
-					printf("%s\n", contenido);
+					int posicion = 0;
+					while (contenido[posicion] != '\0') {
+					  if (isprint(contenido[posicion]))
+						  printf("%c    ", contenido[posicion]);
+					  else
+						  printf("~    ");
+					  posicion++;
+					}
+					printf("\n");
+					int poshex = 0;
+					while (contenido[poshex] != '\0') {
+					  //printf("%02x   ", (unsigned int) contenido[poshex]);
+					  printf("%x   ", contenido[poshex] & 0xff);
+					  fflush(stdout);
+					  poshex++;
+					}
+					printf("\n");
+					printf("\n");
+
 				}
 			}
 		}
@@ -980,14 +1000,64 @@ void dump_memory(int pid){
 			int frame =(tabla->entradas[i]).frame ;
 			if (frame != -1)
 			{
+				printf("Contenido de la entrada %d ubicada en el frame %d : \n",i, frame );
 				char *  contenido = leer_frame_de_memoria_principal(frame, 0, TAMANIO_FRAME);
-				printf("%s\n", contenido);
+				int posicion = 0;
+				while (contenido[posicion] != '\0') {
+				  if (isprint(contenido[posicion]))
+					  printf("%c    ", contenido[posicion]);
+				  else
+					  printf("~");
+				  i++;
+				}
+				printf("\n");
+				int poshex = 0;
+				while (contenido[poshex] != '\0') {
+				  printf("%02x   ", (unsigned int) contenido[poshex]);
+				  i++;
+				}
+				printf("\n");
+				printf("\n");
 			}
 		}
 
 	}
 }
 
+void dump_structs(int pid){
+	if (pid == -1){
+		void dump_table(t_tabla_de_paginas * tabla){
+
+			printf("		TABLA DE PAGINAS DEL PROCESO: %d \n\n\n", tabla->pid);
+			printf("Paginas totales del proceso: %d \n\n",tabla->paginas_totales);
+			int i =0;
+			for(0; i<tabla->paginas_totales; i++){
+				printf("		Entrada %d\n", i);
+				printf("Ubicado en el frame: %d\n",(tabla->entradas[i]).frame);
+				printf("Modificado: %d\n",(tabla->entradas[i]).modificado);
+				printf("Segunda Oportunidad: %d\n",(tabla->entradas[i]).segunda_oportunidad);
+				printf("Ultimo uso: %d\n\n\n",(tabla->entradas[i]).lru);
+
+			}
+		}
+			sem_wait(&mut_tabla_de_paginas);
+			list_iterate(lista_tabla_de_paginas, (void*) dump_table);
+			sem_post(&mut_tabla_de_paginas);
+	}
+	else{
+		t_tabla_de_paginas * tabla = buscar_tabla_de_paginas_de_pid(pid);
+		printf("		TABLA DE PAGINAS DEL PROCESO: %d \n\n\n", pid);
+		printf("Paginas totales del proceso: %d \n\n",tabla->paginas_totales);
+		int i =0;
+		for(0; i<tabla->paginas_totales; i++){
+			printf("		Entrada %d\n", i);
+			printf("Ubicado en el frame: %d\n",(tabla->entradas[i]).frame);
+			printf("Modificado: %d\n",(tabla->entradas[i]).modificado);
+			printf("Segunda Oportunidad: %d\n",(tabla->entradas[i]).segunda_oportunidad);
+			printf("Ultimo uso: %d\n\n\n",(tabla->entradas[i]).lru);
+		}
+	}
+}
 
 void flush_memory(int pid){
 	if (pid == -1)

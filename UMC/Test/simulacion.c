@@ -67,11 +67,15 @@ CU_initialize_registry();
 void comandos(){
 	simulacion_3();
 	dump_memory(-1);
-	flush_memory(0);
+	printf("\n\n AHORA HAGO UN DUMP SOLO DEL PROCESO 0 \n\n");
+	dump_memory(0);
+	printf("\n\n AHORA HAGO UN DUMP DE TODAS LAS ESTRUCTURAS \n\n");
+	dump_structs(-1);
 
-	t_tabla_de_paginas * tabla = buscar_tabla_de_paginas_de_pid(0);
 
-	int a=0;
+//	t_tabla_de_paginas * tabla = buscar_tabla_de_paginas_de_pid(0);
+//
+//	int a=0;
 
 }
 
@@ -190,14 +194,18 @@ void simulacion_1(){
 
 void simulacion_3(){
 
+//	inicializar_estructuras();
+//	set_algoritmo_reemplazo("clock");
+//	crear_swap_mock();
+	set_algoritmo_reemplazo("clock");
 	inicializar_estructuras();
-	set_algoritmo_reemplazo("ClockM");
-	crear_swap_mock();
+	int swap_socket = create_client_socket_descriptor("localhost", "6000");
+	set_socket_descriptor(swap_socket);
 
 	//	int swap_socket = create_client_socket_descriptor("localhost", "6000");
 		//set_socket_descriptor(swap_socket);
-		char * codigo_pid0= "0pg000pg010pg020pg030pg040pg050pg060pg070pg080pg090pg100pg110pg120pg130pg14";
-		char * codigo_pid5 = "5pg005pg015pg025pg035pg045pg055pg065pg075pg085pg095pg105pg115pg125pg135pg14";
+	char * codigo_pid0= "0pg000pg010pg020pg030pg040pg050pg060pg070pg080pg090pg100pg110pg120pg130pg14";
+	char * codigo_pid5 = "5pg005pg015pg025pg035pg045pg055pg065pg075pg085pg095pg105pg115pg125pg135pg14";
 
 
 		int paginas_necesarias = (30);

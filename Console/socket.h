@@ -5,8 +5,8 @@
  *      Author: utnso
  */
 
-#ifndef SOCKET_H_
-#define SOCKET_H_
+#ifndef ANSISOP_SOCKET_H_
+#define ANSISOP_SOCKET_H_
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -22,4 +22,4 @@ int create_server_socket_descriptor(char* ip, char* port, int backlog);
 int accept_connection(int socket_descriptor);
 int create_client_socket_descriptor(char* ip, char* port);
 
-#endif /* SOCKET_H_ */
+#endif /* ANSISOP_SOCKET_H_ */

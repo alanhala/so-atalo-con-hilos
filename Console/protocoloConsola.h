@@ -5,8 +5,8 @@
  *      Author: utnso
  */
 
-#ifndef PROTOCOLOCONSOLA_H_
-#define PROTOCOLOCONSOLA_H_
+#ifndef ANSISOP_PROTOCOLOCONSOLA_H_
+#define ANSISOP_PROTOCOLOCONSOLA_H_
 
 
 
@@ -46,4 +46,4 @@ t_stream *serializar_iniciar_programa_en_kernel(t_iniciar_programa_en_kernel *in
 
 
 
-#endif /* PROTOCOLOCONSOLA_H_ */
+#endif /* ANSISOP_PROTOCOLOCONSOLA_H_ */

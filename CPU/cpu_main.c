@@ -47,13 +47,14 @@ int main(int argc, char **argv) {
 
 //	if (argc == 3) {
 //	    if (strcmp(argv[2], "-conexiones") == 0){
-   		connect_to_UMC();
-    		connect_to_Kernel();
+   			connect_to_UMC();
+    		//connect_to_Kernel();
 //    	    }
 //	}
 //
 //	if (strcmp(argv[1], "-test") == 0){
-		 correrTest();
+		 //correrTest();
+		correr_simulacion();
 		 return 0;
 //		 //correrTestSerializacion();
 //		 return 0;
@@ -98,7 +99,7 @@ int main(int argc, char **argv) {
 			free_space->offset = 3;
 			free_space->pagina = 20;
 			//pcb->stack_pointer = recibir_pcb->stack_pointer;
-			pcb->stack_free_space_pointer = *free_space;
+			pcb->stack_free_space_pointer = free_space;
 			set_PCB(pcb);
 			int resultado_ejecucion = ejecutar_pcb();
 

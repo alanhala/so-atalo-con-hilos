@@ -35,6 +35,7 @@
 int BACKLOG =10;
 
 void *kernel_and_cpu_connection_handler(int client_socket_descriptor);
+void *interprete_comando_thread();
 
 int huboUnCambio;
 
@@ -77,7 +78,18 @@ int main(int argc, char **argv) {
 		//correrTestSerializacion();
 	//}
 
-	set_algoritmo_reemplazo("clock");
+	pthread_t interprete_comandos;
+	int interprete_thread_result = pthread_create(&interprete_comandos, NULL,
+			&interprete_comando_thread, NULL);
+	if (interprete_thread_result) {
+		// TODO LOGUEAR ERROR
+		// TODO Analizar el tratamiento que desea darse
+		printf("Error en la creacion del thread del interprete de comandos: return code: %d\n", interprete_thread_result);
+		exit(1);
+	}
+
+	set_algoritmo_reemplazo("ClockM");
+
 	inicializar_estructuras();
 	int swap_socket = create_client_socket_descriptor("localhost", "6000");
 	set_socket_descriptor(swap_socket);
@@ -464,7 +476,17 @@ char* leer_string(t_config *config, char* key) {
 
 
 
-void interprete_de_comandos(){
+void* interprete_comando_thread(){
+
+	//TODO borrar esto y hacerlo bien
+	while(1){
+		sleep(60);
+
+		dump_memory(-1);
+
+	}
+
+
 	while(1)
 	{
 		// leo una linea
