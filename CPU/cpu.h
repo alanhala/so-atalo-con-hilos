@@ -73,7 +73,9 @@ typedef struct {
 
 
 int QUANTUM;
+int QUANTUM_SLEEP;
 void set_quantum(int quantum);
+void set_quantum_sleep(int quantum_sleep);
 int ejecutar_pcb();
 void execute_next_instruction_for_process();
 t_dato_en_memoria* get_next_instruction();

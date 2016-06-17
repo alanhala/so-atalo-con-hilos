@@ -128,12 +128,41 @@ void *recReady() {
 
 }
 
+t_PCB_serializacion * adaptar_pcb_a_serializar(t_PCB * pcb){
+	t_PCB_serializacion * pcb_serializacion = malloc(sizeof(t_PCB_serializacion));
+	pcb_serializacion->instructions_index = pcb->instructions_index;
+	pcb_serializacion->instructions_size = pcb->instructions_size;
+	pcb_serializacion->label_index = pcb->label_index; //todo chequear que alan lo este inicializando
+	pcb_serializacion->pid = pcb->pid;
+	pcb_serializacion->program_counter = pcb->program_counter;
+	pcb_serializacion->program_finished = 0; //TODO revisar que valor le pongo
+	pcb_serializacion->quantum = KERNEL->quantum;
+	pcb_serializacion->quantum_sleep = KERNEL->quantum_sleep;
+	pcb_serializacion->stack_index = pcb->stack_index;
+	pcb_serializacion->stack_last_address = pcb->stack_last_address;
+	pcb_serializacion->stack_size = pcb->stack_size;
+	pcb_serializacion->used_pages = pcb->used_pages;
 
+	return pcb_serializacion;
+}
+
+void actualizar_pcb_serializado(t_PCB *pcb, t_PCB_serializacion *pcb_serializacion){
+	pcb->instructions_index = pcb_serializacion->instructions_index;
+	pcb->instructions_size = pcb_serializacion->instructions_size;
+	pcb->label_index = pcb_serializacion->label_index;
+	pcb->pid = pcb_serializacion->pid;
+	pcb->program_counter = pcb_serializacion->program_counter;
+	pcb->program_finished = pcb_serializacion->program_finished;
+	pcb->stack_index = pcb_serializacion->stack_index;
+	pcb->stack_last_address = pcb_serializacion->stack_last_address;
+	pcb->stack_size = pcb_serializacion->stack_size;
+	pcb->used_pages = pcb_serializacion->used_pages;
+}
 
 void ejecutar_pcb_en_cpu(t_PCB *pcb){
 
-
-	t_stream *buffer = serializar_mensaje(121,pcb);
+	t_PCB_serializacion * pcb_serializacion = adaptar_pcb_a_serializar(pcb);
+	t_stream *buffer = serializar_mensaje(121,pcb_serializacion);
 
 	int bytes_enviados = send(pcb->cpu_socket_descriptor, buffer->datos, buffer->size, 0);
 	if (bytes_enviados == -1){
@@ -151,26 +180,27 @@ void ejecutar_pcb_en_cpu(t_PCB *pcb){
 			bytes_recibidos_header = recv(pcb->cpu_socket_descriptor,buffer_header,5,MSG_PEEK);
 
 			un_header = deserializar_header(buffer_header);
+			int tipo = un_header->tipo;
+			int length = un_header->length;
 
-			char buffer_recibidos[(un_header->length)];
+			char buffer_recibidos[length];
 
-			if(un_header->tipo == 132){
+			if(tipo == 132){
 
-				int bytes_recibidos = recv(pcb->cpu_socket_descriptor,buffer_recibidos,un_header->length,0);
-
+				int bytes_recibidos = recv(pcb->cpu_socket_descriptor,buffer_recibidos,length,0);
 
 				int bytes_sent = send(pcb->console_socket_descriptor,buffer_recibidos,buffer->size,0);
 				printf("Envio imprimir texto a consola\n");
 			}
+			if(tipo == 121){
 
+				int bytes_recibidos = recv(pcb->cpu_socket_descriptor,buffer_recibidos,length,0);
+				t_PCB_serializacion *unPCB = deserealizar_mensaje(121,buffer_recibidos);
 
+				actualizar_pcb_serializado(pcb, unPCB);
+				printf("Recibo PCB de CPU\n");
+			}
 	}
-	//while(1){
-		//aca tengo que hacer un while de todas las respuestas que me va mandando cpu
-		// entre ellas las de semaforos, dispositivos, terminar programa y termino ejecucion de
-		//quantum
-	//}
-
 }
 
 void * recEjecucion() {
@@ -193,10 +223,6 @@ void * recEjecucion() {
 		pthread_create(&th_ejecucion_pcb, NULL, &ejecutar_pcb_en_cpu, pcb);
 
 	}
-
-
-
-
 }
 
 
@@ -296,8 +322,6 @@ int iniciar_programa_en_umc(int pid, int cantidad_paginas_requeridas, char* codi
 	   iniciar_programa_en_UMC->process_id = pid;
 	   iniciar_programa_en_UMC->cantidad_de_paginas = cantidad_paginas_requeridas;
 	   iniciar_programa_en_UMC->codigo_de_programa = codigo;
-	   //char unChar[5] = "Hola";
-	   //memcpy(iniciar_programa_en_UMC->codigo_de_programa,&unChar,5);
 
 	   t_stream *buffer = malloc(sizeof(t_stream));
 

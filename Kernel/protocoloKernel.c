@@ -221,13 +221,13 @@ t_stream *serializar_PCB(t_PCB_serializacion *unPCB){
 	uint32_t sizePCB =	sizeof(uint32_t)  +		//Process ID
 						sizeof(uint32_t)  +		//Program Counter
 						tamano_total_stack+		//Tamano total de la lista de stack elements
-						sizeof(uint32_t)  +		//Stack Pointer
 						sizeof(uint32_t)  +		//Stack Size
 						sizeof(uint32_t)  +		//Used Pages
 						sizeof(uint32_t)  +		//Instructions Size
 						sizeof_instruccion+		//Tamano de las instrucciones
 						sizeof(uint32_t)  +		//Tamano del flag program_finished;
-						sizeof(uint32_t);		//Tamano del quantum
+						sizeof(uint32_t)  +		//Tamano del quantum
+						sizeof(uint32_t);		//Tamano del quantum sleep
 
 	uint32_t stream_size = 	sizeof(uint8_t) +	//Tamano del tipo
 							sizeof(uint32_t)+	//Tamano del length del mensaje
@@ -246,12 +246,12 @@ t_stream *serializar_PCB(t_PCB_serializacion *unPCB){
 
 	uint32_t 	pid = unPCB->pid,
 				program_counter = unPCB->program_counter,
-				stack_pointer = unPCB->stack_pointer,
 				stack_size = unPCB->stack_size,
 				used_pages = unPCB->used_pages,
 				instructions_size = unPCB->instructions_size,
 				program_finished = unPCB->program_finished,
-				quantum = unPCB->quantum;
+				quantum = unPCB->quantum,
+				quantum_sleep = unPCB->quantum_sleep;
 
 	memcpy(stream->datos,&tipo,tmpsize=sizeof(uint8_t));
 	offset+=tmpsize;
@@ -272,12 +272,12 @@ t_stream *serializar_PCB(t_PCB_serializacion *unPCB){
 
 		uint32_t posicion_retorno = stack_element->posicion_retorno;
 
-		t_dato_en_memoria valor_de_retorno = stack_element->valor_retorno;
-		uint32_t size_valor_de_retorno = valor_de_retorno.size;
+		t_dato_en_memoria *valor_de_retorno = stack_element->valor_retorno;
+		uint32_t size_valor_de_retorno = valor_de_retorno->size;
 
-		t_virtual_address direccion_del_dato = valor_de_retorno.direccion;
-		uint32_t pagina_direccion_del_dato = direccion_del_dato.page;
-		uint32_t offset_direccion_del_dato = direccion_del_dato.offset;
+		t_virtual_address * direccion_del_dato = valor_de_retorno->direccion;
+		uint32_t pagina_direccion_del_dato = direccion_del_dato->page;
+		uint32_t offset_direccion_del_dato = direccion_del_dato->offset;
 
 		int cantidad_de_variables_en_elemento_del_stack = stack_element->variables->elements_count;
 
@@ -300,12 +300,12 @@ t_stream *serializar_PCB(t_PCB_serializacion *unPCB){
 
 			char id = una_variable->id;
 
-			t_dato_en_memoria dato = una_variable->dato;
-			uint32_t size_dato = dato.size;
+			t_dato_en_memoria *dato = una_variable->dato;
+			uint32_t size_dato = dato->size;
 
-			t_virtual_address virtual_address = dato.direccion;
-			uint32_t page_virtual_address = virtual_address.page;
-			uint32_t offset_virtual_address = virtual_address.offset;
+			t_virtual_address *virtual_address = dato->direccion;
+			uint32_t page_virtual_address = virtual_address->page;
+			uint32_t offset_virtual_address = virtual_address->offset;
 
 			memcpy(stream->datos+offset,&id,tmpsize=sizeof(char));
 			offset+=tmpsize;
@@ -325,9 +325,6 @@ t_stream *serializar_PCB(t_PCB_serializacion *unPCB){
 
 	list_iterate(unPCB->stack_index,(void*)serializa_lista_de_elementos_de_la_pila);
 
-	memcpy(stream->datos+offset,&stack_pointer,tmpsize=sizeof(uint32_t));
-	offset+=tmpsize;
-
 	memcpy(stream->datos+offset,&stack_size,tmpsize=sizeof(uint32_t));
 	offset+=tmpsize;
 
@@ -341,7 +338,7 @@ t_stream *serializar_PCB(t_PCB_serializacion *unPCB){
 
 	while (contador_de_instrucciones<instructions_size){
 
-	t_puntero_instruccion primera_instruccion = obtiene_primera_instruccion((unPCB->instructions_index)[contador_de_instrucciones]);
+	t_puntero_instruccion * primera_instruccion = obtiene_primera_instruccion((unPCB->instructions_index)[contador_de_instrucciones]);
 	memcpy(stream->datos+offset,&primera_instruccion,tmpsize=sizeof(t_puntero_instruccion));
 	offset+=tmpsize;
 
@@ -355,7 +352,10 @@ t_stream *serializar_PCB(t_PCB_serializacion *unPCB){
 	memcpy(stream->datos+offset,&program_finished,tmpsize=sizeof(uint32_t));
 	offset+=tmpsize;
 
-	memcpy(stream->datos+offset,&quantum,sizeof(uint32_t));
+	memcpy(stream->datos+offset,&quantum,tmpsize=sizeof(uint32_t));
+	offset+=tmpsize;
+
+	memcpy(stream->datos+offset,&quantum_sleep,sizeof(uint32_t));
 
 	return stream;
 }
@@ -483,9 +483,9 @@ t_PCB_serializacion *deserializar_PCB(char *datos){
 		t_stack_element *stack_element = malloc(sizeof(t_stack_element));
 
 		stack_element->posicion_retorno = posicion_retorno;
-		stack_element->valor_retorno.size = size_valor_de_retorno;
-		stack_element->valor_retorno.direccion.offset = offset_direccion_del_dato;
-		stack_element->valor_retorno.direccion.page = pagina_direccion_del_dato;
+		stack_element->valor_retorno->size = size_valor_de_retorno;
+		stack_element->valor_retorno->direccion->offset = offset_direccion_del_dato;
+		stack_element->valor_retorno->direccion->page = pagina_direccion_del_dato;
 		stack_element->variables = list_create();
 
 		int contador_de_variables_en_el_elemento_del_stack = 0;
@@ -515,9 +515,9 @@ t_PCB_serializacion *deserializar_PCB(char *datos){
 			t_variable *una_variable = malloc(sizeof(t_variable));
 
 			una_variable->id = id;
-			una_variable->dato.size = size_dato;
-			una_variable->dato.direccion.offset = offset_virtual_address;
-			una_variable->dato.direccion.page = page_virtual_address;
+			una_variable->dato->size = size_dato;
+			una_variable->dato->direccion->offset = offset_virtual_address;
+			una_variable->dato->direccion->page = page_virtual_address;
 
 			list_add(stack_element->variables,una_variable);
 
@@ -527,9 +527,6 @@ t_PCB_serializacion *deserializar_PCB(char *datos){
 
 		contador_de_elementos_del_stack++;
 	}
-
-	memcpy(&unPCB->stack_pointer,datos+offset,tmpsize=sizeof(uint32_t));
-	offset+=tmpsize;
 
 	memcpy(&unPCB->stack_size,datos+offset,tmpsize=sizeof(uint32_t));
 	offset+=tmpsize;
@@ -565,7 +562,10 @@ t_PCB_serializacion *deserializar_PCB(char *datos){
 	memcpy(&unPCB->program_finished,datos+offset,tmpsize=sizeof(uint32_t));
 	offset+=tmpsize;
 
-	memcpy(&unPCB->quantum,datos+offset,sizeof(uint32_t));
+	memcpy(&unPCB->quantum,datos+offset,tmpsize=sizeof(uint32_t));
+	offset+=tmpsize;
+
+	memcpy(&unPCB->quantum_sleep,datos+offset,sizeof(uint32_t));
 
 	return unPCB;
 }

@@ -44,23 +44,24 @@
 		uint32_t instructions_size;
 		t_intructions* instructions_index;
 		t_list* label_index;
+		uint32_t program_finished;
 	} t_PCB;
 
 
 	typedef struct {
 	    uint32_t size;
-	    t_virtual_address direccion;
+	    t_virtual_address *direccion;
 	} t_dato_en_memoria;
 
 	typedef struct {
 		t_list *variables;
 		uint32_t posicion_retorno;
-		t_dato_en_memoria valor_retorno;
+		t_dato_en_memoria *valor_retorno;
 	} t_stack_element;
 
 	typedef struct {
 		t_nombre_variable id;
-		t_dato_en_memoria dato;
+		t_dato_en_memoria * dato;
 	} t_variable;
 
 

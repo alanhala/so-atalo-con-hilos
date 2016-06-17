@@ -30,7 +30,7 @@
 
 void connect_to_UMC();
 void connect_to_Kernel();
-
+t_PCB_serializacion * adaptar_pcb_a_serializar(t_PCB * pcb);
 
 
 int main(int argc, char **argv) {
@@ -47,15 +47,15 @@ int main(int argc, char **argv) {
 
 //	if (argc == 3) {
 //	    if (strcmp(argv[2], "-conexiones") == 0){
-   			connect_to_UMC();
+   			//connect_to_UMC();
     		//connect_to_Kernel();
 //    	    }
 //	}
 //
 //	if (strcmp(argv[1], "-test") == 0){
 		 //correrTest();
-		correr_simulacion();
-		 return 0;
+		//correr_simulacion();
+		 //return 0;
 //		 //correrTestSerializacion();
 //		 return 0;
 //	}
@@ -65,7 +65,7 @@ int main(int argc, char **argv) {
 
 	while (1) {
 
-		t_header *aHeader = malloc(sizeof(t_header));
+		t_header *a_header = malloc(sizeof(t_header));
 
 		char buffer_header[5];	//Buffer donde se almacena el header recibido
 
@@ -74,16 +74,21 @@ int main(int argc, char **argv) {
 
 		bytes_recibidos_header = recv(KERNEL_DESCRIPTOR, buffer_header, 5,	MSG_PEEK);
 
-		char buffer_recv[buffer_header[1]]; //El buffer para recibir el mensaje se crea con la longitud recibida
+		a_header = deserializar_header(a_header);
 
-		if (buffer_header[0] == 121) {
+		int tipo = a_header->tipo;
+		int length = a_header->length;
+
+		char buffer_recv[length]; //El buffer para recibir el mensaje se crea con la longitud recibida
+
+		if (tipo == 121) {
 
 			int bytes_recibidos = recv(KERNEL_DESCRIPTOR, buffer_recv,
-					buffer_header[1], 0);
+					length, 0);
 
 			t_PCB_serializacion *recibir_pcb = malloc(sizeof(t_PCB_serializacion));
 
-			recibir_pcb = (t_PCB_serializacion * ) deserealizar_mensaje(buffer_header[0], buffer_recv);
+			recibir_pcb = (t_PCB_serializacion * ) deserealizar_mensaje(121, buffer_recv);
 
 			t_PCB *pcb = malloc(sizeof(t_PCB));
 			pcb->instructions_index = recibir_pcb->instructions_index;
@@ -94,16 +99,17 @@ int main(int argc, char **argv) {
 			pcb->used_pages = recibir_pcb->used_pages;
 			pcb->stack_size = recibir_pcb->stack_size;
 
-			//HARCODEADO VER CON ALAN Y MATI
-			 t_direccion_virtual_memoria *free_space = malloc(sizeof(t_direccion_virtual_memoria));
-			free_space->offset = 3;
-			free_space->pagina = 20;
-			//pcb->stack_pointer = recibir_pcb->stack_pointer;
-			pcb->stack_free_space_pointer = free_space;
+			pcb->stack_free_space_pointer = recibir_pcb->stack_last_address;
+			set_quantum(recibir_pcb->quantum);
+			set_quantum_sleep(recibir_pcb->quantum_sleep);
+
 			set_PCB(pcb);
 			int resultado_ejecucion = ejecutar_pcb();
 
-			//ENVIAR EL PCB A KERNEL
+			t_PCB_serializacion * pcb_serializado = adaptar_pcb_a_serializar(get_PCB());
+			t_stream * stream = serializar_mensaje(121,pcb_serializado);
+			send(KERNEL_DESCRIPTOR, stream->datos, stream->size, 0);
+
 		}
 	}
 
@@ -133,4 +139,22 @@ void connect_to_Kernel() {
 
 }
 
+
+t_PCB_serializacion * adaptar_pcb_a_serializar(t_PCB * pcb){
+	t_PCB_serializacion * pcb_serializacion = malloc(sizeof(t_PCB_serializacion));
+	pcb_serializacion->instructions_index = pcb->instructions_index;
+	pcb_serializacion->instructions_size = pcb->instructions_size;
+	pcb_serializacion->label_index = pcb->label_index; //todo chequear que alan lo este inicializando
+	pcb_serializacion->pid = pcb->pid;
+	pcb_serializacion->program_counter = pcb->program_counter;
+	pcb_serializacion->program_finished = 0;
+	pcb_serializacion->quantum = 0;
+	pcb_serializacion->quantum_sleep = 0;
+	pcb_serializacion->stack_index = pcb->stack;
+	pcb_serializacion->stack_last_address = pcb->stack_free_space_pointer;
+	pcb_serializacion->stack_size = pcb->stack_size;
+	pcb_serializacion->used_pages = pcb->used_pages;
+
+	return pcb_serializacion;
+}
 

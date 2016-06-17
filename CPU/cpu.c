@@ -451,21 +451,21 @@ set_kernel_socket_descriptor(int socket_descriptor){
 void set_quantum(int quantum){
        QUANTUM = quantum;
 }
+void set_quantum_sleep(int quantum_sleep){
+       QUANTUM_SLEEP = quantum_sleep;
+}
 int ejecutar_pcb(){
 
        cambiar_contexto(pcb->pid);
 
-       int instruccion_ejecutada = 0;
-       while(instruccion_ejecutada < pcb->instructions_size){ //TODO PONER QUANTUM
+       int instruccion_ejecutada = 1;
+       while(instruccion_ejecutada <= QUANTUM  && pcb->program_finished == 0){
                execute_next_instruction_for_process();
-               //pcb->program_counter ++ ;
                printf("Instruccion %d del pid %d ejecutada \n", instruccion_ejecutada, pcb->pid);
                fflush(stdout);
                instruccion_ejecutada ++;
        }
 
-		printf("ejecucion de programa finalizada");
-		fflush(stdout);
 
        return 0;
 
