@@ -41,7 +41,20 @@ typedef struct {
        uint32_t respuesta_correcta;
 }__attribute__((packed)) t_respuesta_iniciar_programa_en_UMC;
 
-
+typedef struct {
+	uint32_t pid;
+	uint32_t program_counter;
+	t_list* stack_index;
+	t_virtual_address* stack_last_address;
+	uint32_t stack_size;
+	uint32_t used_pages;
+	uint32_t instructions_size;
+	t_intructions* instructions_index;
+	t_list* label_index;
+	uint32_t program_finished;
+	uint32_t quantum;
+	uint32_t quantum_sleep;
+}__attribute__((packed)) t_PCB_serializacion;
 
 typedef struct {
 	uint8_t tipo;
@@ -62,8 +75,9 @@ t_stream *serializar_finalizar_programa_en_UMC(t_finalizar_programa_en_UMC *fina
 t_stream *serializar_respuesta_inicio_de_programa_en_kernel(t_respuesta_iniciar_programa_en_kernel *respuesta);
 t_stream *serializar_inicio_de_programa_en_UMC(t_inicio_de_programa_en_UMC *inicio_de_programa);
 t_stream *serializar_mensaje(int tipo, void *unaEstructura);
-t_stream *serializar_enviar_PCB_a_CPU(t_PCB *unPCB);
+t_stream *serializar_PCB(t_PCB_serializacion *unPCB);
 t_stream *serializar_finalizar_consola(t_finalizar_programa_en_consola *unaEstructura);
+t_PCB_serializacion *deserializar_PCB(char *datos);
 
 
 
@@ -74,5 +88,6 @@ void obtiene_elementos_del_stack(t_list *stack_index, int elementos_del_stack[])
 t_puntero_instruccion obtiene_primera_instruccion(t_intructions instruccion);
 t_size obtiene_offset (t_intructions instruccion);
 void serializa_lista_de_elementos_de_la_pila(t_list *stack_element);
+t_intructions carga_instructions_index(t_puntero_instruccion primera_instruccion,t_size offset_instrucciones);
 
 #endif /* PROTOCOLOKERNEL_H_ */

@@ -38,6 +38,12 @@ t_PCB* create_pcb(t_kernel* kernel, char* program) {
 	pcb->pid = kernel->programs_number;
 	pcb->program_counter = metadata->instruccion_inicio;
 	pcb->stack_index = list_create();
+	t_stack_element * stack_element = malloc(sizeof(t_stack_element));
+	stack_element->variables = list_create();
+	stack_element->posicion_retorno = 0;
+	stack_element->valor_retorno = malloc(sizeof(t_dato_en_memoria));
+	list_add(pcb->stack_index, stack_element);
+
 	pcb->stack_size = kernel->stack_size;
 	pcb->instructions_index = metadata->instrucciones_serializado;
 	pcb->instructions_size = metadata->instrucciones_size;

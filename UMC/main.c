@@ -479,16 +479,6 @@ char* leer_string(t_config *config, char* key) {
 
 
 void* interprete_comando_thread(){
-
-//	//TODO borrar esto y hacerlo bien
-//	while(1){
-//		sleep(60);
-//
-//		dump_memory(-1);
-//
-//	}
-
-
 	while(1)
 	{
 		char *comando = malloc(100);
