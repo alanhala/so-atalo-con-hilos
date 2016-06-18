@@ -74,7 +74,7 @@ int main(int argc, char **argv) {
 
 		bytes_recibidos_header = recv(KERNEL_DESCRIPTOR, buffer_header, 5,	MSG_PEEK);
 
-		a_header = deserializar_header(a_header);
+		a_header = deserializar_header(buffer_header);
 
 		int tipo = a_header->tipo;
 		int length = a_header->length;
@@ -95,11 +95,14 @@ int main(int argc, char **argv) {
 			pcb->pid = recibir_pcb->pid;
 			pcb->instructions_size = recibir_pcb->instructions_size;
 			pcb->program_counter = recibir_pcb->program_counter;
-			pcb->stack= recibir_pcb->stack_index;
+			pcb->stack = list_create();
+			pcb->stack = recibir_pcb->stack_index;
 			pcb->used_pages = recibir_pcb->used_pages;
 			pcb->stack_size = recibir_pcb->stack_size;
-
+			pcb->program_finished = recibir_pcb->program_finished;
+			pcb->stack_free_space_pointer = malloc(sizeof(t_direccion_virtual_memoria));
 			pcb->stack_free_space_pointer = recibir_pcb->stack_last_address;
+			pcb->label_index = recibir_pcb->label_index;
 			set_quantum(recibir_pcb->quantum);
 			set_quantum_sleep(recibir_pcb->quantum_sleep);
 

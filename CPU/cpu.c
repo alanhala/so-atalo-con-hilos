@@ -218,8 +218,8 @@ void finalizar(void) {
 	pcb->program_counter = stack_element->posicion_retorno;
     }
 
-    if(list_size(pcb->stack) == 1) {
-	pcb->program_finished = 1;
+    if(list_is_empty(pcb->stack)) {
+    	pcb->program_finished = 1;
     }
 
     go_back_to_previous_stack_element(stack_element);

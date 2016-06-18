@@ -210,10 +210,9 @@ t_stream *serializar_PCB(t_PCB_serializacion *unPCB){
 	uint32_t	tmpsize = 0,
 				offset = 0;
 
-	uint32_t tamano_total_stack = 0;
-
 	uint32_t cantidad_elementos_stack = unPCB->stack_index->elements_count;
 
+	uint32_t tamano_total_stack = 0;
 	void calcular_tamano_de_un_elemento_del_stack(t_stack_element *stack_element){
 
 		uint32_t tamano_fijo_del_elemento =	sizeof(uint32_t) +	//Posicion de retorno
@@ -229,8 +228,22 @@ t_stream *serializar_PCB(t_PCB_serializacion *unPCB){
 
 		tamano_total_stack += tamano_del_elemento;
 	}
-
 	list_iterate(unPCB->stack_index,(void *)calcular_tamano_de_un_elemento_del_stack);
+
+	uint32_t tamano_total_de_la_lista_de_labels = 0;
+	void calcular_tamano_de_un_label (t_label_index *un_label){
+
+		uint32_t tamano_del_name = strlen(un_label->name)+1;
+		uint32_t tamano_de_location = sizeof(uint32_t);
+
+		uint32_t tamano_del_label = tamano_del_name + tamano_de_location;
+
+		tamano_total_de_la_lista_de_labels += tamano_del_label;
+	}
+	list_iterate(unPCB->label_index,(void *)calcular_tamano_de_un_label);
+
+
+	uint32_t acumula_labels = list_size(unPCB->label_index);
 
 	uint32_t sizeof_instruccion = unPCB->instructions_size * obtiene_sizeof_instrucciones(unPCB->instructions_index);
 
@@ -244,7 +257,10 @@ t_stream *serializar_PCB(t_PCB_serializacion *unPCB){
 						sizeof_instruccion+		//Tamano de las instrucciones
 						sizeof(uint32_t)  +		//Tamano del flag program_finished
 						sizeof(uint32_t)  +		//Quantum
-						sizeof(uint32_t);		//Quantum Sleep
+						sizeof(uint32_t)  +		//Quantum Sleep
+						sizeof(t_direccion_virtual_memoria) +//Tamano de la direccion virtual de memoria
+						sizeof(uint32_t)  +		//Tamano de la cantidad de elementos de la lista de labels
+						tamano_total_de_la_lista_de_labels;	 //Tamano de la lista de labels
 
 	uint32_t stream_size = 	sizeof(uint8_t) +	//Tamano del tipo
 							sizeof(uint32_t)+	//Tamano del length del mensaje
@@ -268,7 +284,9 @@ t_stream *serializar_PCB(t_PCB_serializacion *unPCB){
 				instructions_size = unPCB->instructions_size,
 				program_finished = unPCB->program_finished,
 				quantum = unPCB->quantum,
-				quantum_sleep = unPCB->quantum_sleep;
+				quantum_sleep = unPCB->quantum_sleep,
+				pagina = unPCB->stack_last_address->pagina,
+				offset_direccion_virtual = unPCB->stack_last_address->offset;
 
 	memcpy(stream->datos,&tipo,tmpsize=sizeof(uint8_t));
 	offset+=tmpsize;
@@ -292,7 +310,7 @@ t_stream *serializar_PCB(t_PCB_serializacion *unPCB){
 		t_dato_en_memoria * valor_de_retorno = stack_element->valor_retorno;
 		uint32_t size_valor_de_retorno = valor_de_retorno->size;
 
-		t_direccion_virtual_memoria * direccion_del_dato = valor_de_retorno->direccion;
+		t_direccion_virtual_memoria *direccion_del_dato = valor_de_retorno->direccion;
 		uint32_t pagina_direccion_del_dato = direccion_del_dato->pagina;
 		uint32_t offset_direccion_del_dato = direccion_del_dato->offset;
 
@@ -320,7 +338,7 @@ t_stream *serializar_PCB(t_PCB_serializacion *unPCB){
 			t_dato_en_memoria * dato = una_variable->dato;
 			uint32_t size_dato = dato->size;
 
-			t_direccion_virtual_memoria * virtual_address = dato->direccion;
+			t_direccion_virtual_memoria *virtual_address = dato->direccion;
 			uint32_t page_virtual_address = virtual_address->pagina;
 			uint32_t offset_virtual_address = virtual_address->offset;
 
@@ -372,7 +390,35 @@ t_stream *serializar_PCB(t_PCB_serializacion *unPCB){
 	memcpy(stream->datos+offset,&quantum,tmpsize=sizeof(uint32_t));
 	offset+=tmpsize;
 
-	memcpy(stream->datos+offset,&quantum_sleep,sizeof(uint32_t));
+	memcpy(stream->datos+offset,&quantum_sleep,tmpsize=sizeof(uint32_t));
+	offset+=tmpsize;
+
+	memcpy(stream->datos+offset,&pagina,tmpsize=sizeof(uint32_t));
+	offset+=tmpsize;
+
+	memcpy(stream->datos+offset,&offset_direccion_virtual,tmpsize=sizeof(uint32_t));
+	offset+=tmpsize;
+
+	memcpy(stream->datos+offset,&acumula_labels,tmpsize=sizeof(uint32_t));
+	offset+=tmpsize;
+
+	void serializa_un_label(t_label_index *un_label){
+
+		char* nombre_del_label = un_label->name;
+		uint32_t tamano_del_nombre_del_label = strlen(nombre_del_label)+1;
+		uint32_t location = un_label->location;
+
+		memcpy(stream->datos+offset,nombre_del_label,tmpsize=tamano_del_nombre_del_label);
+		offset+=tmpsize;
+
+		char end_string = '\0';
+		memcpy(stream->datos+offset-1,&end_string,1);
+
+		memcpy(stream->datos+offset,&location,tmpsize=sizeof(uint32_t));
+		offset+=tmpsize;
+
+	}
+	list_iterate(unPCB->label_index,(void *)serializa_un_label);
 
 	return stream;
 }
@@ -517,9 +563,14 @@ t_PCB_serializacion *deserializar_PCB(char *datos){
 		t_stack_element *stack_element = malloc(sizeof(t_stack_element));
 
 		stack_element->posicion_retorno = posicion_retorno;
+
+		stack_element->valor_retorno = malloc(sizeof(t_stack_element));
 		stack_element->valor_retorno->size = size_valor_de_retorno;
+
+		stack_element->valor_retorno->direccion = malloc(sizeof(t_direccion_virtual_memoria));
 		stack_element->valor_retorno->direccion->offset = offset_direccion_del_dato;
 		stack_element->valor_retorno->direccion->pagina = pagina_direccion_del_dato;
+
 		stack_element->variables = list_create();
 
 		int contador_de_variables_en_el_elemento_del_stack = 0;
@@ -536,12 +587,6 @@ t_PCB_serializacion *deserializar_PCB(char *datos){
 			offset+=tmpsize;
 
 			memcpy(&size_dato,datos+offset,tmpsize=sizeof(uint32_t));
-			offset+=tmpsize;
-
-			memcpy(&page_virtual_address,datos+offset,tmpsize=sizeof(uint32_t));
-			offset+=tmpsize;
-
-			memcpy(&offset_virtual_address,datos+offset,tmpsize=sizeof(uint32_t));
 			offset+=tmpsize;
 
 			contador_de_variables_en_el_elemento_del_stack++;
@@ -562,7 +607,6 @@ t_PCB_serializacion *deserializar_PCB(char *datos){
 		contador_de_elementos_del_stack++;
 	}
 
-
 	memcpy(&unPCB->stack_size,datos+offset,tmpsize=sizeof(uint32_t));
 	offset+=tmpsize;
 
@@ -574,8 +618,7 @@ t_PCB_serializacion *deserializar_PCB(char *datos){
 
 	int contador_de_instrucciones = 0;
 
-	t_intructions * instrucciones = malloc(sizeof(t_intructions)*(unPCB->instructions_size));
-	unPCB->instructions_index = instrucciones;
+	unPCB->instructions_index = malloc(sizeof(t_intructions)*(unPCB->instructions_size));
 
 	while(contador_de_instrucciones < unPCB->instructions_size){
 
@@ -600,7 +643,48 @@ t_PCB_serializacion *deserializar_PCB(char *datos){
 	memcpy(&unPCB->quantum,datos+offset,tmpsize=sizeof(uint32_t));
 	offset+=tmpsize;
 
-	memcpy(&unPCB->quantum_sleep,datos+offset,sizeof(uint32_t));
+	memcpy(&unPCB->quantum_sleep,datos+offset,tmpsize=sizeof(uint32_t));
+	offset+=tmpsize;
+
+	unPCB->stack_last_address = malloc(sizeof(t_direccion_virtual_memoria));
+
+	memcpy(&unPCB->stack_last_address->pagina,datos+offset,tmpsize=sizeof(uint32_t));
+	offset+=tmpsize;
+
+	memcpy(&unPCB->stack_last_address->offset,datos+offset,tmpsize=sizeof(uint32_t));
+	offset+=tmpsize;
+
+	uint32_t cantidad_de_labels = 0;
+
+	memcpy(&cantidad_de_labels,datos+offset,tmpsize=sizeof(uint32_t));
+	offset+=tmpsize;
+
+	uint32_t contador_de_labels = 0;
+
+	unPCB->label_index = list_create();
+
+	while (contador_de_labels < cantidad_de_labels){
+
+		t_label_index *un_label = malloc(sizeof(t_label_index));
+
+		uint32_t tamanoDato;
+		for(tamanoDato = 0; (datos+offset)[tamanoDato] != '\0';tamanoDato++);//incremento tamanoDato, hasta el tamaÃ±o del nombre
+
+		un_label->name = malloc(tamanoDato+1);
+
+		memcpy(un_label->name,datos+offset,tmpsize=tamanoDato+1);
+		offset+=tmpsize;
+
+		char end_string = '\0';
+		memcpy(un_label->name+tamanoDato,&end_string,1);
+
+		memcpy(&un_label->location,datos+offset,tmpsize=sizeof(uint32_t));
+		offset+=tmpsize;
+
+		contador_de_labels++;
+
+		list_add(unPCB->label_index,un_label);
+	}
 
 	return unPCB;
 }
