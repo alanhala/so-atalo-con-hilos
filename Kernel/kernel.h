@@ -63,6 +63,10 @@
 		uint32_t value;
 	} t_shared_variable;
 
+	typedef struct {
+	    		t_nombre_variable id;
+	 		t_dato_en_memoria dato;
+	}t_variable;
 
 	t_PCB* create_pcb(t_kernel* kernel, char* program);
 
