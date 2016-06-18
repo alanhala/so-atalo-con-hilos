@@ -45,7 +45,7 @@ typedef struct {
 	uint32_t pid;
 	uint32_t program_counter;
 	t_list* stack_index;
-	t_virtual_address* stack_last_address;
+	t_virtual_address *stack_last_address;
 	uint32_t stack_size;
 	uint32_t used_pages;
 	uint32_t instructions_size;
@@ -54,6 +54,10 @@ typedef struct {
 	uint32_t program_finished;
 	uint32_t quantum;
 	uint32_t quantum_sleep;
+	uint32_t mensaje;
+	char *valor_mensaje;
+	uint32_t cantidad_operaciones;
+	uint32_t resultado_mensaje;
 }__attribute__((packed)) t_PCB_serializacion;
 
 typedef struct {

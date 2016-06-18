@@ -142,6 +142,12 @@ t_PCB_serializacion * adaptar_pcb_a_serializar(t_PCB * pcb){
 	pcb_serializacion->stack_last_address = pcb->stack_last_address;
 	pcb_serializacion->stack_size = pcb->stack_size;
 	pcb_serializacion->used_pages = pcb->used_pages;
+	//TODO Agregar valor a los campos nuevos de la serializacion
+	pcb_serializacion->mensaje = 999;
+	char *mensaje_test = "Newton loololo";
+	pcb_serializacion->valor_mensaje = mensaje_test;
+	pcb_serializacion->cantidad_operaciones = 1000;
+	pcb_serializacion->resultado_mensaje = 1001;
 
 	return pcb_serializacion;
 }
@@ -157,6 +163,7 @@ void actualizar_pcb_serializado(t_PCB *pcb, t_PCB_serializacion *pcb_serializaci
 	pcb->stack_last_address = pcb_serializacion->stack_last_address;
 	pcb->stack_size = pcb_serializacion->stack_size;
 	pcb->used_pages = pcb_serializacion->used_pages;
+	//TODO Agregar valor a los campos nuevos de la serializacion
 }
 
 void ejecutar_pcb_en_cpu(t_PCB *pcb){
@@ -201,7 +208,6 @@ void ejecutar_pcb_en_cpu(t_PCB *pcb){
 				t_PCB_serializacion *unPCB = deserealizar_mensaje(121,buffer_recibidos);
 
 				actualizar_pcb_serializado(pcb, unPCB);
-				printf("Recibo PCB de CPU\n");
 			}
 	}
 }

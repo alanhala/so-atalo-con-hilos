@@ -56,6 +56,10 @@ typedef struct {
 	uint32_t program_finished;
 	uint32_t quantum;
 	uint32_t quantum_sleep;
+	uint32_t mensaje;
+	char *valor_mensaje;
+	uint32_t cantidad_operaciones;
+	uint32_t resultado_mensaje;
 }__attribute__((packed)) t_PCB_serializacion;
 
 typedef struct {

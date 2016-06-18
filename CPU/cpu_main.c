@@ -31,6 +31,7 @@
 void connect_to_UMC();
 void connect_to_Kernel();
 t_PCB_serializacion * adaptar_pcb_a_serializar(t_PCB * pcb);
+void actualizarPCB(t_PCB *pcb, t_PCB_serializacion *recibir_pcb);
 
 
 int main(int argc, char **argv) {
@@ -94,6 +95,8 @@ int main(int argc, char **argv) {
 			recibir_pcb = (t_PCB_serializacion * ) deserealizar_mensaje(121, buffer_recv);
 
 			t_PCB *pcb = malloc(sizeof(t_PCB));
+
+			//actualizarPCB(pcb, recibir_pcb);  -->Validar y agregar. Es un adapter
 			pcb->instructions_index = recibir_pcb->instructions_index;
 			pcb->pid = recibir_pcb->pid;
 			pcb->instructions_size = recibir_pcb->instructions_size;
@@ -160,7 +163,29 @@ t_PCB_serializacion * adaptar_pcb_a_serializar(t_PCB * pcb){
 	pcb_serializacion->stack_last_address = pcb->stack_free_space_pointer;
 	pcb_serializacion->stack_size = pcb->stack_size;
 	pcb_serializacion->used_pages = pcb->used_pages;
-
+	//TODO Agregar campos nuevos de la serializacion
+	pcb_serializacion->mensaje = 999;
+	char *mensaje_test = "Newton loololo";
+	pcb_serializacion->valor_mensaje = mensaje_test;
+	pcb_serializacion->cantidad_operaciones = 1000;
+	pcb_serializacion->resultado_mensaje = 1001;
 	return pcb_serializacion;
+}
+
+
+void actualizarPCB(t_PCB *pcb, t_PCB_serializacion *recibir_pcb){
+	pcb->instructions_index = recibir_pcb->instructions_index;
+	pcb->pid = recibir_pcb->pid;
+	pcb->instructions_size = recibir_pcb->instructions_size;
+	pcb->program_counter = recibir_pcb->program_counter;
+	pcb->stack = list_create();
+	pcb->stack = recibir_pcb->stack_index;
+	pcb->used_pages = recibir_pcb->used_pages;
+	pcb->stack_size = recibir_pcb->stack_size;
+	pcb->program_finished = recibir_pcb->program_finished;
+	pcb->stack_free_space_pointer = malloc(sizeof(t_direccion_virtual_memoria));
+	pcb->stack_free_space_pointer = recibir_pcb->stack_last_address;
+	pcb->label_index = recibir_pcb->label_index;
+	//TODO Agregar campos nuevos de la serializacion
 }
 
