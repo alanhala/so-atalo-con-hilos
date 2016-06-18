@@ -74,7 +74,7 @@ void UMC_connection(t_swap* swap) {
 
 			t_iniciar_programa_en_swap *carga = malloc(sizeof(t_iniciar_programa_en_swap));
 
-			carga = (t_iniciar_programa_en_swap *)deserealizar_mensaje(buffer_header[0], buffer_recv);
+			carga = (t_iniciar_programa_en_swap *)deserealizar_mensaje(tipo, buffer_recv);
 
 			int resultado_carga =initialize_program(swap, carga->pid, carga->paginas_necesarias, carga->codigo_programa);
 
@@ -96,7 +96,7 @@ void UMC_connection(t_swap* swap) {
 
 			t_leer_pagina_swap *lectura = malloc(sizeof(t_leer_pagina_swap));
 
-			lectura = (t_leer_pagina_swap*)deserealizar_mensaje(buffer_header[0], buffer_recv);
+			lectura = (t_leer_pagina_swap*)deserealizar_mensaje(tipo, buffer_recv);
 
 			char *contenido = read_page(swap, lectura->pid, lectura->pagina);
 
@@ -118,7 +118,7 @@ void UMC_connection(t_swap* swap) {
 
 			t_escribir_pagina_swap * carga = malloc(sizeof(t_escribir_pagina_swap));
 
-			carga = (t_escribir_pagina_swap*)deserealizar_mensaje(buffer_header[0], buffer_recv);
+			carga = (t_escribir_pagina_swap*)deserealizar_mensaje(tipo, buffer_recv);
 
 			int res = write_page(swap, carga->pid, carga->pagina, carga->datos);
 

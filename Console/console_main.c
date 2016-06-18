@@ -85,16 +85,18 @@ int main(int argc, char **argv) {
 
 	un_header = deserializar_header(buffer_header);
 
-	char buffer_recibidos[un_header->length];
+	uint8_t tipo = un_header->tipo;
+	uint32_t length = un_header->length;
 
-	bytes_recibidos = recv(kernel_socket_descriptor,buffer_recibidos,un_header->length,0);
+	char buffer_recibidos[length];
+
+	bytes_recibidos = recv(kernel_socket_descriptor,buffer_recibidos,length,0);
 
 	t_respuesta_iniciar_programa_en_kernel *respuesta = malloc(sizeof(t_respuesta_iniciar_programa_en_kernel));
 
 	respuesta = deserealizar_mensaje(92,buffer_recibidos);
 
 	printf("Respuesta al inicio de programa: %d\n",respuesta->respuesta_correcta);
-
 
 	while (1) {
 		t_header *un_header = malloc(sizeof(t_header));
@@ -107,11 +109,14 @@ int main(int argc, char **argv) {
 
 		un_header = deserializar_header(buffer_header);
 
-		char buffer_recibidos[(un_header->length)];
+		uint8_t tipo = un_header->tipo;
+		uint32_t length = un_header->length;
 
-		if(un_header->tipo == 132){
+		char buffer_recibidos[(length)];
 
-			int bytes_recibidos = recv(kernel_socket_descriptor,buffer_recibidos,un_header->length,0);
+		if(tipo == 132){
+
+			int bytes_recibidos = recv(kernel_socket_descriptor,buffer_recibidos,length,0);
 
 			t_imprimir_texto_en_consola *texto_a_imprimir = malloc(sizeof(t_imprimir_texto_en_consola));
 
@@ -122,9 +127,9 @@ int main(int argc, char **argv) {
 
 
 		}
-		if(un_header->tipo == 133){
+		if(tipo == 133){
 
-				int bytes_recibidos = recv(kernel_socket_descriptor,buffer_recibidos,un_header->length,0);
+				int bytes_recibidos = recv(kernel_socket_descriptor,buffer_recibidos,length,0);
 
 				t_finalizar_programa_en_consola *finalizar = malloc(sizeof(t_finalizar_programa_en_consola));
 
