@@ -6,6 +6,10 @@ int kernel_spec() {
 	CU_pSuite create_kernel = CU_add_suite("Kernel creation", NULL, NULL);
 	CU_add_test(create_kernel, "it creates the kernel with the right attributes",
 			create_kernel_1);
+	CU_add_test(create_kernel, "it creates the right io_list",
+			create_kernel_2);
+	CU_add_test(create_kernel, "it creates the right shared variables list",
+			create_kernel_3);
 
 	CU_pSuite initialize_program = CU_add_suite("Initialize program", NULL, NULL);
 	CU_add_test(initialize_program, "it increments the programs number",
@@ -34,15 +38,40 @@ int kernel_spec() {
 
 void create_kernel_1() {
 	t_kernel* kernel = create_kernel("./spec/kernel_config_spec.txt");
-	t_shared_variable* var_1 = list_get(kernel->shared_vars, 0);
-	t_shared_variable* var_2 = list_get(kernel->shared_vars, 1);
-	t_shared_variable* var_3 = list_get(kernel->shared_vars, 2);
 	CU_ASSERT_EQUAL(kernel->programs_number, 0);
 	CU_ASSERT_STRING_EQUAL(kernel->console_port, "5000");
 	CU_ASSERT_STRING_EQUAL(kernel->cpu_port, "5001");
 	CU_ASSERT_EQUAL(kernel->quantum, 3);
 	CU_ASSERT_EQUAL(kernel->quantum_sleep, 500);
 	CU_ASSERT_EQUAL(kernel->stack_size, 2);
+}
+
+void create_kernel_2() {
+	t_kernel* kernel = create_kernel("./spec/kernel_config_spec.txt");
+	t_io* io1 = list_get(kernel->io_list, 0);
+	t_io* io2 = list_get(kernel->io_list, 1);
+	t_io* io3 = list_get(kernel->io_list, 2);
+	int sem_1, sem_2, sem_3;
+	sem_getvalue(&io1->resources, &sem_1);
+	sem_getvalue(&io2->resources, &sem_2);
+	sem_getvalue(&io3->resources, &sem_3);
+	CU_ASSERT_EQUAL(kernel->io_list->elements_count, 3);
+	CU_ASSERT_STRING_EQUAL(io1->name, "Disco");
+	CU_ASSERT_EQUAL(sem_1, 1);
+	CU_ASSERT_EQUAL(io1->sleep, 1000);
+	CU_ASSERT_STRING_EQUAL(io2->name, "Impresora");
+	CU_ASSERT_EQUAL(io2->sleep, 2000);
+	CU_ASSERT_EQUAL(sem_2, 1);
+	CU_ASSERT_STRING_EQUAL(io3->name, "Scanner");
+	CU_ASSERT_EQUAL(io3->sleep, 1000);
+	CU_ASSERT_EQUAL(sem_3, 1);
+}
+
+void create_kernel_3() {
+	t_kernel* kernel = create_kernel("./spec/kernel_config_spec.txt");
+	t_shared_variable* var_1 = list_get(kernel->shared_vars, 0);
+	t_shared_variable* var_2 = list_get(kernel->shared_vars, 1);
+	t_shared_variable* var_3 = list_get(kernel->shared_vars, 2);
 	CU_ASSERT_EQUAL(kernel->shared_vars->elements_count, 3);
 	CU_ASSERT_STRING_EQUAL(var_1->name, "!Global");
 	CU_ASSERT_EQUAL(var_1->value, 0);

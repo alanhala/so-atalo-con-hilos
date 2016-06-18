@@ -12,6 +12,21 @@ t_list* load_shared_vars(char** shared_vars_list) {
 	}
 	return shared_variables;
 }
+
+t_list* load_input_output_list(char** name_list, char** sleep_values) {
+	t_list* io_list = list_create();
+	int i = 0;
+	while(*(name_list + i) != NULL) {
+		t_io* io = malloc(sizeof(t_io));
+		io->name = *(name_list + i);
+		io->sleep = atoi(*(sleep_values + i));
+		sem_init(&io->resources, 0, 1);
+		list_add(io_list, io);
+		i++;
+	}
+	return io_list;
+}
+
 t_kernel* create_kernel(char* config_file_path) {
 	t_config* kernel_config = config_create(config_file_path);
 	t_kernel* kernel = malloc(sizeof(t_kernel));
@@ -23,6 +38,8 @@ t_kernel* create_kernel(char* config_file_path) {
 	kernel->quantum_sleep = config_get_int_value(kernel_config, "QUANTUM_SLEEP");
 	kernel->stack_size = config_get_int_value(kernel_config, "STACK_SIZE");
 	kernel->shared_vars = load_shared_vars(config_get_array_value(kernel_config, "SHARED_VARS"));
+	kernel->io_list = load_input_output_list(config_get_array_value(kernel_config, "IO_IDS"),
+			config_get_array_value(kernel_config, "IO_SLEEP"));
 	return kernel;
 }
 
@@ -113,5 +130,19 @@ uint32_t update_shared_var_value(t_kernel* self, char* variable_name, uint32_t v
 	}
 	t_shared_variable* shared_variable = list_find(self->shared_vars, (void*) same_variable);
 	shared_variable->value = value;
+	return 0;
+}
+
+uint32_t io_call(t_kernel* self, char* io_name, int times) {
+	int same_io(t_io* io) {
+		if (strcmp(io->name, io_name) == 0)
+			return 1;
+		else
+			return 0;
+	}
+	t_io* io = list_find(self->io_list, (void*) same_io);
+	sem_wait(&io->resources);
+	usleep(io->sleep * times * 1000); // milisegundos a microsegundos
+	sem_post(&io->resources);
 	return 0;
 }
