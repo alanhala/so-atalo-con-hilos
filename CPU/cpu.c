@@ -28,20 +28,19 @@ AnSISOP_funciones functions = {
 };
 
 AnSISOP_kernel kernel_functions = {
-	.AnSISOP_signal = signal,
-	.AnSISOP_wait = wait
+	.AnSISOP_signal = do_signal,
+	.AnSISOP_wait = do_wait
 };
-AnSISOP_kernel kernel_functions = { };
 
 t_PCB *pcb;
 
 uint32_t tamanio_pagina;
 
-void wait(t_nombre_semaforo identificador_semaforo) {
+void do_wait(t_nombre_semaforo identificador_semaforo) {
 
 }
 
-void signal(t_nombre_semaforo identificador_semaforo) {
+void do_signal(t_nombre_semaforo identificador_semaforo) {
 
 }
 
@@ -195,6 +194,7 @@ void imprimir(t_valor_variable valor_mostrar) {
 void imprimirTexto(char* print_value) {
     int enviado_correctamente = send_text_to_kernel(print_value, string_length(print_value));
     //todo si se quiere validar que haya enviado correctmente
+    //printf("%s\n", print_value);
     free(print_value);
 }
 
@@ -240,11 +240,11 @@ void finalizar(void) {
 	pcb->program_counter = stack_element->posicion_retorno;
     }
 
-    if(list_size(pcb->stack) == 1) {
+    go_back_to_previous_stack_element(stack_element);
+
+    if(list_is_empty(pcb->stack)) {
 	pcb->program_finished = 1;
     }
-
-    go_back_to_previous_stack_element(stack_element);
 }
 
 int send_text_to_kernel(char* print_value, uint32_t length) {
@@ -255,7 +255,7 @@ int send_text_to_kernel(char* print_value, uint32_t length) {
 
 	int bytes_enviados = send(KERNEL_DESCRIPTOR, buffer->datos, buffer->size, 0);
 
-
+	free(imprimir_en_cpu);
     return bytes_enviados;
 }
 
@@ -414,7 +414,7 @@ char* ejecutar_lectura_de_dato_con_iteraciones(void*(*closure_lectura)(t_dato_en
     }
     free(aux_dato);
     char endString='\0';
-	memcpy(result+dato->size,&endString,1);
+    memcpy(result+dato->size,&endString,1);
     return result;
 }
 

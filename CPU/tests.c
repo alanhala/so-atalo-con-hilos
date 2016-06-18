@@ -61,7 +61,7 @@ void test_ejecutar_programa_en_memoria() {
 
     //Cargo metadata de programa ANSISOP en PCB
 //    t_metadata_program *metadata = metadata_desde_literal("begin\nvariables c, d, e\nc=2147483647\nd=224947129\nf\ne <- g\nend\nfunction f\nvariables a\na=1234\nend\nfunction g\nvariables a\na=4321\nreturn a\nend");
-      t_metadata_program *metadata = metadata_desde_literal("begin\nvariables c, d, e\nc=2147483647\nd=224947129\nf\ne <- g\nend\nfunction f\nvariables a\na=1234\nend\nfunction g\nvariables a\na=2\nreturn a\nend");
+      t_metadata_program *metadata = metadata_desde_literal("begin\nvariables c, d, e\nc=2147483647\nd=224947129\nf\ne <- g\niterar\nend\nfunction f\nvariables a\na=1234\nend\nfunction g\nvariables a\na=2\nreturn a\nend\nfunction iterar\nvariables f, i, t\nf=20\ni=0\n:inicio\ni=i+1\nprint i\nt=f-i\nprint t\njnz t inicio\nend");
 
     pcb->instructions_index = metadata->instrucciones_serializado;
     pcb->label_index = get_label_index(metadata);
@@ -86,7 +86,7 @@ void test_ejecutar_programa_en_memoria() {
 
     execute_next_instruction_for_process();
     CU_ASSERT_EQUAL(2, list_size(pcb->stack));
-    CU_ASSERT_EQUAL(6, pcb->program_counter);
+    CU_ASSERT_EQUAL(7, pcb->program_counter);
     stack_element = list_get(pcb->stack, 1);
     CU_ASSERT_EQUAL(list_size(stack_element->variables), 0);
 
@@ -105,8 +105,11 @@ void test_ejecutar_programa_en_memoria() {
     int valor_final_e = dereferenciar(obtenerPosicionVariable('e'));
    // CU_ASSERT_EQUAL(valor_final_e, 4321);
     CU_ASSERT_EQUAL(valor_final_e, 2);
-//    execute_next_instruction_for_process();
-//    execute_next_instruction_for_process();
+
+    while(pcb->program_finished == 0) {
+	//int i = dereferenciar(obtenerPosicionVariable('t'));
+	execute_next_instruction_for_process();
+    }
 }
 
 void test_definir_variable() {
@@ -139,7 +142,7 @@ void test_obtener_posicion_variable() {
 
     t_dato_en_memoria *dato = obtenerPosicionVariable('a');
     CU_ASSERT_EQUAL(dato->size, sizeof(uint32_t));
-    CU_ASSERT_EQUAL(dato->direccion->pagina, 40);
+    CU_ASSERT_EQUAL(dato->direccion->pagina, 60);
     CU_ASSERT_EQUAL(dato->direccion->offset, 3);
 }
 
@@ -181,21 +184,20 @@ void test_actualizar_next_free_space() {
     t_PCB *pcb = get_PCB();
 
     CU_ASSERT_EQUAL(pcb->stack_free_space_pointer->offset, 2);
-    CU_ASSERT_EQUAL(pcb->stack_free_space_pointer->pagina, 41);
+    CU_ASSERT_EQUAL(pcb->stack_free_space_pointer->pagina, 61);
 
     incrementar_next_free_space(4);
 
     CU_ASSERT_EQUAL(pcb->stack_free_space_pointer->offset, 1);
-    CU_ASSERT_EQUAL(pcb->stack_free_space_pointer->pagina, 42);
+    CU_ASSERT_EQUAL(pcb->stack_free_space_pointer->pagina, 62);
 }
-
 
 void mockear_pcb() {
     t_PCB *pcb = malloc(sizeof(t_PCB));
     pcb->instructions_index = malloc(sizeof(t_indice_instrucciones_elemento)*2);
 
     t_intructions *indice = pcb->instructions_index;
-
+    pcb->program_finished = 0;
     pcb->program_counter = 1;
 
     indice->start = 0;
@@ -212,7 +214,7 @@ void mockear_pcb() {
 
     t_direccion_virtual_memoria *free_space = malloc(sizeof(t_direccion_virtual_memoria));
     free_space->offset =3;
-    free_space->pagina = 40;
+    free_space->pagina = 60;
 
     pcb->stack_free_space_pointer = free_space;
 

@@ -152,24 +152,22 @@ void ejecutar_pcb_en_cpu(t_PCB *pcb){
 
 			un_header = deserializar_header(buffer_header);
 
-			char buffer_recibidos[(un_header->length)];
+			uint32_t tipo = un_header->tipo;
+			uint32_t length = un_header->length;
 
-			if(un_header->tipo == 132){
+			char buffer_recibidos[length];
 
-				int bytes_recibidos = recv(pcb->cpu_socket_descriptor,buffer_recibidos,un_header->length,0);
+			if(tipo == 132){
+
+				int bytes_recibidos = recv(pcb->cpu_socket_descriptor,buffer_recibidos,length,0);
 
 
-				int bytes_sent = send(pcb->console_socket_descriptor,buffer_recibidos,buffer->size,0);
+				int bytes_sent = send(pcb->console_socket_descriptor,buffer_recibidos,length,0);
 				printf("Envio imprimir texto a consola\n");
 			}
 
 
 	}
-	//while(1){
-		//aca tengo que hacer un while de todas las respuestas que me va mandando cpu
-		// entre ellas las de semaforos, dispositivos, terminar programa y termino ejecucion de
-		//quantum
-	//}
 
 }
 
