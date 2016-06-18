@@ -23,6 +23,7 @@ AnSISOP_funciones functions = {
 	.AnSISOP_llamarConRetorno = llamarConRetorno,
 	.AnSISOP_finalizar = finalizar,
 	.AnSISOP_retornar = retornar,
+	.AnSISOP_entradaSalida = entradaSalida,
 	.AnSISOP_obtenerValorCompartida = obtenerValorCompartida,
 	.AnSISOP_asignarValorCompartida = asignarValorCompartida
 };
@@ -49,6 +50,10 @@ t_valor_variable obtenerValorCompartida(t_nombre_compartida variable) {
 }
 
 t_valor_variable asignarValorCompartida(t_nombre_compartida variable, t_valor_variable valor) {
+
+}
+
+void entradaSalida(t_nombre_dispositivo dispositivo, int tiempo) {
 
 }
 
