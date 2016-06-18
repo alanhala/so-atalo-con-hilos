@@ -47,9 +47,10 @@ t_PCB* create_pcb(t_kernel* kernel, char* program) {
 	pcb->stack_size = kernel->stack_size;
 	pcb->instructions_index = metadata->instrucciones_serializado;
 	pcb->instructions_size = metadata->instrucciones_size;
-	pcb->used_pages = 100; // ESTO LO HARCODEO EZE. TIENE QE CALCULARSE A PARTIR DEL PROGRAMA Y EL STAACK. validar con mati
+	pcb->used_pages = 300; // ESTO LO HARCODEO EZE. TIENE QE CALCULARSE A PARTIR DEL PROGRAMA Y EL STAACK. validar con mati
 	pcb->stack_last_address = get_stack_address(program);
 	pcb->label_index = get_label_index(metadata);
+	pcb->program_finished = 0;
 	return pcb;
 }
 
