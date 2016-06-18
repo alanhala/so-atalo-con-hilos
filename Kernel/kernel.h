@@ -26,7 +26,7 @@
 		uint32_t quantum_sleep;
 		char* io_ids;
 		char* sem_ids;
-		char* shared_vars;
+		t_list* shared_vars;
 		uint32_t stack_size;
 	} t_kernel;
 
@@ -59,9 +59,9 @@
 	} t_stack_element;
 
 	typedef struct {
-		t_nombre_variable id;
-		t_dato_en_memoria dato;
-	} t_variable;
+		char* name;
+		uint32_t value;
+	} t_shared_variable;
 
 
 	t_PCB* create_pcb(t_kernel* kernel, char* program);
@@ -76,4 +76,7 @@
 
 	t_label_index* create_label_index(char* label_name, int label_location);
 
+	uint32_t get_shared_var_value(t_kernel* self, char* shared_variable);
+
+	uint32_t update_shared_var_value(t_kernel* self, char* variable_name, uint32_t value);
 #endif
