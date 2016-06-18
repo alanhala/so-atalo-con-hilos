@@ -1,5 +1,17 @@
 #include "kernel.h"
 
+t_list* load_shared_vars(char** shared_vars_list) {
+	t_list* shared_variables = list_create();
+	int i = 0;
+	while(*(shared_vars_list + i) != NULL) {
+		t_shared_variable* shared_variable = malloc(sizeof(t_shared_variable));
+		shared_variable->name = *(shared_vars_list + i);
+		shared_variable->value = 0;
+		list_add(shared_variables, shared_variable);
+		i++;
+	}
+	return shared_variables;
+}
 t_kernel* create_kernel(char* config_file_path) {
 	t_config* kernel_config = config_create(config_file_path);
 	t_kernel* kernel = malloc(sizeof(t_kernel));
@@ -10,6 +22,7 @@ t_kernel* create_kernel(char* config_file_path) {
 	kernel->quantum = config_get_int_value(kernel_config, "QUANTUM");
 	kernel->quantum_sleep = config_get_int_value(kernel_config, "QUANTUM_SLEEP");
 	kernel->stack_size = config_get_int_value(kernel_config, "STACK_SIZE");
+	kernel->shared_vars = load_shared_vars(config_get_array_value(kernel_config, "SHARED_VARS"));
 	return kernel;
 }
 
@@ -71,4 +84,27 @@ t_label_index* create_label_index(char* label_name, int label_location) {
 	label_index->name = label_name;
 	label_index->location = label_location;
 	return label_index;
+}
+
+uint32_t get_shared_var_value(t_kernel* self, char* variable_name) {
+	int same_variable(t_shared_variable* shared_variable) {
+		if (strcmp(shared_variable->name, variable_name) == 0)
+			return 1;
+		else
+			return 0;
+	}
+	t_shared_variable* shared_variable = list_find(self->shared_vars, (void*) same_variable);
+	return shared_variable->value;
+}
+
+uint32_t update_shared_var_value(t_kernel* self, char* variable_name, uint32_t value) {
+	int same_variable(t_shared_variable* shared_variable) {
+		if (strcmp(shared_variable->name, variable_name) == 0)
+			return 1;
+		else
+			return 0;
+	}
+	t_shared_variable* shared_variable = list_find(self->shared_vars, (void*) same_variable);
+	shared_variable->value = value;
+	return 0;
 }

@@ -19,7 +19,6 @@
 #include <signal.h>
 #include <pthread.h>
 #include "socket.h"
-#include "tests.h"
 #include "protocoloKernel.h"
 #include "kernel.h"
 #include "nucleo.h"
@@ -64,7 +63,6 @@ int main(int argc, char **argv) {
 
 
 	}
-
 
 	return 0;
 }

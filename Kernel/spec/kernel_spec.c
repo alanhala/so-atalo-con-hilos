@@ -17,6 +17,14 @@ int kernel_spec() {
 	CU_add_test(initialize_program, "having a program with more than one label, it assigns the right label indexes",
 			initialize_program_4);
 
+	CU_pSuite get_shared_variable_value = CU_add_suite("get shared variable value", NULL, NULL);
+	CU_add_test(get_shared_variable_value, "it returns the right value",
+			get_shared_var_value_1);
+
+	CU_pSuite update_shared_variable_value = CU_add_suite("update shared variable value", NULL, NULL);
+	CU_add_test(update_shared_variable_value, "it updates the variable with the right value",
+			update_shared_var_value_1);
+
 	CU_basic_set_mode(CU_BRM_VERBOSE);
 	CU_basic_run_tests();
 	CU_cleanup_registry();
@@ -26,12 +34,22 @@ int kernel_spec() {
 
 void create_kernel_1() {
 	t_kernel* kernel = create_kernel("./spec/kernel_config_spec.txt");
+	t_shared_variable* var_1 = list_get(kernel->shared_vars, 0);
+	t_shared_variable* var_2 = list_get(kernel->shared_vars, 1);
+	t_shared_variable* var_3 = list_get(kernel->shared_vars, 2);
 	CU_ASSERT_EQUAL(kernel->programs_number, 0);
 	CU_ASSERT_STRING_EQUAL(kernel->console_port, "5000");
 	CU_ASSERT_STRING_EQUAL(kernel->cpu_port, "5001");
 	CU_ASSERT_EQUAL(kernel->quantum, 3);
 	CU_ASSERT_EQUAL(kernel->quantum_sleep, 500);
 	CU_ASSERT_EQUAL(kernel->stack_size, 2);
+	CU_ASSERT_EQUAL(kernel->shared_vars->elements_count, 3);
+	CU_ASSERT_STRING_EQUAL(var_1->name, "!Global");
+	CU_ASSERT_EQUAL(var_1->value, 0);
+	CU_ASSERT_STRING_EQUAL(var_2->name, "!UnaVar");
+	CU_ASSERT_EQUAL(var_2->value, 0);
+	CU_ASSERT_STRING_EQUAL(var_3->name, "!tiempo3");
+	CU_ASSERT_EQUAL(var_3->value, 0);
 }
 
 void initialize_program_1() {
@@ -77,5 +95,18 @@ void initialize_program_4() {
 	CU_ASSERT_EQUAL(label_index2->location, 7);
 }
 
+void get_shared_var_value_1() {
+	t_kernel* kernel = create_kernel("./spec/kernel_config_spec.txt");
+	t_shared_variable* var = list_get(kernel->shared_vars, 2);
+	var->value = 42;
+	int var_value = get_shared_var_value(kernel, "!tiempo3");
+	CU_ASSERT_EQUAL(var_value, 42);
+}
+
+void update_shared_var_value_1() {
+	t_kernel* kernel = create_kernel("./spec/kernel_config_spec.txt");
+	update_shared_var_value(kernel, "!UnaVar", 25);
+	CU_ASSERT_EQUAL(get_shared_var_value(kernel, "!UnaVar"), 25)
+}
 
 
