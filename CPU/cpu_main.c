@@ -47,15 +47,15 @@ int main(int argc, char **argv) {
 
 //	if (argc == 3) {
 //	    if (strcmp(argv[2], "-conexiones") == 0){
-		connect_to_UMC();
-    		connect_to_Kernel();
+//		connect_to_UMC();
+//    		connect_to_Kernel();
 //    	    }
 //	}
 //
 //	if (strcmp(argv[1], "-test") == 0){
-		 correrTest();
+//		 correrTest();
 		//correr_simulacion();
-		 return 0;
+//		 return 0;
 		 //correrTest();
 		//correr_simulacion();
 		 //return 0;
