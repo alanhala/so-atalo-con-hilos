@@ -102,14 +102,11 @@ void manejo_de_solicitudes(int client_socket_descriptor) {
 
 			un_header = deserializar_header(buffer_header);
 
-			uint8_t tipo = un_header->tipo;
-			uint32_t length = un_header->length;
+			char buffer_recibidos[(un_header->length)];
 
-			char buffer_recibidos[length];
+			if(un_header->tipo == 91){
 
-			if(tipo == 91){
-
-				int bytes_recibidos = recv(client_socket_descriptor,buffer_recibidos,length,0);
+				int bytes_recibidos = recv(client_socket_descriptor,buffer_recibidos,un_header->length,0);
 
 				t_iniciar_programa_en_kernel *iniciar_programa = malloc(sizeof(t_iniciar_programa_en_kernel));
 
@@ -118,7 +115,7 @@ void manejo_de_solicitudes(int client_socket_descriptor) {
 				printf("Kernel. El mensaje es: %s\n",iniciar_programa->codigo_de_programa);
 				printf("Kernel. El mensaje tiene de largo: %d\n",un_header->length);
 
-				// AGREGO EL CODIGO A LA COLA DE NEW -- Diuj
+				// AGREGO EL CODIGO A LA COLA DE NEW
 				t_new_program * nuevo_programa = malloc(sizeof(t_new_program));
 				nuevo_programa->codigo_programa = iniciar_programa->codigo_de_programa;
 				nuevo_programa->console_socket_descriptor = client_socket_descriptor;

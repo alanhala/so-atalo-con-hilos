@@ -215,7 +215,7 @@ void manejo_de_solicitudes(int socket_descriptor) {
 
 			bytes_de_una_pagina =
 					(t_escribir_bytes_de_una_pagina_en_UMC *) deserealizar_mensaje(
-							tipo, buffer_recv);
+							buffer_header[0], buffer_recv);
 			int pid_active = dame_pid_activo(socket_descriptor);
 			int estado_escritura = escribir_pagina_de_programa(pid_active,
 					bytes_de_una_pagina->pagina, bytes_de_una_pagina->offset,
@@ -244,7 +244,7 @@ void manejo_de_solicitudes(int socket_descriptor) {
 					sizeof(t_cambio_de_proceso));
 
 			cambio_de_proceso = (t_cambio_de_proceso *) deserealizar_mensaje(
-					tipo, buffer_recv);
+					buffer_header[0], buffer_recv);
 			int respuesta_temp = cambio_contexto(socket_descriptor,
 					cambio_de_proceso->pid);
 			t_respuesta_cambio_de_proceso *respuesta_c_de_proceso = malloc(
@@ -264,7 +264,7 @@ void manejo_de_solicitudes(int socket_descriptor) {
 
 				   t_inicio_de_programa_en_UMC *inicio_programa_en_UMC = malloc(sizeof(t_inicio_de_programa_en_UMC));
 
-				   inicio_programa_en_UMC = (t_inicio_de_programa_en_UMC *)deserealizar_mensaje(tipo,buffer_recv);
+				   inicio_programa_en_UMC = (t_inicio_de_programa_en_UMC *)deserealizar_mensaje(buffer_header[0],buffer_recv);
 
 				   int respuesta_tmp = cargar_nuevo_programa(inicio_programa_en_UMC->process_id,
 						   	   	   	   	   	   	   	   	   	 inicio_programa_en_UMC->cantidad_de_paginas,

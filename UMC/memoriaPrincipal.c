@@ -262,18 +262,13 @@ int cargar_nuevo_programa_en_swap(int pid, int paginas_requeridas_del_proceso, c
 
 	bytes_recibidos_header = recv(SWAP_SOCKET_DESCRIPTOR, buffer_header, 5, MSG_PEEK);
 
-	aHeader = deserializar_header(buffer_header);
+	char buffer_recv[buffer_header[1]]; 	//El buffer para recibir el mensaje se crea con la longitud recibida
 
-	uint8_t tipo = aHeader->tipo;
-	uint32_t length = aHeader->length;
-
-	char buffer_recv[length]; 	//El buffer para recibir el mensaje se crea con la longitud recibida
-
-	bytes_recibidos = recv(SWAP_SOCKET_DESCRIPTOR,buffer_recv,length,0);
+	bytes_recibidos = recv(SWAP_SOCKET_DESCRIPTOR,buffer_recv,buffer_header[1],0);
 
 	t_respuesta_iniciar_programa_en_swap * respuesta = malloc(sizeof(t_respuesta_iniciar_programa_en_swap));
 
-	respuesta = (t_respuesta_iniciar_programa_en_swap*)deserealizar_mensaje(tipo, buffer_recv);
+	respuesta = (t_respuesta_iniciar_programa_en_swap*)deserealizar_mensaje(buffer_header[0], buffer_recv);
 	sem_post(&mut_swap);
 	return respuesta->cargado_correctamente;
 }
@@ -303,18 +298,13 @@ char * leer_pagina_de_swap(int pid, int pagina){
 
 	bytes_recibidos_header = recv(SWAP_SOCKET_DESCRIPTOR, buffer_header, 5, MSG_PEEK);
 
-	aHeader = deserializar_header(buffer_header);
+	char buffer_recv[buffer_header[1]]; 	//El buffer para recibir el mensaje se crea con la longitud recibida
 
-	uint8_t tipo = aHeader->tipo;
-	uint32_t length = aHeader->length;
-
-	char buffer_recv[length]; 	//El buffer para recibir el mensaje se crea con la longitud recibida
-
-	bytes_recibidos = recv(SWAP_SOCKET_DESCRIPTOR,buffer_recv,length,0);
+	bytes_recibidos = recv(SWAP_SOCKET_DESCRIPTOR,buffer_recv,buffer_header[1],0);
 
 	t_respuesta_leer_pagina_swap *respuesta = malloc(sizeof(t_respuesta_leer_pagina_swap));
 
-	respuesta = (t_respuesta_leer_pagina_swap*)deserealizar_mensaje(tipo, buffer_recv);
+	respuesta = (t_respuesta_leer_pagina_swap*)deserealizar_mensaje(buffer_header[0], buffer_recv);
 	sem_post(&mut_swap);
 	return respuesta->datos; //debe devolver esto si no leyo bien "~/-1"
 }
@@ -345,18 +335,13 @@ int escribir_pagina_de_swap(int pid, int pagina, char * datos){
 
 	bytes_recibidos_header = recv(SWAP_SOCKET_DESCRIPTOR, buffer_header, 5, MSG_PEEK);
 
-	aHeader = deserializar_header(buffer_header);
+	char buffer_recv[buffer_header[1]]; 	//El buffer para recibir el mensaje se crea con la longitud recibida
 
-	uint8_t tipo = aHeader->tipo;
-	uint32_t length = aHeader->length;
-
-	char buffer_recv[length]; 	//El buffer para recibir el mensaje se crea con la longitud recibida
-
-	bytes_recibidos = recv(SWAP_SOCKET_DESCRIPTOR,buffer_recv,length,0);
+	bytes_recibidos = recv(SWAP_SOCKET_DESCRIPTOR,buffer_recv,buffer_header[1],0);
 
 	t_respuesta_escribir_pagina_swap *respuesta = malloc(sizeof(t_respuesta_escribir_pagina_swap));
 
-	respuesta = (t_respuesta_escribir_pagina_swap*)deserealizar_mensaje(tipo, buffer_recv);
+	respuesta = (t_respuesta_escribir_pagina_swap*)deserealizar_mensaje(buffer_header[0], buffer_recv);
 	sem_post(&mut_swap);
 	return respuesta->escritura_correcta;
 }
@@ -386,14 +371,9 @@ int finalizar_programa_de_swap(int pid){
 
 	bytes_recibidos_header = recv(SWAP_SOCKET_DESCRIPTOR, buffer_header, 5, MSG_PEEK);
 
-	a_header = deserializar_header(buffer_header);
+	char	buffer_recv[buffer_header[1]];	//El buffer para recibir el mensaje se crea con la longitud recibida
 
-	uint8_t tipo = a_header->tipo;
-	uint32_t length = a_header->length;
-
-	char	buffer_recv[length];	//El buffer para recibir el mensaje se crea con la longitud recibida
-
-	bytes_recibidos = recv(SWAP_SOCKET_DESCRIPTOR,buffer_recv,length,0);
+	bytes_recibidos = recv(SWAP_SOCKET_DESCRIPTOR,buffer_recv,buffer_header[1],0);
 
 	t_respuesta_finalizar_programa_swap *respuesta = malloc(sizeof(t_respuesta_finalizar_programa_swap));
 
