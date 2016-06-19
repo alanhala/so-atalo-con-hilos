@@ -112,9 +112,9 @@ int main(int argc, char **argv) {
 
 			set_PCB(pcb);
 			int resultado_ejecucion = ejecutar_pcb();
-
 			t_PCB_serializacion * pcb_serializado = adaptar_pcb_a_serializar(get_PCB());
 			pcb_serializado->mensaje = 3;
+			pcb_serializado->valor_mensaje = "SACAR ESTO";
 			t_stream * stream = serializar_mensaje(121,pcb_serializado);
 			send(KERNEL_DESCRIPTOR, stream->datos, stream->size, 0);
 		}
@@ -154,7 +154,7 @@ t_PCB_serializacion * adaptar_pcb_a_serializar(t_PCB * pcb){
 	pcb_serializacion->label_index = pcb->label_index; //todo chequear que alan lo este inicializando
 	pcb_serializacion->pid = pcb->pid;
 	pcb_serializacion->program_counter = pcb->program_counter;
-	pcb_serializacion->program_finished = 0;
+	pcb_serializacion->program_finished = pcb->program_finished;
 	pcb_serializacion->quantum = 0;
 	pcb_serializacion->quantum_sleep = 0;
 	pcb_serializacion->stack_index = pcb->stack;

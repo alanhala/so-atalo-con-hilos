@@ -279,13 +279,15 @@ void * recEjecucion() {
 void finalizar_programa(t_PCB *pcb) {
     int cpu = pcb->cpu_socket_descriptor;
 
-    sem_wait(&cant_exit);
+    sem_wait(&mut_exit);
     queue_push(estado_exit, pcb);
+    sem_post(&mut_exit);
     sem_post(&cant_exit);
 
     sem_wait(&mut_cpu_disponibles);
     queue_push(cola_cpu_disponibles, cpu);
     sem_post(&mut_cpu_disponibles);
+    sem_post(&cant_cpu_disponibles);
 }
 
 int finalizar_programa_consola(t_PCB *pcb){
