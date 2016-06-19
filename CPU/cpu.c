@@ -23,6 +23,7 @@ AnSISOP_funciones functions = {
 	.AnSISOP_llamarConRetorno = llamarConRetorno,
 	.AnSISOP_finalizar = finalizar,
 	.AnSISOP_retornar = retornar,
+	.AnSISOP_entradaSalida = entradaSalida,
 	.AnSISOP_obtenerValorCompartida = obtenerValorCompartida,
 	.AnSISOP_asignarValorCompartida = asignarValorCompartida
 };
@@ -146,6 +147,10 @@ t_valor_variable asignarValorCompartida(t_nombre_compartida variable, t_valor_va
 
 }
 
+void entradaSalida(t_nombre_dispositivo dispositivo, int tiempo) {
+
+}
+
 void execute_next_instruction_for_process() {
 	t_dato_en_memoria *instruccion = get_next_instruction();
 
@@ -185,13 +190,18 @@ int cambiar_contexto(int pid){
 
 	recv(UMC_DESCRIPTOR, buffer_header, 5, MSG_PEEK);
 
-	char buffer_recv[buffer_header[1]];
+	a_header = deserializar_header(buffer_header);
 
-	recv(UMC_DESCRIPTOR, buffer_recv, buffer_header[1], 0);
+	uint8_t tipo = a_header->tipo;
+	uint32_t length = a_header->length;
+
+	char buffer_recv[length];
+
+	recv(UMC_DESCRIPTOR, buffer_recv, length, 0);
 
 	t_respuesta_cambio_de_proceso *respuesta = malloc(sizeof(t_respuesta_cambio_de_proceso));
 
-	respuesta = (t_respuesta_cambio_de_proceso*)deserealizar_mensaje(buffer_header[0], buffer_recv);
+	respuesta = (t_respuesta_cambio_de_proceso*)deserealizar_mensaje(tipo, buffer_recv);
 
 	return respuesta->un_numero;
 }
@@ -376,13 +386,18 @@ char* leer_memoria_de_umc(t_dato_en_memoria *dato) {
 
     recv(UMC_DESCRIPTOR, buffer_header, 5, MSG_PEEK);
 
-    char buffer_recv[buffer_header[1]];
+    aHeader = deserializar_header(buffer_header);
 
-    recv(UMC_DESCRIPTOR, buffer_recv, buffer_header[1], 0);
+    uint8_t tipo = aHeader->tipo;
+    uint32_t length = aHeader->length;
+
+    char buffer_recv[length];
+
+    recv(UMC_DESCRIPTOR, buffer_recv, length, 0);
 
     t_respuesta_bytes_de_una_pagina_a_CPU *respuesta = malloc(sizeof(t_respuesta_bytes_de_una_pagina_a_CPU));
 
-    respuesta = (t_respuesta_bytes_de_una_pagina_a_CPU*)deserealizar_mensaje(buffer_header[0], buffer_recv);
+    respuesta = (t_respuesta_bytes_de_una_pagina_a_CPU*)deserealizar_mensaje(tipo, buffer_recv);
     return respuesta->bytes_de_una_pagina;
 }
 
@@ -412,9 +427,14 @@ int escribir_en_umc(t_dato_en_memoria * dato, char* valor) {
 
     recv(UMC_DESCRIPTOR, buffer_header, 5, MSG_PEEK);
 
-    char buffer_recv[buffer_header[1]];
+    aHeader = deserializar_header(buffer_header);
 
-    recv(UMC_DESCRIPTOR, buffer_recv, buffer_header[1], 0);
+    uint8_t tipo = aHeader->tipo;
+    uint32_t length = aHeader->length;
+
+    char buffer_recv[length];
+
+    recv(UMC_DESCRIPTOR, buffer_recv, length, 0);
 
     t_respuesta_escribir_bytes_de_una_pagina_en_UMC * respuesta = malloc(sizeof(t_respuesta_escribir_bytes_de_una_pagina_en_UMC));
 

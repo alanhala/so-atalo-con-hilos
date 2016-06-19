@@ -304,9 +304,16 @@ int finalizar_programa_umc(t_PCB *pcb){
 
 		int bytes_header = recv(UMC_SOCKET_DESCRIPTOR,buffer_header,5,MSG_PEEK);
 
-		char buffer_recv[buffer_header[1]];
+		t_header *un_header = malloc(sizeof(t_header));
 
-		int bytes_recibidos = recv(UMC_SOCKET_DESCRIPTOR,buffer_recv,buffer_header[1],0);
+		un_header = deserializar_header(buffer_header);
+
+		uint8_t tipo = un_header->tipo;
+		uint32_t length = un_header->length;
+
+		char buffer_recv[length];
+
+		int bytes_recibidos = recv(UMC_SOCKET_DESCRIPTOR,buffer_recv,length,0);
 
 		t_respuesta_finalizar_programa_en_UMC *respuesta_finalizar_prog_UMC = malloc(sizeof(t_respuesta_finalizar_programa_en_UMC));
 
@@ -378,15 +385,18 @@ int iniciar_programa_en_umc(int pid, int cantidad_paginas_requeridas, char* codi
 
 	   int bytes_header = recv(UMC_SOCKET_DESCRIPTOR,buffer_header,5,MSG_PEEK);
 
-	   char buffer_recv[buffer_header[1]];
+	   t_header *un_header = malloc(sizeof(t_header));
 
-	   int bytes_recibidos = recv(UMC_SOCKET_DESCRIPTOR,buffer_recv,buffer_header[1],0);
+	   uint8_t tipo = un_header->tipo;
+	   uint32_t length = un_header->length;
+
+	   char buffer_recv[length];
+
+	   int bytes_recibidos = recv(UMC_SOCKET_DESCRIPTOR,buffer_recv,length,0);
 
 	   t_respuesta_iniciar_programa_en_UMC *respuesta = malloc(sizeof(t_respuesta_iniciar_programa_en_UMC));
 	   memset(respuesta,0,sizeof(t_respuesta_iniciar_programa_en_UMC));
-	   respuesta = deserealizar_mensaje(buffer_header[0],buffer_recv);
+	   respuesta = deserealizar_mensaje(tipo,buffer_recv);
 
 	   return respuesta->respuesta_correcta;
-
-
 }
