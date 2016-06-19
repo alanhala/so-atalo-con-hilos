@@ -242,6 +242,12 @@ void ejecutar_pcb_en_cpu(t_PCB *pcb){
 					}
 
 
+				} else if(unPCB->mensaje == 3) {
+				    if(pcb->program_finished) {
+					finalizar_programa(pcb);
+					return;
+				    }
+
 				}
 
 			}
@@ -270,7 +276,17 @@ void * recEjecucion() {
 	}
 }
 
+void finalizar_programa(t_PCB *pcb) {
+    int cpu = pcb->cpu_socket_descriptor;
 
+    sem_wait(&cant_exit);
+    queue_push(estado_exit, pcb);
+    sem_post(&cant_exit);
+
+    sem_wait(&mut_cpu_disponibles);
+    queue_push(cola_cpu_disponibles, cpu);
+    sem_post(&mut_cpu_disponibles);
+}
 
 int finalizar_programa_consola(t_PCB *pcb){
 	t_finalizar_programa_en_consola * finalizar_consola = malloc(sizeof(t_finalizar_programa_en_consola));

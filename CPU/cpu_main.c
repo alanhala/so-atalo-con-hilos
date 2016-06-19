@@ -114,9 +114,9 @@ int main(int argc, char **argv) {
 			int resultado_ejecucion = ejecutar_pcb();
 
 			t_PCB_serializacion * pcb_serializado = adaptar_pcb_a_serializar(get_PCB());
+			pcb_serializado->mensaje = 3;
 			t_stream * stream = serializar_mensaje(121,pcb_serializado);
 			send(KERNEL_DESCRIPTOR, stream->datos, stream->size, 0);
-
 		}
 	}
 
