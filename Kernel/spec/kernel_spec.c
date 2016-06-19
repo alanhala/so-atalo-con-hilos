@@ -10,6 +10,8 @@ int kernel_spec() {
 			create_kernel_2);
 	CU_add_test(create_kernel, "it creates the right shared variables list",
 			create_kernel_3);
+	CU_add_test(create_kernel, "it initialize the semaphores",
+			create_kernel_4);
 
 	CU_pSuite initialize_program = CU_add_suite("Initialize program", NULL, NULL);
 	CU_add_test(initialize_program, "it increments the programs number",
@@ -79,6 +81,19 @@ void create_kernel_3() {
 	CU_ASSERT_EQUAL(var_2->value, 0);
 	CU_ASSERT_STRING_EQUAL(var_3->name, "!tiempo3");
 	CU_ASSERT_EQUAL(var_3->value, 0);
+}
+
+void create_kernel_4() {
+	t_kernel* kernel = create_kernel("./spec/kernel_config_spec.txt");
+	t_semaphore* sem_1 = list_get(kernel->semaphores, 0);
+	t_semaphore* sem_2 = list_get(kernel->semaphores, 1);
+	t_semaphore* sem_3 = list_get(kernel->semaphores, 2);
+	CU_ASSERT_STRING_EQUAL(sem_1->id, "SEM1");
+	CU_ASSERT_STRING_EQUAL(sem_2->id, "SEM2");
+	CU_ASSERT_STRING_EQUAL(sem_3->id, "SEM3");
+	CU_ASSERT_EQUAL(sem_1->value, 0);
+	CU_ASSERT_EQUAL(sem_2->value, 0);
+	CU_ASSERT_EQUAL(sem_3->value, 5);
 }
 
 void initialize_program_1() {

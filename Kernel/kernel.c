@@ -27,6 +27,19 @@ t_list* load_input_output_list(char** name_list, char** sleep_values) {
 	return io_list;
 }
 
+t_list* load_semaphores(char** semaphores_name, char** semaphores_init) {
+	t_list* semaphores = list_create();
+	int i = 0;
+	while(*(semaphores_name + i) != NULL) {
+		t_semaphore* semaphore = malloc(sizeof(t_semaphore));
+		semaphore->id = *(semaphores_name + i);
+		semaphore->value = atoi(*(semaphores_init + i));
+		list_add(semaphores, semaphore);
+		i++;
+	}
+	return semaphores;
+}
+
 t_kernel* create_kernel(char* config_file_path) {
 	t_config* kernel_config = config_create(config_file_path);
 	t_kernel* kernel = malloc(sizeof(t_kernel));
@@ -40,6 +53,8 @@ t_kernel* create_kernel(char* config_file_path) {
 	kernel->shared_vars = load_shared_vars(config_get_array_value(kernel_config, "SHARED_VARS"));
 	kernel->io_list = load_input_output_list(config_get_array_value(kernel_config, "IO_IDS"),
 			config_get_array_value(kernel_config, "IO_SLEEP"));
+	kernel->semaphores = load_semaphores(config_get_array_value(kernel_config, "SEM_IDS"),
+			config_get_array_value(kernel_config, "SEM_INIT"));
 	return kernel;
 }
 
@@ -145,4 +160,21 @@ uint32_t io_call(t_kernel* self, char* io_name, int times) {
 	usleep(io->sleep * times * 1000); // milisegundos a microsegundos
 	sem_post(&io->resources);
 	return 0;
+}
+
+int32_t wait(t_kernel* self, char* sem_id) {
+	int same_sem(t_semaphore* sem) {
+		if (strcmp(sem->id, sem_id) == 0)
+			return 1;
+		else
+			return 0;
+	}
+	t_semaphore* semaphore = list_find(self->semaphores, (void*) same_sem);
+	semaphore->value--;
+	if (semaphore->value < 0)
+//		block_process();
+		return -1;
+	else
+		return 0;
+
 }

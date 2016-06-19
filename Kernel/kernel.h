@@ -27,6 +27,7 @@
 		t_list* shared_vars;
 		uint32_t stack_size;
 		t_list* io_list;
+		t_list* semaphores;
 	} t_kernel;
 
 	typedef struct {
@@ -73,6 +74,11 @@
 		sem_t resources;
 		uint32_t sleep;
 	}t_io;
+
+	typedef struct {
+		char* id;
+		uint32_t value;
+	}t_semaphore;
 
 	t_PCB* create_pcb(t_kernel* kernel, char* program);
 
