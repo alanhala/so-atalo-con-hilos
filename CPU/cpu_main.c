@@ -163,12 +163,6 @@ t_PCB_serializacion * adaptar_pcb_a_serializar(t_PCB * pcb){
 	pcb_serializacion->stack_last_address = pcb->stack_free_space_pointer;
 	pcb_serializacion->stack_size = pcb->stack_size;
 	pcb_serializacion->used_pages = pcb->used_pages;
-	//TODO Agregar campos nuevos de la serializacion
-	pcb_serializacion->mensaje = 999;
-	char *mensaje_test = "Newton loololo";
-	pcb_serializacion->valor_mensaje = mensaje_test;
-	pcb_serializacion->cantidad_operaciones = 1000;
-	pcb_serializacion->resultado_mensaje = 1001;
 	return pcb_serializacion;
 }
 

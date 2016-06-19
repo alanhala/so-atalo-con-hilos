@@ -37,18 +37,112 @@ t_PCB *pcb;
 uint32_t tamanio_pagina;
 
 void do_wait(t_nombre_semaforo identificador_semaforo) {
+	t_PCB_serializacion * pcb_serializado = adaptar_pcb_a_serializar(get_PCB());
+	pcb_serializado->mensaje = 5;
+	pcb_serializado->valor_mensaje = identificador_semaforo;
+	pcb_serializado->cantidad_operaciones = 0;
+	pcb_serializado->resultado_mensaje = 0;
+	t_stream * stream = serializar_mensaje(121,pcb_serializado);
+	send(KERNEL_DESCRIPTOR, stream->datos, stream->size, 0);
 
+	//aca recibir una respuesa que me diga si desalojo el pcb porque pasa a bloqueado o no
 }
 
 void do_signal(t_nombre_semaforo identificador_semaforo) {
+	t_PCB_serializacion * pcb_serializado = adaptar_pcb_a_serializar(get_PCB());
+	pcb_serializado->mensaje = 4;
+	pcb_serializado->valor_mensaje = identificador_semaforo;
+	pcb_serializado->cantidad_operaciones = 0;
+	pcb_serializado->resultado_mensaje = 0;
+	t_stream * stream = serializar_mensaje(121,pcb_serializado);
+	send(KERNEL_DESCRIPTOR, stream->datos, stream->size, 0);
 
 }
 
 t_valor_variable obtenerValorCompartida(t_nombre_compartida variable) {
+	char * new_variable = string_substring(variable, 0, strlen(variable)-1); //LE SACO EL \n
+
+	t_PCB_serializacion * pcb_serializado = adaptar_pcb_a_serializar(get_PCB());
+	pcb_serializado->mensaje = 1;
+	pcb_serializado->valor_mensaje = new_variable;
+	pcb_serializado->cantidad_operaciones = 0;
+	pcb_serializado->resultado_mensaje = 0;
+	t_stream * stream = serializar_mensaje(121,pcb_serializado);
+	send(KERNEL_DESCRIPTOR, stream->datos, stream->size, 0);
+
+
+	t_header *a_header = malloc(sizeof(t_header));
+
+		char buffer_header[5];	//Buffer donde se almacena el header recibido
+
+		int bytes_recibidos_header,	//Cantidad de bytes recibidos en el recv() que recibe el header
+				bytes_recibidos;//Cantidad de bytes recibidos en el recv() que recibe el mensaje completo
+
+		bytes_recibidos_header = recv(KERNEL_DESCRIPTOR, buffer_header, 5,	MSG_PEEK);
+
+		a_header = deserializar_header(buffer_header);
+
+		int tipo = a_header->tipo;
+		int length = a_header->length;
+
+		char buffer_recv[length]; //El buffer para recibir el mensaje se crea con la longitud recibida
+
+		if (tipo == 121) {
+
+			int bytes_recibidos = recv(KERNEL_DESCRIPTOR, buffer_recv,
+					length, 0);
+
+			t_PCB_serializacion *recibir_pcb = malloc(sizeof(t_PCB_serializacion));
+
+			recibir_pcb = (t_PCB_serializacion * ) deserealizar_mensaje(121, buffer_recv);
+
+			return recibir_pcb->resultado_mensaje;
+		}
+		return -1; //TODO NO SE OBTUVO RESULTADO DE LA VARIABLE COMPARTIDA
+
 
 }
 
 t_valor_variable asignarValorCompartida(t_nombre_compartida variable, t_valor_variable valor) {
+	char * new_variable = string_substring(variable, 0, strlen(variable)); //LE SACO EL \N
+
+	t_PCB_serializacion * pcb_serializado = adaptar_pcb_a_serializar(get_PCB());
+	pcb_serializado->mensaje = 2;
+	pcb_serializado->valor_mensaje = new_variable;
+	pcb_serializado->cantidad_operaciones = valor;
+	pcb_serializado->resultado_mensaje = 0;
+	t_stream * stream = serializar_mensaje(121,pcb_serializado);
+	send(KERNEL_DESCRIPTOR, stream->datos, stream->size, 0);
+
+
+	t_header *a_header = malloc(sizeof(t_header));
+
+	char buffer_header[5];	//Buffer donde se almacena el header recibido
+
+	int bytes_recibidos_header,	//Cantidad de bytes recibidos en el recv() que recibe el header
+			bytes_recibidos;//Cantidad de bytes recibidos en el recv() que recibe el mensaje completo
+
+	bytes_recibidos_header = recv(KERNEL_DESCRIPTOR, buffer_header, 5,	MSG_PEEK);
+
+	a_header = deserializar_header(buffer_header);
+
+	int tipo = a_header->tipo;
+	int length = a_header->length;
+
+	char buffer_recv[length]; //El buffer para recibir el mensaje se crea con la longitud recibida
+
+	if (tipo == 121) {
+
+		int bytes_recibidos = recv(KERNEL_DESCRIPTOR, buffer_recv,
+				length, 0);
+
+		t_PCB_serializacion *recibir_pcb = malloc(sizeof(t_PCB_serializacion));
+
+		recibir_pcb = (t_PCB_serializacion * ) deserealizar_mensaje(121, buffer_recv);
+
+		//ACA VER SI RECIBO ALGO O NO
+	}
+	return valor;
 
 }
 
@@ -192,9 +286,9 @@ void imprimir(t_valor_variable valor_mostrar) {
 }
 
 void imprimirTexto(char* print_value) {
-    int enviado_correctamente = send_text_to_kernel(print_value, string_length(print_value));
+   // int enviado_correctamente = send_text_to_kernel(print_value, string_length(print_value));
     //todo si se quiere validar que haya enviado correctmente
-    //printf("%s\n", print_value);
+    printf("%s\n", print_value);
     free(print_value);
 }
 
@@ -375,6 +469,10 @@ t_stack_element* create_stack_element() {
     stack_element->variables = list_create();
     stack_element->posicion_retorno = 0;
     stack_element->valor_retorno = malloc(sizeof(t_dato_en_memoria));
+    t_direccion_virtual_memoria * direccion = malloc(sizeof(t_direccion_virtual_memoria));
+    direccion->pagina = 0;
+    direccion->offset = 0;
+    stack_element->valor_retorno->direccion = direccion;
 
     return stack_element;
 }
