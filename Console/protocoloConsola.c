@@ -62,7 +62,7 @@ t_stream *serializar_iniciar_programa_en_kernel(t_iniciar_programa_en_kernel *in
 	offset+=tmpsize;
 
 	char endString='\0';
-	memcpy(stream->datos+offset,&endString,1);
+	memcpy(stream->datos+offset-1,&endString,1);
 
 	return stream;
 }
@@ -75,9 +75,50 @@ void *deserealizar_mensaje(uint8_t tipo, char* datos) {
 	case(92):
 			estructuraDestino = deserealizar_respuesta_inicio_de_programa_en_kernel(datos);
 			break;
+	case(132):
+			estructuraDestino = deserealizar_imprimir_texto_en_consola(datos);
+			break;
+	case(133):
+			estructuraDestino = deserealizar_finalizar_consola(datos);
+			break;
 	}
 
 	return estructuraDestino;
+}
+
+t_finalizar_programa_en_consola * deserealizar_finalizar_consola(char *datos){
+		const int desplazamiento_header = 5;
+
+		t_finalizar_programa_en_consola *finalizar = malloc(sizeof(t_finalizar_programa_en_consola));
+		memset(finalizar,0,sizeof(t_finalizar_programa_en_consola));
+
+		memcpy(&finalizar->motivo,datos+desplazamiento_header,sizeof(uint32_t));
+
+		return finalizar;
+}
+
+t_imprimir_texto_en_consola *  deserealizar_imprimir_texto_en_consola(char *datos){
+
+	int		tmpsize = 0,
+			tamanoDato = 0;
+
+	const int desplazamientoHeader = 5;		//Offset inicial para no deserealizar tipo (1 byte) y length (4 bytes)
+
+	t_imprimir_texto_en_consola *texto_a_imprimir = malloc(sizeof(t_imprimir_texto_en_consola));
+	memset(texto_a_imprimir,0, sizeof(t_imprimir_texto_en_consola));
+
+	for(tamanoDato = 0; (datos+desplazamientoHeader)[tamanoDato] != '\0';tamanoDato++);//incremento tamanoDato, hasta el tamaÃ±o del nombre
+
+	texto_a_imprimir->texto_a_imprimir = malloc(tamanoDato+1);
+	memset(texto_a_imprimir->texto_a_imprimir,0,tamanoDato+1);
+
+	memcpy(texto_a_imprimir->texto_a_imprimir, datos+desplazamientoHeader, tmpsize=tamanoDato+1);
+
+	char endString = '\0';
+	memcpy(texto_a_imprimir->texto_a_imprimir+tamanoDato,&endString,1);
+
+	return texto_a_imprimir;
+
 }
 
 t_respuesta_iniciar_programa_en_kernel *deserealizar_respuesta_inicio_de_programa_en_kernel(char *datos){

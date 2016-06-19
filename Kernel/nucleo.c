@@ -16,14 +16,17 @@
 #include <signal.h>
 #include <pthread.h>
 #include "nucleo.h"
+#include "kernel.h"
 #include "protocoloKernel.h"
 
 void set_umc_socket_descriptor(int socket){
 	UMC_SOCKET_DESCRIPTOR = socket;
 }
-
+t_kernel* KERNEL;
 
 void iniciar_algoritmo_planificacion() {
+
+	KERNEL = create_kernel("./kernel_config.txt");
 
 	//5 estados new, ready , exec, exit, block
 	estado_new = queue_create();
@@ -72,16 +75,6 @@ void iniciar_algoritmo_planificacion() {
 
 
 
-t_PCB *createPCB(char *codigo_programa)
-{
-    t_PCB *pcb;
-    pcb = malloc(sizeof(t_PCB));
-    pcb->pid = 10 ;
-    pcb->program_counter = 0;
-    pcb->codigo_programa = codigo_programa;
-    pcb->paginas_codigo = 50;
-	return(pcb);
-}
 
 int iniciar_programa_en_umc(int pid, int cantidad_paginas_requeridas, char* codigo);
 void *recNew() {
@@ -90,16 +83,17 @@ void *recNew() {
 	while (1) {
 		sem_wait(&cant_new);
 		sem_wait(&mut_new);
-		char * codigo_programa = queue_pop(estado_new);
+		t_new_program * nuevo_programa = queue_pop(estado_new);
 		sem_post(&mut_new);
 
-		t_PCB *pcb = createPCB(codigo_programa);
-
-		int inicio_correcto = iniciar_programa_en_umc(pcb->pid, pcb->paginas_codigo, pcb->codigo_programa);
-		printf("resultado inicio programa en umc : %d", inicio_correcto); //TODO sacar este comentario
+		t_PCB *pcb = initialize_program(KERNEL,nuevo_programa->codigo_programa);
+		pcb->console_socket_descriptor = nuevo_programa->console_socket_descriptor;
+		int inicio_correcto = iniciar_programa_en_umc(pcb->pid, pcb->used_pages, nuevo_programa->codigo_programa);
+		printf("resultado inicio programa en umc : %d\n", inicio_correcto); //TODO sacar este comentario
 		fflush(stdout);
+
 		sem_wait(&mut_ready);
-		pcb->estado = READY;
+		pcb->state = "Ready";
 		queue_push(estado_ready, pcb);
 		sem_post(&mut_ready);
 		sem_post(&cant_ready);
@@ -120,57 +114,176 @@ void *recReady() {
 
 
 		sem_wait(&cant_cpu_disponibles); //espero tener una cpu disponible
-		sem_post(&cant_cpu_disponibles);
+
 
 
 		sem_wait(&mut_ejecucion);
-		pcb->estado = EXEC;
+		pcb->state = "Ejecutando";
 		queue_push(estado_ejecucion, pcb);
 		sem_post(&mut_ejecucion);
 		sem_post(&cant_ejecucion);
-
-
-
 
 
 	}
 
 }
 
+t_PCB_serializacion * adaptar_pcb_a_serializar(t_PCB * pcb){
+	t_PCB_serializacion * pcb_serializacion = malloc(sizeof(t_PCB_serializacion));
+	pcb_serializacion->instructions_index = pcb->instructions_index;
+	pcb_serializacion->instructions_size = pcb->instructions_size;
+	pcb_serializacion->label_index = pcb->label_index; //todo chequear que alan lo este inicializando
+	pcb_serializacion->pid = pcb->pid;
+	pcb_serializacion->program_counter = pcb->program_counter;
+	pcb_serializacion->program_finished = 0; //TODO revisar que valor le pongo
+	pcb_serializacion->quantum = KERNEL->quantum;
+	pcb_serializacion->quantum_sleep = KERNEL->quantum_sleep;
+	pcb_serializacion->stack_index = pcb->stack_index;
+	pcb_serializacion->stack_last_address = pcb->stack_last_address;
+	pcb_serializacion->stack_size = pcb->stack_size;
+	pcb_serializacion->used_pages = pcb->used_pages;
 
 
-void * ejecutar_pcb_en_cpu(t_cpu *cpu){
+	return pcb_serializacion;
+}
+
+void actualizar_pcb_serializado(t_PCB *pcb, t_PCB_serializacion *pcb_serializacion){
+	pcb->instructions_index = pcb_serializacion->instructions_index;
+	pcb->instructions_size = pcb_serializacion->instructions_size;
+	pcb->label_index = pcb_serializacion->label_index;
+	pcb->pid = pcb_serializacion->pid;
+	pcb->program_counter = pcb_serializacion->program_counter;
+	pcb->program_finished = pcb_serializacion->program_finished;
+	pcb->stack_index = pcb_serializacion->stack_index;
+	pcb->stack_last_address = pcb_serializacion->stack_last_address;
+	pcb->stack_size = pcb_serializacion->stack_size;
+	pcb->used_pages = pcb_serializacion->used_pages;
 
 }
 
-void * recEjecucion() {
-	while(1){
-		sem_wait(&cant_cpu_disponibles);
-		sem_wait(&mut_cpu_disponibles);
-		t_cpu *cpu  = queue_pop(cola_cpu_disponibles);
-		sem_post(&mut_cpu_disponibles);
+void ejecutar_pcb_en_cpu(t_PCB *pcb){
 
+	t_PCB_serializacion * pcb_serializacion = adaptar_pcb_a_serializar(pcb);
+	pcb_serializacion->mensaje = 0;
+	pcb_serializacion->valor_mensaje = "";
+	pcb_serializacion->cantidad_operaciones = 0;
+	pcb_serializacion->resultado_mensaje = 0;
+	t_stream *buffer = serializar_mensaje(121,pcb_serializacion);
+
+	int bytes_enviados = send(pcb->cpu_socket_descriptor, buffer->datos, buffer->size, 0);
+	if (bytes_enviados == -1){
+		printf("error al enviar pcb\n");
+	}
+	printf("pcb enviado a cpu \n ");
+	while(1){
+
+			t_header *un_header = malloc(sizeof(t_header));
+			char buffer_header[5];
+
+			int	bytes_recibidos_header,
+				bytes_recibidos;
+
+			bytes_recibidos_header = recv(pcb->cpu_socket_descriptor,buffer_header,5,MSG_PEEK);
+
+			un_header = deserializar_header(buffer_header);
+
+			uint8_t tipo = un_header->tipo;
+			uint32_t length = un_header->length;
+
+
+			char buffer_recibidos[length];
+
+			if(tipo == 132){
+
+				int bytes_recibidos = recv(pcb->cpu_socket_descriptor,buffer_recibidos,length,0);
+
+
+				int bytes_sent = send(pcb->console_socket_descriptor,buffer_recibidos,length,0);
+				printf("Envio imprimir texto a consola\n");
+			}
+			if(tipo == 121){
+
+				int bytes_recibidos = recv(pcb->cpu_socket_descriptor,buffer_recibidos,length,0);
+				t_PCB_serializacion *unPCB = deserealizar_mensaje(121,buffer_recibidos);
+
+				actualizar_pcb_serializado(pcb, unPCB);
+
+				if(unPCB->mensaje == 1){
+					uint32_t valor_variable =get_shared_var_value(KERNEL, unPCB->valor_mensaje);
+
+					t_PCB_serializacion * pcb_serializacion = adaptar_pcb_a_serializar(pcb);
+					pcb_serializacion->mensaje = 0;
+					pcb_serializacion->valor_mensaje = "";
+					pcb_serializacion->cantidad_operaciones = 0;
+					pcb_serializacion->resultado_mensaje = valor_variable;
+					t_stream *buffer = serializar_mensaje(121,pcb_serializacion);
+
+					int bytes_enviados = send(pcb->cpu_socket_descriptor, buffer->datos, buffer->size, 0);
+					if (bytes_enviados == -1){
+						printf("error al enviar pcb\n");
+					}
+
+
+
+				}else if(unPCB->mensaje ==2){
+					//aca hay que renombrar el cantidad de operaciones ya que no imagine todos los casos.
+					//estoy reutilizadno el campo para no serializar algo mas
+					uint32_t resultado =update_shared_var_value(KERNEL, unPCB->valor_mensaje, unPCB->cantidad_operaciones);
+					t_PCB_serializacion * pcb_serializacion = adaptar_pcb_a_serializar(pcb);
+					pcb_serializacion->mensaje = 0;
+					pcb_serializacion->valor_mensaje = "";
+					pcb_serializacion->cantidad_operaciones = 0;
+					pcb_serializacion->resultado_mensaje = resultado;
+					t_stream *buffer = serializar_mensaje(121,pcb_serializacion);
+
+					int bytes_enviados = send(pcb->cpu_socket_descriptor, buffer->datos, buffer->size, 0);
+					if (bytes_enviados == -1){
+						printf("error al enviar pcb\n");
+					}
+
+
+				}
+
+			}
+	}
+}
+
+void * recEjecucion() {
+
+	while(1){
 
 		sem_wait(&cant_ejecucion);
 		sem_wait(&mut_ejecucion);
 		t_PCB *pcb  = queue_pop(estado_ejecucion);
 		sem_post(&mut_ejecucion);
 
-		cpu->pcb =pcb;
+
+		sem_wait(&mut_cpu_disponibles);
+		int cpu  = (int )queue_pop(cola_cpu_disponibles);
+		sem_post(&mut_cpu_disponibles);
+
+
+		pcb->cpu_socket_descriptor = cpu;
 		pthread_t th_ejecucion_pcb;
-		pthread_create(&th_ejecucion_pcb, NULL, &ejecutar_pcb_en_cpu, cpu);
+		pthread_create(&th_ejecucion_pcb, NULL, &ejecutar_pcb_en_cpu, pcb);
 
 	}
-
-
-
-
 }
 
 
 
 int finalizar_programa_consola(t_PCB *pcb){
+	t_finalizar_programa_en_consola * finalizar_consola = malloc(sizeof(t_finalizar_programa_en_consola));
+	memset(finalizar_consola,0,sizeof(t_finalizar_programa_en_consola));
 
+	finalizar_consola->motivo = 0;
+	t_stream *buffer = malloc(sizeof(t_stream));
+
+	buffer = serializar_mensaje(133,finalizar_consola);
+
+	int bytes_enviados = send(pcb->console_socket_descriptor,buffer->datos,buffer->size,0);
+
+	return bytes_enviados;
 }
 
 int finalizar_programa_umc(t_PCB *pcb){
@@ -205,7 +318,9 @@ int finalizar_programa_umc(t_PCB *pcb){
 }
 
 void * recBlock(){
+	while(1){
 
+	}
 }
 void *recExit() {
 
@@ -217,8 +332,6 @@ void *recExit() {
 
 			int umc_finalizado =finalizar_programa_umc(pcb);
 			int consola_finalizado =finalizar_programa_consola(pcb);
-
-
 
 			free(pcb);// lo libero directamente creo q no es necesario hacer cola de exit
 
@@ -254,8 +367,6 @@ int iniciar_programa_en_umc(int pid, int cantidad_paginas_requeridas, char* codi
 	   iniciar_programa_en_UMC->process_id = pid;
 	   iniciar_programa_en_UMC->cantidad_de_paginas = cantidad_paginas_requeridas;
 	   iniciar_programa_en_UMC->codigo_de_programa = codigo;
-	   //char unChar[5] = "Hola";
-	   //memcpy(iniciar_programa_en_UMC->codigo_de_programa,&unChar,5);
 
 	   t_stream *buffer = malloc(sizeof(t_stream));
 
@@ -279,87 +390,3 @@ int iniciar_programa_en_umc(int pid, int cantidad_paginas_requeridas, char* codi
 
 
 }
-
-int atender_mensaje_cpu(int mensaje,char *identificador,char *valor)
-{
-/*
-al llamar en caso de que los valores no sean necesarios llenar con null
-obtener_valor [identificador de variable compartida]
-grabar_valor [identificador de variable compartida] [valor a grabar]
-wait [identificador de semáforo]
-signal [identificador de semáforo]
-entrada_salida [identificador de dispositivo] [unidades de tiempo a utilizar]
-*/
-     switch(mensaje) {
-        case CPU_IDLE :
-          // sem_post(&cant_cpu);
-           //deReadyaExec(auxcpu);
-           break;
-        case fin_quantum :
-           /* sem_wait(&mut_cpu);
-            cpu_in_list = list_get(pListaCpu,auxcpu->id);
-            sem_post(&mut_cpu);
-            pcb = cpu_in_list->pcb;
-        		sem_wait(&mut_ready);
-        		pcb->estado = READY;
-        		queue_push(pColaReady, pcb);
-        		sem_post(&mut_ready);
-        		sem_post(&cant_ready);
-            sem_post(&cant_cpu);    */
-           break;
-        case entrada_salida :
-        	//todo necesito tener creada la listadispositivos desde el archivo de configuracion
-        	/*extern t_list *listadispositivos ;
-        	t_entradasalida *io;
-        	io = list_find(listadispositivos,strcmp(this->dispositivo,identificador));
-        	queue_push(io->cola,pcb);
-        	*/
-        	//cada pcb se pone en cada cola de cada dispositivo
-
-           /* sem_wait(&mut_cpu);
-            cpu_in_list = list_get(pListaCpu,auxcpu->id);
-            sem_post(&mut_cpu);
-            pcb = cpu_in_list->pcb;
-        		sem_wait(&mut_block);
-        		pcb->estado = BLOCK;
-        		queue_push(pColaBlock, pcb);
-        		sem_post(&mut_block);
-        		sem_post(&cant_block);  */
-           break;
-        case fin_proceso :
-           //aca hay que liberar la cpu ponerla en idle y el proceso poner en cola exit
-           /* sem_wait(&mut_cpu);
-            cpu_in_list = list_get(pListaCpu,auxcpu->id);
-            cpu_in_list->msj = CPU_IDLE; //TODO este elemento se modifica directamente en la listacpu?? nose
-            //capaz hay que hacer
-            //list_add_in_index(cpu_in_list,auxcpu->id, cpu_in_list);
-            pcb = cpu_in_list->pcb;
-            sem_post(&mut_cpu);
-            sem_post(&cant_cpu);
-
-        		sem_wait(&mut_exit);
-        		pcb->estado = EXIT;
-        		queue_push(pColaExit, pcb);
-        		sem_post(&mut_exit);
-        		sem_post(&cant_exit);    */
-           break;
-        case obtener_valor:
-        //obtener_valor [identificador de variable compartida]
-        	break;
-		case grabar_valor:
-		//grabar_valor [identificador de variable compartida] [valor a grabar]
-			break;
-		case cpuwait:
-		//wait [identificador de semáforo]
-			break;
-		case cpusignal:
-		//signal [identificador de semáforo]
-			break;
-      }
-
-}
-
-
-
-
-

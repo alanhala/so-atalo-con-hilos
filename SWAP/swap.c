@@ -88,7 +88,7 @@ void write_swap_file(t_swap* self, int first_page_location, unsigned int pages_a
 		int not_written_bytes = pages_amount * self->page_size - strlen(program);
 		if (not_written_bytes > 0) {
 			for (i = 0; i < not_written_bytes; i++)
-				fwrite("\0", 1, 1, self->file);
+				fwrite("0", 1, 1, self->file);
 		}
 	}
 

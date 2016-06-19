@@ -19,21 +19,26 @@
 #include <signal.h>
 #include <pthread.h>
 #include "socket.h"
-#include "tests.h"
 #include "protocoloKernel.h"
+#include "kernel.h"
 #include "nucleo.h"
 
 #define CPULISTEN  "8000"
 #define UMCIP  "localhost"
 #define UMCPORT  "5000"
+#define CONFIGPATH "kernel_config.txt"
 #define BACKLOG 10
+//t_kernel * gkernel;
 
 void *cpu_connection(int socket_descriptor);
 void *console_and_cpu_connection_handler(int client_socket_descriptor);
 
 int main(int argc, char **argv) {
-
+	//todo me gustaria implementar  el archivo de configuracion asi empiezo a usarlo directamente
+	//pero me tira un par de errores cuando descomento las lineas que uso gkernel
+	//gkernel = create_kernel(CONFIGPATH);
 	iniciar_algoritmo_planificacion();
+
 	int umc_fd = create_client_socket_descriptor("localhost", "5000");
 	set_umc_socket_descriptor(umc_fd);
 	int a =2;
@@ -44,7 +49,7 @@ int main(int argc, char **argv) {
 
 	while(1){
 		int client_socket_descriptor = accept_connection(server_socket_descritptor);
-		printf("consola conectada\n");
+
 
 		pthread_t thread;
 		int thread_result = pthread_create(&thread, NULL,
@@ -58,7 +63,6 @@ int main(int argc, char **argv) {
 
 
 	}
-
 
 	return 0;
 }
@@ -75,6 +79,7 @@ void manejo_de_solicitudes(int client_socket_descriptor) {
 	recv(client_socket_descriptor, &handshake, sizeof(int), 0);
 	if(handshake == 1) //CPU
 	{
+		printf("cpu conectada\n");
 		sem_wait(&mut_cpu_disponibles);
 		int cpu_socket_descriptor = client_socket_descriptor;
 		queue_push(cola_cpu_disponibles, cpu_socket_descriptor);
@@ -83,7 +88,7 @@ void manejo_de_solicitudes(int client_socket_descriptor) {
 	}
 	if(handshake == 2) //Consola
 	{
-
+		printf("consola conectada\n");
 	}
 
 
@@ -111,9 +116,12 @@ void manejo_de_solicitudes(int client_socket_descriptor) {
 				printf("Kernel. El mensaje tiene de largo: %d\n",un_header->length);
 
 				// AGREGO EL CODIGO A LA COLA DE NEW
-				char * codigo_programa = iniciar_programa->codigo_de_programa;
+				t_new_program * nuevo_programa = malloc(sizeof(t_new_program));
+				nuevo_programa->codigo_programa = iniciar_programa->codigo_de_programa;
+				nuevo_programa->console_socket_descriptor = client_socket_descriptor;
+				//char * codigo_programa = iniciar_programa->codigo_de_programa;
 				sem_wait(&mut_new);
-				queue_push(estado_new, codigo_programa);
+				queue_push(estado_new, nuevo_programa);
 				sem_post(&mut_new);
 				sem_post(&cant_new);
 				// FIN

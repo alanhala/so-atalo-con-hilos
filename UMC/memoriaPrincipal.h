@@ -5,16 +5,15 @@
  *      Author: utnso
  */
 
-
+#include <semaphore.h>
 int SWAP_SOCKET_DESCRIPTOR;
+
 
 int TAMANIO_MEMORIA_PRINCIPAL;
 char * MEMORIA_PRINCIPAL;
 int TAMANIO_FRAME;
 int CANTIDAD_FRAMES;
-
 int ALGORITMO_REEMPLAZO;
-
 int	CANTIDAD_ENTRADAS_TLB;
 int TLB_HABILITADA;
 int MAX_FRAMES_POR_PROCESO;
@@ -25,7 +24,8 @@ sem_t mut_lista_frames;
 t_list* lista_tabla_de_paginas;
 sem_t mut_tabla_de_paginas;
 
-
+sem_t mut_memoria_principal; // IMPORTANTES
+sem_t mut_swap; //IMPORTANTES
 
 int SWAP_MOCK_ENABLE;
 
@@ -71,6 +71,7 @@ typedef struct cpu_cont {
 	int pid_active;
 } t_cpu_context;
 
+sem_t mut_lista_cpu_context;
 t_list* lista_cpu_context;
 
 
@@ -120,13 +121,13 @@ int tiene_tabla_mas_paginas_para_pedir(t_tabla_de_paginas* tabla);
 int darle_frame_a_una_pagina(t_tabla_de_paginas* tabla, int pagina);
 int buscar_en_tlb_frame_de_pagina(int tabla, int pagina);
 
-
-
+void actualizar_tlb(int pid, int pagina, int frame);
+void actualizar_reemplazo(t_tabla_de_paginas* tabla, int frame_a_asignar,int pagina, int pagina_victima);
 int reemplazar_clock(t_tabla_de_paginas * tabla);
 int reemplazar_clock_modificado(t_tabla_de_paginas * tabla);
 
 // TLB
-
+sem_t mut_tlb;
 tabla_tlb* crear_tlb();
 tabla_tlb* TLB; //AGREGAR LOS SEMAFOROS QUE CORRESPONDAN
 

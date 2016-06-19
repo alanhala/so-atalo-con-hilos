@@ -90,7 +90,7 @@ t_respuesta_leer_pagina_swap *deserializar_respuesta_leer_pagina_swap(char *dato
 	offset+=tmpsize;
 
 	char endString = '\0';
-	memcpy(respuesta->datos+tmpsize,&endString,1);
+	memcpy(respuesta->datos+tamanoDato,&endString,1);
 
 	return respuesta;
 }
@@ -170,11 +170,10 @@ t_escribir_bytes_de_una_pagina_en_UMC *deserializar_escribir_bytes_de_una_pagina
 	escritura->buffer = malloc(tamanoDato+1);
 	memset(escritura->buffer,0,tamanoDato+1);
 
-	memcpy(escritura->buffer, datos+offset, tmpsize=tamanoDato+1);
-	offset+=tamanoDato+1;
+	memcpy(escritura->buffer, datos+offset, (tamanoDato+1));
 
 	char endString = '\0';
-	memcpy(escritura->buffer+tmpsize,&endString,1);
+	memcpy(escritura->buffer+tamanoDato,&endString,1);
 
 	return escritura;
 }
@@ -217,10 +216,9 @@ t_inicio_de_programa_en_UMC *deserealizar_inicio_de_programa_en_UMC(char *datos)
 	memset(inicio_de_programa->codigo_de_programa,0,tamanoDato+1);
 
 	memcpy(inicio_de_programa->codigo_de_programa,datos+offset,tamanoDato+1);
-	offset+=tmpsize;
 
 	char endString = '\0';
-	memcpy(inicio_de_programa->codigo_de_programa+tamanoDato+1,&endString,tamanoDato+1);
+	memcpy(inicio_de_programa->codigo_de_programa+tamanoDato,&endString,1);
 
 	return inicio_de_programa;
 }
@@ -296,6 +294,7 @@ t_stream * serializar_iniciar_programa_en_swap(t_iniciar_programa_en_swap * pedi
 
     memset(stream, 0, sizeof(t_stream));
     stream->size = stream_size;
+
     stream->datos = malloc(stream_size);
     memset(stream->datos,0,stream_size);
 
@@ -303,28 +302,23 @@ t_stream * serializar_iniciar_programa_en_swap(t_iniciar_programa_en_swap * pedi
     uint32_t pid = pedido->pid;
     uint32_t paginas_necesarias = pedido->paginas_necesarias;
 
-    char *aux = malloc(stream_size);
-    char *pedido_aux = pedido->codigo_programa;
-
-    memcpy(aux,&tipo,tmpsize=sizeof(uint8_t));
+    memcpy(stream->datos,&tipo,tmpsize=sizeof(uint8_t));
     offset+=tmpsize;
 
-    memcpy(aux+offset,&stream_size,tmpsize=sizeof(uint32_t));
+    memcpy(stream->datos+offset,&stream_size,tmpsize=sizeof(uint32_t));
     offset+=tmpsize;
 
-    memcpy(aux+offset,&pid,tmpsize=sizeof(uint32_t));
+    memcpy(stream->datos+offset,&pid,tmpsize=sizeof(uint32_t));
     offset+=tmpsize;
 
-    memcpy(aux+offset,&paginas_necesarias,tmpsize=sizeof(uint32_t));
+    memcpy(stream->datos+offset,&paginas_necesarias,tmpsize=sizeof(uint32_t));
     offset+=tmpsize;
 
-    memcpy(aux+offset,pedido_aux,tmpsize=size_codigo);
+    memcpy(stream->datos+offset,pedido->codigo_programa,tmpsize=size_codigo);
     offset+=tmpsize;
 
     char endString='\0';
-    memcpy(aux+offset,&endString,1);
-
-    stream->datos = aux;
+    memcpy(stream->datos+offset-1,&endString,1);
 
     return stream;
 }
@@ -361,7 +355,7 @@ t_stream * serializar_leer_pagina_swap(t_leer_pagina_swap * pedido){
 	memcpy(stream->datos+offset,&pid,tmpsize=sizeof(uint32_t));
 	offset+=tmpsize;
 
-	memcpy(stream->datos+offset,&pagina,tmpsize=sizeof(uint32_t));
+	memcpy(stream->datos+offset,&pagina,sizeof(uint32_t));
 
 	return stream;
 }
@@ -392,28 +386,24 @@ t_stream * serializar_escribir_pagina_swap(t_escribir_pagina_swap * escritura){
 	uint32_t pid = escritura->pid;
 	uint32_t pagina = escritura->pagina;
 
-	char *aux = malloc(stream_size);
-	char *escritura_aux = escritura->datos;
-
-	memcpy(aux,&tipo,tmpsize=sizeof(uint8_t));
+	memcpy(stream->datos,&tipo,tmpsize=sizeof(uint8_t));
 	offset+=tmpsize;
 
-	memcpy(aux+offset,&stream_size,tmpsize=sizeof(uint32_t));
+	memcpy(stream->datos+offset,&stream_size,tmpsize=sizeof(uint32_t));
 	offset+=tmpsize;
 
-	memcpy(aux+offset,&pid,tmpsize=sizeof(uint32_t));
+	memcpy(stream->datos+offset,&pid,tmpsize=sizeof(uint32_t));
 	offset+=tmpsize;
 
-	memcpy(aux+offset,&pagina,tmpsize=sizeof(uint32_t));
+	memcpy(stream->datos+offset,&pagina,tmpsize=sizeof(uint32_t));
 	offset+=tmpsize;
 
-	memcpy(aux+offset,escritura_aux,tmpsize=size_datos);
+
+	memcpy(stream->datos+offset,escritura->datos,tmpsize=size_datos);
 	offset+=tmpsize;
 
 	char endString='\0';
-	memcpy(aux+offset,&endString,1);
-
-	stream->datos = aux;
+	memcpy(stream->datos+offset-1,&endString,1);
 
 	return stream;
 }
@@ -445,7 +435,7 @@ t_stream *serializar_finalizar_programa_swap(t_finalizar_programa_en_swap *final
 	memcpy(stream->datos+offset,&stream_size,tmpsize=sizeof(uint32_t));
 	offset+=tmpsize;
 
-	memcpy(stream->datos+offset,&process_id,tmpsize=sizeof(uint32_t));
+	memcpy(stream->datos+offset,&process_id,sizeof(uint32_t));
 
 	return stream;
 }
@@ -468,24 +458,19 @@ t_stream *serializar_respuesta_bytes_de_una_pagina_a_CPU(t_respuesta_bytes_de_un
 	stream->datos = malloc(stream_size);
 	memset(stream->datos,0,stream_size);
 
- 	char* aux = malloc(stream_size);
- 	char *respuesta_aux = unaEstructura->bytes_de_una_pagina;
-
 	uint8_t tipo = 32; 	//Tipo del Mensaje . Fijado estaticamente segun protocolo
 
-	memcpy(aux,&tipo,tmpsize=sizeof(uint8_t));
+	memcpy(stream->datos,&tipo,tmpsize=sizeof(uint8_t));
 	offset+=tmpsize;
 
-	memcpy(aux+offset,&stream_size,tmpsize=sizeof(uint32_t));
+	memcpy(stream->datos+offset,&stream_size,tmpsize=sizeof(uint32_t));
 	offset+=tmpsize;
 
-	memcpy(aux+offset,respuesta_aux,tmpsize=size_bytes_de_una_pagina);
+	memcpy(stream->datos+offset,unaEstructura->bytes_de_una_pagina,tmpsize=size_bytes_de_una_pagina);
 	offset+=tmpsize;
 
 	char endString='\0';
-	memcpy(aux+offset,&endString,1);
-
-	stream->datos = aux;
+	memcpy(stream->datos+offset-1,&endString,1);
 
 	return stream;
 }
@@ -517,7 +502,7 @@ t_stream *serializar_respuesta_escribir_bytes_de_una_pagina_en_UMC(t_respuesta_e
 		memcpy(stream->datos+offset,&stream_size,tmpsize=sizeof(uint32_t));
 		offset+=tmpsize;
 
-		memcpy(stream->datos+offset,&escritura_resultado,tmpsize=sizeof(uint32_t));
+		memcpy(stream->datos+offset,&escritura_resultado,sizeof(uint32_t));
 
 		return stream;
 }

@@ -209,7 +209,7 @@ void write_swap_file_4() {
 	char* data = malloc(5);
 	fseek(swap->file, 0, SEEK_SET);
 	fread(data, 5, 1, swap->file);
-	CU_ASSERT_NSTRING_EQUAL(data, "qwe", 5);
+	CU_ASSERT_NSTRING_EQUAL(data, "qwe  ", 5);
 }
 
 void read_page_1() {
@@ -225,7 +225,7 @@ void read_page_2() {
 	initialize_program(swap, 1, 1, "123");
 	char* data = malloc(5);
 	data = read_page(swap, 1, 0);
-	CU_ASSERT_NSTRING_EQUAL(data, "123", 5);
+	CU_ASSERT_NSTRING_EQUAL(data, "123  ", 5);
 }
 
 void read_page_3() {

@@ -5,8 +5,10 @@
  *      Author: utnso
  */
 
-#ifndef PROTOCOLOCONSOLA_H_
-#define PROTOCOLOCONSOLA_H_
+#ifndef ANSISOP_PROTOCOLOCONSOLA_H_
+#define ANSISOP_PROTOCOLOCONSOLA_H_
+
+
 
 typedef struct {
 	char *codigo_de_programa;
@@ -15,6 +17,14 @@ typedef struct {
 typedef struct {
 	uint32_t respuesta_correcta;
 }__attribute__((packed)) t_respuesta_iniciar_programa_en_kernel;
+
+typedef struct {
+	char *texto_a_imprimir;
+}__attribute__((packed)) t_imprimir_texto_en_consola;
+
+typedef struct {
+       uint32_t motivo;
+}__attribute__((packed)) t_finalizar_programa_en_consola;
 
 typedef struct {
 	uint8_t tipo;
@@ -28,10 +38,12 @@ typedef struct {
 
 
 void *deserealizar_mensaje(uint8_t tipo, char* datos);
+t_imprimir_texto_en_consola *  deserealizar_imprimir_texto_en_consola(char *datos);
 t_respuesta_iniciar_programa_en_kernel *deserealizar_respuesta_inicio_de_programa_en_kernel(char *datos);
+t_finalizar_programa_en_consola * deserealizar_finalizar_consola(char *datos);
 t_stream *serializar_mensaje(int tipo, void* unaEstructura);
 t_stream *serializar_iniciar_programa_en_kernel(t_iniciar_programa_en_kernel *inicio_programa);
 
 
 
-#endif /* PROTOCOLOCONSOLA_H_ */
+#endif /* ANSISOP_PROTOCOLOCONSOLA_H_ */

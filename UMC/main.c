@@ -9,6 +9,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 #include <errno.h>
 #include <string.h>
@@ -20,12 +21,13 @@
 #include <sys/wait.h>
 #include <signal.h>
 #include <pthread.h>
-#include<commons/config.h>
-#include<commons/error.h>
-#include<commons/log.h>
+#include <commons/config.h>
+#include <commons/error.h>
+#include <commons/log.h>
 #include <commons/collections/list.h>
-#include<sys/types.h>
-#include<sys/inotify.h>
+#include <commons/string.h>
+#include <sys/types.h>
+#include <sys/inotify.h>
 #include <semaphore.h>
 #include "socket.h"
 #include "memoriaPrincipal.h"
@@ -34,11 +36,8 @@
 
 int BACKLOG =10;
 
-void *kernel_and_cpu_connection_thread();
-void kernel_and_cpu_connections();
-void connect_to_SWAP();
-void *connect_to_SWAP_thread();
 void *kernel_and_cpu_connection_handler(int client_socket_descriptor);
+void *interprete_comando_thread();
 
 int huboUnCambio;
 
@@ -81,7 +80,18 @@ int main(int argc, char **argv) {
 		//correrTestSerializacion();
 	//}
 
+	pthread_t interprete_comandos;
+	int interprete_thread_result = pthread_create(&interprete_comandos, NULL,
+			&interprete_comando_thread, NULL);
+	if (interprete_thread_result) {
+		// TODO LOGUEAR ERROR
+		// TODO Analizar el tratamiento que desea darse
+		printf("Error en la creacion del thread del interprete de comandos: return code: %d\n", interprete_thread_result);
+		exit(1);
+	}
+
 	set_algoritmo_reemplazo("clock");
+
 	inicializar_estructuras();
 	//int swap_socket = create_client_socket_descriptor("localhost", "6000");
 	//set_socket_descriptor(swap_socket);
@@ -109,68 +119,13 @@ int main(int argc, char **argv) {
 		}
 
 
-	//connect_to_SWAP();
-	//kernel_and_cpu_connections();
-
 		while (1) {
 			sleep(10);
 		}
 
 		return 0;
 }
-void kernel_and_cpu_connections() {
-	pthread_t thread;
-	int thread_result = pthread_create(&thread, NULL,
-			&kernel_and_cpu_connection_thread, NULL);
 
-	if (thread_result) {
-		// TODO LOGUEAR ERROR
-		// TODO Analizar el tratamiento que desea darse
-		printf("Error - pthread_create() return code: %d\n", thread_result);
-		exit(1);
-	}
-}
-
-void *kernel_and_cpu_connection_thread() {
-	int server_socket_descriptor = create_server_socket_descriptor("localhost", LISTENPORT,
-	BACKLOG);
-
-}
-
-void connect_to_SWAP(){
-	pthread_t thread;
-	int thread_result = pthread_create(&thread, NULL,
-			&connect_to_SWAP_thread, NULL);
-
-	if (thread_result) {
-		// TODO LOGUEAR ERROR
-		// TODO Analizar el tratamiento que desea darse
-		printf("Error - pthread_create() return code: %d\n", thread_result);
-		exit(1);
-	}
-}
-
-void *connect_to_SWAP_thread() {
-	int swap_socket_descriptor = create_client_socket_descriptor(SWAPIP,
-	SWAPPORT);
-	printf("Conectado al Swap");
-	fflush(stdout);
-	char message[] = "hola swap, soy umc\n";
-
-	while (1) { //TODO REVISAR por que hace print de lo que envia y de lo que recibe. puede que ser que sea por el socket?
-		//char header[1];
-		char recvBuffer[15];
-		send(swap_socket_descriptor, "hola swap, soy umc\n", 19, 0);
-		//recv(swap_socket_descriptor, header, 2, 0);
-		//char recvBuffer[header];
-		recv(swap_socket_descriptor, recvBuffer, 15, 0);
-
-		printf(recvBuffer);
-		fflush(stdout);
-		sleep(1);
-	}
-
-}
 
 void *kernel_and_cpu_connection_handler(int client_socket_descriptor) {
 	manejo_de_solicitudes(client_socket_descriptor);
@@ -191,35 +146,41 @@ void manejo_de_solicitudes(int socket_descriptor) {
 	}
 	if(handshake == 2) //KERNEL
 	{
-		cargar_nuevo_programa(1, 50, "begin\nvariables c, d\nc=2147483647\nd=224947129\nend\0");
-		cargar_nuevo_programa(2, 50, "cargo un programa");
+		//cargar_nuevo_programa(1, 50, "begin\nvariables c, d\nc=2147483647\nd=224947129\nend\0");
+		//cargar_nuevo_programa(1, 50, "begin\nvariables c, d\nc=1234\nd=4321\nend\0");
+		//cargar_nuevo_programa(2, 50, "cargo un programa");
 	}
 
 	while (1) {
 
-		t_header *aHeader = malloc(sizeof(t_header));
+		t_header *a_header = malloc(sizeof(t_header));
 
 		char buffer_header[5];	//Buffer donde se almacena el header recibido
 
-		int bytes_recibidos_header,	//Cantidad de bytes recibidos en el recv() que recibe el header
-				bytes_recibidos;//Cantidad de bytes recibidos en el recv() que recibe el mensaje completo
+		//int bytes_recibidos_header = -1;	//Cantidad de bytes recibidos en el recv() que recibe el header
+		//int bytes_recibidos= -1;			//Cantidad de bytes recibidos en el recv() que recibe el mensaje completo
 
-		bytes_recibidos_header = recv(socket_descriptor, buffer_header, 5,
+		int bytes_recibidos_header = recv(socket_descriptor, buffer_header, 5,
 				MSG_PEEK);
 
-		char buffer_recv[buffer_header[1]]; //El buffer para recibir el mensaje se crea con la longitud recibida
+		a_header = deserializar_header(buffer_header);
 
-		if (buffer_header[0] == 31) {
+		char buffer_recv[a_header->length]; //El buffer para recibir el mensaje se crea con la longitud recibida
+
+		int tipo = a_header->tipo;
+		int length = a_header->length;
+
+		if (tipo == 31) {
 
 			int bytes_recibidos = recv(socket_descriptor, buffer_recv,
-					buffer_header[1], 0);
+				length, 0);
 
 			t_solicitar_bytes_de_una_pagina_a_UMC *bytes_de_una_pagina = malloc(
 					sizeof(t_solicitar_bytes_de_una_pagina_a_UMC));
 
 			bytes_de_una_pagina =
 					(t_solicitar_bytes_de_una_pagina_a_UMC *) deserealizar_mensaje(
-							buffer_header[0], buffer_recv);
+							tipo, buffer_recv);
 			int pid_active = dame_pid_activo(socket_descriptor);
 			char *datos_de_lectura = leer_pagina_de_programa(pid_active,
 					bytes_de_una_pagina->pagina, bytes_de_una_pagina->offset,
@@ -239,12 +200,14 @@ void manejo_de_solicitudes(int socket_descriptor) {
 			int bytes_sent = send(socket_descriptor, buffer->datos,
 					buffer->size, 0);
 
+
+
 		}
 
-		if (buffer_header[0] == 33) {
+		if (tipo == 33) {
 
 			int bytes_recibidos = recv(socket_descriptor, buffer_recv,
-					buffer_header[1], 0);
+					length, 0);
 
 			t_escribir_bytes_de_una_pagina_en_UMC *bytes_de_una_pagina = malloc(
 					sizeof(t_escribir_bytes_de_una_pagina_en_UMC));
@@ -268,11 +231,13 @@ void manejo_de_solicitudes(int socket_descriptor) {
 
 			int bytes_sent = send(socket_descriptor, buffer->datos,
 					buffer->size, 0);
+
+
 		}
-		if (buffer_header[0] == 35) {
+		if (tipo == 35) {
 
 			int bytes_recibidos = recv(socket_descriptor, buffer_recv,
-					buffer_header[1], 0);
+					length, 0);
 
 			t_cambio_de_proceso *cambio_de_proceso = malloc(
 					sizeof(t_cambio_de_proceso));
@@ -292,9 +257,9 @@ void manejo_de_solicitudes(int socket_descriptor) {
 			int bytes_sent = send(socket_descriptor, buffer->datos,
 					buffer->size, 0);
 		}
-		if(buffer_header[0] == 61){
+		if(tipo == 61){
 
-				   int bytes_recibidos = recv(socket_descriptor,buffer_recv,buffer_header[1],0);
+				   int bytes_recibidos = recv(socket_descriptor,buffer_recv,length,0);
 
 				   t_inicio_de_programa_en_UMC *inicio_programa_en_UMC = malloc(sizeof(t_inicio_de_programa_en_UMC));
 
@@ -313,9 +278,9 @@ void manejo_de_solicitudes(int socket_descriptor) {
 				   int bytes_sent = send(socket_descriptor,buffer->datos,buffer->size,0);
 
 			   }
-		if(buffer_header[0]==63) {
+		if(tipo==63) {
 
-			int bytes_recibidos = recv(socket_descriptor,buffer_recv,buffer_header[1],0);
+			int bytes_recibidos = recv(socket_descriptor,buffer_recv,length,0);
 
 			t_finalizar_programa_en_UMC *finalizar_programa_en_UMC = malloc(sizeof(t_finalizar_programa_en_UMC));
 
@@ -512,26 +477,31 @@ char* leer_string(t_config *config, char* key) {
 
 
 
-void interprete_de_comandos(){
+void* interprete_comando_thread(){
 	while(1)
 	{
-		// leo una linea
+		char *comando = malloc(100);
+		char **comando_separado = malloc(100);
 
-		// si es "retardo xx"
-		//set_retardo(xx);
+		puts("Ingrese un comando:");
+		fgets(comando, 100,stdin);
 
-		// si es dumpstruct xx
-		// dump_structs(xx);
+		comando_separado = string_split(comando," ");
+		int  numero_del_comando = atoi(comando_separado[1]);
 
-		//si es dumpmemory xx
-		// dump_memory(xx);
-
-		//si es flushmemory xx
-		//flush_memory(xx)
-
-		//si es flushtlb xx
-		//flush_tlb(xx)
-
+		if(!strcasecmp("retardo", comando_separado[0])){
+			set_retardo(numero_del_comando);
+		} else if (!strcasecmp("dumpstruct", comando_separado[0])){
+			dump_structs(numero_del_comando);
+		} else if (!strcasecmp("dumpmemory", comando_separado[0])){
+			dump_memory(numero_del_comando);
+		} else if (!strcasecmp("flushmemory", comando_separado[0])){
+			flush_memory(numero_del_comando);
+		} else if (!strcasecmp("flushtlb", comando_separado[0])){
+			flush_tlb(numero_del_comando);
+		}
+		free(comando_separado);
+		free(comando);
 	}
 
 
