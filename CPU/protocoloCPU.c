@@ -617,6 +617,8 @@ t_PCB_serializacion *deserializar_PCB(char *datos){
 			contador_de_variables_en_el_elemento_del_stack++;
 
 			t_variable *una_variable = malloc(sizeof(t_variable));
+			una_variable->dato = malloc(sizeof(t_dato_en_memoria));
+			una_variable->dato->direccion = malloc(sizeof(t_direccion_virtual_memoria));
 
 			una_variable->id = id;
 			una_variable->dato->size = size_dato;

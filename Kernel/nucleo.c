@@ -92,13 +92,17 @@ void *recNew() {
 		printf("resultado inicio programa en umc : %d\n", inicio_correcto); //TODO sacar este comentario
 		fflush(stdout);
 
-		sem_wait(&mut_ready);
-		pcb->state = "Ready";
-		queue_push(estado_ready, pcb);
-		sem_post(&mut_ready);
-		sem_post(&cant_ready);
+		enqueue_ready_pcb(pcb);
 	}
 
+}
+
+void enqueue_ready_pcb(t_PCB *pcb) {
+    sem_wait(&mut_ready);
+    pcb->state = "Ready";
+    queue_push(estado_ready, pcb);
+    sem_post(&mut_ready);
+    sem_post(&cant_ready);
 }
 
 void *recReady() {
@@ -245,9 +249,11 @@ void ejecutar_pcb_en_cpu(t_PCB *pcb){
 				} else if(unPCB->mensaje == 3) {
 				    if(pcb->program_finished) {
 					finalizar_programa(pcb);
-					return;
+				    } else {
+					enqueue_ready_pcb(pcb);
 				    }
 
+				    return;
 				}
 
 			}
