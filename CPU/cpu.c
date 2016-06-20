@@ -159,10 +159,9 @@ void execute_next_instruction_for_process() {
 	int program_counter = pcb->program_counter;
 	analizadorLinea(strdup(instruccion_string), &functions, &kernel_functions);
 
-	if(program_counter == pcb->program_counter) {
+	if(program_counter == pcb->program_counter && !string_starts_with(instruccion_string, TEXT_END)) {
 	    pcb->program_counter++;
 	}
-
 };
 
 
@@ -294,7 +293,6 @@ void imprimirTexto(char* print_value) {
    // int enviado_correctamente = send_text_to_kernel(print_value, string_length(print_value));
     //todo si se quiere validar que haya enviado correctmente
     printf("%s\n", print_value);
-    free(print_value);
 }
 
 void irALabel(t_nombre_etiqueta nombre_etiqueta) {
@@ -589,7 +587,7 @@ int ejecutar_pcb(){
                printf("Instruccion %d del pid %d ejecutada \n", instruccion_ejecutada, pcb->pid);
                fflush(stdout);
                instruccion_ejecutada ++;
-               sleep(1);
+               //sleep(1);
        }
 
 
