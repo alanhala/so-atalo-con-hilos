@@ -206,7 +206,8 @@ t_stream *serializar_PCB(t_PCB_serializacion *unPCB){
 											sizeof(uint32_t); 	//Cantidad de Variables
 
 		uint32_t cantidad_de_variables_del_elemento = stack_element->variables->elements_count;
-		uint32_t tamano_de_variables_del_elemento =	sizeof(t_variable) * cantidad_de_variables_del_elemento;
+		//uint32_t tamano_de_variables_del_elemento =	sizeof(t_variable) * cantidad_de_variables_del_elemento;
+		uint32_t tamano_de_variables_del_elemento =	(sizeof(t_nombre_variable)+3*sizeof(uint32_t)) * cantidad_de_variables_del_elemento;
 
 		uint32_t tamano_del_elemento = tamano_fijo_del_elemento + tamano_de_variables_del_elemento;
 
@@ -579,6 +580,12 @@ t_PCB_serializacion *deserializar_PCB(char *datos){
 			offset+=tmpsize;
 
 			memcpy(&size_dato,datos+offset,tmpsize=sizeof(uint32_t));
+			offset+=tmpsize;
+
+			memcpy(&offset_virtual_address,datos+offset,tmpsize=sizeof(uint32_t));
+			offset+=tmpsize;
+
+			memcpy(&page_virtual_address,datos+offset,tmpsize=sizeof(uint32_t));
 			offset+=tmpsize;
 
 			contador_de_variables_en_el_elemento_del_stack++;
