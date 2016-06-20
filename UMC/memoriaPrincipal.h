@@ -160,3 +160,4 @@ void set_algoritmo_reemplazo(char * algoritmo);
 void set_test();
 
 void set_socket_descriptor(int fd);
+

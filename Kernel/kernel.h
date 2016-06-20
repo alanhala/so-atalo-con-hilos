@@ -1,11 +1,13 @@
 #ifndef KERNEL_H
 #define	KERNEL_H
 
-	#include <stdint.h>
-	#include <semaphore.h>
-	#include <commons/collections/list.h>
-	#include <commons/config.h>
-	#include <parser/metadata_program.h>
+#include <stdint.h>
+#include <semaphore.h>
+#include <commons/collections/list.h>
+#include <commons/config.h>
+#include <parser/metadata_program.h>
+#include <commons/log.h>
+
 
 	typedef struct {
 		uint32_t page;

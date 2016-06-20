@@ -28,6 +28,8 @@
 #define UMCPORT  "5000"
 #define CONFIGPATH "kernel_config.txt"
 #define BACKLOG 10
+
+t_log *trace_log_Kernel;
 //t_kernel * gkernel;
 
 void *cpu_connection(int socket_descriptor);
@@ -37,6 +39,12 @@ int main(int argc, char **argv) {
 	//todo me gustaria implementar  el archivo de configuracion asi empiezo a usarlo directamente
 	//pero me tira un par de errores cuando descomento las lineas que uso gkernel
 	//gkernel = create_kernel(CONFIGPATH);
+
+	trace_log_Kernel = log_create("Log_de_Kernel.txt",
+									"kernel_main.c",
+									false,
+									LOG_LEVEL_TRACE);
+
 	iniciar_algoritmo_planificacion();
 
 	int umc_fd = create_client_socket_descriptor("localhost", "5000");
@@ -55,7 +63,7 @@ int main(int argc, char **argv) {
 		int thread_result = pthread_create(&thread, NULL,
 				&console_and_cpu_connection_handler, client_socket_descriptor);
 		if (thread_result) {
-			// TODO LOGUEAR ERROR
+			log_trace(trace_log_Kernel,"Error - pthread_create(). Codigo de Retorno: %d\n",thread_result);
 			// TODO Analizar el tratamiento que desea darse
 			printf("Error - pthread_create() return code: %d\n", thread_result);
 			exit(1);
@@ -79,6 +87,7 @@ void manejo_de_solicitudes(int client_socket_descriptor) {
 	recv(client_socket_descriptor, &handshake, sizeof(int), 0);
 	if(handshake == 1) //CPU
 	{
+		log_trace(trace_log_Kernel,"CPU Conectada\n");
 		printf("cpu conectada\n");
 		sem_wait(&mut_cpu_disponibles);
 		int cpu_socket_descriptor = client_socket_descriptor;
@@ -88,9 +97,9 @@ void manejo_de_solicitudes(int client_socket_descriptor) {
 	}
 	if(handshake == 2) //Consola
 	{
+		log_trace(trace_log_Kernel,"Consola Conectada\n");
 		printf("consola conectada\n");
 	}
-
 
 			t_header *un_header = malloc(sizeof(t_header));
 			char buffer_header[5];

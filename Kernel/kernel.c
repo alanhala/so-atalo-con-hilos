@@ -1,5 +1,11 @@
 #include "kernel.h"
 
+/*
+Para usar Logs
+t_log *trace_log_Kernel;
+log_trace(trace_log_Kernel,"<lo_que_quieran_loggear>");
+*/
+
 t_list* load_shared_vars(char** shared_vars_list) {
 	t_list* shared_variables = list_create();
 	int i = 0;

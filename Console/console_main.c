@@ -19,8 +19,7 @@
 #include <signal.h>
 #include <pthread.h>
 #include "protocoloConsola.h"
-
-//#include <commons/log.h>
+#include <commons/log.h>
 
 #define KERNELTIP = "localhost"
 #define KERNELPORT = "9000"
@@ -50,9 +49,10 @@ int main(int argc, char **argv) {
 //		//return 0;
 //	}
 
-
-
-
+	t_log 	*trace_log = log_create("Log_de_Consola.txt",
+									"console_main.c",
+									false,
+									LOG_LEVEL_TRACE);
 
 	int kernel_socket_descriptor = create_client_socket_descriptor("localhost", "9000");
 	int a =2;
@@ -72,6 +72,8 @@ int main(int argc, char **argv) {
 
 	buffer = serializar_mensaje(91,iniciar_programa);
 
+	log_trace(trace_log,"Enviando el codigo ansisop al Nucleo\n");
+
 	send(kernel_socket_descriptor,buffer->datos,buffer->size,0);
 
 	t_header *un_header = malloc(sizeof(t_header));
@@ -81,6 +83,7 @@ int main(int argc, char **argv) {
 	int	bytes_recibidos_header,
 		bytes_recibidos;
 
+	log_trace(trace_log,"Recibiendo la respuesta del Nucleo\n");
 	bytes_recibidos_header = recv(kernel_socket_descriptor,buffer_header,5,MSG_PEEK);
 
 	un_header = deserializar_header(buffer_header);
@@ -94,7 +97,6 @@ int main(int argc, char **argv) {
 	respuesta = deserealizar_mensaje(92,buffer_recibidos);
 
 	printf("Respuesta al inicio de programa: %d\n",respuesta->respuesta_correcta);
-
 
 	while (1) {
 		t_header *un_header = malloc(sizeof(t_header));
@@ -111,6 +113,7 @@ int main(int argc, char **argv) {
 
 		if(un_header->tipo == 132){
 
+			log_trace(trace_log,"Recibiendo el codigo a imprimir pedido por CPU\n");
 			int bytes_recibidos = recv(kernel_socket_descriptor,buffer_recibidos,un_header->length,0);
 
 			t_imprimir_texto_en_consola *texto_a_imprimir = malloc(sizeof(t_imprimir_texto_en_consola));
@@ -120,27 +123,31 @@ int main(int argc, char **argv) {
 			printf("%s\n",texto_a_imprimir->texto_a_imprimir);
 			fflush(stdout);
 
-
 		}
 		if(un_header->tipo == 133){
 
-				int bytes_recibidos = recv(kernel_socket_descriptor,buffer_recibidos,un_header->length,0);
+			log_trace(trace_log,"Recibiendo la finalizacion de la Consola\n");
+			int bytes_recibidos = recv(kernel_socket_descriptor,buffer_recibidos,un_header->length,0);
 
-				t_finalizar_programa_en_consola *finalizar = malloc(sizeof(t_finalizar_programa_en_consola));
+			t_finalizar_programa_en_consola *finalizar = malloc(sizeof(t_finalizar_programa_en_consola));
 
-				finalizar = (t_finalizar_programa_en_consola *)deserealizar_mensaje(133,buffer_recibidos);
+			finalizar = (t_finalizar_programa_en_consola *)deserealizar_mensaje(133,buffer_recibidos);
 
-				if (finalizar->motivo == 0){
-					printf("El programa finalizo correctamente\n");
-					fflush(stdout);
-				}
-				else{
-					printf("El programa no pudo finalizar correctamente\n");
-					fflush(stdout);
-				}
-				break;
+			if (finalizar->motivo == 0){
+				printf("El programa finalizo correctamente\n");
+				log_trace(trace_log,"El programa finalizo correctamente\n");
+				fflush(stdout);
+			}
+			else{
+				printf("El programa no pudo finalizar correctamente\n");
+				log_trace(trace_log,"El programa no finalizo correctamente\n");
+				fflush(stdout);
+			}
+			break;
 		}
 	}
+
+	log_destroy(trace_log);
 
 	return 0;
 }

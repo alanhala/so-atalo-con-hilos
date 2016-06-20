@@ -11,6 +11,13 @@
 #include <string.h>
 #include <commons/collections/list.h>
 #include "protocoloCPU.h"
+
+/*
+Para usar Logs
+t_log *trace_log_CPU;
+log_trace(trace_log_CPU,"<lo_que_quieran_loggear>");
+*/
+
 AnSISOP_funciones functions = {
 	.AnSISOP_definirVariable	= definirVariable,
 	.AnSISOP_obtenerPosicionVariable = obtenerPosicionVariable,
@@ -589,7 +596,7 @@ int ejecutar_pcb(){
                printf("Instruccion %d del pid %d ejecutada \n", instruccion_ejecutada, pcb->pid);
                fflush(stdout);
                instruccion_ejecutada ++;
-               sleep(1);
+               //sleep(1);
        }
 
 

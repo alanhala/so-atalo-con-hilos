@@ -1,5 +1,12 @@
 #include "swap.h"
 
+/*
+Para usar Logs
+extern t_log *trace_log_SWAP;
+log_trace(trace_log_SWAP,"<lo_que_quieran_loggear>");
+*/
+
+
 
 void create_file(t_swap* self) {
 	char* size_of_swap_file = string_itoa(self->pages_number * self->page_size);
@@ -14,6 +21,9 @@ void create_file(t_swap* self) {
 	strcat(linux_instruction, self->swap_name);
 	system(linux_instruction);
 	free(linux_instruction);
+
+	extern t_log *trace_log_SWAP;
+	log_trace(trace_log_SWAP,"---------\n");
 }
 
 void initialize_bitmap(t_swap* self) {

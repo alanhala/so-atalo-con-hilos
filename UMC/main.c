@@ -23,7 +23,6 @@
 #include <pthread.h>
 #include <commons/config.h>
 #include <commons/error.h>
-#include <commons/log.h>
 #include <commons/collections/list.h>
 #include <commons/string.h>
 #include <sys/types.h>
@@ -33,6 +32,8 @@
 #include "memoriaPrincipal.h"
 #include "protocoloUMC.h"
 #include "main.h"
+
+t_log 	*trace_log_UMC;
 
 int BACKLOG =10;
 
@@ -56,16 +57,16 @@ typedef struct umcConfigFile {
 	char 	*algoritmo_reemplazo;
 } UMCConfigFile;
 
+
 char* leer_string(t_config *config, char* key);
 
 unsigned leerUnsigned(t_config *config, char* key);
 void levantaConfigFileEnVariables(UMCConfigFile *ptrvaloresConfigFile,t_config *ptrConfig);
-void liberaVariables(t_log* traceLogger, t_config* ptrConfig, t_log* errorLogger, t_config* ptrConfigUpdate);
+void liberaVariables(t_log* trace_log, t_config* ptrConfig, t_config* ptrConfigUpdate);
 void detectaCambiosEnConfigFile();
 void cargar_variables_productivas(UMCConfigFile *ptrvaloresConfigFile);
 void interprete_de_comandos();
 void manejo_de_solicitudes(int cpu_socket_descriptor);
-
 
 int main(int argc, char **argv) {
 
@@ -80,13 +81,17 @@ int main(int argc, char **argv) {
 		//correrTestSerializacion();
 	//}
 
+	 trace_log_UMC = log_create("Log_de_UMC.txt",
+								"main.c",
+								false,
+								LOG_LEVEL_TRACE);
+
 	pthread_t interprete_comandos;
 	int interprete_thread_result = pthread_create(&interprete_comandos, NULL,
 			&interprete_comando_thread, NULL);
 	if (interprete_thread_result) {
-		// TODO LOGUEAR ERROR
+		log_trace(trace_log_UMC,"Error en la creacion del thread del interprete de comandos\n. Codigo de error: %d", interprete_thread_result);
 		// TODO Analizar el tratamiento que desea darse
-		printf("Error en la creacion del thread del interprete de comandos: return code: %d\n", interprete_thread_result);
 		exit(1);
 	}
 
@@ -109,13 +114,10 @@ int main(int argc, char **argv) {
 			int thread_result = pthread_create(&thread, NULL,
 					&kernel_and_cpu_connection_handler, client_socket_descriptor);
 			if (thread_result) {
-				// TODO LOGUEAR ERROR
+				log_trace(trace_log_UMC,"Error en la creacion del thread que maneja las conexiones de CPU y Nucleo\n. Codigo de error: %d\n",thread_result);
 				// TODO Analizar el tratamiento que desea darse
-				printf("Error - pthread_create() return code: %d\n", thread_result);
 				exit(1);
 			}
-
-
 		}
 
 
@@ -181,6 +183,7 @@ void manejo_de_solicitudes(int socket_descriptor) {
 			bytes_de_una_pagina =
 					(t_solicitar_bytes_de_una_pagina_a_UMC *) deserealizar_mensaje(
 							tipo, buffer_recv);
+
 			int pid_active = dame_pid_activo(socket_descriptor);
 			char *datos_de_lectura = leer_pagina_de_programa(pid_active,
 					bytes_de_una_pagina->pagina, bytes_de_una_pagina->offset,
@@ -199,9 +202,6 @@ void manejo_de_solicitudes(int socket_descriptor) {
 
 			int bytes_sent = send(socket_descriptor, buffer->datos,
 					buffer->size, 0);
-
-
-
 		}
 
 		if (tipo == 33) {
@@ -231,8 +231,6 @@ void manejo_de_solicitudes(int socket_descriptor) {
 
 			int bytes_sent = send(socket_descriptor, buffer->datos,
 					buffer->size, 0);
-
-
 		}
 		if (tipo == 35) {
 
@@ -246,6 +244,7 @@ void manejo_de_solicitudes(int socket_descriptor) {
 					buffer_header[0], buffer_recv);
 			int respuesta_temp = cambio_contexto(socket_descriptor,
 					cambio_de_proceso->pid);
+
 			t_respuesta_cambio_de_proceso *respuesta_c_de_proceso = malloc(
 					sizeof(t_respuesta_cambio_de_proceso));
 
@@ -259,23 +258,23 @@ void manejo_de_solicitudes(int socket_descriptor) {
 		}
 		if(tipo == 61){
 
-				   int bytes_recibidos = recv(socket_descriptor,buffer_recv,length,0);
+			int bytes_recibidos = recv(socket_descriptor,buffer_recv,length,0);
 
-				   t_inicio_de_programa_en_UMC *inicio_programa_en_UMC = malloc(sizeof(t_inicio_de_programa_en_UMC));
+			t_inicio_de_programa_en_UMC *inicio_programa_en_UMC = malloc(sizeof(t_inicio_de_programa_en_UMC));
 
-				   inicio_programa_en_UMC = (t_inicio_de_programa_en_UMC *)deserealizar_mensaje(buffer_header[0],buffer_recv);
+			inicio_programa_en_UMC = (t_inicio_de_programa_en_UMC *)deserealizar_mensaje(buffer_header[0],buffer_recv);
 
-				   int respuesta_tmp = cargar_nuevo_programa(inicio_programa_en_UMC->process_id,
+			int respuesta_tmp = cargar_nuevo_programa(inicio_programa_en_UMC->process_id,
 						   	   	   	   	   	   	   	   	   	 inicio_programa_en_UMC->cantidad_de_paginas,
 															 inicio_programa_en_UMC->codigo_de_programa);
 
-				   t_respuesta_inicio_de_programa_en_UMC *respuesta = malloc(sizeof(t_respuesta_inicio_de_programa_en_UMC));
+			t_respuesta_inicio_de_programa_en_UMC *respuesta = malloc(sizeof(t_respuesta_inicio_de_programa_en_UMC));
 
-				   respuesta->respuesta_correcta = respuesta_tmp;
+			respuesta->respuesta_correcta = respuesta_tmp;
 
-				   t_stream *buffer = (t_stream*)serializar_mensaje(62,respuesta);
+			t_stream *buffer = (t_stream*)serializar_mensaje(62,respuesta);
 
-				   int bytes_sent = send(socket_descriptor,buffer->datos,buffer->size,0);
+			int bytes_sent = send(socket_descriptor,buffer->datos,buffer->size,0);
 
 			   }
 		if(tipo==63) {
@@ -288,7 +287,7 @@ void manejo_de_solicitudes(int socket_descriptor) {
 
 			t_respuesta_finalizar_programa_en_UMC *respuesta = malloc(sizeof(t_respuesta_finalizar_programa_en_UMC));
 
-			//HARDCODEADO. ESTA MAL
+			//TODO Setear este valor
 			int respuesta_tmp = 1;
 			respuesta->respuesta_correcta = respuesta_tmp;
 
@@ -307,9 +306,8 @@ void manejo_de_solicitudes(int socket_descriptor) {
 
 
 int cargar_configuracion(){
-	t_log *errorLogger, *traceLogger;
-	traceLogger = log_create("LogTraceUMC.txt","main.c",true,LOG_LEVEL_TRACE);
-	errorLogger = log_create("LogErroresUMC.txt","main.c",true,LOG_LEVEL_ERROR);
+	t_log *trace_log_Config_Files;
+	trace_log_Config_Files = log_create("Log_de_Config_Files.txt","main.c",false,LOG_LEVEL_TRACE);
 
 	//Declaracion de Variables
 	t_config *ptrConfig, *ptrConfigUpdate;
@@ -320,16 +318,16 @@ int cargar_configuracion(){
 	//y lo advierte en el log
 	ptrConfig = config_create("umc.cfg");
 	if (ptrConfig == NULL){
-		log_error(errorLogger,"Archivo de configuración no disponible. No puede ejecutar el UMC.\n");
+		log_trace(trace_log_Config_Files,"Archivo de configuración no disponible. No puede ejecutar el UMC.\n");
 		return -1;
 	}
 
-	log_trace(traceLogger,"Iniciando Proceso UMC.\n");
+	log_trace(trace_log_Config_Files,"Cargando parametros del Archivo de Configuracion\n");
 
 	//El procedimiento carga los valores del Config File en las variables creadas
 	levantaConfigFileEnVariables(ptrvaloresConfigFile,ptrConfig);
 
-	log_trace(traceLogger,"Archivo de Configuracion levantado exitosamente.\n");
+	log_trace(trace_log_Config_Files,"Archivo de Configuracion levantado exitosamente.\n");
 
 
 
@@ -356,7 +354,7 @@ int cargar_configuracion(){
 	cargar_variables_productivas(ptrvaloresConfigFile);
 	//printf("%s\n\n", ptrvaloresConfigFile->ip_swap);
 
-	liberaVariables(traceLogger, ptrConfig, errorLogger, ptrConfigUpdate);
+	liberaVariables(trace_log_Config_Files, ptrConfig, ptrConfigUpdate);
 	free(ptrvaloresConfigFile);
 
 	return 0;
@@ -386,15 +384,13 @@ void levantaConfigFileEnVariables(UMCConfigFile *ptrvaloresConfigFile,t_config *
 	//ptrvaloresConfigFile->algoritmo_reemplazo = leer_string(ptrConfig, "ALGORITMO");
 
 }
-void liberaVariables(t_log* traceLogger, t_config* ptrConfig, t_log* errorLogger, t_config* ptrConfigUpdate) {
+void liberaVariables(t_log* trace_log, t_config* ptrConfig, t_config* ptrConfigUpdate) {
 	//Libera Logs y el Config File
-	log_trace(traceLogger, "Se libera el Archivo de Configuracion.\n");
+	log_trace(trace_log, "Se libera el Archivo de Configuracion.\n");
 	config_destroy(ptrConfig);
 	//config_destroy(ptrConfigUpdate); // TODO MKN EZE
-	log_trace(traceLogger, "Se libera el Log de Errores.\n");
-	log_destroy(errorLogger);
-	log_trace(traceLogger, "Se libera el Trace Log.\n");
-	log_destroy(traceLogger);
+	log_trace(trace_log, "Se libera el Trace Log.\n");
+	log_destroy(trace_log);
 }
 void detectaCambiosEnConfigFile() {
 		char buffer[BUF_LEN];
