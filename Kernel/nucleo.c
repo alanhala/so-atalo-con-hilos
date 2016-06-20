@@ -247,12 +247,13 @@ void ejecutar_pcb_en_cpu(t_PCB *pcb){
 
 
 				} else if(unPCB->mensaje == 3) {
+				    int cpu = pcb->cpu_socket_descriptor;
 				    if(pcb->program_finished) {
 					finalizar_programa(pcb);
 				    } else {
 					enqueue_ready_pcb(pcb);
 				    }
-
+				    liberar_cpu(cpu);
 				    return;
 				}
 
@@ -283,13 +284,13 @@ void * recEjecucion() {
 }
 
 void finalizar_programa(t_PCB *pcb) {
-    int cpu = pcb->cpu_socket_descriptor;
-
     sem_wait(&mut_exit);
     queue_push(estado_exit, pcb);
     sem_post(&mut_exit);
     sem_post(&cant_exit);
+}
 
+void liberar_cpu(int cpu) {
     sem_wait(&mut_cpu_disponibles);
     queue_push(cola_cpu_disponibles, cpu);
     sem_post(&mut_cpu_disponibles);
