@@ -20,16 +20,12 @@
 #include <pthread.h>
 #include "socket.h"
 #include "protocoloKernel.h"
-#include "kernel.h"
-#include "nucleo.h"
 
 #define CPULISTEN  "8000"
 #define UMCIP  "localhost"
 #define UMCPORT  "5000"
 #define CONFIGPATH "kernel_config.txt"
 #define BACKLOG 10
-
-t_log *trace_log_Kernel;
 //t_kernel * gkernel;
 
 void *cpu_connection(int socket_descriptor);
@@ -39,16 +35,9 @@ int main(int argc, char **argv) {
 	//todo me gustaria implementar  el archivo de configuracion asi empiezo a usarlo directamente
 	//pero me tira un par de errores cuando descomento las lineas que uso gkernel
 	//gkernel = create_kernel(CONFIGPATH);
-
-	trace_log_Kernel = log_create("Log_de_Kernel.txt",
-									"kernel_main.c",
-									false,
-									LOG_LEVEL_TRACE);
-
-	iniciar_algoritmo_planificacion();
-
+	t_kernel* kernel = create_kernel(CONFIGPATH);
 	int umc_fd = create_client_socket_descriptor("localhost", "5000");
-	set_umc_socket_descriptor(umc_fd);
+	scheduler->umc_socket_descriptor = umc_fd;
 	int a =2;
 	send(umc_fd, &a, sizeof(int), 0);
 
@@ -63,7 +52,7 @@ int main(int argc, char **argv) {
 		int thread_result = pthread_create(&thread, NULL,
 				&console_and_cpu_connection_handler, client_socket_descriptor);
 		if (thread_result) {
-			log_trace(trace_log_Kernel,"Error - pthread_create(). Codigo de Retorno: %d\n",thread_result);
+			// TODO LOGUEAR ERROR
 			// TODO Analizar el tratamiento que desea darse
 			printf("Error - pthread_create() return code: %d\n", thread_result);
 			exit(1);
@@ -71,7 +60,6 @@ int main(int argc, char **argv) {
 
 
 	}
-
 	return 0;
 }
 
@@ -87,19 +75,18 @@ void manejo_de_solicitudes(int client_socket_descriptor) {
 	recv(client_socket_descriptor, &handshake, sizeof(int), 0);
 	if(handshake == 1) //CPU
 	{
-		log_trace(trace_log_Kernel,"CPU Conectada\n");
 		printf("cpu conectada\n");
-		sem_wait(&mut_cpu_disponibles);
+		sem_wait(&mutex_cpus_available);
 		int cpu_socket_descriptor = client_socket_descriptor;
-		queue_push(cola_cpu_disponibles, cpu_socket_descriptor);
-		sem_post(&mut_cpu_disponibles);
-		sem_post(&cant_cpu_disponibles);
+		queue_push(scheduler->cpus_available, cpu_socket_descriptor);
+		sem_post(&mutex_cpus_available);
+		sem_post(&sem_cpus_available);
 	}
 	if(handshake == 2) //Consola
 	{
-		log_trace(trace_log_Kernel,"Consola Conectada\n");
 		printf("consola conectada\n");
 	}
+
 
 			t_header *un_header = malloc(sizeof(t_header));
 			char buffer_header[5];
@@ -125,14 +112,14 @@ void manejo_de_solicitudes(int client_socket_descriptor) {
 				printf("Kernel. El mensaje tiene de largo: %d\n",un_header->length);
 
 				// AGREGO EL CODIGO A LA COLA DE NEW
-				t_new_program * nuevo_programa = malloc(sizeof(t_new_program));
-				nuevo_programa->codigo_programa = iniciar_programa->codigo_de_programa;
-				nuevo_programa->console_socket_descriptor = client_socket_descriptor;
+				t_new_program* new_program = malloc(sizeof(t_new_program));
+				new_program->program_code = iniciar_programa->codigo_de_programa;
+				new_program->console_socket_descriptor = client_socket_descriptor;
 				//char * codigo_programa = iniciar_programa->codigo_de_programa;
-				sem_wait(&mut_new);
-				queue_push(estado_new, nuevo_programa);
-				sem_post(&mut_new);
-				sem_post(&cant_new);
+				sem_wait(&mutex_new);
+				queue_push(scheduler->new_state, new_program);
+				sem_post(&mutex_new);
+				sem_post(&sem_new);
 				// FIN
 
 				t_respuesta_iniciar_programa_en_kernel *respuesta = malloc(sizeof(t_respuesta_iniciar_programa_en_kernel));

@@ -164,11 +164,12 @@ t_pages_table* remove_pages_table(t_swap* self, unsigned int pid) {
 	return list_remove_by_condition(self->pages_table_list, (void*) same_pid);
 }
 
-void remove_program(t_swap* self, unsigned int pid) {
+int remove_program(t_swap* self, unsigned int pid) {
 	t_pages_table* pages_table = remove_pages_table(self, pid);
 	int first_page = *(pages_table->pages_location) / self->page_size;
 	remove_program_from_bitmap(self, first_page, pages_table->pages_number);
 	destroy_pages_table(pages_table);
+	return 0;
 }
 
 
