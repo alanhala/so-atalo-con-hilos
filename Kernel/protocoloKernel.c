@@ -252,7 +252,9 @@ t_stream *serializar_PCB(t_PCB_serializacion *unPCB){
 						sizeof(uint32_t)  + 	//Tamano del codigo del mensaje
 						sizeof_mensaje_del_pcb				+	//Tamano del mensaje del pcb
 						sizeof(uint32_t)  +		//Tamano de la cantidad de operaciones del pcb
-						sizeof(uint32_t);			//Tamano del resultado del mensaje
+						sizeof(uint32_t)  +		//Tamano del resultado del mensaje
+						sizeof(uint32_t);		//Valor de la variable compartida
+
 
 	uint32_t stream_size = 	sizeof(uint8_t) +	//Tamano del tipo
 							sizeof(uint32_t)+	//Tamano del length del mensaje
@@ -281,7 +283,8 @@ t_stream *serializar_PCB(t_PCB_serializacion *unPCB){
 				offset_direccion_virtual = unPCB->stack_last_address->offset,
 				codigo_del_mensaje = unPCB->mensaje,
 				cantidad_de_operaciones = unPCB->cantidad_operaciones,
-				resultado_del_mensaje = unPCB->resultado_mensaje;
+				resultado_del_mensaje = unPCB->resultado_mensaje,
+				valor_de_la_variable_compartida = unPCB->valor_de_la_variable_compartida;
 
 
 	memcpy(stream->datos,&tipo,tmpsize=sizeof(uint8_t));
@@ -428,7 +431,10 @@ t_stream *serializar_PCB(t_PCB_serializacion *unPCB){
 	memcpy(stream->datos+offset,&cantidad_de_operaciones,tmpsize=sizeof(uint32_t));
 	offset+=tmpsize;
 
-	memcpy(stream->datos+offset,&resultado_del_mensaje,sizeof(uint32_t));
+	memcpy(stream->datos+offset,&resultado_del_mensaje,tmpsize=sizeof(uint32_t));
+	offset+=tmpsize;
+
+	memcpy(stream->datos+offset,&valor_de_la_variable_compartida,sizeof(uint32_t));
 
 	return stream;
 }
@@ -703,7 +709,10 @@ t_PCB_serializacion *deserializar_PCB(char *datos){
 	memcpy(&unPCB->cantidad_operaciones,datos+offset,tmpsize=sizeof(uint32_t));
 	offset+=tmpsize;
 
-	memcpy(&unPCB->resultado_mensaje,datos+offset,sizeof(uint32_t));
+	memcpy(&unPCB->resultado_mensaje,datos+offset,tmpsize=sizeof(uint32_t));
+	offset+=tmpsize;
+
+	memcpy(&unPCB->valor_de_la_variable_compartida,datos+offset,sizeof(uint32_t));
 
 	return unPCB;
 }

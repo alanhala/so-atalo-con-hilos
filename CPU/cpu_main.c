@@ -33,8 +33,16 @@ void connect_to_Kernel();
 t_PCB_serializacion * adaptar_pcb_a_serializar(t_PCB * pcb);
 void actualizarPCB(t_PCB *pcb, t_PCB_serializacion *recibir_pcb);
 
+t_log *trace_log_CPU;
+
 
 int main(int argc, char **argv) {
+
+
+	trace_log_CPU = log_create("Log_de_CPU.txt",
+								"cpu_main.c",
+								false,
+								LOG_LEVEL_TRACE);
 
 	set_quantum(3); // me lo tiene qe mandar cpu en cada ejecucion
 	set_tamanio_pagina(5);

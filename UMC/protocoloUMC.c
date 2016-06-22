@@ -143,7 +143,7 @@ t_solicitar_bytes_de_una_pagina_a_UMC *deserializar_pedido_bytes_de_una_pagina_a
 
 	return pedido;
 }
-
+/*
 t_escribir_bytes_de_una_pagina_en_UMC *deserializar_escribir_bytes_de_una_pagina_en_UMC(char *datos){
 
 	int		tmpsize = 0,
@@ -174,6 +174,34 @@ t_escribir_bytes_de_una_pagina_en_UMC *deserializar_escribir_bytes_de_una_pagina
 
 	char endString = '\0';
 	memcpy(escritura->buffer+tamanoDato,&endString,1);
+
+	return escritura;
+}
+*/
+
+t_escribir_bytes_de_una_pagina_en_UMC *deserializar_escribir_bytes_de_una_pagina_en_UMC(char *datos){
+
+	int		tmpsize = 0,
+			offset = 0,
+			tamanoDato = 0;
+
+	const int desplazamientoHeader = 5;		//Offset inicial para no deserealizar tipo (1 byte) y length (4 bytes)
+
+	t_escribir_bytes_de_una_pagina_en_UMC *escritura = malloc(sizeof(t_escribir_bytes_de_una_pagina_en_UMC));
+	memset(escritura,0, sizeof(t_escribir_bytes_de_una_pagina_en_UMC));
+
+	memcpy(&escritura->pagina, datos+desplazamientoHeader, tmpsize = sizeof(uint32_t));
+	offset+=tmpsize;
+	offset+=desplazamientoHeader;
+
+	memcpy(&escritura->offset, datos+offset, tmpsize = sizeof(uint32_t));
+	offset+=tmpsize;
+
+	memcpy(&escritura->size, datos+offset, tmpsize = sizeof(uint32_t));
+	offset+=tmpsize;
+
+	escritura->buffer = malloc(escritura->size);
+	memcpy(escritura->buffer, datos+offset, escritura->size);
 
 	return escritura;
 }

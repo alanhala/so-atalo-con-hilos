@@ -55,6 +55,7 @@ t_kernel* create_kernel(char* config_file_path) {
 			config_get_array_value(kernel_config, "IO_SLEEP"));
 	kernel->semaphores = load_semaphores(config_get_array_value(kernel_config, "SEM_IDS"),
 			config_get_array_value(kernel_config, "SEM_INIT"));
+	scheduler = create_scheduler(kernel);
 	return kernel;
 }
 
@@ -162,19 +163,35 @@ uint32_t io_call(t_kernel* self, char* io_name, int times) {
 	return 0;
 }
 
-int32_t wait(t_kernel* self, char* sem_id) {
+int32_t wait_ansisop(t_kernel* kernel, char* sem_id, t_PCB* pcb) {
 	int same_sem(t_semaphore* sem) {
 		if (strcmp(sem->id, sem_id) == 0)
 			return 1;
 		else
 			return 0;
 	}
-	t_semaphore* semaphore = list_find(self->semaphores, (void*) same_sem);
-	semaphore->value--;
-	if (semaphore->value < 0)
-//		block_process();
+	t_semaphore* semaphore = list_find(kernel->semaphores, (void*) same_sem);
+	semaphore->value--; // TODO ver si hace falta poner semaforo
+	if (semaphore->value < 0) {
+		block_process(scheduler, semaphore->id, pcb);
 		return -1;
+	}
 	else
 		return 0;
 
+}
+
+int32_t signal_ansisop(t_kernel* kernel, char* sem_id) {
+	int same_sem(t_semaphore* sem) {
+		if (strcmp(sem->id, sem_id) == 0)
+			return 1;
+		else
+			return 0;
+	}
+	t_semaphore* semaphore = list_find(kernel->semaphores, (void*) same_sem);
+	semaphore->value++; // TODO ver si hace falta poner semaforo
+	if (semaphore->value <= 0) {
+		unblock_process(scheduler, semaphore->id);
+	}
+	return 0;
 }

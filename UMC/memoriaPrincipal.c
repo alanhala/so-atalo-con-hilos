@@ -18,6 +18,13 @@
 #include <semaphore.h>
 #include "memoriaPrincipal.h"
 #include "protocoloUMC.h"
+#include "main.h"
+
+/*
+Para usar LOGS
+extern t_log *trace_log_UMC
+log_trace(trace_log_UMC,"<lo_que_quieran_loggear>");
+*/
 
 
 int inicializar_estructuras() {
@@ -43,9 +50,6 @@ void inicializar_semaforos() {
 	sem_init(&mut_memoria_principal, 0, 1);
 	sem_init(&mut_swap, 0, 1);
 	sem_init(&mut_tlb, 0, 1);
-
-
-
 
 
 }
@@ -404,12 +408,17 @@ int buscar_en_tlb_frame_de_pagina(int pid, int pagina){
 }
 
 int conseguir_frame_mediante_reemplazo(t_tabla_de_paginas* tabla, int pagina) {
+
+	extern t_log *trace_log_UMC;
+
 	int pagina_victima = seleccionar_pagina_victima(tabla) ;
 	int frame_victima = (tabla->entradas[pagina_victima]).frame ;
+	log_trace(trace_log_UMC,"frame victima %d\n",frame_victima);
 	printf("\n frame victima %d\n", frame_victima);
 	char* contenido_frame_victima = leer_frame_de_memoria_principal(frame_victima, 0, TAMANIO_FRAME);
+	log_trace(trace_log_UMC,"contenido de frame victima a escribir en swap: %s en pagina victima %d\n",contenido_frame_victima,pagina_victima);
 	printf("\n contenido de frame victima a escribir en swap :  %s en pagina victima %d\n", contenido_frame_victima, pagina_victima);
-	escribir_pagina_de_swap(tabla->pid, pagina_victima,     contenido_frame_victima);
+	escribir_pagina_de_swap(tabla->pid, pagina_victima,contenido_frame_victima);
 
 	//int pagina_victima = buscar_pagina_de_frame_en_tabla_de_paginas(tabla, frame_victima);
 	// TODO IF PAGINA_VICTIMA FUE MODIFICADO, SINO ES AL PEDO
@@ -418,6 +427,7 @@ int conseguir_frame_mediante_reemplazo(t_tabla_de_paginas* tabla, int pagina) {
 
 	char* contenido_pagina_a_actualizar = leer_pagina_de_swap(tabla->pid, pagina);
 
+	log_trace(trace_log_UMC,"Contenido a actualizar:  %s en pagina victima %d\n",contenido_pagina_a_actualizar,pagina);
 	printf("\n contenido a actualizar :  %s en pagina victima %d\n", contenido_pagina_a_actualizar, pagina);
 	escribir_frame_de_memoria_principal(frame_victima, 0, TAMANIO_FRAME, contenido_pagina_a_actualizar);
 	actualizar_reemplazo(tabla, frame_victima, pagina, pagina_victima);
@@ -951,6 +961,7 @@ void flush_tlb(int pid){
 
 
 void dump_memory(int pid){
+	extern t_log *trace_log_UMC;
 	//Contenido de memoria:
 	//Datos almacenados en la memoria de todos los procesos o de un proceso en particular.
 	if (pid == -1)
@@ -958,6 +969,7 @@ void dump_memory(int pid){
 
 		void dump(t_tabla_de_paginas *tabla)
 		{
+			log_trace(trace_log_UMC,"Contenido en memoria de proceso %d\n",tabla->pid);
 			printf("			Contenido en memoria de proceso %d\n\n", tabla->pid);
 			int i =0;
 			for(0; i<tabla->paginas_totales; i++)
@@ -965,6 +977,7 @@ void dump_memory(int pid){
 				int frame =(tabla->entradas[i]).frame ;
 				if (frame != -1)
 				{
+					log_trace(trace_log_UMC,"Contenido de la entrada %d ubicada en el frame %d\n",i, frame );
 					printf("Contenido de la entrada %d ubicada en el frame %d : \n",i, frame );
 					char *  contenido = leer_frame_de_memoria_principal(frame, 0, TAMANIO_FRAME);
 					int posicion = 0;
@@ -998,6 +1011,7 @@ void dump_memory(int pid){
 	{
 		//TODO VER SI PONGO MUTEX ACA O NO
 		t_tabla_de_paginas * tabla = buscar_tabla_de_paginas_de_pid(pid);
+		log_trace(trace_log_UMC,"Contenido en memoria de proceso %d\n", tabla->pid);
 		printf("Contenido en memoria de proceso %d\n", tabla->pid);
 		int i =0;
 		for(0; i<tabla->paginas_totales; i++)
@@ -1005,6 +1019,7 @@ void dump_memory(int pid){
 			int frame =(tabla->entradas[i]).frame ;
 			if (frame != -1)
 			{
+				log_trace(trace_log_UMC,"Contenido en memoria de proceso %d\n", tabla->pid);
 				printf("Contenido de la entrada %d ubicada en el frame %d : \n",i, frame );
 				char *  contenido = leer_frame_de_memoria_principal(frame, 0, TAMANIO_FRAME);
 				int posicion = 0;
@@ -1030,17 +1045,24 @@ void dump_memory(int pid){
 }
 
 void dump_structs(int pid){
+	extern t_log *trace_log_UMC;
 	if (pid == -1){
 		void dump_table(t_tabla_de_paginas * tabla){
-
+			log_trace(trace_log_UMC,"TABLA DE PAGINAS DEL PROCESO: %d\n", tabla->pid);
 			printf("		TABLA DE PAGINAS DEL PROCESO: %d \n\n\n", tabla->pid);
+			log_trace(trace_log_UMC,"Paginas totales del proceso: %d\n", tabla->paginas_totales);
 			printf("Paginas totales del proceso: %d \n\n",tabla->paginas_totales);
 			int i =0;
 			for(0; i<tabla->paginas_totales; i++){
+				log_trace(trace_log_UMC,"Entrada %d\n",i);
 				printf("		Entrada %d\n", i);
+				log_trace(trace_log_UMC,"Ubicado en el frame: %d\n",(tabla->entradas[i]).frame);
 				printf("Ubicado en el frame: %d\n",(tabla->entradas[i]).frame);
+				log_trace(trace_log_UMC,"Modificado: %d\n",(tabla->entradas[i]).modificado);
 				printf("Modificado: %d\n",(tabla->entradas[i]).modificado);
+				log_trace(trace_log_UMC,"Segunda Oportunidad: %d\n",(tabla->entradas[i]).segunda_oportunidad);
 				printf("Segunda Oportunidad: %d\n",(tabla->entradas[i]).segunda_oportunidad);
+				log_trace(trace_log_UMC,"Ultimo uso: %d\n\n\n",(tabla->entradas[i]).lru);
 				printf("Ultimo uso: %d\n\n\n",(tabla->entradas[i]).lru);
 
 			}

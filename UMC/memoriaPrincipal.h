@@ -162,8 +162,6 @@ void set_test();
 void set_socket_descriptor(int fd);
 
 
-
-
 // MOCK
 char * SWAP_MOCK;
 

@@ -1,5 +1,12 @@
 #include "swap.h"
 
+/*
+Para usar Logs
+extern t_log *trace_log_SWAP;
+log_trace(trace_log_SWAP,"<lo_que_quieran_loggear>");
+*/
+
+
 
 void create_file(t_swap* self) {
 	char* size_of_swap_file = string_itoa(self->pages_number * self->page_size);
@@ -14,6 +21,9 @@ void create_file(t_swap* self) {
 	strcat(linux_instruction, self->swap_name);
 	system(linux_instruction);
 	free(linux_instruction);
+
+	extern t_log *trace_log_SWAP;
+	log_trace(trace_log_SWAP,"---------\n");
 }
 
 void initialize_bitmap(t_swap* self) {
@@ -154,11 +164,12 @@ t_pages_table* remove_pages_table(t_swap* self, unsigned int pid) {
 	return list_remove_by_condition(self->pages_table_list, (void*) same_pid);
 }
 
-void remove_program(t_swap* self, unsigned int pid) {
+int remove_program(t_swap* self, unsigned int pid) {
 	t_pages_table* pages_table = remove_pages_table(self, pid);
 	int first_page = *(pages_table->pages_location) / self->page_size;
 	remove_program_from_bitmap(self, first_page, pages_table->pages_number);
 	destroy_pages_table(pages_table);
+	return 0;
 }
 
 
