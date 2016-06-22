@@ -589,7 +589,7 @@ int ejecutar_pcb(){
                printf("Instruccion %d del pid %d ejecutada \n", instruccion_ejecutada, pcb->pid);
                fflush(stdout);
                instruccion_ejecutada ++;
-               sleep(1);
+               usleep(10000);
        }
 
 

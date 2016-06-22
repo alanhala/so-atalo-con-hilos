@@ -29,6 +29,9 @@ int inicializar_estructuras() {
 	TLB = crear_tlb();
 	lista_tabla_de_paginas = list_create();
 	crear_lista_frames();
+	set_test();
+	crear_swap_mock();
+
 	return 0;
 }
 
@@ -85,12 +88,12 @@ int buscar_frame_libre(){
 	return frame_encontrado->frame;
 }
 
-void finalizar_programa(int pid){
+int finalizar_programa(int pid){
 	//TODO aca no se le debe enviar nada a swap, debe hacerse en el switch del protocolo
 	// yo aca solo manejo las estructuras de UMC
 
 	t_tabla_de_paginas* tabla = buscar_tabla_de_paginas_de_pid(pid);
-
+	flush_tlb(pid);
 	int pagina=0;
 	for(0; pagina < tabla->paginas_totales ; pagina++ ){
 		int frame = devolver_frame_de_pagina(tabla, pagina);
@@ -102,8 +105,9 @@ void finalizar_programa(int pid){
 			return (tabla->pid == pid);
 		}
 
-	list_remove_by_condition(lista_tabla_de_paginas, pid_iguales);
-
+	t_tabla_de_paginas * aux = list_remove_by_condition(lista_tabla_de_paginas, pid_iguales);
+	free(aux);
+	return 0;
 }
 
 t_entrada_tabla_de_paginas* inicializar_paginas(int paginas_requeridas_del_proceso) {
@@ -203,6 +207,7 @@ void marcar_frame_como_libre(int numero_de_frame){
 				}
 	t_frame * frame_a_modificar = list_find(lista_frames, (void *)frames_iguales);
 	frame_a_modificar->asignado = 0;
+
 }
 
 int buscar_frame_de_una_pagina(t_tabla_de_paginas* tabla, int pagina){
@@ -236,11 +241,6 @@ int buscar_frame_de_una_pagina(t_tabla_de_paginas* tabla, int pagina){
 }
 
 int cargar_nuevo_programa_en_swap(int pid, int paginas_requeridas_del_proceso, char *codigo_programa){
-
-	if (SWAP_MOCK_ENABLE)
-		return cargar_nuevo_programa_en_swap_mock(pid, paginas_requeridas_del_proceso, codigo_programa);
-
-
 	sem_wait(&mut_swap);
 	t_iniciar_programa_en_swap *carga = malloc(sizeof(t_iniciar_programa_en_swap));
 	memset(carga,0,sizeof(t_iniciar_programa_en_swap));
@@ -270,13 +270,15 @@ int cargar_nuevo_programa_en_swap(int pid, int paginas_requeridas_del_proceso, c
 
 	respuesta = (t_respuesta_iniciar_programa_en_swap*)deserealizar_mensaje(buffer_header[0], buffer_recv);
 	sem_post(&mut_swap);
+	if (SWAP_MOCK_ENABLE)
+			return cargar_nuevo_programa_en_swap_mock(pid, paginas_requeridas_del_proceso, codigo_programa);
+
+
 	return respuesta->cargado_correctamente;
 }
 
 char * leer_pagina_de_swap(int pid, int pagina){
 
-	if(SWAP_MOCK_ENABLE)
-		return leer_pagina_de_swap_mock(pid, pagina);
 	sem_wait(&mut_swap);
 	t_leer_pagina_swap *lectura = malloc(sizeof(t_leer_pagina_swap));
 
@@ -306,13 +308,13 @@ char * leer_pagina_de_swap(int pid, int pagina){
 
 	respuesta = (t_respuesta_leer_pagina_swap*)deserealizar_mensaje(buffer_header[0], buffer_recv);
 	sem_post(&mut_swap);
+	if(SWAP_MOCK_ENABLE)
+			return leer_pagina_de_swap_mock(pid, pagina);
+
 	return respuesta->datos; //debe devolver esto si no leyo bien "~/-1"
 }
 
 int escribir_pagina_de_swap(int pid, int pagina, char * datos){
-
-	if (SWAP_MOCK_ENABLE)
-		return escribir_pagina_de_swap_mock(pid, pagina, datos);
 	sem_wait(&mut_swap);
 	t_escribir_pagina_swap *escritura = malloc(sizeof(t_escribir_pagina_swap));
 
@@ -343,13 +345,14 @@ int escribir_pagina_de_swap(int pid, int pagina, char * datos){
 
 	respuesta = (t_respuesta_escribir_pagina_swap*)deserealizar_mensaje(buffer_header[0], buffer_recv);
 	sem_post(&mut_swap);
+	if (SWAP_MOCK_ENABLE)
+		return escribir_pagina_de_swap_mock(pid, pagina, datos);
 	return respuesta->escritura_correcta;
 }
 
 int finalizar_programa_de_swap(int pid){
 
-	if(SWAP_MOCK_ENABLE)
-		return finalizar_programa_de_swap_mock(pid);
+
 	sem_wait(&mut_swap);
 
 	t_finalizar_programa_en_swap *finalizar_programa = malloc(sizeof(t_finalizar_programa_en_swap));
@@ -379,6 +382,8 @@ int finalizar_programa_de_swap(int pid){
 
 	respuesta = (t_respuesta_finalizar_programa_swap*)deserealizar_mensaje(8, buffer_recv);
 	sem_post(&mut_swap);
+	if(SWAP_MOCK_ENABLE)
+		return finalizar_programa_de_swap_mock(pid);
 	return respuesta;
 
 }
@@ -971,14 +976,14 @@ void dump_memory(int pid){
 					  posicion++;
 					}
 					printf("\n");
-					int poshex = 0;
-					while (contenido[poshex] != '\0') {
-					  //printf("%02x   ", (unsigned int) contenido[poshex]);
-					  printf("%x   ", contenido[poshex] & 0xff);
-					  fflush(stdout);
-					  poshex++;
-					}
-					printf("\n");
+//					int poshex = 0;
+//					while (contenido[poshex] != '\0') {
+//					  //printf("%02x   ", (unsigned int) contenido[poshex]);
+//					  printf("%x   ", contenido[poshex] & 0xff);
+//					  fflush(stdout);
+//					  poshex++;
+//					}
+//					printf("\n");
 					printf("\n");
 
 				}
@@ -1011,12 +1016,12 @@ void dump_memory(int pid){
 				  i++;
 				}
 				printf("\n");
-				int poshex = 0;
-				while (contenido[poshex] != '\0') {
-				  printf("%02x   ", (unsigned int) contenido[poshex]);
-				  i++;
-				}
-				printf("\n");
+//				int poshex = 0;
+//				while (contenido[poshex] != '\0') {
+//				  printf("%02x   ", (unsigned int) contenido[poshex]);
+//				  i++;
+//				}
+//				printf("\n");
 				printf("\n");
 			}
 		}
@@ -1122,4 +1127,37 @@ void set_test(){
 
 void set_socket_descriptor(int fd){
 	SWAP_SOCKET_DESCRIPTOR = fd;
+}
+
+
+void crear_swap_mock(){
+
+	char* datos = malloc(10000000);
+	memset(datos, '/0', 10000000);
+	SWAP_MOCK = datos;
+
+}
+
+int cargar_nuevo_programa_en_swap_mock(int pid, int paginas_requeridas_del_proceso, char *codigo_programa){
+	memcpy(SWAP_MOCK + (pid * MAX_FRAMES_POR_PROCESO * TAMANIO_FRAME), codigo_programa, strlen(codigo_programa));
+	return 0;
+}
+
+char * leer_pagina_de_swap_mock(int pid, int pagina){
+	char* datos = malloc(TAMANIO_FRAME);
+	memcpy(datos, SWAP_MOCK + (pid * MAX_FRAMES_POR_PROCESO * TAMANIO_FRAME) + (pagina * TAMANIO_FRAME),  TAMANIO_FRAME);
+	return datos;
+
+
+
+}
+
+int escribir_pagina_de_swap_mock(int pid, int pagina, char* datos) {
+
+	memcpy(SWAP_MOCK + (pid * MAX_FRAMES_POR_PROCESO * TAMANIO_FRAME) +(pagina * TAMANIO_FRAME) , datos, TAMANIO_FRAME);
+	return 0;
+}
+
+int finalizar_programa_de_swap_mock(int pid){
+       return 0;
 }

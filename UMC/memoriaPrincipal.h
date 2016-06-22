@@ -77,7 +77,7 @@ t_list* lista_cpu_context;
 
 // Inteface Nucleo - UMC
 int cargar_nuevo_programa(int pid, int paginas_requeridas_del_proceso, char * codigo_programa);
-void finalizar_programa(int pid);
+int finalizar_programa(int pid);
 // Fin Interfaz Nucleo - UMC
 
 // Interface CPU - UMC
@@ -160,3 +160,15 @@ void set_algoritmo_reemplazo(char * algoritmo);
 void set_test();
 
 void set_socket_descriptor(int fd);
+
+
+
+
+// MOCK
+char * SWAP_MOCK;
+
+int escribir_pagina_de_swap_mock(int pid, int pagina, char* datos) ;
+char * leer_pagina_de_swap_mock(int pid, int pagina);
+int cargar_nuevo_programa_en_swap_mock(int pid, int paginas_requeridas_del_proceso, char *codigo_programa);
+void crear_swap_mock();
+int finalizar_programa_de_swap_mock(int pid);

@@ -93,10 +93,8 @@ int main(int argc, char **argv) {
 	set_algoritmo_reemplazo("clock");
 
 	inicializar_estructuras();
-	//int swap_socket = create_client_socket_descriptor("localhost", "6000");
-	//set_socket_descriptor(swap_socket);
-	set_test();
-	crear_swap_mock();
+	int swap_socket = create_client_socket_descriptor("localhost", "6000");
+	set_socket_descriptor(swap_socket);
 
 
 	int server_socket_descriptor = create_server_socket_descriptor("localhost","5000",BACKLOG);
@@ -288,9 +286,13 @@ void manejo_de_solicitudes(int socket_descriptor) {
 
 			t_respuesta_finalizar_programa_en_UMC *respuesta = malloc(sizeof(t_respuesta_finalizar_programa_en_UMC));
 
-			//HARDCODEADO. ESTA MAL
-			int respuesta_tmp = 1;
-			respuesta->respuesta_correcta = respuesta_tmp;
+
+			int resp_umc = finalizar_programa(finalizar_programa_en_UMC->process_id);
+			int resp_swap = finalizar_programa_de_swap(finalizar_programa_en_UMC->process_id);
+
+			respuesta->respuesta_correcta = -1;
+			if (resp_umc == 0 && resp_swap == 0)
+				respuesta->respuesta_correcta = 0;
 
 			t_stream *buffer = (t_stream *)serializar_mensaje(64,respuesta);
 
