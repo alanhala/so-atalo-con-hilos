@@ -597,7 +597,7 @@ int ejecutar_pcb(){
                fflush(stdout);
                instruccion_ejecutada ++;
 
-               usleep(10000);
+               usleep(100000);
 
        }
 

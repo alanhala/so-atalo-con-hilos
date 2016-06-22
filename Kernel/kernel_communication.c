@@ -130,6 +130,7 @@ void* handle_pcb_execution(void* data_to_cast) {
 
 			}
 	}
+	pthread_exit(1);
 }
 
 int end_program_umc(t_PCB *pcb, int umc_socket_descriptor) {
