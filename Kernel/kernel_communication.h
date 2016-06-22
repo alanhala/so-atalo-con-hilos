@@ -1,6 +1,7 @@
 #ifndef KERNEL_COMMUNICATION_H
 #define KERNEL_COMMUNICATION_H
 	#include <sys/socket.h>
+	#include <pthread.h>
 	#include "kernel.h"
 	#include "protocoloKernel.h"
 

@@ -110,7 +110,7 @@ void* handle_execution(void* scheduler) {
 		pthread_attr_t attr;
 		pthread_attr_init(&attr);
 		pthread_attr_setdetachstate(&attr, PTHREAD_CREATE_DETACHED);
-		pthread_create(&th_pcb_execution, attr, &handle_pcb_execution, (void*) data);
+		pthread_create(&th_pcb_execution, &attr, &handle_pcb_execution, (void*) data);
 		pthread_attr_destroy(&attr);
 	}
 }
