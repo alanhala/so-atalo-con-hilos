@@ -63,8 +63,8 @@ int main(int argc, char **argv) {
 
 	//char * codigo = "begin\nvariables c, d\nc=1234\nd=4321\nend\0";
 //	char * codigo = "begin\nvariables c, d, e\nc=2147483647\nd=224947129\nf\ne <- g\nend\nfunction f\nvariables a\na=1234\nend\nfunction g\nvariables a\na=4321\nreturn a\nend";
-	char * codigo = "begin\nvariables c, d, e\nc=2147483647\nd=224947129\nf\ne <- g\niterar\nend\nfunction f\nvariables a\na=2\nprint a\nend\nfunction g\nvariables a\na=2\nreturn a\nend\nfunction iterar\nvariables f, i, t\nf=20\ni=0\n:inicio\ni=i+1\nprint i\nt=f-i\nprint t\njnz t inicio\nend";
-
+//	char * codigo = "begin\nvariables c, d, e\nc=2147483647\nd=224947129\nf\ne <- g\niterar\nend\nfunction f\nvariables a\na=2\nprint a\nend\nfunction g\nvariables a\na=2\nreturn a\nend\nfunction iterar\nvariables f, i, t\nf=20\ni=0\n:inicio\ni=i+1\nprint i\nt=f-i\nprint t\njnz t inicio\nend";
+	char* codigo = "begin\nvariables f, A, g\nA = 0\n!compartida = 1+A\nprint !compartida \njnz !compartida Siguiente \n:Proximo\nf = 8\ng <- doble !compartida\ntextPrint Hola Mundo!\ng = 1 + g\nprint g \ntextPrint Bye\nend\nfunction doble\nvariables f\nf = $0 + $0\nreturn f\nend\n:Siguiente\nprint A+1\ngoto Proximo\n";
 	iniciar_programa->codigo_de_programa = malloc(strlen(codigo)+1);
 	memcpy(iniciar_programa->codigo_de_programa, codigo, strlen(codigo)+1);
 

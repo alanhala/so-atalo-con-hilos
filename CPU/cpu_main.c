@@ -121,8 +121,11 @@ int main(int argc, char **argv) {
 			set_PCB(pcb);
 			int resultado_ejecucion = ejecutar_pcb();
 			t_PCB_serializacion * pcb_serializado = adaptar_pcb_a_serializar(get_PCB());
-			pcb_serializado->mensaje = 3;
-			pcb_serializado->valor_mensaje = "SACAR ESTO";
+			pcb_serializado->mensaje = 0;
+			pcb_serializado->valor_mensaje = "";
+			pcb_serializado->cantidad_operaciones = 0;
+			pcb_serializado->valor_de_la_variable_compartida =0;
+			pcb_serializado->resultado_mensaje = 0;
 			t_stream * stream = serializar_mensaje(121,pcb_serializado);
 			send(KERNEL_DESCRIPTOR, stream->datos, stream->size, 0);
 		}

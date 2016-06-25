@@ -40,6 +40,7 @@ void* handle_pcb_execution(void* data_to_cast) {
 	pcb_serializacion->mensaje = 0;
 	pcb_serializacion->valor_mensaje = "";
 	pcb_serializacion->cantidad_operaciones = 0;
+	pcb_serializacion->valor_de_la_variable_compartida = 0;
 	pcb_serializacion->resultado_mensaje = 0;
 	t_stream *buffer = serializar_mensaje(121,pcb_serializacion);
 
@@ -88,6 +89,7 @@ void* handle_pcb_execution(void* data_to_cast) {
 					pcb_serializacion->mensaje = 0;
 					pcb_serializacion->valor_mensaje = "";
 					pcb_serializacion->cantidad_operaciones = 0;
+					pcb_serializacion->valor_de_la_variable_compartida = 0;
 					pcb_serializacion->resultado_mensaje = valor_variable;
 					t_stream *buffer = serializar_mensaje(121,pcb_serializacion);
 
@@ -106,6 +108,7 @@ void* handle_pcb_execution(void* data_to_cast) {
 					pcb_serializacion->mensaje = 0;
 					pcb_serializacion->valor_mensaje = "";
 					pcb_serializacion->cantidad_operaciones = 0;
+					pcb_serializacion->valor_de_la_variable_compartida =0;
 					pcb_serializacion->resultado_mensaje = resultado;
 					t_stream *buffer = serializar_mensaje(121,pcb_serializacion);
 
