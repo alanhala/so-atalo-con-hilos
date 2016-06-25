@@ -21,12 +21,10 @@
 #include <sys/wait.h>
 #include <signal.h>
 #include <pthread.h>
-#include <commons/config.h>
 #include <commons/error.h>
 #include <commons/collections/list.h>
 #include <commons/string.h>
 #include <sys/types.h>
-#include <sys/inotify.h>
 #include <semaphore.h>
 #include "socket.h"
 #include "memoriaPrincipal.h"
@@ -42,29 +40,6 @@ void *interprete_comando_thread();
 
 int huboUnCambio;
 
-#define EVENT_SIZE (sizeof (struct inotify_event) + 24)
-#define BUF_LEN (1024 * EVENT_SIZE)
-
-typedef struct umcConfigFile {
-	unsigned puerto,
-			puerto_swap,
-			marcos,
-			marcos_size,
-			marco_x_proc,
-			entradas_tlb,
-			retardo;
-	char 	*ip_swap;
-	char 	*algoritmo_reemplazo;
-} UMCConfigFile;
-
-
-char* leer_string(t_config *config, char* key);
-
-unsigned leerUnsigned(t_config *config, char* key);
-void levantaConfigFileEnVariables(UMCConfigFile *ptrvaloresConfigFile,t_config *ptrConfig);
-void liberaVariables(t_log* trace_log, t_config* ptrConfig, t_config* ptrConfigUpdate);
-void detectaCambiosEnConfigFile();
-void cargar_variables_productivas(UMCConfigFile *ptrvaloresConfigFile);
 void interprete_de_comandos();
 void manejo_de_solicitudes(int cpu_socket_descriptor);
 
@@ -89,6 +64,10 @@ int main(int argc, char **argv) {
 	pthread_t interprete_comandos;
 	int interprete_thread_result = pthread_create(&interprete_comandos, NULL,
 			&interprete_comando_thread, NULL);
+
+	pthread_t levanta_config_file;
+	int levanta_config_file_resultado = pthread_create(&levanta_config_file,NULL,&cargar_configuracion,NULL);
+
 	if (interprete_thread_result) {
 		log_trace(trace_log_UMC,"Error en la creacion del thread del interprete de comandos\n. Codigo de error: %d", interprete_thread_result);
 		// TODO Analizar el tratamiento que desea darse
@@ -133,8 +112,6 @@ void *kernel_and_cpu_connection_handler(int client_socket_descriptor) {
 	manejo_de_solicitudes(client_socket_descriptor);
 	return 0;
 }
-
-
 
 void manejo_de_solicitudes(int socket_descriptor) {
 	int handshake = -1;
@@ -300,190 +277,40 @@ void manejo_de_solicitudes(int socket_descriptor) {
 	}
 }
 
-
-
-
-
-
-int cargar_configuracion(){
-	t_log *trace_log_Config_Files;
-	trace_log_Config_Files = log_create("Log_de_Config_Files.txt","main.c",false,LOG_LEVEL_TRACE);
-
-	//Declaracion de Variables
-	t_config *ptrConfig, *ptrConfigUpdate;
-	UMCConfigFile *ptrvaloresConfigFile;
-	ptrvaloresConfigFile = malloc(sizeof(UMCConfigFile));
-
-	//Se asigna a ptrConfig el archivo de configuracion. Si no lo encuentra, finaliza
-	//y lo advierte en el log
-	ptrConfig = config_create("umc.cfg");
-	if (ptrConfig == NULL){
-		log_trace(trace_log_Config_Files,"Archivo de configuración no disponible. No puede ejecutar el UMC.\n");
-		return -1;
-	}
-
-	log_trace(trace_log_Config_Files,"Cargando parametros del Archivo de Configuracion\n");
-
-	//El procedimiento carga los valores del Config File en las variables creadas
-	levantaConfigFileEnVariables(ptrvaloresConfigFile,ptrConfig);
-
-	log_trace(trace_log_Config_Files,"Archivo de Configuracion levantado exitosamente.\n");
-
-
-
-	/*
-
-	while(1)
-	{
-		huboUnCambio=0;
-		detectaCambiosEnConfigFile();
-		if(huboUnCambio)
-		{
-			ptrConfigUpdate = config_create("/home/utnso/GitHub/tp-2016-1c-Atalo-con-Hilos/UMC/umc.cfg");
-			if(ptrConfigUpdate->properties->elements_amount==0) {
-				log_error(errorLogger,"No se puede levantar el Archivo de Configuracion.\n");
-			} else {
-				levantaConfigFileEnVariables(ptrvaloresConfigFile,ptrConfigUpdate);
-				printf("%s\n\n", ptrvaloresConfigFile->ip_swap);
-				log_trace(traceLogger,"Archivo de Configuracion actualizado y levantado.\n");
-			}
-			config_destroy(ptrConfigUpdate);
-		}
-	}
-	*/
-	cargar_variables_productivas(ptrvaloresConfigFile);
-	//printf("%s\n\n", ptrvaloresConfigFile->ip_swap);
-
-	liberaVariables(trace_log_Config_Files, ptrConfig, ptrConfigUpdate);
-	free(ptrvaloresConfigFile);
-
-	return 0;
-
-};
-
-
-unsigned leerUnsigned(t_config *config, char* key) {
-	unsigned datoInt = 0;
-	if (config_has_property(config, key)) {
-		datoInt = config_get_int_value(config, key);
-	} else {
-		error_show("No se leyó el %s de la config \n", key);
-	}
-
-	return datoInt;
-}
-void levantaConfigFileEnVariables(UMCConfigFile *ptrvaloresConfigFile,t_config *ptrConfig){
-	ptrvaloresConfigFile->puerto = leerUnsigned(ptrConfig, "PUERTO");
-	ptrvaloresConfigFile->puerto_swap = leerUnsigned(ptrConfig, "PUERTO_SWAP");
-	ptrvaloresConfigFile->marcos = leerUnsigned(ptrConfig, "MARCOS");
-	ptrvaloresConfigFile->marcos_size = leerUnsigned(ptrConfig, "MARCOS_SIZE");
-	ptrvaloresConfigFile->marco_x_proc = leerUnsigned(ptrConfig, "MARCO_X_PROC");
-	ptrvaloresConfigFile->entradas_tlb = leerUnsigned(ptrConfig, "ENTRADAS_TLB");
-	ptrvaloresConfigFile->retardo = leerUnsigned(ptrConfig, "RETARDO");
-	ptrvaloresConfigFile->ip_swap = leer_string(ptrConfig, "IP_SWAP");
-	//ptrvaloresConfigFile->algoritmo_reemplazo = leer_string(ptrConfig, "ALGORITMO");
-
-}
-void liberaVariables(t_log* trace_log, t_config* ptrConfig, t_config* ptrConfigUpdate) {
-	//Libera Logs y el Config File
-	log_trace(trace_log, "Se libera el Archivo de Configuracion.\n");
-	config_destroy(ptrConfig);
-	//config_destroy(ptrConfigUpdate); // TODO MKN EZE
-	log_trace(trace_log, "Se libera el Trace Log.\n");
-	log_destroy(trace_log);
-}
-void detectaCambiosEnConfigFile() {
-		char buffer[BUF_LEN];
-		// Al inicializar inotify este nos devuelve un descriptor de archivo
-		int file_descriptor = inotify_init();
-		if (file_descriptor < 0) {
-			perror("inotify_init");
-		}
-		// Creamos un monitor sobre un path indicando que eventos queremos escuchar
-		int watch_descriptor = inotify_add_watch(file_descriptor,
-				"/home/utnso/GitHub/tp-2016-1c-Atalo-con-Hilos/UMC/Debug", IN_MODIFY);
-
-		// El file descriptor creado por inotify, es el que recibe la información sobre los eventos ocurridos
-		// para leer esta información el descriptor se lee como si fuera un archivo comun y corriente pero
-		// la diferencia esta en que lo que leemos no es el contenido de un archivo sino la información
-		// referente a los eventos ocurridos
-		int length = read(file_descriptor, buffer, BUF_LEN);
-		if (length < 0) {
-			error_show("Error al leer el descriptor de archivo");
-		}
-		int offset = 0;
-
-		// Luego del read buffer es un array de n posiciones donde cada posición contiene
-		// un eventos ( inotify_event ) junto con el nombre de este.
-		while (offset < length) {
-
-			// El buffer es de tipo array de char, o array de bytes. Esto es porque como los
-			// nombres pueden tener nombres mas cortos que 24 caracteres el tamaño va a ser menor
-			// a sizeof( struct inotify_event ) + 24.
-			struct inotify_event *event = (struct inotify_event *) &buffer[offset];
-			// El campo "len" nos indica la longitud del tamaño del nombre
-			if (event->len) {
-				// Dentro de "mask" tenemos el evento que ocurrio y sobre donde ocurrio
-				// sea un archivo o un directorio
-				if (event->mask & IN_MODIFY) {
-					if (event->mask) {
-						printf("The file %s was modified.\n\n", event->name);
-						huboUnCambio = 1;
-					}
-					}
-				}
-			offset += sizeof(struct inotify_event) + event->len;
-			}
-
-		inotify_rm_watch(file_descriptor, watch_descriptor);
-		close(file_descriptor);
-}
-
-
-
-void cargar_variables_productivas(UMCConfigFile *config){
-	//cargo un string - inicio
-	SWAPIP = malloc(strlen(config->ip_swap)+1);
-	memset(&SWAPIP, 0, (strlen(config->ip_swap)+1));
-	SWAPIP = config->ip_swap;
-	//cargo un string - fin
-
-	LISTENPORT= config->puerto;
-	SWAPPORT= config->puerto_swap;
-
-
-	set_cantidad_entradas_tlb(config->entradas_tlb);
-	set_max_frames_por_proceso(config->marco_x_proc);
-	set_cantidad_frames(config->marcos);
-	set_tamanio_frame(config->marcos_size);
-	set_retardo(config->retardo);
-	//set_algoritmo_reemplazo(config->algoritmo_reemplazo);
-
-}
-
-char* leer_string(t_config *config, char* key) {
-	char * datoString = malloc(sizeof(config_get_string_value(config, key)));
-	if (config_has_property(config, key)) {
-		datoString = config_get_string_value(config, key);
-	} else {
-		error_show("No se leyó el %s de la config \n", key);
-	}
-	return datoString;
-}
-
-
-
 void* interprete_comando_thread(){
 	while(1)
 	{
+		extern t_log *trace_log_UMC;
+
+		bool respuesta_invalida = true;
+
 		char *comando = malloc(100);
 		char **comando_separado = malloc(100);
+		int numero_del_comando;
+		int i = 0;
+
+		char *comandos_validos[5]={"retardo","dumpstruct","dumpmemory","flushmemory","flushtlb"};
 
 		puts("Ingrese un comando:");
 		fgets(comando, 100,stdin);
-
 		comando_separado = string_split(comando," ");
-		int  numero_del_comando = atoi(comando_separado[1]);
+
+		while(respuesta_invalida){
+			for(i=0;i<=4;i++){
+				if(!strcasecmp(comando_separado[0],comandos_validos[i])){
+					numero_del_comando = atoi(comando_separado[1]);
+					respuesta_invalida = false;
+					break;
+				}
+			}
+			if(!respuesta_invalida)
+				break;
+
+			puts("Entrada no valida");
+			puts("Ingrese un comando:");
+			fgets(comando, 100,stdin);
+			comando_separado = string_split(comando," ");
+		}
 
 		if(!strcasecmp("retardo", comando_separado[0])){
 			set_retardo(numero_del_comando);
@@ -496,9 +323,27 @@ void* interprete_comando_thread(){
 		} else if (!strcasecmp("flushtlb", comando_separado[0])){
 			flush_tlb(numero_del_comando);
 		}
+
 		free(comando_separado);
 		free(comando);
 	}
 
-
 }
+
+void cargar_variables_productivas(UMCConfigFile *config){
+	//cargo un string - inicio
+	SWAPIP = malloc(strlen(config->ip_swap)+1);
+	memset(&SWAPIP, 0, (strlen(config->ip_swap)+1));
+	SWAPIP = config->ip_swap;
+	//cargo un string - fin
+
+	LISTENPORT= config->puerto;
+	SWAPPORT= config->puerto_swap;
+
+	set_cantidad_entradas_tlb(config->entradas_tlb);
+	set_max_frames_por_proceso(config->marco_x_proc);
+	set_cantidad_frames(config->marcos);
+	set_tamanio_frame(config->marcos_size);
+	set_retardo(config->retardo);
+	//set_algoritmo_reemplazo(config->algoritmo_reemplazo);
+};

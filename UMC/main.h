@@ -6,10 +6,10 @@
  */
 
 #include <commons/log.h>
+#include <commons/config.h>
+#include "levanta_config_files.h"
 
 int  LISTENPORT;
 int SWAPPORT;
 char * SWAPIP;
-
-int cargar_configuracion();
 
