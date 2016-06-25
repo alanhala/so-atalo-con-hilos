@@ -61,7 +61,7 @@ void UMC_connection(t_swap* swap) {
 	int umc_socket_descriptor = accept_connection(server_socket_descriptor);
 
 	while (1) {
-
+		//usleep(1000000);
 		t_header *a_header = malloc(sizeof(t_header));
 
 		char 	buffer_header[5];	//Buffer donde se almacena el header recibido

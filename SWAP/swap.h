@@ -42,7 +42,7 @@
 
 	int initialize_program(t_swap* self, unsigned int pid, unsigned int pages_amount, char* program);
 
-	void remove_program(t_swap* self, unsigned int pid);
+	int remove_program(t_swap* self, unsigned int pid);
 
 	char* read_page(t_swap* self, unsigned int pid, unsigned int page);
 

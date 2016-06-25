@@ -25,33 +25,6 @@
 
 
 
-void crear_swap_mock(){
-
-	char* datos = malloc(10000000);
-	memset(datos, '/0', 10000000);
-	SWAP_MOCK = datos;
-
-}
-
-int cargar_nuevo_programa_en_swap_mock(int pid, int paginas_requeridas_del_proceso, char *codigo_programa){
-	memcpy(SWAP_MOCK + (pid * MAX_FRAMES_POR_PROCESO * 5), codigo_programa, strlen(codigo_programa));
-	return 0;
-}
-
-char * leer_pagina_de_swap_mock(int pid, int pagina){
-	char* datos = malloc(TAMANIO_FRAME);
-	memcpy(datos, SWAP_MOCK + (pid * MAX_FRAMES_POR_PROCESO * 5) + (pagina * TAMANIO_FRAME),  TAMANIO_FRAME);
-	return datos;
-
-
-
-}
-
-void escribir_pagina_de_swap_mock(int pid, int pagina, char* datos) {
-
-	memcpy(SWAP_MOCK + (pid * MAX_FRAMES_POR_PROCESO * 5) +(pagina * TAMANIO_FRAME) , datos, TAMANIO_FRAME);
-}
-
 
 void crear_swap_mock_test();
 
