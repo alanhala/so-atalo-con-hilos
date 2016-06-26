@@ -1143,26 +1143,20 @@ void dump_structs(int pid){
 	extern t_log *trace_log_UMC;
 	if (pid == -1){
 		void dump_table(t_tabla_de_paginas * tabla){
-			log_trace(trace_log_UMC,"TABLA DE PAGINAS DEL PROCESO: %d\n", tabla->pid);
-			printf("		TABLA DE PAGINAS DEL PROCESO: %d \n\n\n", tabla->pid);
+			log_trace(trace_log_UMC,"TABLA DE PAGINAS DEL PROCESO EN MEMORIA %d\n", tabla->pid);
+			printf("		TABLA DE PAGINAS DEL PROCESO EN MEMORIA %d \n\n\n", tabla->pid);
 			log_trace(trace_log_UMC,"Paginas totales del proceso: %d\n", tabla->paginas_totales);
 			printf("Paginas totales del proceso: %d \n\n",tabla->paginas_totales);
 			int i =0;
-			for(0; i<tabla->paginas_totales; i++){
-				//TODO SACAR EL IF EN AMBOS
+			for(0; i<MAX_FRAMES_POR_PROCESO; i++){
 				if((tabla->entradas[i]).frame != -1){
-				log_trace(trace_log_UMC,"Entrada %d\n",i);
-				printf("		Entrada %d\n", i);
-				log_trace(trace_log_UMC,"Ubicado en el frame: %d\n",(tabla->entradas[i]).frame);
-				printf("Ubicado en el frame: %d\n",(tabla->entradas[i]).frame);
-				log_trace(trace_log_UMC,"Segunda Oportunidad: %d\n",(tabla->entradas[i]).segunda_oportunidad);
-				printf("Segunda Oportunidad: %d\n",(tabla->entradas[i]).segunda_oportunidad);
-				log_trace(trace_log_UMC,"Modificado: %d\n",(tabla->entradas[i]).modificado);
-				printf("Modificado: %d\n",(tabla->entradas[i]).modificado);
-//				log_trace(trace_log_UMC,"Ultimo uso: %d\n\n\n",(tabla->entradas[i]).lru);
-//				printf("Ultimo uso: %d\n\n\n",(tabla->entradas[i]).lru);
+				printf("Pagina: %d\n",(tabla->info_reemplazo[i]).pagina);
+				printf("Ubicado en el frame: %d\n",(tabla->info_reemplazo[i]).frame);
+				printf("Segunda Oportunidad: %d\n",(tabla->info_reemplazo[i]).segunda_oportunidad);
+				printf("Modificado: %d\n",(tabla->info_reemplazo[i]).modificado);
 				}
 			}
+			printf("El indice del algoritmo de reemplazo esta en la posicion: %d\n",tabla->indice_segunda_oportunidad);
 		}
 			sem_wait(&mut_tabla_de_paginas);
 			list_iterate(lista_tabla_de_paginas, (void*) dump_table);
@@ -1170,29 +1164,18 @@ void dump_structs(int pid){
 	}
 	else{
 		t_tabla_de_paginas * tabla = buscar_tabla_de_paginas_de_pid(pid);
-		printf("		TABLA DE PAGINAS DEL PROCESO: %d \n\n\n", pid);
+		printf("		TABLA DE PAGINAS DEL PROCESO EN MEMORIA %d \n\n\n", pid);
 		printf("Paginas totales del proceso: %d \n\n",tabla->paginas_totales);
-//		int i =0;
-//		for(0; i<tabla->paginas_totales; i++){
-//			if((tabla->entradas[i]).frame != -1){
-//			printf("		Entrada %d\n", i);
-//			printf("Ubicado en el frame: %d\n",(tabla->entradas[i]).frame);
-//			printf("Segunda Oportunidad: %d\n",(tabla->entradas[i]).segunda_oportunidad);
-//			printf("Modificado: %d\n",(tabla->entradas[i]).modificado);
-//
-//			}
-//		}
 		int i =0;
 		for(0; i<MAX_FRAMES_POR_PROCESO; i++){
 			if((tabla->info_reemplazo[i]).frame != -1){
-			//printf("		Entrada %d\n", i);
 			printf("Pagina: %d\n",(tabla->info_reemplazo[i]).pagina);
 			printf("Ubicado en el frame: %d\n",(tabla->info_reemplazo[i]).frame);
 			printf("Segunda Oportunidad: %d\n",(tabla->info_reemplazo[i]).segunda_oportunidad);
 			printf("Modificado: %d\n",(tabla->info_reemplazo[i]).modificado);
-
 			}
 		}
+		printf("El indice del algoritmo esta en la posicion: %d\n",tabla->indice_segunda_oportunidad);
 	}
 }
 

@@ -908,3 +908,47 @@
 
 [TRACE] 16:18:49:970 main.c/(4117:4121): Archivo de Configuracion actualizado y levantado.
 
+[TRACE] 16:32:29:808 main.c/(4292:4295): Cargando parametros del Archivo de Configuracion
+
+[TRACE] 16:32:29:808 main.c/(4292:4295): Archivo de Configuracion levantado exitosamente.
+
+[TRACE] 16:32:29:926 main.c/(4292:4295): Archivo de Configuracion actualizado y levantado.
+
+[TRACE] 16:32:30:928 main.c/(4292:4295): Archivo de Configuracion actualizado y levantado.
+
+[TRACE] 16:32:30:929 main.c/(4292:4295): Archivo de Configuracion actualizado y levantado.
+
+[TRACE] 16:32:34:79 main.c/(4292:4295): Archivo de Configuracion actualizado y levantado.
+
+[TRACE] 16:32:35:76 main.c/(4292:4295): Archivo de Configuracion actualizado y levantado.
+
+[TRACE] 16:32:35:76 main.c/(4292:4295): Archivo de Configuracion actualizado y levantado.
+
+[TRACE] 16:32:38:85 main.c/(4292:4295): Archivo de Configuracion actualizado y levantado.
+
+[TRACE] 16:32:39:85 main.c/(4292:4295): Archivo de Configuracion actualizado y levantado.
+
+[TRACE] 16:32:39:88 main.c/(4292:4295): Archivo de Configuracion actualizado y levantado.
+
+[TRACE] 16:33:24:3 main.c/(4351:4354): Cargando parametros del Archivo de Configuracion
+
+[TRACE] 16:33:24:3 main.c/(4351:4354): Archivo de Configuracion levantado exitosamente.
+
+[TRACE] 16:33:25:77 main.c/(4351:4354): Archivo de Configuracion actualizado y levantado.
+
+[TRACE] 16:33:26:81 main.c/(4351:4354): Archivo de Configuracion actualizado y levantado.
+
+[TRACE] 16:33:26:83 main.c/(4351:4354): Archivo de Configuracion actualizado y levantado.
+
+[TRACE] 16:33:29:87 main.c/(4351:4354): Archivo de Configuracion actualizado y levantado.
+
+[TRACE] 16:33:30:91 main.c/(4351:4354): Archivo de Configuracion actualizado y levantado.
+
+[TRACE] 16:33:30:92 main.c/(4351:4354): Archivo de Configuracion actualizado y levantado.
+
+[TRACE] 16:33:33:99 main.c/(4351:4354): Archivo de Configuracion actualizado y levantado.
+
+[TRACE] 16:33:34:101 main.c/(4351:4354): Archivo de Configuracion actualizado y levantado.
+
+[TRACE] 16:33:34:102 main.c/(4351:4354): Archivo de Configuracion actualizado y levantado.
+
