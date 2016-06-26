@@ -37,9 +37,12 @@ int BACKLOG =10;
 
 void *kernel_and_cpu_connection_handler(int client_socket_descriptor);
 void *interprete_comando_thread();
-
+int CONFIGURACION_CARGADA = 0 ;
 int huboUnCambio;
 
+void set_configuracion_cargada(){
+	CONFIGURACION_CARGADA =1;
+}
 void interprete_de_comandos();
 void manejo_de_solicitudes(int cpu_socket_descriptor);
 
@@ -74,8 +77,9 @@ int main(int argc, char **argv) {
 		exit(1);
 	}
 
-	set_algoritmo_reemplazo("clock");
-
+	while(CONFIGURACION_CARGADA == 0){
+		//espero
+	};
 	inicializar_estructuras();
 	int swap_socket = create_client_socket_descriptor("localhost", "6000");
 	set_socket_descriptor(swap_socket);
@@ -346,5 +350,5 @@ void cargar_variables_productivas(UMCConfigFile *config){
 	set_cantidad_frames(config->marcos);
 	set_tamanio_frame(config->marcos_size);
 	set_retardo(config->retardo);
-	//set_algoritmo_reemplazo(config->algoritmo_reemplazo);
+	set_algoritmo_reemplazo(config->algoritmo_reemplazo);
 };

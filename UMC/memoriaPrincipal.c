@@ -30,7 +30,6 @@ log_trace(trace_log_UMC,"<lo_que_quieran_loggear>");
 int inicializar_estructuras() {
 	inicializar_semaforos();
 	lista_cpu_context = list_create();
-	int result = cargar_configuracion();
 	TAMANIO_MEMORIA_PRINCIPAL = TAMANIO_FRAME * CANTIDAD_FRAMES;
 	crear_memoria_principal();
 	TLB = crear_tlb();
@@ -172,11 +171,15 @@ int devolver_frame_de_pagina(t_tabla_de_paginas* tabla, int pagina) {
 char* leer_frame_de_memoria_principal(int frame, int offset, int size) {
 	char* datos = malloc(size);
 	memcpy(datos, MEMORIA_PRINCIPAL + (frame * TAMANIO_FRAME) + offset, size);
+	usleep(RETARDO*1000);
+	printf("Leer - Hola soy Newton y el retardo es: %d\n",RETARDO);
 	return datos;
 }
 
 void escribir_frame_de_memoria_principal(int frame, int offset, int size, char* datos) {
 	memcpy(MEMORIA_PRINCIPAL + (frame * TAMANIO_FRAME) + offset, datos, size);
+	usleep(RETARDO*1000);
+	printf("Escribir - Hola soy Newton y el retardo es: %d\n",RETARDO);
 }
 
 t_tabla_de_paginas* buscar_tabla_de_paginas_de_pid(int pid_buscado) {
@@ -228,8 +231,10 @@ int buscar_frame_de_una_pagina(t_tabla_de_paginas* tabla, int pagina){
 	// y voy a buscar el valor de la pagina que quiero a swap. actualizo los valores que correspondan
 	// ver el tema de los limites
 	int frame_de_pagina = -1;
+	printf("TLB_HABILITADA: %d\n",TLB_HABILITADA);
 	if(TLB_HABILITADA)
 	{
+		puts("Busco frame en la TLB"); //TODO Modificar el print
 		frame_de_pagina = buscar_en_tlb_frame_de_pagina(tabla->pid, pagina);
 	}
 
@@ -598,6 +603,8 @@ int busco_cero_uno(t_tabla_de_paginas * tabla){
 
 int reemplazar_clock_modificado(t_tabla_de_paginas * tabla){
 
+	puts("Reemplazo por clock modificado"); //TODO Modificar este print
+
 	int indice = tabla->indice_segunda_oportunidad;
 
 	int pagina_victima = busco_cero_cero(tabla);
@@ -625,6 +632,9 @@ int reemplazar_clock_modificado(t_tabla_de_paginas * tabla){
 }
 
 int reemplazar_clock(t_tabla_de_paginas * tabla){
+
+	puts("Reemplazo por clock\n");//TODO Modificar este
+
 	int indice = tabla->indice_segunda_oportunidad;
 
 	while(indice < tabla->paginas_totales)
@@ -1124,6 +1134,13 @@ void flush_memory(int pid){
 // CONFIGURACION
 
 void set_cantidad_entradas_tlb(int entradas){
+	if (entradas>0){
+		TLB_HABILITADA=0;
+	}
+	else {
+		TLB_HABILITADA=1;
+	}
+
 	CANTIDAD_ENTRADAS_TLB =entradas;
 }
 void set_max_frames_por_proceso(int cantidad){

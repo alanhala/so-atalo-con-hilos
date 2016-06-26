@@ -13,3 +13,4 @@ int  LISTENPORT;
 int SWAPPORT;
 char * SWAPIP;
 
+void set_configuracion_cargada();

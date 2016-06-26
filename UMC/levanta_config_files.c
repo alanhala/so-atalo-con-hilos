@@ -29,9 +29,9 @@ int *cargar_configuracion(){
 	log_trace(trace_log_Config_Files,"Cargando parametros del Archivo de Configuracion\n");
 
 	levantaConfigFileEnVariables(ptrvaloresConfigFile,ptrConfig);
-
+	cargar_variables_productivas(ptrvaloresConfigFile);
 	log_trace(trace_log_Config_Files,"Archivo de Configuracion levantado exitosamente.\n");
-
+	set_configuracion_cargada();
 	while(1)
 	{
 		extern huboUnCambio;
@@ -39,18 +39,18 @@ int *cargar_configuracion(){
 		detectaCambiosEnConfigFile();
 		if(huboUnCambio)
 		{
-			ptrConfigUpdate = config_create("/home/utnso/GitHub/tp-2016-1c-Atalo-con-Hilos/UMC/umc.cfg");
+			ptrConfigUpdate = config_create("umc.cfg");
 			if(ptrConfigUpdate->properties->elements_amount==0) {
 				log_trace(trace_log_Config_Files,"No se puede levantar el Archivo de Configuracion\n");
 			} else {
 				levantaConfigFileEnVariables(ptrvaloresConfigFile,ptrConfigUpdate);
+				cargar_variables_productivas(ptrvaloresConfigFile);
 				log_trace(trace_log_Config_Files,"Archivo de Configuracion actualizado y levantado.\n");
 			}
 			config_destroy(ptrConfigUpdate);
 		}
 		printf("Entradas TLB: %d\n",ptrvaloresConfigFile->entradas_tlb);
 	}
-	levantaConfigFileEnVariables(ptrvaloresConfigFile,ptrConfigUpdate);
 
 	printf("%s\n",ptrvaloresConfigFile->entradas_tlb);
 
@@ -68,7 +68,7 @@ void detectaCambiosEnConfigFile() {
 		}
 		// Creamos un monitor sobre un path indicando que eventos queremos escuchar
 		int watch_descriptor = inotify_add_watch(file_descriptor,
-				"/home/utnso/GitHub/tp-2016-1c-Atalo-con-Hilos/UMC/Debug", IN_MODIFY);
+				"/home/utnso/GitHub/tp-2016-1c-Atalo-con-Hilos/UMC", IN_MODIFY);
 
 		// El file descriptor creado por inotify, es el que recibe la información sobre los eventos ocurridos
 		// para leer esta información el descriptor se lee como si fuera un archivo comun y corriente pero
