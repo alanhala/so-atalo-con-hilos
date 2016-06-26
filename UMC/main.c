@@ -43,21 +43,15 @@ int huboUnCambio;
 void set_configuracion_cargada(){
 	CONFIGURACION_CARGADA =1;
 }
+
+int get_configuracion_cargada(){
+	return CONFIGURACION_CARGADA;
+}
 void interprete_de_comandos();
 void manejo_de_solicitudes(int cpu_socket_descriptor);
 
 int main(int argc, char **argv) {
 
-	//if (strcmp(argv[1], "-test") == 0 || strcmp(argv[1], "-testMock") == 0){
-//		if(strcmp(argv[1], "-testMock") == 0)
-	//		set_test();//para usar mock
-		//simulaciones();
-
-		//correr_swap_mock_test();
-
-		//correrTest();
-		//correrTestSerializacion();
-	//}
 
 	 trace_log_UMC = log_create("Log_de_UMC.txt",
 								"main.c",
@@ -80,6 +74,25 @@ int main(int argc, char **argv) {
 	while(CONFIGURACION_CARGADA == 0){
 		//espero
 	};
+
+
+	//if (strcmp(argv[1], "-test") == 0 || strcmp(argv[1], "-testMock") == 0){
+	//		if(strcmp(argv[1], "-testMock") == 0)
+		//		set_test();//para usar mock
+			//simulaciones();
+
+			//correr_swap_mock_test();
+
+			//correrTest();
+			//correrTestSerializacion();
+		//}
+	//ESTE SOCKET ES PARA TEST borrarlo
+	int swap_socket_test = create_client_socket_descriptor("localhost", "6000");
+	set_socket_descriptor(swap_socket_test);
+	//ESTE SOCKET ES PARA TEST borrarlo
+	correr_test_tlb(); //
+
+
 	inicializar_estructuras();
 	int swap_socket = create_client_socket_descriptor("localhost", "6000");
 	set_socket_descriptor(swap_socket);

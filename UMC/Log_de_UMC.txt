@@ -1,0 +1,102 @@
+[TRACE] 23:52:13:366 main.c/(4602:4602): Contenido en memoria de proceso 0
+
+[TRACE] 23:52:13:367 main.c/(4602:4602): Contenido en memoria de proceso 0
+
+[TRACE] 23:56:18:660 main.c/(4666:4666): Contenido en memoria de proceso 0
+
+[TRACE] 23:56:18:661 main.c/(4666:4666): Contenido en memoria de proceso 0
+
+[TRACE] 23:57:38:647 main.c/(4751:4751): Contenido en memoria de proceso 0
+
+[TRACE] 23:58:31:661 main.c/(4751:4751): Contenido en memoria de proceso 0
+
+[TRACE] 00:20:42:110 main.c/(5090:5090): Contenido en memoria de proceso 0
+
+[TRACE] 00:20:50:850 main.c/(5090:5090): Contenido en memoria de proceso 0
+
+[TRACE] 00:20:56:658 main.c/(5090:5090): Contenido en memoria de proceso 0
+
+[TRACE] 00:20:57:659 main.c/(5090:5090): Contenido en memoria de proceso 0
+
+[TRACE] 00:20:58:661 main.c/(5090:5090): Contenido en memoria de proceso 0
+
+[TRACE] 00:23:10:150 main.c/(5235:5235): Contenido en memoria de proceso 0
+
+[TRACE] 00:23:17:247 main.c/(5235:5235): Contenido en memoria de proceso 0
+
+[TRACE] 00:23:26:206 main.c/(5235:5235): Contenido en memoria de proceso 0
+
+[TRACE] 00:23:27:261 main.c/(5235:5235): Contenido en memoria de proceso 0
+
+[TRACE] 00:23:28:409 main.c/(5235:5235): Contenido en memoria de proceso 0
+
+[TRACE] 00:54:26:507 main.c/(6250:6250): frame victima 1
+
+[TRACE] 00:54:27:509 main.c/(6250:6250): contenido de frame victima a escribir en swap:  en pagina victima 1
+
+[TRACE] 00:54:27:509 main.c/(6250:6250): Contenido a actualizar:  00000:27 en pagina victima 4
+
+[TRACE] 00:54:57:831 main.c/(6300:6300): frame victima 1
+
+[TRACE] 00:54:58:842 main.c/(6300:6300): contenido de frame victima a escribir en swap:  en pagina victima 1
+
+[TRACE] 01:06:45:85 main.c/(6721:6721): frame victima 1
+
+[TRACE] 01:06:46:92 main.c/(6721:6721): contenido de frame victima a escribir en swap:  en pagina victima 1
+
+[TRACE] 01:06:46:94 main.c/(6721:6721): Contenido a actualizar:  0 en pagina victima 4
+
+[TRACE] 01:11:02:470 main.c/(6830:6830): frame victima 1
+
+[TRACE] 01:11:03:481 main.c/(6830:6830): contenido de frame victima a escribir en swap:  en pagina victima 1
+
+[TRACE] 01:11:03:483 main.c/(6830:6830): Contenido a actualizar:  5 en pagina victima 4
+
+[TRACE] 01:20:05:602 main.c/(7017:7017): frame victima 1
+
+[TRACE] 01:20:05:607 main.c/(7017:7017): contenido de frame victima a escribir en swap: 2 de la pagina victima 1
+
+[TRACE] 01:20:05:609 main.c/(7017:7017): Contenido a actualizar:  5 en pagina victima 4
+
+[TRACE] 01:57:28:274 main.c/(7286:7286): frame victima 0
+
+[TRACE] 01:57:28:276 main.c/(7286:7286): contenido de frame victima a escribir en swap: 1 de la pagina victima 0
+
+[TRACE] 01:57:28:277 main.c/(7286:7286): Contenido a actualizar:  5 en pagina victima 4
+
+[TRACE] 02:19:01:576 main.c/(7896:7896): frame victima 1
+
+[TRACE] 02:19:01:578 main.c/(7896:7896): contenido de frame victima a escribir en swap: 3 de la pagina victima 17
+
+[TRACE] 02:19:01:580 main.c/(7896:7896): Contenido a actualizar:  1 en pagina victima 0
+
+[TRACE] 02:25:59:158 main.c/(8035:8035): frame victima 3
+
+[TRACE] 02:26:00:160 main.c/(8035:8035): contenido de frame victima a escribir en swap: 1 de la pagina victima 0
+
+[TRACE] 02:26:00:166 main.c/(8035:8035): Contenido a actualizar:  1 en pagina victima 15
+
+[TRACE] 02:26:03:171 main.c/(8035:8035): frame victima 1
+
+[TRACE] 02:26:04:174 main.c/(8035:8035): contenido de frame victima a escribir en swap: 3 de la pagina victima 17
+
+[TRACE] 02:26:04:176 main.c/(8035:8035): Contenido a actualizar:  3 en pagina victima 12
+
+[TRACE] 02:26:07:184 main.c/(8035:8035): frame victima 2
+
+[TRACE] 02:26:08:186 main.c/(8035:8035): contenido de frame victima a escribir en swap: p de la pagina victima 19
+
+[TRACE] 02:26:08:195 main.c/(8035:8035): Contenido a actualizar:  3 en pagina victima 17
+
+[TRACE] 02:26:12:207 main.c/(8035:8035): frame victima 0
+
+[TRACE] 02:26:13:209 main.c/(8035:8035): contenido de frame victima a escribir en swap: x de la pagina victima 14
+
+[TRACE] 02:26:13:214 main.c/(8035:8035): Contenido a actualizar:  p en pagina victima 19
+
+[TRACE] 02:37:32:494 main.c/(8194:8194): frame victima 3
+
+[TRACE] 02:37:33:497 main.c/(8194:8194): contenido de frame victima a escribir en swap: 1 de la pagina victima 0
+
+[TRACE] 02:37:33:500 main.c/(8194:8194): Contenido a actualizar:  1 en pagina victima 15
+

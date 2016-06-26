@@ -14,3 +14,4 @@ int SWAPPORT;
 char * SWAPIP;
 
 void set_configuracion_cargada();
+int get_configuracion_cargada();

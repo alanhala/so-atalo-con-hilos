@@ -172,14 +172,12 @@ char* leer_frame_de_memoria_principal(int frame, int offset, int size) {
 	char* datos = malloc(size);
 	memcpy(datos, MEMORIA_PRINCIPAL + (frame * TAMANIO_FRAME) + offset, size);
 	usleep(RETARDO*1000);
-	printf("Leer - Hola soy Newton y el retardo es: %d\n",RETARDO);
 	return datos;
 }
 
 void escribir_frame_de_memoria_principal(int frame, int offset, int size, char* datos) {
 	memcpy(MEMORIA_PRINCIPAL + (frame * TAMANIO_FRAME) + offset, datos, size);
 	usleep(RETARDO*1000);
-	printf("Escribir - Hola soy Newton y el retardo es: %d\n",RETARDO);
 }
 
 t_tabla_de_paginas* buscar_tabla_de_paginas_de_pid(int pid_buscado) {
@@ -231,7 +229,6 @@ int buscar_frame_de_una_pagina(t_tabla_de_paginas* tabla, int pagina){
 	// y voy a buscar el valor de la pagina que quiero a swap. actualizo los valores que correspondan
 	// ver el tema de los limites
 	int frame_de_pagina = -1;
-	printf("TLB_HABILITADA: %d\n",TLB_HABILITADA);
 	if(TLB_HABILITADA)
 	{
 		puts("Busco frame en la TLB"); //TODO Modificar el print
@@ -427,19 +424,23 @@ int conseguir_frame_mediante_reemplazo(t_tabla_de_paginas* tabla, int pagina) {
 	log_trace(trace_log_UMC,"frame victima %d\n",frame_victima);
 	printf("\n frame victima %d\n", frame_victima);
 	char* contenido_frame_victima = leer_frame_de_memoria_principal(frame_victima, 0, TAMANIO_FRAME);
-	log_trace(trace_log_UMC,"contenido de frame victima a escribir en swap: %s en pagina victima %d\n",contenido_frame_victima,pagina_victima);
-	printf("\n contenido de frame victima a escribir en swap :  %s en pagina victima %d\n", contenido_frame_victima, pagina_victima);
+	log_trace(trace_log_UMC,"contenido de frame victima a escribir en swap: %s de la pagina victima %d\n",contenido_frame_victima,pagina_victima);
+	printf("\n contenido de frame victima a escribir en swap :  %s de la pagina victima %d\n", contenido_frame_victima, pagina_victima);
 	escribir_pagina_de_swap(tabla->pid, pagina_victima,contenido_frame_victima);
 
 	//int pagina_victima = buscar_pagina_de_frame_en_tabla_de_paginas(tabla, frame_victima);
-	// TODO IF PAGINA_VICTIMA FUE MODIFICADO, SINO ES AL PEDO
-	//if ((tabla->entradas[pagina_victima]).modificado == 1)
-	//	escribir_pagina_de_swap(tabla->pid, pagina_victima,	contenido_frame_victima);
+	// TODO IF PAGINA_VICTIMA FUE MODIFICADO
+	if ((tabla->entradas[pagina_victima]).modificado == 1){
+		escribir_pagina_de_swap(tabla->pid, pagina_victima,	contenido_frame_victima);
+		printf("Actualizacion de swap al reemplazar pagina porque estaba modificado");
+	}
 
 	char* contenido_pagina_a_actualizar = leer_pagina_de_swap(tabla->pid, pagina);
 
+	//log_trace(trace_log_UMC,"Contenido a actualizar:  %s en pagina victima %d\n",contenido_pagina_a_actualizar,pagina);
+	//printf("\n contenido a actualizar :  %s en pagina victima %d\n", contenido_pagina_a_actualizar, pagina);
 	log_trace(trace_log_UMC,"Contenido a actualizar:  %s en pagina victima %d\n",contenido_pagina_a_actualizar,pagina);
-	printf("\n contenido a actualizar :  %s en pagina victima %d\n", contenido_pagina_a_actualizar, pagina);
+	printf("\n contenido a actualizar :  %s \n", contenido_pagina_a_actualizar);
 	escribir_frame_de_memoria_principal(frame_victima, 0, TAMANIO_FRAME, contenido_pagina_a_actualizar);
 	actualizar_reemplazo(tabla, frame_victima, pagina, pagina_victima);
 	return frame_victima;
@@ -504,7 +505,6 @@ int seleccionar_pagina_victima(t_tabla_de_paginas* tabla)
 		pagina_victima= reemplazar_test(tabla);
 		break;
 	}
-
 	return pagina_victima;
 }
 
@@ -733,8 +733,6 @@ void actualizar_reemplazo(t_tabla_de_paginas* tabla, int frame_a_asignar,int pag
 	tabla->entradas[pagina].segunda_oportunidad=1;
 	tabla->entradas[pagina].modificado=0;
 
-	//tabla->entradas[pagina].utilizado=1;
-	//tabla->frames_en_uso +=1;
 
 	tabla->entradas[pagina_victima].frame = -1;
 	tabla->entradas[pagina_victima].segunda_oportunidad = 1;
@@ -756,10 +754,10 @@ int escribir_pagina_de_programa(int pid, int pagina, int offset, int size, char 
 
 	if(frame != -1)
 	{
-		//(tabla->entradas[pagina]).segunda_oportunidad = 1;
-		//(tabla->entradas[pagina]).modificado = 0;
+		(tabla->entradas[pagina]).segunda_oportunidad = 1;
+		(tabla->entradas[pagina]).modificado = 1;
 
-		//ver el tema de los modificados
+
 		//actualizar_frame(frame, tabla); //aca varia segun el algoritmo de reemplazo
 		actualizar_tlb(pid, pagina, frame);
 		escribir_frame_de_memoria_principal(frame, offset, size, datos);
@@ -999,7 +997,7 @@ void dump_memory(int pid){
 					int posicion = 0;
 					while (contenido[posicion] != '\0') {
 					  if (isprint(contenido[posicion]))
-						  printf("%c    ", contenido[posicion]);
+						  printf("contenido frame %d : %c    ", frame, contenido[posicion]);
 					  else
 						  printf("~    ");
 					  posicion++;
@@ -1041,10 +1039,10 @@ void dump_memory(int pid){
 				int posicion = 0;
 				while (contenido[posicion] != '\0') {
 				  if (isprint(contenido[posicion]))
-					  printf("%c    ", contenido[posicion]);
+					  printf("contenido frame %d : %c    ", frame, contenido[posicion]);
 				  else
 					  printf("~");
-				  i++;
+				  posicion++;
 				}
 				printf("\n");
 //				int poshex = 0;
@@ -1070,17 +1068,19 @@ void dump_structs(int pid){
 			printf("Paginas totales del proceso: %d \n\n",tabla->paginas_totales);
 			int i =0;
 			for(0; i<tabla->paginas_totales; i++){
+				//TODO SACAR EL IF EN AMBOS
+				if((tabla->entradas[i]).frame != -1){
 				log_trace(trace_log_UMC,"Entrada %d\n",i);
 				printf("		Entrada %d\n", i);
 				log_trace(trace_log_UMC,"Ubicado en el frame: %d\n",(tabla->entradas[i]).frame);
 				printf("Ubicado en el frame: %d\n",(tabla->entradas[i]).frame);
-				log_trace(trace_log_UMC,"Modificado: %d\n",(tabla->entradas[i]).modificado);
-				printf("Modificado: %d\n",(tabla->entradas[i]).modificado);
 				log_trace(trace_log_UMC,"Segunda Oportunidad: %d\n",(tabla->entradas[i]).segunda_oportunidad);
 				printf("Segunda Oportunidad: %d\n",(tabla->entradas[i]).segunda_oportunidad);
-				log_trace(trace_log_UMC,"Ultimo uso: %d\n\n\n",(tabla->entradas[i]).lru);
-				printf("Ultimo uso: %d\n\n\n",(tabla->entradas[i]).lru);
-
+				log_trace(trace_log_UMC,"Modificado: %d\n",(tabla->entradas[i]).modificado);
+				printf("Modificado: %d\n",(tabla->entradas[i]).modificado);
+//				log_trace(trace_log_UMC,"Ultimo uso: %d\n\n\n",(tabla->entradas[i]).lru);
+//				printf("Ultimo uso: %d\n\n\n",(tabla->entradas[i]).lru);
+				}
 			}
 		}
 			sem_wait(&mut_tabla_de_paginas);
@@ -1093,11 +1093,13 @@ void dump_structs(int pid){
 		printf("Paginas totales del proceso: %d \n\n",tabla->paginas_totales);
 		int i =0;
 		for(0; i<tabla->paginas_totales; i++){
+			if((tabla->entradas[i]).frame != -1){
 			printf("		Entrada %d\n", i);
 			printf("Ubicado en el frame: %d\n",(tabla->entradas[i]).frame);
-			printf("Modificado: %d\n",(tabla->entradas[i]).modificado);
 			printf("Segunda Oportunidad: %d\n",(tabla->entradas[i]).segunda_oportunidad);
-			printf("Ultimo uso: %d\n\n\n",(tabla->entradas[i]).lru);
+			printf("Modificado: %d\n",(tabla->entradas[i]).modificado);
+
+			}
 		}
 	}
 }
