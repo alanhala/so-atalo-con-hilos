@@ -86,11 +86,11 @@ int main(int argc, char **argv) {
 			//correrTest();
 			//correrTestSerializacion();
 		//}
-	//ESTE SOCKET ES PARA TEST borrarlo
-	int swap_socket_test = create_client_socket_descriptor("localhost", "6000");
-	set_socket_descriptor(swap_socket_test);
-	//ESTE SOCKET ES PARA TEST borrarlo
-	correr_test_tlb(); //
+//	//ESTE SOCKET ES PARA TEST borrarlo
+//	int swap_socket_test = create_client_socket_descriptor("localhost", "6000");
+//	set_socket_descriptor(swap_socket_test);
+//	//ESTE SOCKET ES PARA TEST borrarlo
+//	correr_test_tlb(); //
 
 
 	inicializar_estructuras();

@@ -92,10 +92,10 @@ void liberar_memoria_principal() {
 }
 
 int cargar_nuevo_programa(int pid, int paginas_requeridas_del_proceso, char * codigo_programa) {
-	if (lista_tabla_de_paginas->elements_count == CANTIDAD_MAXIMA_PROGRAMAS){
-		printf("Se supero la cantidad maximas de procesos activos");
-		return -1;
-	}
+//	if (lista_tabla_de_paginas->elements_count == CANTIDAD_MAXIMA_PROGRAMAS){
+//		printf("Se supero la cantidad maximas de procesos activos");
+//		return -1;
+//	}
 
 	int pudo_cargar_swap = cargar_nuevo_programa_en_swap(pid, paginas_requeridas_del_proceso, codigo_programa);
 	if (pudo_cargar_swap != -1 )
@@ -1017,7 +1017,7 @@ void flush_tlb(int pid){
 				(tabla->info_reemplazo[i]).pagina = -1;
 				(tabla->info_reemplazo[i]).modificado = 0;
 				(tabla->info_reemplazo[i]).segunda_oportunidad = 1;
-
+				i ++;
 			}
 
 		}
@@ -1045,7 +1045,7 @@ void flush_tlb(int pid){
 			(tabla->info_reemplazo[i]).pagina = -1;
 			(tabla->info_reemplazo[i]).modificado = 0;
 			(tabla->info_reemplazo[i]).segunda_oportunidad = 1;
-
+			i++;
 		}
 
 		//sem_post(&mut_tlb);
