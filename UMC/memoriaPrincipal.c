@@ -25,6 +25,19 @@ Para usar LOGS
 extern t_log *trace_log_UMC
 log_trace(trace_log_UMC,"<lo_que_quieran_loggear>");
 */
+t_clock_m* inicializar_info_reemplazo();
+int buscar_indice_info_reemplazo_de_frame(int frame, t_tabla_de_paginas* tabla){
+	int indice=0;
+	while(indice <= MAX_FRAMES_POR_PROCESO){
+		if((tabla->info_reemplazo[indice]).frame  == frame)
+			break;
+		indice ++;
+	}
+
+	return indice;
+}
+
+
 
 
 int inicializar_estructuras() {
@@ -129,19 +142,36 @@ t_entrada_tabla_de_paginas* inicializar_paginas(int paginas_requeridas_del_proce
 		entradas[i].modificado=0;
 		entradas[i].lru =0;
 		i++;
-		//TODO INICIARLIZAR TODO LO QUE HAGA FALTA
+
 	}
 	return entradas;
 }
+
+t_clock_m* inicializar_info_reemplazo(){
+	t_clock_m* info_reemplazo = malloc(sizeof(t_clock_m)* MAX_FRAMES_POR_PROCESO);
+	int i=0;
+	while(i<MAX_FRAMES_POR_PROCESO)
+	{
+		info_reemplazo[i].pagina =-1;
+		info_reemplazo[i].frame=-1;
+		info_reemplazo[i].segunda_oportunidad =1;
+		info_reemplazo[i].modificado=0;
+		i++;
+	}
+	return info_reemplazo;
+}
+
 
 t_tabla_de_paginas * crear_tabla_de_pagina_de_un_proceso(int pid, int paginas_requeridas_del_proceso) {
 
 	t_entrada_tabla_de_paginas* entradas = inicializar_paginas(paginas_requeridas_del_proceso);
 	t_tabla_de_paginas* nueva_tabla = malloc(sizeof(t_tabla_de_paginas));
+	t_clock_m* info_reemplazo = inicializar_info_reemplazo();
 	nueva_tabla->pid = pid;
 	nueva_tabla->paginas_totales = paginas_requeridas_del_proceso;
 	nueva_tabla->entradas = entradas;
 	nueva_tabla->frames_en_uso=0;
+	nueva_tabla->info_reemplazo = info_reemplazo;
 	nueva_tabla->indice_segunda_oportunidad=0;
 	sem_wait(&mut_tabla_de_paginas);
 	list_add(lista_tabla_de_paginas, nueva_tabla);
@@ -421,6 +451,8 @@ int conseguir_frame_mediante_reemplazo(t_tabla_de_paginas* tabla, int pagina) {
 
 	int pagina_victima = seleccionar_pagina_victima(tabla) ;
 	int frame_victima = (tabla->entradas[pagina_victima]).frame ;
+	int index = buscar_indice_info_reemplazo_de_frame()
+
 	log_trace(trace_log_UMC,"frame victima %d\n",frame_victima);
 	printf("\n frame victima %d\n", frame_victima);
 	char* contenido_frame_victima = leer_frame_de_memoria_principal(frame_victima, 0, TAMANIO_FRAME);
@@ -448,6 +480,18 @@ int conseguir_frame_mediante_reemplazo(t_tabla_de_paginas* tabla, int pagina) {
 
 }
 
+void asignar_frame_a_una_pagina_info_reemplazo(t_tabla_de_paginas* tabla, int frame, int pagina){
+	int indice= tabla->indice_segunda_oportunidad;
+	(tabla->info_reemplazo[indice]).frame = frame;
+	(tabla->info_reemplazo[indice]).pagina = pagina;
+	(tabla->info_reemplazo[indice]).segunda_oportunidad = 1;
+	(tabla->info_reemplazo[indice]).modificado = 0;
+	tabla->indice_segunda_oportunidad ++;
+	if(tabla->indice_segunda_oportunidad == MAX_FRAMES_POR_PROCESO)
+		tabla->indice_segunda_oportunidad = 0;
+
+}
+
 int darle_frame_a_una_pagina(t_tabla_de_paginas* tabla, int pagina){
 
 	int frame = -1;
@@ -456,6 +500,7 @@ int darle_frame_a_una_pagina(t_tabla_de_paginas* tabla, int pagina){
 		frame = buscar_frame_libre();
 		if(frame !=-1)
 		{
+			asignar_frame_a_una_pagina_info_reemplazo(tabla, frame, pagina);
 			asignar_frame_a_una_pagina(tabla, frame, pagina);
 
 			return frame;
@@ -511,12 +556,12 @@ int seleccionar_pagina_victima(t_tabla_de_paginas* tabla)
 int busco_cero_cero(t_tabla_de_paginas * tabla){
 	int indice = tabla->indice_segunda_oportunidad;
 
-	while(indice < tabla->paginas_totales)
+	while(indice < MAX_FRAMES_POR_PROCESO)
 	{
-		if ((tabla->entradas[indice]).segunda_oportunidad == 0 && (tabla->entradas[indice]).modificado == 0 && (tabla->entradas[indice]).frame != -1)
+		if ((tabla->info_reemplazo[indice]).segunda_oportunidad == 0 && (tabla->info_reemplazo[indice]).modificado == 0 && (tabla->info_reemplazo[indice]).frame != -1)
 		{
-			int victima = indice;
-			if (tabla->indice_segunda_oportunidad == (tabla->paginas_totales -1))
+
+			if (tabla->indice_segunda_oportunidad == (MAX_FRAMES_POR_PROCESO -1))
 			{
 				tabla->indice_segunda_oportunidad = 0;
 			}
@@ -525,7 +570,7 @@ int busco_cero_cero(t_tabla_de_paginas * tabla){
 				tabla->indice_segunda_oportunidad = indice + 1;
 			}
 
-			return victima;
+			return (tabla->info_reemplazo[indice]).pagina;
 		}
 
 		indice ++;
@@ -534,10 +579,10 @@ int busco_cero_cero(t_tabla_de_paginas * tabla){
 	indice = 0;
 	while(indice < tabla->indice_segunda_oportunidad)
 	{
-		if ((tabla->entradas[indice]).segunda_oportunidad == 0 && (tabla->entradas[indice]).modificado == 0 && (tabla->entradas[indice]).frame != -1)
+		if ((tabla->info_reemplazo[indice]).segunda_oportunidad == 0 && (tabla->info_reemplazo[indice]).modificado == 0 && (tabla->info_reemplazo[indice]).frame != -1)
 		{
-			int victima = indice;
-			if (tabla->indice_segunda_oportunidad == (tabla->paginas_totales -1))
+
+			if (tabla->indice_segunda_oportunidad == (MAX_FRAMES_POR_PROCESO -1))
 			{
 				tabla->indice_segunda_oportunidad = 0;
 			}
@@ -545,7 +590,7 @@ int busco_cero_cero(t_tabla_de_paginas * tabla){
 			{
 				tabla->indice_segunda_oportunidad = indice + 1;
 			}
-			return victima;
+			return (tabla->info_reemplazo[indice]).pagina;
 		}
 		indice ++;
 	}
@@ -556,12 +601,12 @@ int busco_cero_cero(t_tabla_de_paginas * tabla){
 int busco_cero_uno(t_tabla_de_paginas * tabla){
 	int indice = tabla->indice_segunda_oportunidad;
 
-	while(indice < tabla->paginas_totales)
+	while(indice < MAX_FRAMES_POR_PROCESO)
 	{
-		if ((tabla->entradas[indice]).segunda_oportunidad == 0 && (tabla->entradas[indice]).modificado == 1 && (tabla->entradas[indice]).frame != -1)
+		if ((tabla->info_reemplazo[indice]).segunda_oportunidad == 0 && (tabla->info_reemplazo[indice]).modificado == 1 && (tabla->info_reemplazo[indice]).frame != -1)
 		{
-			int victima = indice;
-			if (tabla->indice_segunda_oportunidad == (tabla->paginas_totales -1))
+
+			if (tabla->indice_segunda_oportunidad == (MAX_FRAMES_POR_PROCESO -1))
 			{
 				tabla->indice_segunda_oportunidad = 0;
 			}
@@ -570,20 +615,20 @@ int busco_cero_uno(t_tabla_de_paginas * tabla){
 				tabla->indice_segunda_oportunidad = indice + 1;
 			}
 
-			return victima;
+			return (tabla->info_reemplazo[indice]).pagina;
 		}
-		if ((tabla->entradas[indice]).frame != -1)
-			(tabla->entradas[indice]).segunda_oportunidad = 0;
+		if ((tabla->info_reemplazo[indice]).frame != -1)
+			(tabla->info_reemplazo[indice]).segunda_oportunidad = 0;
 		indice ++;
 	}
 
 	indice = 0;
 	while(indice < tabla->indice_segunda_oportunidad)
 	{
-		if ((tabla->entradas[indice]).segunda_oportunidad == 0 && (tabla->entradas[indice]).modificado == 1 && (tabla->entradas[indice]).frame != -1)
+		if ((tabla->info_reemplazo[indice]).segunda_oportunidad == 0 && (tabla->info_reemplazo[indice]).modificado == 1 && (tabla->info_reemplazo[indice]).frame != -1)
 		{
-			int victima = indice;
-			if (tabla->indice_segunda_oportunidad == (tabla->paginas_totales -1))
+
+			if (tabla->indice_segunda_oportunidad == (MAX_FRAMES_POR_PROCESO -1))
 			{
 				tabla->indice_segunda_oportunidad = 0;
 			}
@@ -591,10 +636,10 @@ int busco_cero_uno(t_tabla_de_paginas * tabla){
 			{
 				tabla->indice_segunda_oportunidad = indice + 1;
 			}
-			return victima;
+			return (tabla->info_reemplazo[indice]).pagina;
 		}
-		if ((tabla->entradas[indice]).frame != -1)
-					(tabla->entradas[indice]).segunda_oportunidad = 0;
+		if ((tabla->info_reemplazo[indice]).frame != -1)
+					(tabla->info_reemplazo[indice]).segunda_oportunidad = 0;
 		indice ++;
 	}
 
@@ -637,11 +682,11 @@ int reemplazar_clock(t_tabla_de_paginas * tabla){
 
 	int indice = tabla->indice_segunda_oportunidad;
 
-	while(indice < tabla->paginas_totales)
+	while(indice < MAX_FRAMES_POR_PROCESO)
 	{
-		if ((tabla->entradas[indice]).segunda_oportunidad == 0 && (tabla->entradas[indice]).frame != -1)
+		if ((tabla->info_reemplazo[indice]).segunda_oportunidad == 0 && (tabla->info_reemplazo[indice]).frame != -1)
 		{
-			if (tabla->indice_segunda_oportunidad == (tabla->paginas_totales -1))
+			if (tabla->indice_segunda_oportunidad == (MAX_FRAMES_POR_PROCESO -1))
 			{
 				tabla->indice_segunda_oportunidad = 0;
 			}
@@ -650,20 +695,20 @@ int reemplazar_clock(t_tabla_de_paginas * tabla){
 				tabla->indice_segunda_oportunidad = indice + 1;
 			}
 			return indice;
-			//return (tabla->entradas[indice]).frame;
+
 		}
-		if ((tabla->entradas[indice]).frame != -1)
-			(tabla->entradas[indice]).segunda_oportunidad = 0;
+		if ((tabla->info_reemplazo[indice]).frame != -1)
+			(tabla->info_reemplazo[indice]).segunda_oportunidad = 0;
 		indice ++;
 	}
 
 	indice = 0;
 	while(indice < tabla->indice_segunda_oportunidad)
 	{
-		if ((tabla->entradas[indice]).segunda_oportunidad == 0 && (tabla->entradas[indice]).frame != -1)
+		if ((tabla->info_reemplazo[indice]).segunda_oportunidad == 0 && (tabla->info_reemplazo[indice]).frame != -1)
 		{
 
-			if (tabla->indice_segunda_oportunidad == (tabla->paginas_totales -1))
+			if (tabla->indice_segunda_oportunidad == (MAX_FRAMES_POR_PROCESO -1))
 			{
 				tabla->indice_segunda_oportunidad = 0;
 			}
@@ -672,58 +717,55 @@ int reemplazar_clock(t_tabla_de_paginas * tabla){
 				tabla->indice_segunda_oportunidad = indice + 1;
 			}
 			return indice;
-			//return (tabla->entradas[indice]).frame;
+
 		}
-		if ((tabla->entradas[indice]).frame != -1)
-			(tabla->entradas[indice]).segunda_oportunidad = 0;
+		if ((tabla->info_reemplazo[indice]).frame != -1)
+			(tabla->info_reemplazo[indice]).segunda_oportunidad = 0;
 		indice ++;
 	}
 
 
-	while(indice < tabla->paginas_totales)
+	while(indice < MAX_FRAMES_POR_PROCESO  )
 		{
-			if ((tabla->entradas[indice]).segunda_oportunidad == 0 && (tabla->entradas[indice]).frame != -1)
+			if ((tabla->info_reemplazo[indice]).segunda_oportunidad == 0 && (tabla->info_reemplazo[indice]).frame != -1)
 			{
-
 				tabla->indice_segunda_oportunidad = indice;
 				return indice;
-				///return (tabla->entradas[indice]).frame;
 			}
-			if ((tabla->entradas[indice]).frame != -1)
-				(tabla->entradas[indice]).segunda_oportunidad = 0;
+			if ((tabla->info_reemplazo[indice]).frame != -1)
+				(tabla->info_reemplazo[indice]).segunda_oportunidad = 0;
 			indice ++;
 		}
 
 		indice = 0;
 		while(indice < tabla->indice_segunda_oportunidad)
 		{
-			if ((tabla->entradas[indice]).segunda_oportunidad == 0 && (tabla->entradas[indice]).frame != -1)
+			if ((tabla->info_reemplazo[indice]).segunda_oportunidad == 0 && (tabla->info_reemplazo[indice]).frame != -1)
 			{
 
 				tabla->indice_segunda_oportunidad = indice;
 				return indice;
-				//return (tabla->entradas[indice]).frame;
 			}
-			if ((tabla->entradas[indice]).frame != -1)
-				(tabla->entradas[indice]).segunda_oportunidad = 0;
+			if ((tabla->info_reemplazo[indice]).frame != -1)
+				(tabla->info_reemplazo[indice]).segunda_oportunidad = 0;
 			indice ++;
 		}
 
 
-	return -1; //el algoritmo funciono mal
+	return -1;
 }
 
 int reemplazar_test(t_tabla_de_paginas * tabla){
 
 	int pagina=-1;
-	int i = 0;
-	for(i=0; i<tabla->paginas_totales; i++){
-
-		if((tabla->entradas[i]).frame != -1){
-			pagina = i;
-			break;
-		}
-	}
+//	int i = 0;
+//	for(i=0; i<tabla->paginas_totales; i++){
+//
+//		if((tabla->entradas[i]).frame != -1){
+//			pagina = i;
+//			break;
+//		}
+//	}
 	return pagina;
 }
 
@@ -732,6 +774,12 @@ void actualizar_reemplazo(t_tabla_de_paginas* tabla, int frame_a_asignar,int pag
 	tabla->entradas[pagina].frame=frame_a_asignar;
 	tabla->entradas[pagina].segunda_oportunidad=1;
 	tabla->entradas[pagina].modificado=0;
+
+	int index = buscar_indice_info_reemplazo_de_frame(frame_a_asignar, tabla);
+	(tabla->info_reemplazo[index]).frame = frame_a_asignar;
+	(tabla->info_reemplazo[index]).frame = pagina;
+	(tabla->info_reemplazo[index]).modificado =0;
+	(tabla->info_reemplazo[index]).segunda_oportunidad =1;
 
 
 	tabla->entradas[pagina_victima].frame = -1;
@@ -757,6 +805,9 @@ int escribir_pagina_de_programa(int pid, int pagina, int offset, int size, char 
 		(tabla->entradas[pagina]).segunda_oportunidad = 1;
 		(tabla->entradas[pagina]).modificado = 1;
 
+		int index = buscar_indice_info_reemplazo_de_frame(frame, tabla);
+		(tabla->info_reemplazo[index]).segunda_oportunidad = 1;
+		(tabla->info_reemplazo[index]).modificado =1;
 
 		//actualizar_frame(frame, tabla); //aca varia segun el algoritmo de reemplazo
 		actualizar_tlb(pid, pagina, frame);
@@ -898,6 +949,8 @@ void actualizar_tlb(int pid, int pagina, int frame){
 	(TLB->entradas[entrada]).lru = -1; // lo seteo en -1 para que cuando le sume uno a todos quede en 0
 	(TLB->entradas[entrada]).frame = frame;
 	(TLB->entradas[entrada]).pagina = pagina;
+
+
 	//sem_post(&mut_tlb);
 	lru_sumarle_uno_a_todos();
 }
@@ -945,8 +998,17 @@ void flush_tlb(int pid){
 					(TLB->entradas[i]).lru = 0;
 					(TLB->entradas[i]).pagina = -1;
 					(TLB->entradas[i]).frame = -1;
+
 				}
 				i++;
+			}
+			i=0;
+			while(i < MAX_FRAMES_POR_PROCESO){
+				(tabla->info_reemplazo[i]).frame = -1;
+				(tabla->info_reemplazo[i]).pagina = -1;
+				(tabla->info_reemplazo[i]).modificado = 0;
+				(tabla->info_reemplazo[i]).segunda_oportunidad = 1;
+
 			}
 
 		}
@@ -967,6 +1029,16 @@ void flush_tlb(int pid){
 			}
 			i++;
 		}
+		t_tabla_de_paginas * tabla = buscar_tabla_de_paginas_de_pid(pid);
+		i=0;
+		while(i < MAX_FRAMES_POR_PROCESO){
+			(tabla->info_reemplazo[i]).frame = -1;
+			(tabla->info_reemplazo[i]).pagina = -1;
+			(tabla->info_reemplazo[i]).modificado = 0;
+			(tabla->info_reemplazo[i]).segunda_oportunidad = 1;
+
+		}
+
 		//sem_post(&mut_tlb);
 
 	}
@@ -1091,13 +1163,24 @@ void dump_structs(int pid){
 		t_tabla_de_paginas * tabla = buscar_tabla_de_paginas_de_pid(pid);
 		printf("		TABLA DE PAGINAS DEL PROCESO: %d \n\n\n", pid);
 		printf("Paginas totales del proceso: %d \n\n",tabla->paginas_totales);
+//		int i =0;
+//		for(0; i<tabla->paginas_totales; i++){
+//			if((tabla->entradas[i]).frame != -1){
+//			printf("		Entrada %d\n", i);
+//			printf("Ubicado en el frame: %d\n",(tabla->entradas[i]).frame);
+//			printf("Segunda Oportunidad: %d\n",(tabla->entradas[i]).segunda_oportunidad);
+//			printf("Modificado: %d\n",(tabla->entradas[i]).modificado);
+//
+//			}
+//		}
 		int i =0;
-		for(0; i<tabla->paginas_totales; i++){
-			if((tabla->entradas[i]).frame != -1){
-			printf("		Entrada %d\n", i);
-			printf("Ubicado en el frame: %d\n",(tabla->entradas[i]).frame);
-			printf("Segunda Oportunidad: %d\n",(tabla->entradas[i]).segunda_oportunidad);
-			printf("Modificado: %d\n",(tabla->entradas[i]).modificado);
+		for(0; i<MAX_FRAMES_POR_PROCESO; i++){
+			if((tabla->info_reemplazo[i]).frame != -1){
+			//printf("		Entrada %d\n", i);
+			printf("Pagina: %d\n",(tabla->info_reemplazo[i]).pagina);
+			printf("Ubicado en el frame: %d\n",(tabla->info_reemplazo[i]).frame);
+			printf("Segunda Oportunidad: %d\n",(tabla->info_reemplazo[i]).segunda_oportunidad);
+			printf("Modificado: %d\n",(tabla->info_reemplazo[i]).modificado);
 
 			}
 		}
@@ -1111,7 +1194,11 @@ void flush_memory(int pid){
 			{
 				int i =0;
 				for(0; i<tabla->paginas_totales; i++){
-					(tabla->entradas[i]).modificado = 1;
+					if(tabla->entradas[i].frame != -1){
+						(tabla->entradas[i]).modificado = 1;
+						int index = buscar_indice_info_reemplazo_de_frame(tabla->entradas[i].frame, tabla);
+						tabla->info_reemplazo[index].modificado =1;
+					}
 				}
 			}
 			sem_wait(&mut_tabla_de_paginas);
@@ -1124,7 +1211,12 @@ void flush_memory(int pid){
 		t_tabla_de_paginas * tabla = buscar_tabla_de_paginas_de_pid(pid);
 		int i =0;
 		for(0; i<tabla->paginas_totales; i++){
-			(tabla->entradas[i]).modificado = 1;
+			if(tabla->entradas[i].frame != -1){
+				(tabla->entradas[i]).modificado = 1;
+				int index = buscar_indice_info_reemplazo_de_frame(tabla->entradas[i].frame, tabla);
+				tabla->info_reemplazo[index].modificado =1;
+			}
+
 		}
 	}
 }
