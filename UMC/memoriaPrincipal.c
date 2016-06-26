@@ -172,14 +172,12 @@ char* leer_frame_de_memoria_principal(int frame, int offset, int size) {
 	char* datos = malloc(size);
 	memcpy(datos, MEMORIA_PRINCIPAL + (frame * TAMANIO_FRAME) + offset, size);
 	usleep(RETARDO*1000);
-	printf("Leer - Hola soy Newton y el retardo es: %d\n",RETARDO);
 	return datos;
 }
 
 void escribir_frame_de_memoria_principal(int frame, int offset, int size, char* datos) {
 	memcpy(MEMORIA_PRINCIPAL + (frame * TAMANIO_FRAME) + offset, datos, size);
 	usleep(RETARDO*1000);
-	printf("Escribir - Hola soy Newton y el retardo es: %d\n",RETARDO);
 }
 
 t_tabla_de_paginas* buscar_tabla_de_paginas_de_pid(int pid_buscado) {
