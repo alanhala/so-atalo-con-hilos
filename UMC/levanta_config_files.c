@@ -49,10 +49,8 @@ int *cargar_configuracion(){
 			}
 			config_destroy(ptrConfigUpdate);
 		}
-		printf("Entradas TLB: %d\n",ptrvaloresConfigFile->entradas_tlb);
-	}
 
-	printf("%s\n",ptrvaloresConfigFile->entradas_tlb);
+	}
 
 	liberaVariables(trace_log_Config_Files, ptrConfig, ptrConfigUpdate);
 
@@ -94,7 +92,6 @@ void detectaCambiosEnConfigFile() {
 				// sea un archivo o un directorio
 				if (event->mask & IN_MODIFY) {
 					if (event->mask) {
-						printf("The file %s was modified.\n\n", event->name);
 						extern huboUnCambio;
 						huboUnCambio = 1;
 					}

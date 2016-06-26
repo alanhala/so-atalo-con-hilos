@@ -36,6 +36,12 @@ typedef struct e_t_p{
 	int modificado;
 	int lru;
 } t_entrada_tabla_de_paginas;
+typedef struct t_c_m {
+	int pagina;
+	int frame;
+	int segunda_oportunidad;
+	int modificado;
+} t_clock_m;
 
 
 
@@ -43,6 +49,7 @@ typedef struct t_p {
 	int pid;
 	int paginas_totales;
 	t_entrada_tabla_de_paginas* entradas;
+	t_clock_m * info_reemplazo;
 	int frames_en_uso;
 	int indice_segunda_oportunidad;
 } t_tabla_de_paginas;

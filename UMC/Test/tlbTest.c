@@ -14,6 +14,7 @@
 #include <signal.h>
 #include <pthread.h>
 #include <commons/collections/list.h>
+#include <commons/log.h>
 #include <semaphore.h>
 #include "../memoriaPrincipal.h"
 #include "../main.h"
@@ -23,15 +24,18 @@
 
 void tlb_test_1();
 void isPrint();
-
+void algoritmo_clock_modificado();
+void algoritmo_clock();
 
 int correr_test_tlb(){
 	CU_initialize_registry();
 
-      CU_pSuite tlb = CU_add_suite("Suite de TLB", NULL, NULL);
+      //CU_pSuite tlb = CU_add_suite("Suite de TLB", NULL, NULL);
 	  //CU_add_test(tlb , "tlb test 1", tlb_test_1); //IMPORATENTE. CANTIDAD ENTRADAS TLB TIENE QUE SER 5
-      CU_add_test(tlb , "is print", isPrint);
-
+      //CU_add_test(tlb , "is print", isPrint);
+	  CU_pSuite algoritmos_reemplazo = CU_add_suite("Suite de algoritmos reemplazo", NULL, NULL);
+//      CU_add_test(algoritmos_reemplazo , "clock modificado", algoritmo_clock_modificado);
+      CU_add_test(algoritmos_reemplazo , "clock", algoritmo_clock);
 
 	  CU_basic_set_mode(CU_BRM_VERBOSE);
 	  CU_basic_run_tests();
@@ -42,6 +46,94 @@ int correr_test_tlb(){
 	  return CU_get_error();
 
 }
+
+void algoritmo_clock(){
+
+	//IMPORTANTE VER QUE EL ARCHIVO DE CONFIGURACION TENGA EL MAX FRAME POR PROCESO =3
+
+	inicializar_semaforos();
+	lista_cpu_context = list_create();
+	set_tamanio_frame(1);
+	set_cantidad_frames(50);
+	TAMANIO_MEMORIA_PRINCIPAL = TAMANIO_FRAME * CANTIDAD_FRAMES;
+	crear_memoria_principal();
+	set_cantidad_entradas_tlb(0);
+	TLB = crear_tlb();
+	lista_tabla_de_paginas = list_create();
+	crear_lista_frames();
+	set_max_frames_por_proceso(3);
+	CANTIDAD_MAXIMA_PROGRAMAS = 5;
+	crear_swap_mock();
+	set_algoritmo_reemplazo("clock");
+	set_retardo(1);
+	cargar_nuevo_programa(0, 8, "12345678");
+
+	//2  3  2  1  5  2 4 5 3 2 5 2
+	//2  3  2  1  5  2 4 5 3 2 52
+	leer_pagina_de_programa(0, 2, 0, 1);
+	leer_pagina_de_programa(0, 3, 0, 1);
+	leer_pagina_de_programa(0, 2, 0, 1);
+	leer_pagina_de_programa(0, 1, 0, 1);
+	leer_pagina_de_programa(0, 5, 0, 1);
+	leer_pagina_de_programa(0, 2, 0, 1);
+	leer_pagina_de_programa(0, 4, 0, 1);
+	leer_pagina_de_programa(0, 5, 0, 1);
+	leer_pagina_de_programa(0, 3, 0, 1);
+//	leer_pagina_de_programa(0, 2, 0, 1);
+//	leer_pagina_de_programa(0, 5, 0, 1);
+//	leer_pagina_de_programa(0, 2, 0, 1);
+
+
+	dump_structs(0);
+}
+
+
+void algoritmo_clock_modificado(){
+	//IMPORTANTE VER QUE EL ARCHIVO DE CONFIGURACION TENGA EL MAX FRAME POR PROCESO = 4
+
+
+	inicializar_semaforos();
+	lista_cpu_context = list_create();
+	set_tamanio_frame(1);
+	set_cantidad_frames(50);
+	TAMANIO_MEMORIA_PRINCIPAL = TAMANIO_FRAME * CANTIDAD_FRAMES;
+	crear_memoria_principal();
+	set_cantidad_entradas_tlb(0);
+	TLB = crear_tlb();
+	lista_tabla_de_paginas = list_create();
+	crear_lista_frames();
+	set_max_frames_por_proceso(4);
+	CANTIDAD_MAXIMA_PROGRAMAS = 5;
+	crear_swap_mock();
+	set_algoritmo_reemplazo("ClockM");
+	set_retardo(1);
+	cargar_nuevo_programa(0, 20, "12345123451234512345");
+
+
+
+
+	escribir_pagina_de_programa(0, 14, 0, 1, "x");
+	leer_pagina_de_programa(0, 17, 0, 1);
+	escribir_pagina_de_programa(0, 19, 0, 1, "p");
+
+
+	leer_pagina_de_programa(0, 0, 0, 1);
+	escribir_pagina_de_programa(0, 15, 0, 1, "p");
+	leer_pagina_de_programa(0, 12, 0, 1);
+	escribir_pagina_de_programa(0, 17, 0, 1, "p");
+	leer_pagina_de_programa(0, 15, 0, 1);
+	escribir_pagina_de_programa(0, 19, 0, 1, "p");
+
+	dump_structs(0);
+	while(1);
+
+
+
+
+
+
+}
+
 
 void isPrint(){
 		set_test();//para usar mock
@@ -187,3 +279,4 @@ void tlb_test_1(){
 		*/
 
 }
+
