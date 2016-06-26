@@ -68,12 +68,13 @@ void do_signal(t_nombre_semaforo identificador_semaforo) {
 }
 
 t_valor_variable obtenerValorCompartida(t_nombre_compartida variable) {
-	char * new_variable = string_substring(variable, 0, strlen(variable)-1); //LE SACO EL \n
+//	char * new_variable = string_substring(variable, 0, strlen(variable)-1); //LE SACO EL \n
 
 	t_PCB_serializacion * pcb_serializado = adaptar_pcb_a_serializar(get_PCB());
 	pcb_serializado->mensaje = 1;
-	pcb_serializado->valor_mensaje = new_variable;
+	pcb_serializado->valor_mensaje = variable;
 	pcb_serializado->cantidad_operaciones = 0;
+	pcb_serializado->valor_de_la_variable_compartida =0;
 	pcb_serializado->resultado_mensaje = 0;
 	t_stream * stream = serializar_mensaje(121,pcb_serializado);
 	send(KERNEL_DESCRIPTOR, stream->datos, stream->size, 0);
@@ -112,12 +113,13 @@ t_valor_variable obtenerValorCompartida(t_nombre_compartida variable) {
 }
 
 t_valor_variable asignarValorCompartida(t_nombre_compartida variable, t_valor_variable valor) {
-	char * new_variable = string_substring(variable, 0, strlen(variable)); //LE SACO EL \N
+//	char * new_variable = string_substring(variable, 0, strlen(variable)); //LE SACO EL \N
 
 	t_PCB_serializacion * pcb_serializado = adaptar_pcb_a_serializar(get_PCB());
 	pcb_serializado->mensaje = 2;
-	pcb_serializado->valor_mensaje = new_variable;
-	pcb_serializado->cantidad_operaciones = valor;
+	pcb_serializado->valor_mensaje = variable;
+	pcb_serializado->cantidad_operaciones = 0;
+	pcb_serializado->valor_de_la_variable_compartida =valor;
 	pcb_serializado->resultado_mensaje = 0;
 	t_stream * stream = serializar_mensaje(121,pcb_serializado);
 	send(KERNEL_DESCRIPTOR, stream->datos, stream->size, 0);
@@ -166,10 +168,9 @@ void execute_next_instruction_for_process() {
 	int program_counter = pcb->program_counter;
 	analizadorLinea(strdup(instruccion_string), &functions, &kernel_functions);
 
-	if(program_counter == pcb->program_counter) {
+	if(program_counter == pcb->program_counter && !string_starts_with(instruccion_string, TEXT_END)) {
 	    pcb->program_counter++;
 	}
-
 };
 
 
@@ -301,7 +302,6 @@ void imprimirTexto(char* print_value) {
    // int enviado_correctamente = send_text_to_kernel(print_value, string_length(print_value));
     //todo si se quiere validar que haya enviado correctmente
     printf("%s\n", print_value);
-    free(print_value);
 }
 
 void irALabel(t_nombre_etiqueta nombre_etiqueta) {
@@ -596,9 +596,7 @@ int ejecutar_pcb(){
                printf("Instruccion %d del pid %d ejecutada \n", instruccion_ejecutada, pcb->pid);
                fflush(stdout);
                instruccion_ejecutada ++;
-
                usleep(100000);
-
        }
 
 
