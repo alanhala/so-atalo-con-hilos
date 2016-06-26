@@ -82,6 +82,8 @@ t_PCB* create_pcb(t_kernel* kernel, char* program) {
 	stack_element->variables = list_create();
 	stack_element->posicion_retorno = 0;
 	stack_element->valor_retorno = malloc(sizeof(t_dato_en_memoria));
+	t_virtual_address * virtual_address = malloc(sizeof(t_virtual_address));
+	stack_element->valor_retorno->direccion =virtual_address;
 	list_add(pcb->stack_index, stack_element);
 
 	pcb->stack_size = kernel->stack_size;
@@ -193,7 +195,6 @@ int32_t wait_ansisop(t_kernel* kernel, char* sem_id, t_PCB* pcb) {
 	t_semaphore* semaphore = list_find(kernel->semaphores, (void*) same_sem);
 	semaphore->value--; // TODO ver si hace falta poner semaforo
 	if (semaphore->value < 0) {
-		wait_block_process(scheduler, semaphore->id, pcb);
 		return -1;
 	}
 	else

@@ -33,7 +33,6 @@ t_list* create_semaphores_list(t_kernel* kernel) {
 		sem_blocked->id = semaphore->id;
 		sem_blocked->blocked_pids = queue_create();
 		list_add(semaphores_list, sem_blocked);
-		i++;
 	}
 	return semaphores_list;
 }
@@ -148,7 +147,7 @@ void enqueue_to_ready(t_scheduler* scheduler, t_PCB* pcb) {
 void enqueue_to_block(t_scheduler* scheduler, t_PCB* pcb) {
 	sem_wait(&mutex_block);
 	pcb->state = "Bloqueado";
-	queue_push(scheduler->block_state, pcb);
+	list_add(scheduler->block_state, pcb);
 	sem_post(&mutex_block);
 	sem_post(&sem_block);
 }

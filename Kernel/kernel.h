@@ -90,7 +90,7 @@
 
 	typedef struct {
 		char* id;
-		uint32_t value;
+		int32_t value;
 	} t_semaphore;
 
 	typedef struct {

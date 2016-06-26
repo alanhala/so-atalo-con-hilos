@@ -45,18 +45,8 @@ t_PCB *pcb;
 uint32_t tamanio_pagina;
 
 void do_wait(t_nombre_semaforo identificador_semaforo) {
-	t_PCB_serializacion * pcb_serializado = adaptar_pcb_a_serializar(get_PCB());
-	pcb_serializado->mensaje = 5;
-	pcb_serializado->valor_mensaje = identificador_semaforo;
-	pcb_serializado->cantidad_operaciones = 0;
-	pcb_serializado->resultado_mensaje = 0;
-	t_stream * stream = serializar_mensaje(121,pcb_serializado);
-	send(KERNEL_DESCRIPTOR, stream->datos, stream->size, 0);
-
-	//aca recibir una respuesa que me diga si desalojo el pcb porque pasa a bloqueado o no
-}
-
-void do_signal(t_nombre_semaforo identificador_semaforo) {
+	while(string_ends_with(identificador_semaforo, "\n") || string_ends_with(identificador_semaforo, " "))
+			identificador_semaforo = string_substring_until(identificador_semaforo, string_length((char*)identificador_semaforo)-1);
 	t_PCB_serializacion * pcb_serializado = adaptar_pcb_a_serializar(get_PCB());
 	pcb_serializado->mensaje = 4;
 	pcb_serializado->valor_mensaje = identificador_semaforo;
@@ -65,6 +55,48 @@ void do_signal(t_nombre_semaforo identificador_semaforo) {
 	t_stream * stream = serializar_mensaje(121,pcb_serializado);
 	send(KERNEL_DESCRIPTOR, stream->datos, stream->size, 0);
 
+	t_header *a_header = malloc(sizeof(t_header));
+
+	char buffer_header[5];	//Buffer donde se almacena el header recibido
+
+	int bytes_recibidos_header,	//Cantidad de bytes recibidos en el recv() que recibe el header
+			bytes_recibidos;//Cantidad de bytes recibidos en el recv() que recibe el mensaje completo
+
+	bytes_recibidos_header = recv(KERNEL_DESCRIPTOR, buffer_header, 5,	MSG_PEEK);
+
+	a_header = deserializar_header(buffer_header);
+
+	int tipo = a_header->tipo;
+	int length = a_header->length;
+
+	char buffer_recv[length]; //El buffer para recibir el mensaje se crea con la longitud recibida
+
+	if (tipo == 121) {
+
+		int bytes_recibidos = recv(KERNEL_DESCRIPTOR, buffer_recv,
+				length, 0);
+
+		t_PCB_serializacion *recibir_pcb = malloc(sizeof(t_PCB_serializacion));
+
+		recibir_pcb = (t_PCB_serializacion * ) deserealizar_mensaje(121, buffer_recv);
+		actualizarPCB(get_PCB(), recibir_pcb);
+		if (get_PCB()->program_finished == 5) {
+			sem_to_be_blocked = identificador_semaforo;
+			pthread_exit();
+		}
+	}
+}
+
+void do_signal(t_nombre_semaforo identificador_semaforo) {
+	while(string_ends_with(identificador_semaforo, "\n") || string_ends_with(identificador_semaforo, " "))
+		identificador_semaforo = string_substring_until(identificador_semaforo, string_length((char*)identificador_semaforo)-1);
+	t_PCB_serializacion * pcb_serializado = adaptar_pcb_a_serializar(get_PCB());
+	pcb_serializado->mensaje = 5;
+	pcb_serializado->valor_mensaje = identificador_semaforo;
+	pcb_serializado->cantidad_operaciones = 0;
+	pcb_serializado->resultado_mensaje = 0;
+	t_stream * stream = serializar_mensaje(121,pcb_serializado);
+	send(KERNEL_DESCRIPTOR, stream->datos, stream->size, 0);
 }
 
 t_valor_variable obtenerValorCompartida(t_nombre_compartida variable) {
@@ -85,32 +117,32 @@ t_valor_variable obtenerValorCompartida(t_nombre_compartida variable) {
 
 	t_header *a_header = malloc(sizeof(t_header));
 
-		char buffer_header[5];	//Buffer donde se almacena el header recibido
+	char buffer_header[5];	//Buffer donde se almacena el header recibido
 
-		int bytes_recibidos_header,	//Cantidad de bytes recibidos en el recv() que recibe el header
-				bytes_recibidos;//Cantidad de bytes recibidos en el recv() que recibe el mensaje completo
+	int bytes_recibidos_header,	//Cantidad de bytes recibidos en el recv() que recibe el header
+			bytes_recibidos;//Cantidad de bytes recibidos en el recv() que recibe el mensaje completo
 
-		bytes_recibidos_header = recv(KERNEL_DESCRIPTOR, buffer_header, 5,	MSG_PEEK);
+	bytes_recibidos_header = recv(KERNEL_DESCRIPTOR, buffer_header, 5,	MSG_PEEK);
 
-		a_header = deserializar_header(buffer_header);
+	a_header = deserializar_header(buffer_header);
 
-		int tipo = a_header->tipo;
-		int length = a_header->length;
+	int tipo = a_header->tipo;
+	int length = a_header->length;
 
-		char buffer_recv[length]; //El buffer para recibir el mensaje se crea con la longitud recibida
+	char buffer_recv[length]; //El buffer para recibir el mensaje se crea con la longitud recibida
 
-		if (tipo == 121) {
+	if (tipo == 121) {
 
-			int bytes_recibidos = recv(KERNEL_DESCRIPTOR, buffer_recv,
-					length, 0);
+		int bytes_recibidos = recv(KERNEL_DESCRIPTOR, buffer_recv,
+				length, 0);
 
-			t_PCB_serializacion *recibir_pcb = malloc(sizeof(t_PCB_serializacion));
+		t_PCB_serializacion *recibir_pcb = malloc(sizeof(t_PCB_serializacion));
 
-			recibir_pcb = (t_PCB_serializacion * ) deserealizar_mensaje(121, buffer_recv);
-			printf("valor de la variable compartida: %d\n", recibir_pcb->resultado_mensaje);
-			return recibir_pcb->resultado_mensaje;
-		}
-		return -1; //TODO NO SE OBTUVO RESULTADO DE LA VARIABLE COMPARTIDA
+		recibir_pcb = (t_PCB_serializacion * ) deserealizar_mensaje(121, buffer_recv);
+		printf("valor de la variable compartida: %d\n", recibir_pcb->resultado_mensaje);
+		return recibir_pcb->resultado_mensaje;
+	}
+	return -1; //TODO NO SE OBTUVO RESULTADO DE LA VARIABLE COMPARTIDA
 
 
 }
@@ -166,13 +198,19 @@ void entradaSalida(t_nombre_dispositivo dispositivo, int tiempo) {
 
 }
 
+void* execute_instruction(void* instruction) {
+	char* instruccion_string = (char*) instruction;
+	analizadorLinea(strdup(instruccion_string), &functions, &kernel_functions);
+}
+
 void execute_next_instruction_for_process() {
 	t_dato_en_memoria *instruccion = get_next_instruction();
-
 	char *instruccion_string = ejecutar_lectura_de_dato_con_iteraciones(leer_memoria_de_umc, instruccion, tamanio_pagina);
-
 	int program_counter = pcb->program_counter;
-	analizadorLinea(strdup(instruccion_string), &functions, &kernel_functions);
+	pthread_t execution_thread;
+	pthread_create(&execution_thread, NULL,
+			&execute_instruction, (void*) instruccion_string);
+	pthread_join(execution_thread, NULL);
 
 	if(program_counter == pcb->program_counter && !string_starts_with(instruccion_string, TEXT_END)) {
 	    pcb->program_counter++;
@@ -605,12 +643,12 @@ int ejecutar_pcb(){
        cambiar_contexto(pcb->pid);
 
        int instruccion_ejecutada = 1;
-       while(instruccion_ejecutada <= QUANTUM  && !pcb->program_finished){
-               execute_next_instruction_for_process();
-               printf("Instruccion %d del pid %d ejecutada \n", instruccion_ejecutada, pcb->pid);
-               fflush(stdout);
-               instruccion_ejecutada ++;
-               usleep(100000);
+       while(instruccion_ejecutada <= QUANTUM  && pcb->program_finished == 0){
+    	   execute_next_instruction_for_process();
+    	   printf("Instruccion %d del pid %d ejecutada \n", instruccion_ejecutada, pcb->pid);
+		   fflush(stdout);
+		   instruccion_ejecutada ++;
+		   usleep(100000);
        }
 
       return 0;

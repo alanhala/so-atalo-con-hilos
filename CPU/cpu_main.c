@@ -137,6 +137,8 @@ int main(int argc, char **argv) {
 			pcb_serializado->cantidad_operaciones = 0;
 			pcb_serializado->valor_de_la_variable_compartida =0;
 			pcb_serializado->resultado_mensaje = 0;
+			if (pcb_serializado->program_finished == 5)
+				pcb_serializado->valor_mensaje = sem_to_be_blocked;
 			t_stream * stream = serializar_mensaje(121,pcb_serializado);
 			send(KERNEL_DESCRIPTOR, stream->datos, stream->size, 0);
 		}

@@ -120,15 +120,34 @@ void* handle_pcb_execution(void* data_to_cast) {
 
 				} else if(unPCB->mensaje == 3) {
 				    int cpu = pcb->cpu_socket_descriptor;
-				    if(pcb->program_finished) {
+				    if(pcb->program_finished == 1)
 				    	end_program(scheduler, pcb);
-				    } else {
+				    else if (pcb->program_finished == 2)
+				    	printf("recibir el 2, sacarme cuando me implementen");
+				    else if (pcb->program_finished == 5)
+				    	wait_block_process(scheduler, unPCB->valor_mensaje, pcb);
+				    else
 				    	enqueue_to_ready(scheduler, pcb);
-				    }
 				    free_cpu(scheduler, cpu);
 				    break; // TODO REVISAR
 				} else if(unPCB->mensaje == 4) {
-					io_call(kernel, unPCB->valor_mensaje, unPCB->cantidad_operaciones);
+					int resultado = wait_ansisop(kernel, unPCB->valor_mensaje, pcb);
+					t_PCB_serializacion * pcb_serializacion = adaptar_pcb_a_serializar(pcb, kernel);
+					if (resultado == -1)
+						pcb_serializacion->program_finished = 5;
+					pcb_serializacion->mensaje = 0;
+					pcb_serializacion->valor_mensaje = "";
+					pcb_serializacion->cantidad_operaciones = 0;
+					pcb_serializacion->valor_de_la_variable_compartida =0;
+					pcb_serializacion->resultado_mensaje = 0;
+					t_stream *buffer = serializar_mensaje(121,pcb_serializacion);
+
+					int bytes_enviados = send(pcb->cpu_socket_descriptor, buffer->datos, buffer->size, 0);
+					if (bytes_enviados == -1){
+						printf("error al enviar pcb\n");
+					}
+				} else if (unPCB->mensaje = 5) {
+					signal_ansisop(kernel, unPCB->valor_mensaje);
 				}
 
 			}

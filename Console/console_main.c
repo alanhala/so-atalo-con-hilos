@@ -64,6 +64,8 @@ int main(int argc, char **argv) {
 //	char * codigo = "begin\nvariables c, d, e\nc=2147483647\nd=224947129\nf\ne <- g\niterar\nend\nfunction f\nvariables a\na=2\nprint a\nend\nfunction g\nvariables a\na=2\nreturn a\nend\nfunction iterar\nvariables f, i, t\nf=20\ni=0\n:inicio\ni=i+1\nprint i\nt=f-i\nprint t\njnz t inicio\nend";
 //	char* codigo = "begin\nvariables a, b\na = 3\nb = 5\na = b + 12\nend";
 //	char * codigo = "begin\nvariables c, d, e\nc=2147483647\nd=20\nf\ne <- g\niterar\nrecursiva d\ntextPrint Finaliza programa\nend\nfunction f\nvariables a\na=1234\nend\nfunction g\nvariables a\na=2\nreturn a\nend\nfunction iterar\nvariables f, i, t\nf=20\ni=0\n:inicio\ni=i+1\nprint i\nt=f-i\nprint t\njnz t inicio\nend\nfunction recursiva\njz $0 salir\nvariables a\na = $0 - 1\ntextPrint recursiva\nprint a\nrecursiva a\n:salir\nend";
+//	char* codigo = "begin\n:etiqueta\nwait c\ntextPrint entro consumidor\nsignal b\n#Ciclar indefinidamente\ngoto etiqueta\nend";
+//	char* codigo = "begin\n:etiqueta\nwait b\ntextPrint entro productor\nsignal c\n#Ciclar indefinidamente\ngoto etiqueta\nend";
 
 	iniciar_programa->codigo_de_programa = malloc(strlen(codigo)+1);
 	memcpy(iniciar_programa->codigo_de_programa, codigo, strlen(codigo)+1);
