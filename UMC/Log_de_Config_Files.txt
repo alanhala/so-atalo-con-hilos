@@ -352,3 +352,73 @@
 
 [TRACE] 22:41:13:509 main.c/(6095:6102): Archivo de Configuracion levantado exitosamente.
 
+[TRACE] 22:46:04:615 main.c/(6299:6303): Cargando parametros del Archivo de Configuracion
+
+[TRACE] 22:46:04:615 main.c/(6299:6303): Archivo de Configuracion levantado exitosamente.
+
+[TRACE] 22:47:07:116 main.c/(6451:6458): Cargando parametros del Archivo de Configuracion
+
+[TRACE] 22:47:27:473 main.c/(6451:6458): Archivo de Configuracion levantado exitosamente.
+
+[TRACE] 22:48:03:60 main.c/(6451:6458): No se puede levantar el Archivo de Configuracion
+
+[TRACE] 22:48:27:249 main.c/(6451:6458): Archivo de Configuracion actualizado y levantado.
+
+[TRACE] 22:57:04:367 main.c/(6661:6666): Cargando parametros del Archivo de Configuracion
+
+[TRACE] 22:57:04:367 main.c/(6661:6666): Archivo de Configuracion levantado exitosamente.
+
+[TRACE] 22:57:22:866 main.c/(6661:6666): Archivo de Configuracion actualizado y levantado.
+
+[TRACE] 22:57:31:186 main.c/(6661:6666): Archivo de Configuracion actualizado y levantado.
+
+[TRACE] 22:59:32:67 main.c/(6777:6783): Cargando parametros del Archivo de Configuracion
+
+[TRACE] 22:59:43:881 main.c/(6777:6783): Archivo de Configuracion levantado exitosamente.
+
+[TRACE] 23:00:20:211 main.c/(6777:6783): No se puede levantar el Archivo de Configuracion
+
+[TRACE] 23:01:26:734 main.c/(6777:6783): Archivo de Configuracion actualizado y levantado.
+
+[TRACE] 23:08:33:645 main.c/(6906:6912): Cargando parametros del Archivo de Configuracion
+
+[TRACE] 23:08:33:657 main.c/(6906:6912): Archivo de Configuracion levantado exitosamente.
+
+[TRACE] 23:09:12:19 main.c/(6906:6912): Archivo de Configuracion actualizado y levantado.
+
+[TRACE] 23:11:51:498 main.c/(7005:7017): Cargando parametros del Archivo de Configuracion
+
+[TRACE] 23:12:08:659 main.c/(7005:7017): Archivo de Configuracion levantado exitosamente.
+
+[TRACE] 23:13:13:869 main.c/(7005:7017): Archivo de Configuracion actualizado y levantado.
+
+[TRACE] 23:15:14:352 main.c/(7182:7188): Cargando parametros del Archivo de Configuracion
+
+[TRACE] 23:15:16:441 main.c/(7182:7188): Archivo de Configuracion levantado exitosamente.
+
+[TRACE] 23:16:50:948 main.c/(7182:7188): Archivo de Configuracion actualizado y levantado.
+
+[TRACE] 23:21:05:583 main.c/(7449:7457): Cargando parametros del Archivo de Configuracion
+
+[TRACE] 23:21:10:446 main.c/(7449:7457): Archivo de Configuracion levantado exitosamente.
+
+[TRACE] 23:24:25:735 main.c/(7596:7601): Cargando parametros del Archivo de Configuracion
+
+[TRACE] 23:24:25:735 main.c/(7596:7601): Archivo de Configuracion levantado exitosamente.
+
+[TRACE] 23:24:47:630 main.c/(7641:7647): Cargando parametros del Archivo de Configuracion
+
+[TRACE] 23:24:47:630 main.c/(7641:7647): Archivo de Configuracion levantado exitosamente.
+
+[TRACE] 23:25:12:840 main.c/(7741:7746): Cargando parametros del Archivo de Configuracion
+
+[TRACE] 23:25:12:840 main.c/(7741:7746): Archivo de Configuracion levantado exitosamente.
+
+[TRACE] 23:26:42:750 main.c/(7838:7846): Cargando parametros del Archivo de Configuracion
+
+[TRACE] 23:28:04:381 main.c/(7896:7901): Cargando parametros del Archivo de Configuracion
+
+[TRACE] 23:28:04:381 main.c/(7896:7901): Archivo de Configuracion levantado exitosamente.
+
+[TRACE] 23:28:17:309 main.c/(7896:7901): Archivo de Configuracion actualizado y levantado.
+

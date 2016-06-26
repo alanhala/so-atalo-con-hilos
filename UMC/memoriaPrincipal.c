@@ -1135,13 +1135,13 @@ void flush_memory(int pid){
 
 void set_cantidad_entradas_tlb(int entradas){
 	if (entradas>0){
-		TLB_HABILITADA=0;
-	}
-	else {
 		TLB_HABILITADA=1;
 	}
+	else {
+		TLB_HABILITADA=0;
+	}
 
-	CANTIDAD_ENTRADAS_TLB =entradas;
+	CANTIDAD_ENTRADAS_TLB = entradas;
 }
 void set_max_frames_por_proceso(int cantidad){
 	MAX_FRAMES_POR_PROCESO = cantidad;
