@@ -70,14 +70,14 @@ void algoritmo_clock(){
 	escribir_pagina_de_programa(0, 14, 0, 1, "x");
 	leer_pagina_de_programa(0, 17, 0, 1);
 	escribir_pagina_de_programa(0, 19, 0, 1, "p");
-	t_tabla_de_paginas *tabla =buscar_tabla_de_paginas_de_pid(0);
+//	t_tabla_de_paginas *tabla =buscar_tabla_de_paginas_de_pid(0);
 
 	leer_pagina_de_programa(0, 0, 0, 1);
 	escribir_pagina_de_programa(0, 15, 0, 1, "p");
-//	leer_pagina_de_programa(0, 12, 0, 1);
-//	escribir_pagina_de_programa(0, 17, 0, 1, "p");
-//	leer_pagina_de_programa(0, 15, 0, 1);
-//	escribir_pagina_de_programa(0, 19, 0, 1, "p");
+	leer_pagina_de_programa(0, 12, 0, 1);
+	escribir_pagina_de_programa(0, 17, 0, 1, "p");
+	leer_pagina_de_programa(0, 15, 0, 1);
+	escribir_pagina_de_programa(0, 19, 0, 1, "p");
 
 	dump_structs(0);
 	while(1);

@@ -26,6 +26,19 @@ extern t_log *trace_log_UMC
 log_trace(trace_log_UMC,"<lo_que_quieran_loggear>");
 */
 t_clock_m* inicializar_info_reemplazo();
+
+int buscar_pagina_victima_de_frame_en_info_reemplazo(int frame_victima, t_tabla_de_paginas *tabla){
+	int pagina_victima=-1;
+	int indice = 0;
+	while(indice <= MAX_FRAMES_POR_PROCESO){
+		if((tabla->info_reemplazo[indice]).frame  == frame_victima )
+			break;
+		indice ++;
+	}
+
+	return (tabla->info_reemplazo[indice]).pagina;
+}
+
 int buscar_indice_info_reemplazo_de_frame(int frame, t_tabla_de_paginas* tabla){
 	int indice=0;
 	while(indice <= MAX_FRAMES_POR_PROCESO){
@@ -449,19 +462,18 @@ int conseguir_frame_mediante_reemplazo(t_tabla_de_paginas* tabla, int pagina) {
 
 	extern t_log *trace_log_UMC;
 
-	int pagina_victima = seleccionar_pagina_victima(tabla) ;
-	int frame_victima = (tabla->entradas[pagina_victima]).frame ;
-	int index = buscar_indice_info_reemplazo_de_frame()
+	int frame_victima = seleccionar_frame_victima(tabla);
+	int pagina_victima = buscar_pagina_victima_de_frame_en_info_reemplazo(frame_victima, tabla);
+
 
 	log_trace(trace_log_UMC,"frame victima %d\n",frame_victima);
 	printf("\n frame victima %d\n", frame_victima);
 	char* contenido_frame_victima = leer_frame_de_memoria_principal(frame_victima, 0, TAMANIO_FRAME);
 	log_trace(trace_log_UMC,"contenido de frame victima a escribir en swap: %s de la pagina victima %d\n",contenido_frame_victima,pagina_victima);
 	printf("\n contenido de frame victima a escribir en swap :  %s de la pagina victima %d\n", contenido_frame_victima, pagina_victima);
-	escribir_pagina_de_swap(tabla->pid, pagina_victima,contenido_frame_victima);
 
-	//int pagina_victima = buscar_pagina_de_frame_en_tabla_de_paginas(tabla, frame_victima);
-	// TODO IF PAGINA_VICTIMA FUE MODIFICADO
+
+
 	if ((tabla->entradas[pagina_victima]).modificado == 1){
 		escribir_pagina_de_swap(tabla->pid, pagina_victima,	contenido_frame_victima);
 		printf("Actualizacion de swap al reemplazar pagina porque estaba modificado");
@@ -533,24 +545,21 @@ int buscar_pagina_de_frame_en_tabla_de_paginas(t_tabla_de_paginas * tabla, int f
 
 int reemplazar_test(t_tabla_de_paginas * tabla);
 
-int seleccionar_pagina_victima(t_tabla_de_paginas* tabla)
+int seleccionar_frame_victima(t_tabla_de_paginas* tabla)
 {
 	//ACA SELECCIONO EL FRAME CON CONTENIDO SEGUN ALGORITMO Y LO GUARDO EN SWAP. LUEGO DEVUELVO EL
 	//FRAME DE LA VICTIMA PARA QUE SEA UTILIZADO POR OTRA PAGINA
-	int pagina_victima =-1 ;
+	int frame_victima =-1 ;
 	switch(ALGORITMO_REEMPLAZO){
 	case 1: //clock
-		pagina_victima= reemplazar_clock(tabla);
+		frame_victima= reemplazar_clock(tabla);
 		break;
 
 	case 2: //clock M
-		pagina_victima= reemplazar_clock_modificado(tabla);
-		break;
-	case 99: //algoritmo_test
-		pagina_victima= reemplazar_test(tabla);
+		frame_victima= reemplazar_clock_modificado(tabla);
 		break;
 	}
-	return pagina_victima;
+	return frame_victima;
 }
 
 int busco_cero_cero(t_tabla_de_paginas * tabla){
@@ -570,7 +579,7 @@ int busco_cero_cero(t_tabla_de_paginas * tabla){
 				tabla->indice_segunda_oportunidad = indice + 1;
 			}
 
-			return (tabla->info_reemplazo[indice]).pagina;
+			return (tabla->info_reemplazo[indice]).frame;
 		}
 
 		indice ++;
@@ -590,7 +599,7 @@ int busco_cero_cero(t_tabla_de_paginas * tabla){
 			{
 				tabla->indice_segunda_oportunidad = indice + 1;
 			}
-			return (tabla->info_reemplazo[indice]).pagina;
+			return (tabla->info_reemplazo[indice]).frame;
 		}
 		indice ++;
 	}
@@ -615,7 +624,7 @@ int busco_cero_uno(t_tabla_de_paginas * tabla){
 				tabla->indice_segunda_oportunidad = indice + 1;
 			}
 
-			return (tabla->info_reemplazo[indice]).pagina;
+			return (tabla->info_reemplazo[indice]).frame;
 		}
 		if ((tabla->info_reemplazo[indice]).frame != -1)
 			(tabla->info_reemplazo[indice]).segunda_oportunidad = 0;
@@ -636,7 +645,7 @@ int busco_cero_uno(t_tabla_de_paginas * tabla){
 			{
 				tabla->indice_segunda_oportunidad = indice + 1;
 			}
-			return (tabla->info_reemplazo[indice]).pagina;
+			return (tabla->info_reemplazo[indice]).frame;
 		}
 		if ((tabla->info_reemplazo[indice]).frame != -1)
 					(tabla->info_reemplazo[indice]).segunda_oportunidad = 0;
@@ -652,25 +661,25 @@ int reemplazar_clock_modificado(t_tabla_de_paginas * tabla){
 
 	int indice = tabla->indice_segunda_oportunidad;
 
-	int pagina_victima = busco_cero_cero(tabla);
+	int frame_victima = busco_cero_cero(tabla);
 
-	if (pagina_victima != -1)
-		return pagina_victima;
+	if (frame_victima != -1)
+		return frame_victima;
 
-	pagina_victima = busco_cero_uno(tabla);
+	frame_victima = busco_cero_uno(tabla);
 
-	if (pagina_victima != -1)
-			return pagina_victima;
+	if (frame_victima != -1)
+			return frame_victima;
 
-	pagina_victima = busco_cero_cero(tabla);
+	frame_victima = busco_cero_cero(tabla);
 
-	if (pagina_victima != -1)
-		return pagina_victima;
+	if (frame_victima != -1)
+		return frame_victima;
 
-	pagina_victima = busco_cero_uno(tabla);
+	frame_victima = busco_cero_uno(tabla);
 
-	if (pagina_victima != -1)
-			return pagina_victima;
+	if (frame_victima != -1)
+			return frame_victima;
 
 	return -1; // el algoritmo no funciono
 
@@ -694,7 +703,7 @@ int reemplazar_clock(t_tabla_de_paginas * tabla){
 			{
 				tabla->indice_segunda_oportunidad = indice + 1;
 			}
-			return indice;
+			return (tabla->info_reemplazo[indice]).frame;
 
 		}
 		if ((tabla->info_reemplazo[indice]).frame != -1)
@@ -716,7 +725,7 @@ int reemplazar_clock(t_tabla_de_paginas * tabla){
 			{
 				tabla->indice_segunda_oportunidad = indice + 1;
 			}
-			return indice;
+			return (tabla->info_reemplazo[indice]).frame;
 
 		}
 		if ((tabla->info_reemplazo[indice]).frame != -1)
@@ -730,7 +739,7 @@ int reemplazar_clock(t_tabla_de_paginas * tabla){
 			if ((tabla->info_reemplazo[indice]).segunda_oportunidad == 0 && (tabla->info_reemplazo[indice]).frame != -1)
 			{
 				tabla->indice_segunda_oportunidad = indice;
-				return indice;
+				return (tabla->info_reemplazo[indice]).frame;
 			}
 			if ((tabla->info_reemplazo[indice]).frame != -1)
 				(tabla->info_reemplazo[indice]).segunda_oportunidad = 0;
@@ -744,7 +753,7 @@ int reemplazar_clock(t_tabla_de_paginas * tabla){
 			{
 
 				tabla->indice_segunda_oportunidad = indice;
-				return indice;
+				return (tabla->info_reemplazo[indice]).frame;
 			}
 			if ((tabla->info_reemplazo[indice]).frame != -1)
 				(tabla->info_reemplazo[indice]).segunda_oportunidad = 0;
@@ -777,7 +786,7 @@ void actualizar_reemplazo(t_tabla_de_paginas* tabla, int frame_a_asignar,int pag
 
 	int index = buscar_indice_info_reemplazo_de_frame(frame_a_asignar, tabla);
 	(tabla->info_reemplazo[index]).frame = frame_a_asignar;
-	(tabla->info_reemplazo[index]).frame = pagina;
+	(tabla->info_reemplazo[index]).pagina = pagina;
 	(tabla->info_reemplazo[index]).modificado =0;
 	(tabla->info_reemplazo[index]).segunda_oportunidad =1;
 
@@ -786,7 +795,7 @@ void actualizar_reemplazo(t_tabla_de_paginas* tabla, int frame_a_asignar,int pag
 	tabla->entradas[pagina_victima].segunda_oportunidad = 1;
 	tabla->entradas[pagina_victima].modificado = 0;
 
-	//todo eze: analizar
+
 }
 
 
