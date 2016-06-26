@@ -134,6 +134,8 @@ uint32_t get_shared_var_value(t_kernel* self, char* variable_name) {
 			return 0;
 	}
 	t_shared_variable* shared_variable = list_find(self->shared_vars, (void*) same_variable);
+	if (shared_variable == NULL)
+		printf("No se encontro la variable %s", variable_name);
 	return shared_variable->value;
 }
 
@@ -145,6 +147,8 @@ uint32_t update_shared_var_value(t_kernel* self, char* variable_name, uint32_t v
 			return 0;
 	}
 	t_shared_variable* shared_variable = list_find(self->shared_vars, (void*) same_variable);
+	if (shared_variable == NULL)
+		printf("No se encontro la variable %s", variable_name);
 	shared_variable->value = value;
 	return 0;
 }
@@ -173,7 +177,7 @@ int32_t wait_ansisop(t_kernel* kernel, char* sem_id, t_PCB* pcb) {
 	t_semaphore* semaphore = list_find(kernel->semaphores, (void*) same_sem);
 	semaphore->value--; // TODO ver si hace falta poner semaforo
 	if (semaphore->value < 0) {
-		block_process(scheduler, semaphore->id, pcb);
+		wait_block_process(scheduler, semaphore->id, pcb);
 		return -1;
 	}
 	else
@@ -191,7 +195,7 @@ int32_t signal_ansisop(t_kernel* kernel, char* sem_id) {
 	t_semaphore* semaphore = list_find(kernel->semaphores, (void*) same_sem);
 	semaphore->value++; // TODO ver si hace falta poner semaforo
 	if (semaphore->value <= 0) {
-		unblock_process(scheduler, semaphore->id);
+		signal_unblock_process(scheduler, semaphore->id);
 	}
 	return 0;
 }

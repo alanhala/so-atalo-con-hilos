@@ -103,7 +103,7 @@ void* handle_pcb_execution(void* data_to_cast) {
 				}else if(unPCB->mensaje ==2){
 					//aca hay que renombrar el cantidad de operaciones ya que no imagine todos los casos.
 					//estoy reutilizadno el campo para no serializar algo mas
-					uint32_t resultado =update_shared_var_value(kernel, unPCB->valor_mensaje, unPCB->cantidad_operaciones);
+					uint32_t resultado =update_shared_var_value(kernel, unPCB->valor_mensaje, unPCB->valor_de_la_variable_compartida);
 					t_PCB_serializacion * pcb_serializacion = adaptar_pcb_a_serializar(pcb, kernel);
 					pcb_serializacion->mensaje = 0;
 					pcb_serializacion->valor_mensaje = "";
