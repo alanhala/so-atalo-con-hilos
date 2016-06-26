@@ -69,10 +69,13 @@ void do_signal(t_nombre_semaforo identificador_semaforo) {
 
 t_valor_variable obtenerValorCompartida(t_nombre_compartida variable) {
 //	char * new_variable = string_substring(variable, 0, strlen(variable)-1); //LE SACO EL \n
+	char* variable_limpia = (char*)variable;
 
+	while(string_ends_with(variable_limpia, "\n") || string_ends_with(variable_limpia, " "))
+		variable_limpia = string_substring_until(variable, string_length((char*)variable)-1);
 	t_PCB_serializacion * pcb_serializado = adaptar_pcb_a_serializar(get_PCB());
 	pcb_serializado->mensaje = 1;
-	pcb_serializado->valor_mensaje = variable;
+	pcb_serializado->valor_mensaje = variable_limpia;
 	pcb_serializado->cantidad_operaciones = 0;
 	pcb_serializado->valor_de_la_variable_compartida =0;
 	pcb_serializado->resultado_mensaje = 0;
@@ -104,7 +107,7 @@ t_valor_variable obtenerValorCompartida(t_nombre_compartida variable) {
 			t_PCB_serializacion *recibir_pcb = malloc(sizeof(t_PCB_serializacion));
 
 			recibir_pcb = (t_PCB_serializacion * ) deserealizar_mensaje(121, buffer_recv);
-
+			printf("valor de la variable compartida: %d\n", recibir_pcb->resultado_mensaje);
 			return recibir_pcb->resultado_mensaje;
 		}
 		return -1; //TODO NO SE OBTUVO RESULTADO DE LA VARIABLE COMPARTIDA
@@ -114,10 +117,13 @@ t_valor_variable obtenerValorCompartida(t_nombre_compartida variable) {
 
 t_valor_variable asignarValorCompartida(t_nombre_compartida variable, t_valor_variable valor) {
 //	char * new_variable = string_substring(variable, 0, strlen(variable)); //LE SACO EL \N
+	char* variable_limpia = (char*)variable;
 
+	while(string_ends_with(variable_limpia, "\n") || string_ends_with(variable_limpia, " "))
+		variable_limpia = string_substring_until(variable, string_length((char*)variable)-1);
 	t_PCB_serializacion * pcb_serializado = adaptar_pcb_a_serializar(get_PCB());
 	pcb_serializado->mensaje = 2;
-	pcb_serializado->valor_mensaje = variable;
+	pcb_serializado->valor_mensaje = variable_limpia;
 	pcb_serializado->cantidad_operaciones = 0;
 	pcb_serializado->valor_de_la_variable_compartida =valor;
 	pcb_serializado->resultado_mensaje = 0;
@@ -299,7 +305,7 @@ void imprimir(t_valor_variable valor_mostrar) {
 }
 
 void imprimirTexto(char* print_value) {
-   // int enviado_correctamente = send_text_to_kernel(print_value, string_length(print_value));
+//	int enviado_correctamente = send_text_to_kernel(print_value, string_length(print_value));
     //todo si se quiere validar que haya enviado correctmente
     printf("%s\n", print_value);
 }
@@ -343,13 +349,13 @@ void finalizar(void) {
     t_stack_element *stack_element = list_get(pcb->stack, list_size(pcb->stack)-1);
 
     if(stack_element->posicion_retorno) {
-	pcb->program_counter = stack_element->posicion_retorno;
+    	pcb->program_counter = stack_element->posicion_retorno;
     }
 
     go_back_to_previous_stack_element(stack_element);
 
     if(list_is_empty(pcb->stack)) {
-	pcb->program_finished = 1;
+    	pcb->program_finished = 1;
     }
 }
 
@@ -599,8 +605,7 @@ int ejecutar_pcb(){
                usleep(100000);
        }
 
-
-       return 0;
+      return 0;
 
 }
 

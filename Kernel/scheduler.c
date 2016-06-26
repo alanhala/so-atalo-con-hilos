@@ -28,7 +28,7 @@ t_list* create_semaphores_list(t_kernel* kernel) {
 	t_list* semaphores_list = list_create();
 	int i;
 	for(i = 0; i < kernel->semaphores->elements_count; i++) {
-		t_sem_blocked* sem_blocked = malloc(sizeof(t_sem_blocked));
+		t_sem_blocked_queue* sem_blocked = malloc(sizeof(t_sem_blocked_queue));
 		t_semaphore* semaphore = list_get(kernel->semaphores, i);
 		sem_blocked->id = semaphore->id;
 		sem_blocked->blocked_pids = queue_create();
@@ -167,26 +167,26 @@ void free_cpu(t_scheduler* self, int cpu) {
     sem_post(&sem_cpus_available);
 }
 
-void block_process(t_scheduler* scheduler, char* sem_id, t_PCB* pcb) {
-	int same_sem(t_sem_blocked* sem) {
+void wait_block_process(t_scheduler* scheduler, char* sem_id, t_PCB* pcb) {
+	int same_sem(t_sem_blocked_queue* sem) {
 		if (strcmp(sem->id, sem_id) == 0)
 			return 1;
 		else
 			return 0;
 	}
-	t_sem_blocked* sem_blocks = list_find(scheduler->semaphores_list, (void*) same_sem);
+	t_sem_blocked_queue* sem_blocks = list_find(scheduler->semaphores_list, (void*) same_sem);
 	queue_push(sem_blocks->blocked_pids, pcb->pid);
 	enqueue_to_block(scheduler, pcb);
 }
 
-void unblock_process(t_scheduler* scheduler, char* sem_id) {
-	int same_sem(t_sem_blocked* sem) {
+void signal_unblock_process(t_scheduler* scheduler, char* sem_id) {
+	int same_sem(t_sem_blocked_queue* sem) {
 		if (strcmp(sem->id, sem_id) == 0)
 			return 1;
 		else
 			return 0;
 	}
-	t_sem_blocked* sem_blocks = list_find(scheduler->semaphores_list, (void*) same_sem);
+	t_sem_blocked_queue* sem_blocks = list_find(scheduler->semaphores_list, (void*) same_sem);
 	int pid = queue_pop(sem_blocks->blocked_pids);
 	int same_pid(t_PCB* aux_pcb) {
 		return (aux_pcb->pid == pid);

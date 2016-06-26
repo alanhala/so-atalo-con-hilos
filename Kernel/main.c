@@ -20,6 +20,7 @@
 #include <pthread.h>
 #include "socket.h"
 #include "protocoloKernel.h"
+#include "levanta_config_file.h"
 
 #define CPULISTEN  "8000"
 #define UMCIP  "localhost"
@@ -35,18 +36,21 @@ int main(int argc, char **argv) {
 	//todo me gustaria implementar  el archivo de configuracion asi empiezo a usarlo directamente
 	//pero me tira un par de errores cuando descomento las lineas que uso gkernel
 	//gkernel = create_kernel(CONFIGPATH);
-	t_kernel* kernel = create_kernel(CONFIGPATH);
+	t_kernel *kernel = create_kernel(CONFIGPATH);
+
 	int umc_fd = create_client_socket_descriptor("localhost", "5000");
 	scheduler->umc_socket_descriptor = umc_fd;
 	int a =2;
 	send(umc_fd, &a, sizeof(int), 0);
 
+	pthread_t levanta_config_file;
+	int levanta_config_file_resultado = pthread_create(&levanta_config_file,NULL,&cargar_configuracion,kernel);
 
 	int server_socket_descritptor =  create_server_socket_descriptor("localhost","9000",10);
 
 	while(1){
-		int client_socket_descriptor = accept_connection(server_socket_descritptor);
 
+		int client_socket_descriptor = accept_connection(server_socket_descritptor);
 
 		pthread_t thread;
 		int thread_result = pthread_create(&thread, NULL,

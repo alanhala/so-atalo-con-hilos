@@ -96,7 +96,7 @@
 	typedef struct {
 		char* id;
 		t_queue* blocked_pids;
-	} t_sem_blocked;
+	} t_sem_blocked_queue;
 
 	typedef struct {
 		char* program_code;
@@ -145,6 +145,6 @@
 	void enqueue_to_ready(t_scheduler* scheduler, t_PCB* pcb);
 	void end_program(t_scheduler* scheduler, t_PCB *pcb);
 	void free_cpu(t_scheduler* scheduler, int cpu);
-	void block_process(t_scheduler* scheduler, char* sem_id, t_PCB* pcb);
-	void unblock_process(t_scheduler* scheduler, char* sem_id);
+	void wait_block_process(t_scheduler* scheduler, char* sem_id, t_PCB* pcb);
+	void signal_unblock_process(t_scheduler* scheduler, char* sem_id);
 #endif

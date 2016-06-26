@@ -27,13 +27,16 @@
 #define UMCPORT "5000"
 #define UMCIP "localhost"
 
-
 void connect_to_UMC();
 void connect_to_Kernel();
 t_PCB_serializacion * adaptar_pcb_a_serializar(t_PCB * pcb);
 void actualizarPCB(t_PCB *pcb, t_PCB_serializacion *recibir_pcb);
+void *captador_de_senal_thread();
+void sig_handler();
 
 t_log *trace_log_CPU;
+
+int hot_plug;
 
 
 int main(int argc, char **argv) {
@@ -72,6 +75,9 @@ int main(int argc, char **argv) {
 
 	connect_to_UMC();
 	connect_to_Kernel();
+
+	pthread_t captador_de_senal;
+	pthread_create(&captador_de_senal,NULL,&captador_de_senal_thread,NULL);
 
 	while (1) {
 
@@ -121,7 +127,12 @@ int main(int argc, char **argv) {
 			set_PCB(pcb);
 			int resultado_ejecucion = ejecutar_pcb();
 			t_PCB_serializacion * pcb_serializado = adaptar_pcb_a_serializar(get_PCB());
-			pcb_serializado->mensaje = 0;
+
+			if(hot_plug==1){
+				pcb_serializado->program_finished = 9;
+			}
+
+			pcb_serializado->mensaje = 3;
 			pcb_serializado->valor_mensaje = "";
 			pcb_serializado->cantidad_operaciones = 0;
 			pcb_serializado->valor_de_la_variable_compartida =0;
@@ -191,4 +202,25 @@ void actualizarPCB(t_PCB *pcb, t_PCB_serializacion *recibir_pcb){
 	pcb->label_index = recibir_pcb->label_index;
 	//TODO Agregar campos nuevos de la serializacion
 }
+
+void *captador_de_senal_thread(){
+
+	printf("Process ID: %d\n",getpid());
+	fflush(stdout);
+
+	if(signal(SIGUSR1,sig_handler) == SIG_ERR)
+		error_show("No se atrapo la senal\n");
+
+}
+
+
+void sig_handler(){
+	hot_plug = 1;
+	printf("Pulpo\n");
+};
+
+
+
+
+
 

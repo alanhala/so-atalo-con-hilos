@@ -45,17 +45,18 @@ t_kernel* create_kernel(char* config_file_path) {
 	t_kernel* kernel = malloc(sizeof(t_kernel));
 	kernel->pcb_list = list_create();
 	kernel->programs_number = 0;
-	kernel->console_port = config_get_string_value(kernel_config, "PUERTO_PROG");
+	kernel->console_port = config_get_string_value(kernel_config, "PUERTO_PROGRAMA");
 	kernel->cpu_port = config_get_string_value(kernel_config, "PUERTO_CPU");
 	kernel->quantum = config_get_int_value(kernel_config, "QUANTUM");
 	kernel->quantum_sleep = config_get_int_value(kernel_config, "QUANTUM_SLEEP");
 	kernel->stack_size = config_get_int_value(kernel_config, "STACK_SIZE");
 	kernel->shared_vars = load_shared_vars(config_get_array_value(kernel_config, "SHARED_VARS"));
-	kernel->io_list = load_input_output_list(config_get_array_value(kernel_config, "IO_IDS"),
+	kernel->io_list = load_input_output_list(config_get_array_value(kernel_config, "IO_ID"),
 			config_get_array_value(kernel_config, "IO_SLEEP"));
-	kernel->semaphores = load_semaphores(config_get_array_value(kernel_config, "SEM_IDS"),
+	kernel->semaphores = load_semaphores(config_get_array_value(kernel_config, "SEM_ID"),
 			config_get_array_value(kernel_config, "SEM_INIT"));
 	scheduler = create_scheduler(kernel);
+
 	return kernel;
 }
 
@@ -134,6 +135,8 @@ uint32_t get_shared_var_value(t_kernel* self, char* variable_name) {
 			return 0;
 	}
 	t_shared_variable* shared_variable = list_find(self->shared_vars, (void*) same_variable);
+	if (shared_variable == NULL)
+		printf("No se encontro la variable %s", variable_name);
 	return shared_variable->value;
 }
 
@@ -145,6 +148,8 @@ uint32_t update_shared_var_value(t_kernel* self, char* variable_name, uint32_t v
 			return 0;
 	}
 	t_shared_variable* shared_variable = list_find(self->shared_vars, (void*) same_variable);
+	if (shared_variable == NULL)
+		printf("No se encontro la variable %s", variable_name);
 	shared_variable->value = value;
 	return 0;
 }
@@ -173,7 +178,7 @@ int32_t wait_ansisop(t_kernel* kernel, char* sem_id, t_PCB* pcb) {
 	t_semaphore* semaphore = list_find(kernel->semaphores, (void*) same_sem);
 	semaphore->value--; // TODO ver si hace falta poner semaforo
 	if (semaphore->value < 0) {
-		block_process(scheduler, semaphore->id, pcb);
+		wait_block_process(scheduler, semaphore->id, pcb);
 		return -1;
 	}
 	else
@@ -191,7 +196,7 @@ int32_t signal_ansisop(t_kernel* kernel, char* sem_id) {
 	t_semaphore* semaphore = list_find(kernel->semaphores, (void*) same_sem);
 	semaphore->value++; // TODO ver si hace falta poner semaforo
 	if (semaphore->value <= 0) {
-		unblock_process(scheduler, semaphore->id);
+		signal_unblock_process(scheduler, semaphore->id);
 	}
 	return 0;
 }
