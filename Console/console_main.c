@@ -51,8 +51,8 @@ int main(int argc, char **argv) {
 //		//return 0;
 //	}
 
-	pthread_t captador_senal_interrupcion;
-	pthread_create(&captador_senal_interrupcion,NULL,&senal_de_interrupcion_thread,NULL);
+	//pthread_t captador_senal_interrupcion;
+	//pthread_create(&captador_senal_interrupcion,NULL,&senal_de_interrupcion_thread,NULL);
 
 
 	t_log 	*trace_log = log_create("Log_de_Consola.txt",
@@ -70,7 +70,7 @@ int main(int argc, char **argv) {
 	//char * codigo = "begin\nvariables c, d\nc=1234\nd=4321\nend\0";
 //	char * codigo = "begin\nvariables c, d, e\nc=2147483647\nd=224947129\nf\ne <- g\nend\nfunction f\nvariables a\na=1234\nend\nfunction g\nvariables a\na=4321\nreturn a\nend";
 //	char * codigo = "begin\nvariables c, d, e\nc=2147483647\nd=224947129\nf\ne <- g\niterar\nend\nfunction f\nvariables a\na=2\nprint a\nend\nfunction g\nvariables a\na=2\nreturn a\nend\nfunction iterar\nvariables f, i, t\nf=20\ni=0\n:inicio\ni=i+1\nprint i\nt=f-i\nprint t\njnz t inicio\nend";
-	char* codigo = "begin\nvariables f, A, g\nA = 0\n!compartida = 1+A\njnz !compartida Siguiente \n:Proximo\nf = 8\ng <- doble !compartida\ntextPrint Hola Mundo!\ng = 1 + g\nprint g \ntextPrint Bye\nend\nfunction doble\nvariables f\nf = $0 + $0\nreturn f\nend\n:Siguiente\nprint A+1\ngoto Proximo\n";
+	char* codigo = "begin\nvariables a, b\na = 3\nb = 5\na = b + 12\nend";
 //	char * codigo = "begin\nvariables c, d, e\nc=2147483647\nd=20\nf\ne <- g\niterar\nrecursiva d\ntextPrint Finaliza programa\nend\nfunction f\nvariables a\na=1234\nend\nfunction g\nvariables a\na=2\nreturn a\nend\nfunction iterar\nvariables f, i, t\nf=20\ni=0\n:inicio\ni=i+1\nprint i\nt=f-i\nprint t\njnz t inicio\nend\nfunction recursiva\njz $0 salir\nvariables a\na = $0 - 1\ntextPrint recursiva\nprint a\nrecursiva a\n:salir\nend";
 
 	iniciar_programa->codigo_de_programa = malloc(strlen(codigo)+1);

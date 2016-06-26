@@ -1,0 +1,20 @@
+[TRACE] 17:09:52:998 main.c/(2549:2583): frame victima 0
+
+[TRACE] 17:09:55:499 main.c/(2549:2583): contenido de frame victima a escribir en swap: 0000000000000000000000000000000000000000000000000000000000000000 en pagina victima 5
+
+[TRACE] 17:12:18:392 main.c/(2672:2707): frame victima 0
+
+[TRACE] 17:12:20:893 main.c/(2672:2707): contenido de frame victima a escribir en swap: 0000000000000000000000000000000000000000000000000000000000000000 en pagina victima 1
+
+[TRACE] 17:18:26:262 main.c/(2829:2906): frame victima 0
+
+[TRACE] 17:18:28:928 main.c/(2829:2906): contenido de frame victima a escribir en swap:  en pagina victima 1
+
+[TRACE] 17:29:13:17 main.c/(3124:3163): frame victima 0
+
+[TRACE] 17:29:25:863 main.c/(3124:3163): contenido de frame victima a escribir en swap:  en pagina victima 1
+
+[TRACE] 17:43:03:495 main.c/(3521:3555): frame victima 0
+
+[TRACE] 17:43:05:995 main.c/(3521:3555): contenido de frame victima a escribir en swap: 0000000000000000000000000000000000000000000000000000000000000000 en pagina victima 1
+

@@ -362,3 +362,45 @@
 
 [TRACE] 03:00:41:782 main.c/(14842:14848): Archivo de Configuracion levantado exitosamente.
 
+[TRACE] 16:51:58:805 main.c/(2330:2335): Cargando parametros del Archivo de Configuracion
+
+[TRACE] 16:51:58:813 main.c/(2330:2335): Archivo de Configuracion levantado exitosamente.
+
+[TRACE] 17:09:11:133 main.c/(2549:2552): Cargando parametros del Archivo de Configuracion
+
+[TRACE] 17:09:11:134 main.c/(2549:2552): Archivo de Configuracion levantado exitosamente.
+
+[TRACE] 17:09:52:999 main.c/(2549:2552): Archivo de Configuracion actualizado y levantado.
+
+[TRACE] 17:11:52:819 main.c/(2672:2675): Cargando parametros del Archivo de Configuracion
+
+[TRACE] 17:11:52:827 main.c/(2672:2675): Archivo de Configuracion levantado exitosamente.
+
+[TRACE] 17:12:18:392 main.c/(2672:2675): Archivo de Configuracion actualizado y levantado.
+
+[TRACE] 17:15:48:239 main.c/(2829:2839): Cargando parametros del Archivo de Configuracion
+
+[TRACE] 17:16:27:602 main.c/(2829:2839): Archivo de Configuracion levantado exitosamente.
+
+[TRACE] 17:18:35:966 main.c/(2829:2839): Archivo de Configuracion actualizado y levantado.
+
+[TRACE] 17:26:22:751 main.c/(3124:3130): Cargando parametros del Archivo de Configuracion
+
+[TRACE] 17:26:25:871 main.c/(3124:3130): Archivo de Configuracion levantado exitosamente.
+
+[TRACE] 17:29:28:669 main.c/(3124:3130): Archivo de Configuracion actualizado y levantado.
+
+[TRACE] 17:30:43:367 main.c/(3353:3357): Cargando parametros del Archivo de Configuracion
+
+[TRACE] 17:30:43:367 main.c/(3353:3357): Archivo de Configuracion levantado exitosamente.
+
+[TRACE] 17:31:04:861 main.c/(3409:3414): Cargando parametros del Archivo de Configuracion
+
+[TRACE] 17:31:04:862 main.c/(3409:3414): Archivo de Configuracion levantado exitosamente.
+
+[TRACE] 17:42:42:486 main.c/(3521:3524): Cargando parametros del Archivo de Configuracion
+
+[TRACE] 17:42:42:486 main.c/(3521:3524): Archivo de Configuracion levantado exitosamente.
+
+[TRACE] 17:43:03:495 main.c/(3521:3524): Archivo de Configuracion actualizado y levantado.
+
