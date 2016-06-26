@@ -29,6 +29,8 @@
 //void imprimeArray(const int cantCar,char array[]);
 //Agrega Newton -- Fin
 
+void *senal_de_interrupcion_thread();
+
 int main(int argc, char **argv) {
 //	char * codigo;
 //	FILE *fdarchivo;
@@ -48,6 +50,10 @@ int main(int argc, char **argv) {
 //		//printf("  %s\n",  codigo);
 //		//return 0;
 //	}
+
+	pthread_t captador_senal_interrupcion;
+	pthread_create(&captador_senal_interrupcion,NULL,&senal_de_interrupcion_thread,NULL);
+
 
 	t_log 	*trace_log = log_create("Log_de_Consola.txt",
 									"console_main.c",
@@ -154,7 +160,9 @@ int main(int argc, char **argv) {
 	return 0;
 }
 
+void *senal_de_interrupcion_thread(){
 
+}
 /*
 //Agrega Newton -- Inicio
 void cargaArray(char* array, struct FILE* codeF) {
