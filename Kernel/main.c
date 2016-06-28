@@ -36,13 +36,16 @@ int main(int argc, char **argv) {
 	//todo me gustaria implementar  el archivo de configuracion asi empiezo a usarlo directamente
 	//pero me tira un par de errores cuando descomento las lineas que uso gkernel
 	//gkernel = create_kernel(CONFIGPATH);
-	set_page_size(5);
+	//set_page_size(5);
 	t_kernel *kernel = create_kernel(CONFIGPATH);
 
 	int umc_fd = create_client_socket_descriptor("localhost", "5000");
 	scheduler->umc_socket_descriptor = umc_fd;
 	int a =2;
 	send(umc_fd, &a, sizeof(int), 0);
+	int tamanio_pagina = -1;
+	recv(umc_fd, &tamanio_pagina, sizeof(int), 0);
+	set_page_size(tamanio_pagina);
 
 	pthread_t levanta_config_file;
 	int levanta_config_file_resultado = pthread_create(&levanta_config_file,NULL,&cargar_configuracion,kernel);
