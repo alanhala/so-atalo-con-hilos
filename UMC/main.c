@@ -133,6 +133,8 @@ void manejo_de_solicitudes(int socket_descriptor) {
 	recv(socket_descriptor, &handshake, sizeof(int), 0);
 	if(handshake == 1) //CPU
 	{
+		int a = TAMANIO_FRAME;
+		send(socket_descriptor, &a, sizeof(int), 0);
 		t_cpu_context * nueva_cpu = malloc(sizeof(t_cpu_context));
 		nueva_cpu->cpu_id = socket_descriptor;
 		nueva_cpu->pid_active = -1;

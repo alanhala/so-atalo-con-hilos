@@ -307,6 +307,11 @@ t_puntero obtenerPosicionVariable(t_nombre_variable identificador_variable) {
 
 	t_variable *variable = list_find(stack_element->variables, (void*)find_variable);
 
+	if(variable == NULL) {
+		pcb->program_finished = 2;
+		pthread_exit();
+	}
+
 	return (t_puntero)(variable->dato);
 }
 

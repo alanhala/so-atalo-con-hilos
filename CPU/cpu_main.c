@@ -47,8 +47,8 @@ int main(int argc, char **argv) {
 								false,
 								LOG_LEVEL_TRACE);
 
-	set_quantum(3); // me lo tiene qe mandar cpu en cada ejecucion
-	set_tamanio_pagina(5);
+	//set_quantum(3); // me lo tiene qe mandar cpu en cada ejecucion
+//	set_tamanio_pagina(5);
 //	correr_simulacion();
 //	while(1){
 //			sleep(1000);
@@ -154,6 +154,9 @@ void connect_to_UMC() {
 	set_umc_socket_descriptor(umc_socket_descriptor);
 	int a =1;
 	send(umc_socket_descriptor, &a, sizeof(int), 0);
+	int tamanio_pagina = -1;
+	recv(umc_socket_descriptor, &tamanio_pagina, sizeof(int), 0);
+	set_tamanio_pagina(tamanio_pagina);
 
 
 }
@@ -207,7 +210,7 @@ void actualizarPCB(t_PCB *pcb, t_PCB_serializacion *recibir_pcb){
 
 void *captador_de_senal_thread(){
 
-	printf("Process ID: %d\n",getpid());
+	//printf("Process ID: %d\n",getpid());
 	fflush(stdout);
 
 	if(signal(SIGUSR1,sig_handler) == SIG_ERR)
