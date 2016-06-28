@@ -146,7 +146,7 @@ void* handle_pcb_execution(void* data_to_cast) {
 					if (bytes_enviados == -1){
 						printf("error al enviar pcb\n");
 					}
-				} else if (unPCB->mensaje = 5) {
+				} else if (unPCB->mensaje == 5) {
 					signal_ansisop(kernel, unPCB->valor_mensaje);
 				}
 
