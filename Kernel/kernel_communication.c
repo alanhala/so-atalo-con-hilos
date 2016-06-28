@@ -171,7 +171,7 @@ int end_program_console(t_PCB *pcb) {
 	t_finalizar_programa_en_consola * finalizar_consola = malloc(sizeof(t_finalizar_programa_en_consola));
 	memset(finalizar_consola,0,sizeof(t_finalizar_programa_en_consola));
 
-	finalizar_consola->motivo = 0;
+	finalizar_consola->motivo = pcb->program_finished;
 	t_stream *buffer = malloc(sizeof(t_stream));
 
 	buffer = serializar_mensaje(133,finalizar_consola);

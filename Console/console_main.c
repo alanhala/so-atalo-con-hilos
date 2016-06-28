@@ -32,36 +32,28 @@
 void *senal_de_interrupcion_thread();
 
 int main(int argc, char **argv) {
-//	char * codigo;
-//	FILE *fdarchivo;
-//
-//	if ((fdarchivo = fopen(argv[1], "rb")) == 0) {
-//		//todo log el archivo esta vacio en este caso no se ejecuta consola
-//		//return 0;
-//		char * codigo = "begin\nvariables c, d, e\nc=2147483647\nd=224947129\nf\ne <- g\nend\nfunction f\nvariables a\na=1\nend\nfunction g\nvariables a\na=2\nreturn a\nend";
-//
-//	}
-//	else{
-//		fseek(fdarchivo, 0L, SEEK_END);
-//		int tamanio = ftell(fdarchivo);
-//		rewind(fdarchivo);
-//		codigo = malloc(tamanio);
-//		fread(codigo, tamanio, 1, fdarchivo);
-//		//printf("  %s\n",  codigo);
-//		//return 0;
-//	}
+	char* codigo;
+	FILE *fdarchivo;
 
-	//pthread_t captador_senal_interrupcion;
-	//pthread_create(&captador_senal_interrupcion,NULL,&senal_de_interrupcion_thread,NULL);
+	if ((fdarchivo = fopen(argv[1], "rb")) == 0) {
+		//todo log el archivo esta vacio en este caso no se ejecuta consola
+//return 0;
+		codigo = "begin\nvariables c, d, e\nc=2147483647\nd=224947129\nf\ne <- g\nend\nfunction f\nvariables a\na=1\nend\nfunction g\nvariables a\na=2\nreturn a\nend";
 
-
-	t_log 	*trace_log = log_create("Log_de_Consola.txt",
-									"console_main.c",
-									false,
-									LOG_LEVEL_TRACE);
-
-	int kernel_socket_descriptor = create_client_socket_descriptor("localhost", "9000");
-	int a =2;
+	} else {
+		fseek(fdarchivo, 0L, SEEK_END);
+		int tamanio = ftell(fdarchivo);
+		rewind(fdarchivo);
+		codigo = malloc(tamanio);
+		fread(codigo, tamanio, 1, fdarchivo);
+		printf(" %s\n", codigo);
+		//return 0;
+	}
+	t_log *trace_log = log_create("Log_de_Consola.txt", "console_main.c",
+	false, LOG_LEVEL_TRACE);
+	int kernel_socket_descriptor = create_client_socket_descriptor("localhost",
+			"9000");
+	int a = 2;
 	send(kernel_socket_descriptor, &a, sizeof(int), 0);
 
 	t_iniciar_programa_en_kernel *iniciar_programa = malloc(sizeof(t_iniciar_programa_en_kernel));
@@ -70,7 +62,7 @@ int main(int argc, char **argv) {
 	//char * codigo = "begin\nvariables c, d\nc=1234\nd=4321\nend\0";
 //	char * codigo = "begin\nvariables c, d, e\nc=2147483647\nd=224947129\nf\ne <- g\nend\nfunction f\nvariables a\na=1234\nend\nfunction g\nvariables a\na=4321\nreturn a\nend";
 //	char * codigo = "begin\nvariables c, d, e\nc=2147483647\nd=224947129\nf\ne <- g\niterar\nend\nfunction f\nvariables a\na=2\nprint a\nend\nfunction g\nvariables a\na=2\nreturn a\nend\nfunction iterar\nvariables f, i, t\nf=20\ni=0\n:inicio\ni=i+1\nprint i\nt=f-i\nprint t\njnz t inicio\nend";
-	char* codigo = "begin\nvariables a, b\na = 3\nb = 5\na = b + 12\nend";
+//	char* codigo = "begin\nvariables a, b\na = 3\nb = 5\na = b + 12\nend";
 //	char * codigo = "begin\nvariables c, d, e\nc=2147483647\nd=20\nf\ne <- g\niterar\nrecursiva d\ntextPrint Finaliza programa\nend\nfunction f\nvariables a\na=1234\nend\nfunction g\nvariables a\na=2\nreturn a\nend\nfunction iterar\nvariables f, i, t\nf=20\ni=0\n:inicio\ni=i+1\nprint i\nt=f-i\nprint t\njnz t inicio\nend\nfunction recursiva\njz $0 salir\nvariables a\na = $0 - 1\ntextPrint recursiva\nprint a\nrecursiva a\n:salir\nend";
 
 	iniciar_programa->codigo_de_programa = malloc(strlen(codigo)+1);
@@ -141,7 +133,7 @@ int main(int argc, char **argv) {
 
 			finalizar = (t_finalizar_programa_en_consola *)deserealizar_mensaje(133,buffer_recibidos);
 
-			if (finalizar->motivo == 0){
+			if (finalizar->motivo == 1){
 				printf("El programa finalizo correctamente\n");
 				log_trace(trace_log,"El programa finalizo correctamente\n");
 				fflush(stdout);

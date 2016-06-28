@@ -147,4 +147,6 @@
 	void free_cpu(t_scheduler* scheduler, int cpu);
 	void wait_block_process(t_scheduler* scheduler, char* sem_id, t_PCB* pcb);
 	void signal_unblock_process(t_scheduler* scheduler, char* sem_id);
+	void set_page_size(uint32_t size);
+	uint32_t get_used_pages(t_PCB *pcb, uint32_t stack_size);
 #endif

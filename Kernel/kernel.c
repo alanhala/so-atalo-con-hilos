@@ -1,5 +1,11 @@
 #include "kernel.h"
 
+uint32_t page_size;
+
+void set_page_size(uint32_t size) {
+    page_size = size;
+}
+
 t_list* load_shared_vars(char** shared_vars_list) {
 	t_list* shared_variables = list_create();
 	int i = 0;
@@ -81,19 +87,28 @@ t_PCB* create_pcb(t_kernel* kernel, char* program) {
 	pcb->stack_size = kernel->stack_size;
 	pcb->instructions_index = metadata->instrucciones_serializado;
 	pcb->instructions_size = metadata->instrucciones_size;
-	pcb->used_pages = 300; // ESTO LO HARCODEO EZE. TIENE QE CALCULARSE A PARTIR DEL PROGRAMA Y EL STAACK. validar con mati
 	pcb->stack_last_address = get_stack_address(program);
+	pcb->used_pages = get_used_pages(pcb, kernel->stack_size);
 	pcb->label_index = get_label_index(metadata);
 	pcb->program_finished = 0;
 	return pcb;
 }
 
+uint32_t get_used_pages(t_PCB *pcb, uint32_t stack_size) {
+    return stack_size + pcb->stack_last_address->page + 1;
+}
+
 t_virtual_address* get_stack_address(char* program) {
 	t_virtual_address* address = malloc(sizeof(t_virtual_address));
-	int page = strlen(program) / 5; // TODO sacar el dato hardcodeado por el size de la pagina
-	int offset = strlen(program) - page * 5; // TODO sacar de aca tambien
+	int page = strlen(program) / page_size;
+	int offset = strlen(program) - page * page_size;
+
+	if(offset) {
+	    page++;
+	}
+
 	address->page = page;
-	address->offset = offset;
+	address->offset = 0;
 	return address;
 }
 

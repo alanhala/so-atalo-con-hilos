@@ -247,9 +247,17 @@ t_puntero definirVariable(t_nombre_variable variable) {
 
 	incrementar_next_free_space(new_variable->dato->size);
 
+	validate_stack_size(new_variable);
+
 	list_add(stack_element->variables, new_variable);
 
 	return (t_puntero)(new_variable->dato);
+}
+
+void validate_stack_size(t_variable *variable) {
+    if((variable->dato->direccion->pagina + 1) >= pcb->used_pages) {
+	pcb->program_finished = 2;
+    }
 }
 
 t_puntero obtenerPosicionVariable(t_nombre_variable identificador_variable) {
@@ -597,7 +605,7 @@ int ejecutar_pcb(){
        cambiar_contexto(pcb->pid);
 
        int instruccion_ejecutada = 1;
-       while(instruccion_ejecutada <= QUANTUM  && pcb->program_finished == 0){
+       while(instruccion_ejecutada <= QUANTUM  && !pcb->program_finished){
                execute_next_instruction_for_process();
                printf("Instruccion %d del pid %d ejecutada \n", instruccion_ejecutada, pcb->pid);
                fflush(stdout);

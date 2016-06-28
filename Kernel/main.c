@@ -36,6 +36,7 @@ int main(int argc, char **argv) {
 	//todo me gustaria implementar  el archivo de configuracion asi empiezo a usarlo directamente
 	//pero me tira un par de errores cuando descomento las lineas que uso gkernel
 	//gkernel = create_kernel(CONFIGPATH);
+	set_page_size(5);
 	t_kernel *kernel = create_kernel(CONFIGPATH);
 
 	int umc_fd = create_client_socket_descriptor("localhost", "5000");
