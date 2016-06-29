@@ -41,6 +41,7 @@
 		t_kernel* kernel;
 		int umc_socket_descriptor;
 		t_list* semaphores_list;
+		t_list* io_list;
 	} t_scheduler;
 
 	typedef struct {
@@ -84,7 +85,6 @@
 
 	typedef struct {
 		char* name;
-		sem_t resources;
 		uint32_t sleep;
 	}t_io;
 
@@ -108,6 +108,17 @@
 		t_scheduler* scheduler;
 	} t_pcb_execution_data;
 
+	typedef struct {
+		t_io* io;
+		sem_t resources;
+		t_queue* blocked_pids;
+	} t_io_blocked_queue;
+
+	typedef struct {
+		uint32_t pid;
+		uint32_t operations_count;
+	} t_io_blocked_process_data;
+
 	sem_t mutex_new, mutex_ready, mutex_exit, mutex_block, mutex_execution,
 		mutex_cpus_available;
 	sem_t sem_new, sem_ready, sem_exit, sem_block, sem_execution, sem_cpus_available;
@@ -130,7 +141,7 @@
 
 	uint32_t update_shared_var_value(t_kernel* kernel, char* variable_name, uint32_t value);
 
-	uint32_t io_call(t_kernel* kernel, char* io_name, int times);
+	int32_t io_call(t_kernel* kernel, char* io_name, int times, t_PCB* pcb);
 
 	int32_t wait_ansisop(t_kernel* kernel, char* sem_id, t_PCB* pcb);
 
@@ -149,4 +160,6 @@
 	void signal_unblock_process(t_scheduler* scheduler, char* sem_id);
 	void set_page_size(uint32_t size);
 	uint32_t get_used_pages(t_PCB *pcb, uint32_t stack_size);
+	void* handle_io_queue(void* io_attr);
+	void handle_io_operation(t_scheduler* scheduler, char* io_name, int times, t_PCB* pcb);
 #endif

@@ -195,7 +195,47 @@ t_valor_variable asignarValorCompartida(t_nombre_compartida variable, t_valor_va
 }
 
 void entradaSalida(t_nombre_dispositivo dispositivo, int tiempo) {
+	while(string_ends_with(dispositivo, "\n") || string_ends_with(dispositivo, " "))
+			dispositivo = string_substring_until(dispositivo, string_length((char*)dispositivo)-1);
+	t_PCB_serializacion * pcb_serializado = adaptar_pcb_a_serializar(get_PCB());
+	pcb_serializado->mensaje = 6;
+	pcb_serializado->valor_mensaje = dispositivo;
+	pcb_serializado->cantidad_operaciones = tiempo;
+	pcb_serializado->resultado_mensaje = 0;
+	t_stream * stream = serializar_mensaje(121,pcb_serializado);
+	send(KERNEL_DESCRIPTOR, stream->datos, stream->size, 0);
 
+	t_header *a_header = malloc(sizeof(t_header));
+
+	char buffer_header[5];	//Buffer donde se almacena el header recibido
+
+	int bytes_recibidos_header,	//Cantidad de bytes recibidos en el recv() que recibe el header
+			bytes_recibidos;//Cantidad de bytes recibidos en el recv() que recibe el mensaje completo
+
+	bytes_recibidos_header = recv(KERNEL_DESCRIPTOR, buffer_header, 5,	MSG_PEEK);
+
+	a_header = deserializar_header(buffer_header);
+
+	int tipo = a_header->tipo;
+	int length = a_header->length;
+
+	char buffer_recv[length]; //El buffer para recibir el mensaje se crea con la longitud recibida
+
+	if (tipo == 121) {
+
+		int bytes_recibidos = recv(KERNEL_DESCRIPTOR, buffer_recv,
+				length, 0);
+
+		t_PCB_serializacion *recibir_pcb = malloc(sizeof(t_PCB_serializacion));
+
+		recibir_pcb = (t_PCB_serializacion * ) deserealizar_mensaje(121, buffer_recv);
+		actualizarPCB(get_PCB(), recibir_pcb);
+		if (get_PCB()->program_finished == 6) {
+			io_id = dispositivo;
+			io_operations = tiempo;
+			pthread_exit();
+		}
+	}
 }
 
 void* execute_instruction(void* instruction) {

@@ -56,15 +56,18 @@ int main(int argc, char **argv) {
 
 		//Fibo Ansisop
 		//codigo = "begin\n	variables x\n	x <- fibo 3\n	# Esperable: SegFault en el 10mo (40)\n	\n	# x <- fibo 8\n	#Esperable: 21\n	\n	textPrint Solucion:\n	print x\n	end\n	\n	function fibo\n	print $0\n	jz $0 return0\n	jz $0-1 return1\n	variables a, b\n	a <- fibo $0-1\n	b <- fibo $0-2\n	return a+b\n	\n	:return0\n	return 0\n	\n	:return1\n	return 1\n";
-		codigo = "begin\n variables x\n x <- fibo 3\n # Esperable: SegFault en el 10mo (40)\n \n # x <- fibo 8\n #Esperable: 21\n \n textPrint Solucion:\n print x\n end\n \n function fibo\n print $0\n jz $0 return0\n jz $0-1 return1\n variables a, b\n a <- fibo $0-1\n b <- fibo $0-2\n return a+b\n \n :return0\n return 0\n \n :return1\n return 1\n";
+//		codigo = "begin\n variables x\n x <- fibo 3\n # Esperable: SegFault en el 10mo (40)\n \n # x <- fibo 8\n #Esperable: 21\n \n textPrint Solucion:\n print x\n end\n \n function fibo\n print $0\n jz $0 return0\n jz $0-1 return1\n variables a, b\n a <- fibo $0-1\n b <- fibo $0-2\n return a+b\n \n :return0\n return 0\n \n :return1\n return 1\n";
+//return 0;
+//		codigo = "begin\nvariables c, d, e\nc=2147483647\nd=224947129\nf\ne <- g\nend\nfunction f\nvariables a\na=1\nend\nfunction g\nvariables a\na=2\nreturn a\nend";
+
 
 	} else {
 		fseek(fdarchivo, 0L, SEEK_END);
 		int tamanio = ftell(fdarchivo);
 		rewind(fdarchivo);
-		codigo = malloc(tamanio);
-		fread(codigo, tamanio, 1, fdarchivo);
-		printf(" %s\n", codigo);
+//		codigo = malloc(tamanio);
+//		fread(codigo, tamanio, 1, fdarchivo);
+//		printf(" %s\n", codigo);
 		//return 0;
 	}
 	t_log *trace_log = log_create("./Log_de_Consola.txt", "console_main.c",
@@ -84,7 +87,7 @@ int main(int argc, char **argv) {
 //	char * codigo = "begin\nvariables c, d, e\nc=2147483647\nd=20\nf\ne <- g\niterar\nrecursiva d\ntextPrint Finaliza programa\nend\nfunction f\nvariables a\na=1234\nend\nfunction g\nvariables a\na=2\nreturn a\nend\nfunction iterar\nvariables f, i, t\nf=20\ni=0\n:inicio\ni=i+1\nprint i\nt=f-i\nprint t\njnz t inicio\nend\nfunction recursiva\njz $0 salir\nvariables a\na = $0 - 1\ntextPrint recursiva\nprint a\nrecursiva a\n:salir\nend";
 //	char* codigo = "begin\n:etiqueta\nwait c\ntextPrint entro consumidor\nsignal b\n#Ciclar indefinidamente\ngoto etiqueta\nend";
 //	char* codigo = "begin\n:etiqueta\nwait b\ntextPrint entro productor\nsignal c\n#Ciclar indefinidamente\ngoto etiqueta\nend";
-
+	codigo = "begin\nvariables f, i, t\n	#`f`: Hasta donde contar\n	f=20\n	:inicio\n	#`i`: Iterador\ni=0\ni=i+1\n	#Imprimir el contador\n	print i\n	#`t`: Comparador entre `i` y `f`\n	t=f-i\n	#De no ser iguales, salta a inicio\n	#esperar\n	io HDD1 3\n	jnz t inicio\nend";
 	iniciar_programa->codigo_de_programa = malloc(strlen(codigo)+1);
 	memcpy(iniciar_programa->codigo_de_programa, codigo, strlen(codigo)+1);
 

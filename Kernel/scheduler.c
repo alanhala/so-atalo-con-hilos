@@ -37,6 +37,22 @@ t_list* create_semaphores_list(t_kernel* kernel) {
 	return semaphores_list;
 }
 
+t_list* create_io_list(t_kernel* kernel) {
+	t_list* io_list = list_create();
+	int i;
+	for(i = 0; i < kernel->io_list->elements_count; i++) {
+		t_io_blocked_queue* io_queue = malloc(sizeof(t_io_blocked_queue));
+		t_io* io = list_get(kernel->io_list, i);
+		io_queue->io = io;
+		sem_init(&io_queue->resources, 0, 0);
+		io_queue->blocked_pids = queue_create();
+		list_add(io_list, io_queue);
+		pthread_t io_thread;
+		pthread_create(&io_thread, NULL, &handle_io_queue, (void*) io_queue);
+	}
+	return io_list;
+}
+
 t_scheduler* create_scheduler(t_kernel* kernel) {
 	t_scheduler* self = malloc(sizeof(t_scheduler));
 	self->new_state = queue_create();
@@ -46,6 +62,7 @@ t_scheduler* create_scheduler(t_kernel* kernel) {
 	self->exit_state = queue_create();
 	self->cpus_available = queue_create();
 	self->semaphores_list = create_semaphores_list(kernel);
+	self->io_list = create_io_list(kernel);
 	self->kernel = kernel;
 	initialize_semaphores();
 	create_states_threads(self);
@@ -81,6 +98,7 @@ void* handle_ready(void* scheduler) {
 		sem_wait(&sem_cpus_available); //espero tener una cpu disponible
 		sem_wait(&mutex_execution);
 		pcb->state = "Ejecutando";
+		printf("Ejecutando: %d\n", pcb->pid);
 		queue_push(self->execution_state, pcb);
 		sem_post(&mutex_execution);
 		sem_post(&sem_execution);
@@ -136,9 +154,26 @@ void* handle_exit(void* scheduler) {
 	}
 }
 
+void* handle_io_queue(void* io_attr) {
+	t_io_blocked_queue* io_queue = (t_io_blocked_queue*) io_attr;
+	t_io* io = io_queue->io;
+	while (1) {
+		sem_wait(&io_queue->resources);
+		t_io_blocked_process_data* blocked_data = queue_pop(io_queue->blocked_pids);
+		usleep(io->sleep * blocked_data->operations_count * 1000);
+		int same_pid(t_PCB* aux_pcb) {
+			return (aux_pcb->pid == blocked_data->pid);
+		}
+		t_PCB* pcb = list_remove_by_condition(scheduler->block_state, (void*) same_pid);
+		free(blocked_data);
+		enqueue_to_ready(scheduler, pcb);
+	}
+}
+
 void enqueue_to_ready(t_scheduler* scheduler, t_PCB* pcb) {
 	sem_wait(&mutex_ready);
 	pcb->state = "Ready";
+	printf("Ready: %d\n", pcb->pid);
 	queue_push(scheduler->ready_state, pcb);
 	sem_post(&mutex_ready);
 	sem_post(&sem_ready);
@@ -147,6 +182,7 @@ void enqueue_to_ready(t_scheduler* scheduler, t_PCB* pcb) {
 void enqueue_to_block(t_scheduler* scheduler, t_PCB* pcb) {
 	sem_wait(&mutex_block);
 	pcb->state = "Bloqueado";
+	printf("Bloqueado: %d\n", pcb->pid);
 	list_add(scheduler->block_state, pcb);
 	sem_post(&mutex_block);
 	sem_post(&sem_block);
@@ -192,4 +228,20 @@ void signal_unblock_process(t_scheduler* scheduler, char* sem_id) {
 	}
 	t_PCB* pcb = list_remove_by_condition(scheduler->block_state, (void*) same_pid);
 	enqueue_to_ready(scheduler, pcb);
+}
+
+void handle_io_operation(t_scheduler* scheduler, char* io_name, int times, t_PCB* pcb) {
+	int same_io_queue(t_io_blocked_queue* io_queue) {
+		if (strcmp(io_queue->io->name, io_name) == 0)
+			return 1;
+		else
+			return 0;
+	}
+	t_io_blocked_queue* io_queue = list_find(scheduler->io_list, (void*) same_io_queue);
+	t_io_blocked_process_data* blocked_data = malloc(sizeof(t_io_blocked_process_data));
+	blocked_data->pid = pcb->pid;
+	blocked_data->operations_count = times;
+	enqueue_to_block(scheduler, pcb);
+	queue_push(io_queue->blocked_pids, blocked_data);
+	sem_post(&io_queue->resources);
 }

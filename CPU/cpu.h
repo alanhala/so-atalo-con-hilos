@@ -72,6 +72,8 @@ typedef struct {
 } t_PCB;
 
 char* sem_to_be_blocked;
+char* io_id;
+int io_operations;
 
 
 int QUANTUM;
