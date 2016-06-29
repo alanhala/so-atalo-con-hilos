@@ -88,7 +88,7 @@ int main(int argc, char **argv) {
 //	codigo = "begin\n:etiqueta\nwait c\nprint !colas\nsignal b\n#Ciclar indefinidamente\ngoto etiqueta\nend";
 //	codigo = "begin\n:etiqueta\nwait b\n!colas = !colas +1\nsignal c\n#Ciclar indefinidamente\ngoto etiqueta\nend";//	codigo = "begin\nvariables f, i, t\n	#`f`: Hasta donde contar\n	f=20\n	:inicio\n	#`i`: Iterador\ni=0\ni=i+1\n	#Imprimir el contador\n	print i\n	#`t`: Comparador entre `i` y `f`\n	t=f-i\n	#De no ser iguales, salta a inicio\n	#esperar\n	io HDD1 3\n	jnz t inicio\nend";
 //	codigo = "begin\n!colas = 20\n:etiqueta\nprint !colas\n!colas = !colas - 1\njnz !colas etiqueta\nend";
-	codigo = "begin\nvariables x\nx <- fibo 8\n#Esperable: 21\n\ntextPrint Solucion:\nprint x\nend\n\nfunction fibo\nprint $0\njz $0 return0\njz $0-1 return1\nvariables a, b\na <- fibo $0-1\nb <- fibo $0-2\ntextPrint a:\nprint a\ntextPrint b:\nprint b\nreturn a+b\n\n:return0\nreturn 0\n:return1\nreturn 1#";
+//	codigo = "begin\nvariables x\nx <- fibo 8\n#Esperable: 21\n\ntextPrint Solucion:\nprint x\nend\n\nfunction fibo\nprint $0\njz $0 return0\njz $0-1 return1\nvariables a, b\na <- fibo $0-1\nb <- fibo $0-2\ntextPrint a:\nprint a\ntextPrint b:\nprint b\nreturn a+b\n\n:return0\nreturn 0\n:return1\nreturn 1#";
 	//codigo = "begin\nvariables x\nx <- fibo 8\n#Esperable: 21\n\ntextPrint Solucion:\nprint x\nend\n\nfunction fibo\nreturn 1#";
 	iniciar_programa->codigo_de_programa = malloc(strlen(codigo)+1);
 	memcpy(iniciar_programa->codigo_de_programa, codigo, strlen(codigo)+1);
