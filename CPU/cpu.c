@@ -396,7 +396,7 @@ void imprimir(t_valor_variable valor_mostrar) {
 }
 
 void imprimirTexto(char* print_value) {
-//	int enviado_correctamente = send_text_to_kernel(print_value, string_length(print_value));
+	int enviado_correctamente = send_text_to_kernel(print_value, string_length(print_value));
     //todo si se quiere validar que haya enviado correctmente
     printf("%s\n", print_value);
 }
