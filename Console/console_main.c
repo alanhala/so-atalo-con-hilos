@@ -43,8 +43,20 @@ int main(int argc, char **argv) {
 
 	if ((fdarchivo = fopen(argv[1], "rb")) == 0) {
 		//todo log el archivo esta vacio en este caso no se ejecuta consola
-//return 0;
-		codigo = "begin\nvariables c, d, e\nc=2147483647\nd=224947129\nf\ne <- g\nend\nfunction f\nvariables a\na=1\nend\nfunction g\nvariables a\na=2\nreturn a\nend";
+//return 0;PESADO ANSISOP
+
+		//Pesado Ansisop
+		//codigo = "begin\ngoto Etiqueta19\nend\n:Etiqueta1\n	:Etiqueta2\n	:Etiqueta3\n	:Etiqueta4\n	:Etiqueta5\n	:Etiqueta6\n	:Etiqueta7\n	:Etiqueta8\n	:Etiqueta9\n	:Etiqueta10\n	:Etiqueta11\n	:Etiqueta12\n	:Etiqueta13\n	:Etiqueta14\n	:Etiqueta15\n	:Etiqueta16\n	:Etiqueta17\n	:Etiqueta18\n	:Etiqueta19\n	:Etiqueta20\n	:Etiqueta21\n	:Etiqueta22\n	:Etiqueta23\n	:Etiqueta24\n	:Etiqueta25\n	:Etiqueta26\n	:Etiqueta27\n	textPrint Alfin entre!\n	end\n";
+
+		//Vector Ansisop
+		//codigo = "begin\n	#un vector de 5 posiciones\n	variables a, b, c, d, e, i\n	#No inicializo las primeras 5 variables (vector) para tener elementos aleatorios\n	#i va a ser mi iterador, me interesa que empieze en 0\n	i=0\n	\n	#Bucle del for\n	:for\n	#imprime el valor iavo del vector\n	print *&a+i\n	#pongo en 0 el valor de la posicion para verificar escritura\n	*&a+i = 0\n	#avanzo en el vector (de a 4 posiciones, 1 int)\n	i=i+4\n	#Si i no es 20 (5 posiciones del vector * 4 temanio de las variables)\n	jnz 20-i for\n	\n	#Final del bucle\n	textPrint Fin\n	end\n";
+
+		//For Ansisop
+		//codigo = "begin\n	variables f, i, t\n	\n	#`f`: Hasta donde contar\n	f=20\n	#`i`: Iterador\n	i=0\n	\n	:inicio\n	\n	#Iterar\n	i=i+1\n	\n	#Imprimir el contador\n	print i\n	\n	#`t`: Comparador entre `i` y `f`\n	t=f-i\n	#De no ser iguales, salta a inicio\n	jnz t inicio\n	\n	end\n";
+
+		//Fibo Ansisop
+		//codigo = "begin\n	variables x\n	x <- fibo 3\n	# Esperable: SegFault en el 10mo (40)\n	\n	# x <- fibo 8\n	#Esperable: 21\n	\n	textPrint Solucion:\n	print x\n	end\n	\n	function fibo\n	print $0\n	jz $0 return0\n	jz $0-1 return1\n	variables a, b\n	a <- fibo $0-1\n	b <- fibo $0-2\n	return a+b\n	\n	:return0\n	return 0\n	\n	:return1\n	return 1\n";
+		codigo = "begin\n variables x\n x <- fibo 3\n # Esperable: SegFault en el 10mo (40)\n \n # x <- fibo 8\n #Esperable: 21\n \n textPrint Solucion:\n print x\n end\n \n function fibo\n print $0\n jz $0 return0\n jz $0-1 return1\n variables a, b\n a <- fibo $0-1\n b <- fibo $0-2\n return a+b\n \n :return0\n return 0\n \n :return1\n return 1\n";
 
 	} else {
 		fseek(fdarchivo, 0L, SEEK_END);
