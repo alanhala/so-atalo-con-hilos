@@ -387,6 +387,8 @@ void retornar(t_valor_variable retorno) {
     t_stack_element *stack_element = list_get(pcb->stack, list_size(pcb->stack)-1);
 
     asignar(stack_element->valor_retorno, retorno);
+
+    finalizar();
 }
 
 void imprimir(t_valor_variable valor_mostrar) {
