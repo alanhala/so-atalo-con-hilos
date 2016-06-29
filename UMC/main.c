@@ -33,7 +33,12 @@
 
 t_log 	*trace_log_UMC;
 
-int BACKLOG =10;
+int backlog;
+
+char	*swap_ip,
+		*swap_puerto,
+		*server_ip,
+		*kernel_puerto;
 
 void *kernel_and_cpu_connection_handler(int client_socket_descriptor);
 void *interprete_comando_thread();
@@ -49,11 +54,13 @@ int get_configuracion_cargada(){
 }
 void interprete_de_comandos();
 void manejo_de_solicitudes(int cpu_socket_descriptor);
+void inicializar_semaforos_main(void);
 
 int main(int argc, char **argv) {
 
+	inicializar_semaforos_main();
 
-	 trace_log_UMC = log_create("Log_de_UMC.txt",
+	trace_log_UMC = log_create("./Log_de_UMC.txt",
 								"main.c",
 								false,
 								LOG_LEVEL_TRACE);
@@ -71,9 +78,13 @@ int main(int argc, char **argv) {
 		exit(1);
 	}
 
+	sem_wait(&sem_config_file_umc);
+
+	/*
 	while(CONFIGURACION_CARGADA == 0){
 		//espero
 	};
+	*/
 
 
 	//if (strcmp(argv[1], "-test") == 0 || strcmp(argv[1], "-testMock") == 0){
@@ -94,11 +105,10 @@ int main(int argc, char **argv) {
 
 
 	inicializar_estructuras();
-	int swap_socket = create_client_socket_descriptor("localhost", "6000");
+	int swap_socket = create_client_socket_descriptor(swap_ip, swap_puerto);
 	set_socket_descriptor(swap_socket);
 
-
-	int server_socket_descriptor = create_server_socket_descriptor("localhost","5000",BACKLOG);
+	int server_socket_descriptor = create_server_socket_descriptor(server_ip,kernel_puerto,backlog);
 
 
 	while (1) {
@@ -353,11 +363,14 @@ void cargar_variables_productivas(UMCConfigFile *config){
 	//cargo un string - inicio
 	SWAPIP = malloc(strlen(config->ip_swap)+1);
 	memset(&SWAPIP, 0, (strlen(config->ip_swap)+1));
-	SWAPIP = config->ip_swap;
+	swap_ip = config->ip_swap;
+	swap_puerto= config->puerto_swap;
 	//cargo un string - fin
 
-	LISTENPORT= config->puerto;
-	SWAPPORT= config->puerto_swap;
+	server_ip = config->ip_server;
+	kernel_puerto = config->puerto;
+	backlog = config->backlog;
+
 
 	set_cantidad_entradas_tlb(config->entradas_tlb);
 	set_max_frames_por_proceso(config->marco_x_proc);
@@ -366,3 +379,7 @@ void cargar_variables_productivas(UMCConfigFile *config){
 	set_retardo(config->retardo);
 	set_algoritmo_reemplazo(config->algoritmo_reemplazo);
 };
+
+void inicializar_semaforos_main(void){
+	sem_init(&sem_config_file_umc,0,0);
+}

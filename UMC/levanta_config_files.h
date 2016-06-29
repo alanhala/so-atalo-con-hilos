@@ -20,15 +20,17 @@
 #define BUF_LEN (1024 * EVENT_SIZE)
 
 typedef struct umcConfigFile {
-	unsigned puerto,
-			puerto_swap,
-			marcos,
+	unsigned marcos,
 			marcos_size,
 			marco_x_proc,
 			entradas_tlb,
 			retardo;
-	char 	*ip_swap;
-	char 	*algoritmo_reemplazo;
+	int		backlog;
+	char 	*ip_swap,
+			*algoritmo_reemplazo,
+			*puerto_swap,
+			*ip_server,
+			*puerto;
 } UMCConfigFile;
 
 void levantaConfigFileEnVariables(UMCConfigFile *ptrvaloresConfigFile,t_config *ptrConfig);

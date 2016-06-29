@@ -20,12 +20,7 @@
 #include <pthread.h>
 #include "protocoloCPU.h"
 #include "cpu.h"
-
-#define KERNELPORT "9000"
-#define KERNELIP "localhost"
-
-#define UMCPORT "5000"
-#define UMCIP "localhost"
+#include <commons/config.h>
 
 void connect_to_UMC();
 void connect_to_Kernel();
@@ -38,11 +33,18 @@ t_log *trace_log_CPU;
 
 int hot_plug;
 
+char	*kernel_ip,
+		*kernel_puerto,
+		*umc_ip,
+		*umc_puerto;
+
+int levanta_config_cpu(void);
 
 int main(int argc, char **argv) {
 
+	levanta_config_cpu();
 
-	trace_log_CPU = log_create("Log_de_CPU.txt",
+	trace_log_CPU = log_create("./Log_de_CPU.txt",
 								"cpu_main.c",
 								false,
 								LOG_LEVEL_TRACE);
@@ -149,7 +151,7 @@ int main(int argc, char **argv) {
 
 void connect_to_UMC() {
 
-	int umc_socket_descriptor = create_client_socket_descriptor(UMCIP, UMCPORT);
+	int umc_socket_descriptor = create_client_socket_descriptor(umc_ip, umc_puerto);
 
 	set_umc_socket_descriptor(umc_socket_descriptor);
 	int a =1;
@@ -158,14 +160,13 @@ void connect_to_UMC() {
 	recv(umc_socket_descriptor, &tamanio_pagina, sizeof(int), 0);
 	set_tamanio_pagina(tamanio_pagina);
 
-
 }
 
 
 
 void connect_to_Kernel() {
 
-	int kernel_socket_descriptor =create_client_socket_descriptor(KERNELIP, KERNELPORT);
+	int kernel_socket_descriptor =create_client_socket_descriptor(kernel_ip, kernel_puerto);
 
 	set_kernel_socket_descriptor(kernel_socket_descriptor);
 	int a =1;
@@ -218,11 +219,27 @@ void *captador_de_senal_thread(){
 
 }
 
-
 void sig_handler(){
 	hot_plug = 1;
 	printf("Pulpo\n");
 };
+
+int levanta_config_cpu(void){
+
+	t_config *config_cpu = config_create("./config_cpu.txt");
+
+	if(config_cpu==NULL){
+		//TODO Loggear Error
+		return 1;
+	}
+
+	kernel_ip = config_get_string_value(config_cpu,"IP_KERNEL");
+	kernel_puerto = config_get_string_value(config_cpu,"PUERTO_KERNEL");
+	umc_ip = config_get_string_value(config_cpu,"IP_UMC");
+	umc_puerto = config_get_string_value(config_cpu,"PUERTO_UMC");
+
+	return 0;
+}
 
 
 

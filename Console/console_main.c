@@ -20,9 +20,12 @@
 #include <pthread.h>
 #include "protocoloConsola.h"
 #include <commons/log.h>
+#include <commons/config.h>
 
-#define KERNELTIP = "localhost"
-#define KERNELPORT = "9000"
+char	*kernel_ip,
+		*kernel_puerto;
+
+int levanta_config_consola(void);
 
 //Agrega Newton -- Inicio
 //void cargaArray(char array[],  FILE* codeF);
@@ -32,6 +35,9 @@
 void *senal_de_interrupcion_thread();
 
 int main(int argc, char **argv) {
+
+	levanta_config_consola();
+
 	char* codigo;
 	FILE *fdarchivo;
 
@@ -49,10 +55,10 @@ int main(int argc, char **argv) {
 		printf(" %s\n", codigo);
 		//return 0;
 	}
-	t_log *trace_log = log_create("Log_de_Consola.txt", "console_main.c",
+	t_log *trace_log = log_create("./Log_de_Consola.txt", "console_main.c",
 	false, LOG_LEVEL_TRACE);
-	int kernel_socket_descriptor = create_client_socket_descriptor("localhost",
-			"9000");
+	int kernel_socket_descriptor = create_client_socket_descriptor(kernel_ip,
+			kernel_puerto);
 	int a = 2;
 	send(kernel_socket_descriptor, &a, sizeof(int), 0);
 
@@ -156,6 +162,21 @@ int main(int argc, char **argv) {
 
 void *senal_de_interrupcion_thread(){
 
+}
+
+int levanta_config_consola(void){
+
+	t_config *config_consola = config_create("./config_console.txt");
+
+	if(config_consola==NULL){
+		//TODO loggear error
+		return 1;
+	}
+
+	kernel_ip = config_get_string_value(config_consola,"IP_KERNEL");
+	kernel_puerto = config_get_string_value(config_consola,"PUERTO_KERNEL");
+
+	return 0;
 }
 /*
 //Agrega Newton -- Inicio

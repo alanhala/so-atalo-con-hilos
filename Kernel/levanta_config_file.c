@@ -12,19 +12,20 @@
 #include <sys/inotify.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include "main.h"
 
 int huboUnCambio;
 
 void *cargar_configuracion(t_kernel *kernel){
 
 	t_log *trace_log_Config_Files;
-	trace_log_Config_Files = log_create("Log_de_Config_Files.txt","main.c",false,LOG_LEVEL_TRACE);
+	trace_log_Config_Files = log_create("./Log_de_Config_Files.txt","main.c",false,LOG_LEVEL_TRACE);
 
 	t_config *ptrConfig, *ptrConfigUpdate;
 
 	KernelConfigFile *ptrvaloresConfigFile = malloc(sizeof(KernelConfigFile));
 
-	ptrConfig = config_create("kernel_config.txt");
+	ptrConfig = config_create("./kernel_config.txt");
 	if (ptrConfig == NULL){
 		log_trace(trace_log_Config_Files,"Archivo de configuración no disponible. No puede ejecutar el Kernel.\n");
 		return (1);
@@ -34,7 +35,9 @@ void *cargar_configuracion(t_kernel *kernel){
 
 	levantaConfigFileEnVariables(ptrvaloresConfigFile,ptrConfig);
 	cargar_kernel(ptrvaloresConfigFile,kernel);
+	carga_variables_globales(ptrvaloresConfigFile);
 	log_trace(trace_log_Config_Files,"Archivo de Configuracion levantado exitosamente.\n");
+	sem_post(&sem_config_file_kernel);
 
 	while(1)
 	{
@@ -42,12 +45,13 @@ void *cargar_configuracion(t_kernel *kernel){
 		detectaCambiosEnConfigFile();
 		if(huboUnCambio)
 		{
-			ptrConfigUpdate = config_create("kernel_config.txt");
+			ptrConfigUpdate = config_create("./kernel_config.txt");
 			if(ptrConfigUpdate->properties->elements_amount==0) {
 				log_trace(trace_log_Config_Files,"No se puede levantar el Archivo de Configuracion\n");
 			} else {
 				levantaConfigFileEnVariables(ptrvaloresConfigFile,ptrConfigUpdate);
 				cargar_kernel(ptrvaloresConfigFile,kernel);
+				carga_variables_globales(ptrvaloresConfigFile);
 				log_trace(trace_log_Config_Files,"Archivo de Configuracion actualizado y levantado.\n");
 			}
 			config_destroy(ptrConfigUpdate);
@@ -60,8 +64,8 @@ void *cargar_configuracion(t_kernel *kernel){
 };
 
 void levantaConfigFileEnVariables(KernelConfigFile *ptrvaloresConfigFile,t_config *ptrConfig){
-	ptrvaloresConfigFile->puertoPrograma = leerUnsigned(ptrConfig, "PUERTO_PROGRAMA");
-	ptrvaloresConfigFile->puertoCPU = leerUnsigned(ptrConfig, "PUERTO_CPU");
+	ptrvaloresConfigFile->puerto_programa = leer_string(ptrConfig, "PUERTO_PROGRAMA");
+	ptrvaloresConfigFile->puerto_cpu = leer_string(ptrConfig, "PUERTO_CPU");
 	ptrvaloresConfigFile->quantum = leerUnsigned(ptrConfig, "QUANTUM");
 	ptrvaloresConfigFile->quantum_sleep = leerUnsigned(ptrConfig, "QUANTUM_SLEEP");
 	ptrvaloresConfigFile->idDispositivo = leerArray(ptrConfig, "IO_ID");
@@ -70,7 +74,19 @@ void levantaConfigFileEnVariables(KernelConfigFile *ptrvaloresConfigFile,t_confi
 	ptrvaloresConfigFile->inicioSemaforo = leerArray(ptrConfig, "SEM_INIT");
 	ptrvaloresConfigFile->globalVar = leerArray(ptrConfig, "SHARED_VARS");
 	ptrvaloresConfigFile->stack_size = leerUnsigned(ptrConfig,"STACK_SIZE");
+	ptrvaloresConfigFile->umc_ip = leer_string(ptrConfig,"UMC_IP");
+	ptrvaloresConfigFile->server_ip = leer_string(ptrConfig,"SERVER_IP");
+	ptrvaloresConfigFile->backlog = leerUnsigned(ptrConfig,"BACKLOG");
 }
+
+void carga_variables_globales(KernelConfigFile *una_config){
+	umc_ip = una_config->umc_ip;
+	puerto_programa = una_config->puerto_programa;
+	server_ip = una_config->server_ip;
+	puerto_cpu = una_config->puerto_cpu;
+
+}
+
 
 
 void cargar_kernel(KernelConfigFile *config, t_kernel *kernel){
@@ -89,7 +105,7 @@ void detectaCambiosEnConfigFile() {
 		}
 		// Creamos un monitor sobre un path indicando que eventos queremos escuchar
 		int watch_descriptor = inotify_add_watch(file_descriptor,
-				"/home/utnso/GitHub/tp-2016-1c-Atalo-con-Hilos/Kernel", IN_MODIFY);
+				"./", IN_MODIFY);
 
 		int length = read(file_descriptor, buffer, BUF_LEN);
 		if (length < 0) {

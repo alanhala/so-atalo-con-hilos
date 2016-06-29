@@ -6,7 +6,7 @@ extern t_log *trace_log_SWAP;
 log_trace(trace_log_SWAP,"<lo_que_quieran_loggear>");
 */
 
-
+carga_variables_globales_swap(t_config *swap_config);
 
 void create_file(t_swap* self) {
 	char* size_of_swap_file = string_itoa(self->pages_number * self->page_size);
@@ -37,7 +37,7 @@ void initialize_bitmap(t_swap* self) {
 t_swap *create_swap(char* config_file_path) {
 	t_swap* self = malloc(sizeof(t_swap));
 	t_config* swap_config = config_create(config_file_path);
-	self->port = config_get_string_value(swap_config, "PUERTO_ESCUCHA");
+	umc_port = self->port = config_get_string_value(swap_config, "PUERTO_ESCUCHA");
 	self->swap_name = config_get_string_value(swap_config, "NOMBRE_SWAP");
 	self->pages_number = config_get_int_value(swap_config, "CANTIDAD_PAGINAS");
 	self->page_size = config_get_int_value(swap_config, "TAMANIO_PAGINA");
@@ -46,6 +46,9 @@ t_swap *create_swap(char* config_file_path) {
 	initialize_bitmap(self);
 	create_file(self);
 	self->file = fopen(self->swap_name, "r+");
+
+	backlog = config_get_int_value(swap_config,"BACKLOG");
+	server_ip = config_get_string_value(swap_config,"SERVER_IP");
 
 	return self;
 }
@@ -171,5 +174,4 @@ int remove_program(t_swap* self, unsigned int pid) {
 	destroy_pages_table(pages_table);
 	return 0;
 }
-
 

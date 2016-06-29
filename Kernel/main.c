@@ -21,25 +21,30 @@
 #include "socket.h"
 #include "protocoloKernel.h"
 #include "levanta_config_file.h"
+#include "main.h"
 
-#define CPULISTEN  "8000"
-#define UMCIP  "localhost"
-#define UMCPORT  "5000"
-#define CONFIGPATH "kernel_config.txt"
-#define BACKLOG 10
 //t_kernel * gkernel;
 
 void *cpu_connection(int socket_descriptor);
 void *console_and_cpu_connection_handler(int client_socket_descriptor);
+void inicializa_semaforos_kernel(void);
 
 int main(int argc, char **argv) {
 	//todo me gustaria implementar  el archivo de configuracion asi empiezo a usarlo directamente
 	//pero me tira un par de errores cuando descomento las lineas que uso gkernel
 	//gkernel = create_kernel(CONFIGPATH);
 	//set_page_size(5);
-	t_kernel *kernel = create_kernel(CONFIGPATH);
 
-	int umc_fd = create_client_socket_descriptor("localhost", "5000");
+	inicializa_semaforos_kernel();
+
+	t_kernel *kernel = create_kernel("./kernel_config.txt");
+
+	pthread_t levanta_config_file;
+	int levanta_config_file_resultado = pthread_create(&levanta_config_file,NULL,&cargar_configuracion,kernel);
+
+
+	sem_wait(&sem_config_file_kernel);
+	int umc_fd = create_client_socket_descriptor(umc_ip,puerto_programa);
 	scheduler->umc_socket_descriptor = umc_fd;
 	int a =2;
 	send(umc_fd, &a, sizeof(int), 0);
@@ -47,10 +52,7 @@ int main(int argc, char **argv) {
 	recv(umc_fd, &tamanio_pagina, sizeof(int), 0);
 	set_page_size(tamanio_pagina);
 
-	pthread_t levanta_config_file;
-	int levanta_config_file_resultado = pthread_create(&levanta_config_file,NULL,&cargar_configuracion,kernel);
-
-	int server_socket_descritptor =  create_server_socket_descriptor("localhost","9000",10);
+	int server_socket_descritptor =  create_server_socket_descriptor(server_ip,puerto_cpu,backlog);
 
 	while(1){
 
@@ -146,3 +148,6 @@ void manejo_de_solicitudes(int client_socket_descriptor) {
 
 }
 
+void inicializa_semaforos_kernel(void){
+	sem_init(&sem_config_file_kernel,0,0);
+}
