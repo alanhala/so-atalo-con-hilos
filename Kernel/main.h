@@ -13,9 +13,9 @@
 uint32_t	backlog;
 
 char	*umc_ip,
-		*puerto_programa,
+		*puerto_umc,
 		*server_ip,
-		*puerto_cpu;
+		*server_port;
 
 sem_t sem_config_file_kernel;
 

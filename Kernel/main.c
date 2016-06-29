@@ -44,7 +44,7 @@ int main(int argc, char **argv) {
 
 
 	sem_wait(&sem_config_file_kernel);
-	int umc_fd = create_client_socket_descriptor(umc_ip,puerto_programa);
+	int umc_fd = create_client_socket_descriptor(umc_ip,puerto_umc);
 	scheduler->umc_socket_descriptor = umc_fd;
 	int a =2;
 	send(umc_fd, &a, sizeof(int), 0);
@@ -52,7 +52,7 @@ int main(int argc, char **argv) {
 	recv(umc_fd, &tamanio_pagina, sizeof(int), 0);
 	set_page_size(tamanio_pagina);
 
-	int server_socket_descritptor =  create_server_socket_descriptor(server_ip,puerto_cpu,backlog);
+	int server_socket_descritptor =  create_server_socket_descriptor(server_ip,server_port,backlog);
 
 	while(1){
 

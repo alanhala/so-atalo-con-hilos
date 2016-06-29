@@ -130,3 +130,43 @@
 
 [TRACE] 21:17:26:596 main.c/(3324:3332): Archivo de Configuracion levantado exitosamente.
 
+[TRACE] 00:47:40:641 main.c/(2362:2373): Cargando parametros del Archivo de Configuracion
+
+[TRACE] 00:47:40:646 main.c/(2362:2373): Archivo de Configuracion levantado exitosamente.
+
+[TRACE] 00:48:51:682 main.c/(2458:2465): Cargando parametros del Archivo de Configuracion
+
+[TRACE] 00:48:51:682 main.c/(2458:2465): Archivo de Configuracion levantado exitosamente.
+
+[TRACE] 00:49:14:310 main.c/(2512:2518): Cargando parametros del Archivo de Configuracion
+
+[TRACE] 00:49:14:311 main.c/(2512:2518): Archivo de Configuracion levantado exitosamente.
+
+[TRACE] 00:57:10:81 main.c/(2984:2990): Cargando parametros del Archivo de Configuracion
+
+[TRACE] 00:57:10:81 main.c/(2984:2990): Archivo de Configuracion levantado exitosamente.
+
+[TRACE] 01:06:58:607 main.c/(3103:3113): Cargando parametros del Archivo de Configuracion
+
+[TRACE] 01:06:58:613 main.c/(3103:3113): Archivo de Configuracion levantado exitosamente.
+
+[TRACE] 01:07:37:936 main.c/(3177:3193): Cargando parametros del Archivo de Configuracion
+
+[TRACE] 01:07:37:936 main.c/(3177:3193): Archivo de Configuracion levantado exitosamente.
+
+[TRACE] 01:12:56:418 main.c/(3326:3336): Cargando parametros del Archivo de Configuracion
+
+[TRACE] 01:12:56:430 main.c/(3326:3336): Archivo de Configuracion levantado exitosamente.
+
+[TRACE] 01:19:40:120 main.c/(3521:3531): Cargando parametros del Archivo de Configuracion
+
+[TRACE] 01:19:40:134 main.c/(3521:3531): Archivo de Configuracion levantado exitosamente.
+
+[TRACE] 01:20:18:39 main.c/(3521:3531): Archivo de Configuracion actualizado y levantado.
+
+[TRACE] 01:27:34:97 main.c/(3521:3531): Archivo de Configuracion actualizado y levantado.
+
+[TRACE] 01:34:29:633 main.c/(3855:3862): Cargando parametros del Archivo de Configuracion
+
+[TRACE] 01:34:29:633 main.c/(3855:3862): Archivo de Configuracion levantado exitosamente.
+

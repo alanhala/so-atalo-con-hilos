@@ -56,7 +56,7 @@ void UMC_connection(t_swap* swap) {
 	//Solo se va a conectar un proceso UMC
 
 	int server_socket_descriptor = create_server_socket_descriptor(server_ip,
-			umc_port,backlog);
+			umc_port,BACKLOG);
 
 	int umc_socket_descriptor = accept_connection(server_socket_descriptor);
 

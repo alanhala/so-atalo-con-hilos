@@ -47,7 +47,6 @@ t_swap *create_swap(char* config_file_path) {
 	create_file(self);
 	self->file = fopen(self->swap_name, "r+");
 
-	backlog = config_get_int_value(swap_config,"BACKLOG");
 	server_ip = config_get_string_value(swap_config,"SERVER_IP");
 
 	return self;

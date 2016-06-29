@@ -10,7 +10,6 @@
 #include <commons/log.h>
 #include "pages_table.h"
 
-int backlog;
 char 	*server_ip,
 		*umc_port;
 

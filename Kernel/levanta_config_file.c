@@ -64,8 +64,8 @@ void *cargar_configuracion(t_kernel *kernel){
 };
 
 void levantaConfigFileEnVariables(KernelConfigFile *ptrvaloresConfigFile,t_config *ptrConfig){
-	ptrvaloresConfigFile->puerto_programa = leer_string(ptrConfig, "PUERTO_PROGRAMA");
-	ptrvaloresConfigFile->puerto_cpu = leer_string(ptrConfig, "PUERTO_CPU");
+	ptrvaloresConfigFile->puerto_programa = leer_string(ptrConfig, "PUERTO_UMC");
+	ptrvaloresConfigFile->puerto_cpu = leer_string(ptrConfig, "SERVER_PORT");
 	ptrvaloresConfigFile->quantum = leerUnsigned(ptrConfig, "QUANTUM");
 	ptrvaloresConfigFile->quantum_sleep = leerUnsigned(ptrConfig, "QUANTUM_SLEEP");
 	ptrvaloresConfigFile->idDispositivo = leerArray(ptrConfig, "IO_ID");
@@ -81,10 +81,9 @@ void levantaConfigFileEnVariables(KernelConfigFile *ptrvaloresConfigFile,t_confi
 
 void carga_variables_globales(KernelConfigFile *una_config){
 	umc_ip = una_config->umc_ip;
-	puerto_programa = una_config->puerto_programa;
+	puerto_umc = una_config->puerto_programa;
 	server_ip = una_config->server_ip;
-	puerto_cpu = una_config->puerto_cpu;
-
+	server_port = una_config->puerto_cpu;
 }
 
 
