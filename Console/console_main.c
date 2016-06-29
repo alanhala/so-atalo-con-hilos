@@ -68,7 +68,6 @@ int main(int argc, char **argv) {
 		codigo = malloc(tamanio);
 		fread(codigo, tamanio, 1, fdarchivo);
 		printf(" %s\n", codigo);
-	
 	}
 	t_log *trace_log = log_create("./Log_de_Consola.txt", "console_main.c",
 	false, LOG_LEVEL_TRACE);
