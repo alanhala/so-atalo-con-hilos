@@ -6,7 +6,7 @@ extern t_log *trace_log_SWAP;
 log_trace(trace_log_SWAP,"<lo_que_quieran_loggear>");
 */
 
-carga_variables_globales_swap(t_config *swap_config);
+//carga_variables_globales_swap(t_config *swap_config);
 
 void create_file(t_swap* self) {
 	char* size_of_swap_file = string_itoa(self->pages_number * self->page_size);
@@ -21,9 +21,6 @@ void create_file(t_swap* self) {
 	strcat(linux_instruction, self->swap_name);
 	system(linux_instruction);
 	free(linux_instruction);
-
-	extern t_log *trace_log_SWAP;
-	log_trace(trace_log_SWAP,"---------\n");
 }
 
 void initialize_bitmap(t_swap* self) {
@@ -66,9 +63,11 @@ void destroy_swap(t_swap* self) {
 
 int check_space_available(t_swap* self, unsigned int pages_amount) {
 	int first_page_location = -1;
-	int i, free_slots = 0;
+	int i, total_free_slots = 0;
+	int free_slots = 0;
 	for (i = 0; i < self->pages_number; i++) {
 		if (*(self->bitmap + i) == 0) {
+			total_free_slots ++;
 			free_slots ++;
 			if (first_page_location == -1)
 				first_page_location = i;
@@ -82,6 +81,10 @@ int check_space_available(t_swap* self, unsigned int pages_amount) {
 	}
 	if (free_slots < pages_amount)
 		first_page_location = -1;
+	if (total_free_slots >= pages_amount && first_page_location == -1) {
+		compact_swap_file(self, total_free_slots);
+		first_page_location = self->pages_number - total_free_slots;
+	}
 	return first_page_location;
 }
 
@@ -172,5 +175,42 @@ int remove_program(t_swap* self, unsigned int pid) {
 	remove_program_from_bitmap(self, first_page, pages_table->pages_number);
 	destroy_pages_table(pages_table);
 	return 0;
+}
+
+void compact_swap_file(t_swap* self, int free_pages) {
+	bool sort(t_pages_table* table_1, t_pages_table* table_2) {
+		return *(table_1->pages_location) < *(table_2->pages_location);
+	}
+	list_sort(self->pages_table_list, (void*) sort);
+	int i;
+	int last_dir = 0;
+	int size_of_batch;
+	int page_iterator;
+	int bitmap_iterator;
+	for(i = 0; i < self->pages_table_list->elements_count; i++) {
+		t_pages_table* pages_table = list_get(self->pages_table_list, i);
+		if (*(pages_table->pages_location) == last_dir)
+			last_dir = *(pages_table->pages_location + pages_table->pages_number - 1) +
+							self->page_size;
+		else {
+			size_of_batch = pages_table->pages_number * self->page_size;
+			char* program_data = malloc(size_of_batch);
+			if (fseek(self->file, *(pages_table->pages_location), SEEK_SET) == 0) {
+				fread(program_data, size_of_batch, 1, self->file);
+			}
+			write_swap_file(self, last_dir, pages_table->pages_number, program_data);
+			for(page_iterator = 0; page_iterator < pages_table->pages_number;
+					page_iterator ++) {
+				*(pages_table->pages_location + page_iterator) = last_dir;
+				last_dir += self->page_size;
+			}
+		}
+	}
+	for(bitmap_iterator = 0; bitmap_iterator < self->pages_number; bitmap_iterator ++) {
+		if (bitmap_iterator < self->pages_number - free_pages)
+			*(self->bitmap + bitmap_iterator) = 1;
+		else
+			*(self->bitmap + bitmap_iterator) = 0;
+	}
 }
 

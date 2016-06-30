@@ -21,6 +21,10 @@ int swap_spec() {
 			check_space_available_5);
 	CU_add_test(check_space_available, "when bitmap has two programs with space between them, and a new program does not fit anywhere, it returns -1",
 			check_space_available_6);
+	CU_add_test(check_space_available, "when having space for a program, but not together, it compacts the file",
+			compaction_1);
+	CU_add_test(check_space_available, "when having space for a program, but not together, it compacts the file",
+			compaction_2);
 
 	CU_pSuite add_program_to_bitmap = CU_add_suite("Add a new program to the bitmap", NULL, NULL);
 	CU_add_test(add_program_to_bitmap, "it adds the new program right after the specific page",
@@ -142,6 +146,69 @@ void check_space_available_6() {
 	CU_ASSERT_EQUAL(first_page_location, -1);
 }
 
+void compaction_1() {
+	t_swap* swap = create_swap("./spec/config_file_test.txt");
+	initialize_program(swap, 0, 2, "asd");
+	initialize_program(swap, 1, 2, "123");
+	initialize_program(swap, 2, 2, "qwe");
+	remove_program(swap, 1);
+	initialize_program(swap, 3, 1, "zxc");
+	int first_page_location = check_space_available(swap, 5);
+	t_pages_table* table_1 = list_get(swap->pages_table_list, 0);
+	t_pages_table* table_2 = list_get(swap->pages_table_list, 1);
+	t_pages_table* table_3 = list_get(swap->pages_table_list, 2);
+	CU_ASSERT_EQUAL(*(table_1->pages_location), 0);
+	CU_ASSERT_EQUAL(*(table_2->pages_location), 10);
+	CU_ASSERT_EQUAL(*(table_3->pages_location), 15);
+	CU_ASSERT_EQUAL(*(swap->bitmap), 1);
+	CU_ASSERT_EQUAL(*(swap->bitmap + 1), 1);
+	CU_ASSERT_EQUAL(*(swap->bitmap + 2), 1);
+	CU_ASSERT_EQUAL(*(swap->bitmap + 3), 1);
+	CU_ASSERT_EQUAL(*(swap->bitmap + 4), 1);
+	CU_ASSERT_EQUAL(*(swap->bitmap + 5), 0);
+	CU_ASSERT_EQUAL(*(swap->bitmap + 6), 0);
+	CU_ASSERT_EQUAL(*(swap->bitmap + 7), 0);
+	CU_ASSERT_EQUAL(*(swap->bitmap + 8), 0);
+	CU_ASSERT_EQUAL(*(swap->bitmap + 9), 0);
+	char* page_1 = read_swap_file(swap, 0);
+	char* page_3 = read_swap_file(swap, 10);
+	char* page_4 = read_swap_file(swap, 15);
+	CU_ASSERT_NSTRING_EQUAL(page_1, "asd", 3);
+	CU_ASSERT_NSTRING_EQUAL(page_3, "zxc", 3);
+	CU_ASSERT_NSTRING_EQUAL(page_4, "qwe", 3);
+	CU_ASSERT_EQUAL(first_page_location, 5);
+}
+
+void compaction_2() {
+	t_swap* swap = create_swap("./spec/config_file_test.txt");
+	initialize_program(swap, 0, 2, "asd");
+	initialize_program(swap, 1, 3, "qwe");
+	initialize_program(swap, 2, 1, "iop");
+	initialize_program(swap, 3, 1, "mnb");
+	remove_program(swap, 0);
+	remove_program(swap, 2);
+	int first_page_location = check_space_available(swap, 6);
+	t_pages_table* table_1 = list_get(swap->pages_table_list, 0);
+	t_pages_table* table_2 = list_get(swap->pages_table_list, 1);
+	CU_ASSERT_EQUAL(*(table_1->pages_location), 0);
+	CU_ASSERT_EQUAL(*(table_2->pages_location), 15);
+	CU_ASSERT_EQUAL(*(swap->bitmap), 1);
+	CU_ASSERT_EQUAL(*(swap->bitmap + 1), 1);
+	CU_ASSERT_EQUAL(*(swap->bitmap + 2), 1);
+	CU_ASSERT_EQUAL(*(swap->bitmap + 3), 1);
+	CU_ASSERT_EQUAL(*(swap->bitmap + 4), 0);
+	CU_ASSERT_EQUAL(*(swap->bitmap + 5), 0);
+	CU_ASSERT_EQUAL(*(swap->bitmap + 6), 0);
+	CU_ASSERT_EQUAL(*(swap->bitmap + 7), 0);
+	CU_ASSERT_EQUAL(*(swap->bitmap + 8), 0);
+	CU_ASSERT_EQUAL(*(swap->bitmap + 9), 0);
+	char* page_1 = read_swap_file(swap, 0);
+	char* page_4 = read_swap_file(swap, 15);
+	CU_ASSERT_NSTRING_EQUAL(page_1, "qwe", 3);
+	CU_ASSERT_NSTRING_EQUAL(page_4, "mnb", 3);
+	CU_ASSERT_EQUAL(first_page_location, 4);
+}
+
 void add_program_to_bitmap_1() {
 	t_swap* swap = create_swap("./spec/config_file_test.txt");
 	add_program_to_bitmap(swap, 4, 3);
@@ -188,7 +255,7 @@ void write_swap_file_2() {
 	write_swap_file(swap, 0, 1, "12345");
 	char* data = malloc(5);
 	fseek(swap->file, 0, SEEK_SET);
-	fread(data, 15, 1, swap->file);
+	fread(data, 5, 1, swap->file);
 	CU_ASSERT_NSTRING_EQUAL(data, "12345", 5);
 }
 
@@ -209,7 +276,7 @@ void write_swap_file_4() {
 	char* data = malloc(5);
 	fseek(swap->file, 0, SEEK_SET);
 	fread(data, 5, 1, swap->file);
-	CU_ASSERT_NSTRING_EQUAL(data, "qwe  ", 5);
+	CU_ASSERT_NSTRING_EQUAL(data, "qwe00", 5);
 }
 
 void read_page_1() {
@@ -225,7 +292,7 @@ void read_page_2() {
 	initialize_program(swap, 1, 1, "123");
 	char* data = malloc(5);
 	data = read_page(swap, 1, 0);
-	CU_ASSERT_NSTRING_EQUAL(data, "123  ", 5);
+	CU_ASSERT_NSTRING_EQUAL(data, "12300", 5);
 }
 
 void read_page_3() {

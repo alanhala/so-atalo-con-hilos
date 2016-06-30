@@ -14,6 +14,8 @@
 	void check_space_available_4();
 	void check_space_available_5();
 	void check_space_available_6();
+	void compaction_1();
+	void compaction_2();
 	void add_program_to_bitmap_1();
 	void add_program_to_bitmap_2();
 	void write_swap_file_1();

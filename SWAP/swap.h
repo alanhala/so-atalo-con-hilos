@@ -49,4 +49,5 @@ char 	*server_ip,
 
 	char* read_page(t_swap* self, unsigned int pid, unsigned int page);
 
+	void compact_swap_file(t_swap* self, int free_pages);
 #endif
