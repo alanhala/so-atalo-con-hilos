@@ -71,6 +71,11 @@ ejecutar cada script directamente poniendo
  ARCHIVOS DE CONFIGURACION:
  
  1)El archivo de configuracion de cada componente tiene que ser copiado en el directorio donde se ejecuta el componente.
- 2)La consola se ejecuta en el directorio usr/bin por lo tanto copiar el archivo de configuracion a ese directorio usando el comando sudo cp .
+ 2)La consola : en este caso hay que copiar el archivo de configuracion en el directorio donde ejecutamos el script ansisop.
+ 
+podriamos evitar la confusion de la ruta de los archvos de configuracion poniendo cuando llamamos al archivo de configuracion directamente la direccion global o sea /home/utnso/nombrearchivoconfig 
+link de explicacion:
+http://mgarciaisaia.github.io/tutorial-c/blog/2015/04/23/rutas-argentinas/
+
  
  
