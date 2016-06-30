@@ -1,11 +1,11 @@
 # Makefile
-src=cpu_main.c conexionCPUTest.c cpu.c  primitive.c protocoloCPU.c socket.c tests.c   
-obj=cpu_main.o conexionCPUTest.o cpu.o  primitive.o protocoloCPU.o socket.o tests.o   
+src=cpu_main.c cpu.c primitive.c protocoloCPU.c socket.c  
+obj=cpu_main.o cpu.o primitive.o protocoloCPU.o socket.o   
 inc= 
 misc=Makefile
 target=cpu
 cflags=-w
-lflags= -lcommons -lcunit -lparser-ansisop -lpthread
+lflags= -lcommons -lparser-ansisop -lpthread
 
 all: $(target)
 
