@@ -204,6 +204,7 @@ void compact_swap_file(t_swap* self, int free_pages) {
 				*(pages_table->pages_location + page_iterator) = last_dir;
 				last_dir += self->page_size;
 			}
+			free(program_data);
 		}
 	}
 	for(bitmap_iterator = 0; bitmap_iterator < self->pages_number; bitmap_iterator ++) {
