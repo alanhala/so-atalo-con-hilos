@@ -67,3 +67,10 @@ asegurarse que cada script tenga modo de ejecucion  (por defecto ya vienen con m
 chmod +x facil.ansisop
 ejecutar cada script directamente poniendo
  ./facil.ansisop
+ 
+ ARCHIVOS DE CONFIGURACION:
+ 
+ 1)El archivo de configuracion de cada componente tiene que ser copiado en el directorio donde se ejecuta el componente.
+ 2)La consola se ejecuta en el directorio usr/bin por lo tanto copiar el archivo de configuracion a ese directorio usando el comando sudo cp .
+ 
+ 
