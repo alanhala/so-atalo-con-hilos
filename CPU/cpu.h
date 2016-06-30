@@ -107,6 +107,8 @@ t_valor_variable asignarValorCompartida(t_nombre_compartida variable, t_valor_va
 void do_wait(t_nombre_semaforo identificador_semaforo);
 void do_signal(t_nombre_semaforo identificador_semaforo);
 void entradaSalida(t_nombre_dispositivo dispositivo, int tiempo);
+t_dato_en_memoria* convert_to_virtual_address(t_puntero absolute_offset);
+t_puntero convert_to_absolute_offset(t_dato_en_memoria* dato);
 
 char* leer_memoria_de_umc(t_dato_en_memoria *dato);
 int escribir_en_umc(t_dato_en_memoria *dato, char* valor);

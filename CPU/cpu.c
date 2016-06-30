@@ -329,7 +329,7 @@ t_puntero definirVariable(t_nombre_variable variable) {
 
 	list_add(stack_element->variables, new_variable);
 
-	return (t_puntero)(new_variable->dato);
+	return convert_to_absolute_offset(new_variable->dato);
 }
 
 void validate_stack_size(t_variable *variable) {
@@ -339,24 +339,24 @@ void validate_stack_size(t_variable *variable) {
 }
 
 t_puntero obtenerPosicionVariable(t_nombre_variable identificador_variable) {
-	t_stack_element *stack_element = list_get(pcb->stack, list_size(pcb->stack) - 1);
+    t_stack_element *stack_element = list_get(pcb->stack, list_size(pcb->stack) - 1);
 
-	int find_variable(t_variable *var) {
-		return var->id == identificador_variable;
-	}
+    int find_variable(t_variable *var) {
+	    return var->id == identificador_variable;
+    }
 
-	t_variable *variable = list_find(stack_element->variables, (void*)find_variable);
+    t_variable *variable = list_find(stack_element->variables, (void*)find_variable);
 
-	if(variable == NULL) {
-		pcb->program_finished = 2;
-		pthread_exit();
-	}
+    if(variable == NULL) {
+	    pcb->program_finished = 2;
+	    pthread_exit();
+    }
 
-	return (t_puntero)(variable->dato);
+    return convert_to_absolute_offset(variable->dato);
 }
 
-t_valor_variable dereferenciar(t_puntero direccion_variable) {
-    t_dato_en_memoria *direccion = (t_dato_en_memoria*) direccion_variable;
+t_valor_variable dereferenciar(t_puntero absolute_offset) {
+    t_dato_en_memoria *direccion = convert_to_virtual_address(absolute_offset);
 
     char* respuesta = ejecutar_lectura_de_dato_con_iteraciones(leer_memoria_de_umc, direccion, tamanio_pagina);
     uint32_t valor;
@@ -377,16 +377,14 @@ void go_back_to_previous_stack_element(t_stack_element *current_stack_element) {
     free_stack_element_memory(current_stack_element);
 }
 
-void asignar(t_puntero direccion_variable, t_valor_variable valor) {
-    t_dato_en_memoria *direccion = (t_dato_en_memoria*) direccion_variable;
-
-    ejecutar_escritura_de_dato_con_iteraciones(direccion, (char*) &valor, tamanio_pagina);
+void asignar(t_puntero absolute_offset, t_valor_variable valor) {
+    ejecutar_escritura_de_dato_con_iteraciones(convert_to_virtual_address(absolute_offset), (char*) &valor, tamanio_pagina);
 }
 
 void retornar(t_valor_variable retorno) {
     t_stack_element *stack_element = list_get(pcb->stack, list_size(pcb->stack)-1);
 
-    asignar(stack_element->valor_retorno, retorno);
+    asignar(convert_to_absolute_offset(stack_element->valor_retorno), retorno);
 
     finalizar();
 }
@@ -430,7 +428,7 @@ void llamarSinRetorno(t_nombre_etiqueta etiqueta) {
 void llamarConRetorno(t_nombre_etiqueta etiqueta, t_puntero donde_retornar) {
 
     t_stack_element *stack_element = create_stack_element();
-    stack_element->valor_retorno = (t_dato_en_memoria*)donde_retornar;
+    stack_element->valor_retorno = convert_to_virtual_address(donde_retornar);
     stack_element->posicion_retorno = pcb->program_counter+1;
 
     list_add(pcb->stack, stack_element);
@@ -533,14 +531,34 @@ int escribir_en_umc(t_dato_en_memoria * dato, char* valor) {
     return respuesta->escritura_correcta;
 }
 
-void incrementar_next_free_space(uint32_t size) {
-    int absolute_offset = (tamanio_pagina * pcb->stack_free_space_pointer->pagina ) + pcb->stack_free_space_pointer->offset + size;
+t_puntero convert_to_absolute_offset(t_dato_en_memoria* dato) {
+    return (tamanio_pagina * dato->direccion->pagina ) + dato->direccion->offset;
+}
 
+t_dato_en_memoria* convert_to_virtual_address(t_puntero absolute_offset) {
+
+    t_dato_en_memoria* dato = malloc(sizeof(t_dato_en_memoria));
+    dato->direccion = malloc(sizeof(t_direccion_virtual_memoria));
+
+    set_page_and_offset_from_absolute_offset(dato->direccion, absolute_offset);
+
+    dato->size = sizeof(uint32_t);
+
+    return dato;
+}
+
+void set_page_and_offset_from_absolute_offset(t_direccion_virtual_memoria* direccion, uint32_t absolute_offset) {
     int new_pages = absolute_offset / tamanio_pagina;
     int new_offset = absolute_offset - (new_pages * tamanio_pagina);
 
-    pcb->stack_free_space_pointer->pagina = new_pages;
-    pcb->stack_free_space_pointer->offset = new_offset;
+    direccion->pagina = new_pages;
+    direccion->offset = new_offset;
+}
+
+void incrementar_next_free_space(uint32_t size) {
+    int absolute_offset = (tamanio_pagina * pcb->stack_free_space_pointer->pagina ) + pcb->stack_free_space_pointer->offset + size;
+
+    set_page_and_offset_from_absolute_offset( pcb->stack_free_space_pointer, absolute_offset);
 };
 
 void decrementar_next_free_space(uint32_t size) {
@@ -695,7 +713,7 @@ int ejecutar_pcb(){
     	   printf("Instruccion %d del pid %d ejecutada \n", instruccion_ejecutada, pcb->pid);
 		   fflush(stdout);
 		   instruccion_ejecutada ++;
-		   usleep(100000);
+		   //usleep(100000);
        }
 
       return 0;
