@@ -248,11 +248,10 @@ void execute_next_instruction_for_process() {
 	char *instruccion_string = ejecutar_lectura_de_dato_con_iteraciones(leer_memoria_de_umc, instruccion, tamanio_pagina);
 	int program_counter = pcb->program_counter;
 	pthread_t execution_thread;
-	pthread_create(&execution_thread, NULL,
-			&execute_instruction, (void*) instruccion_string);
+	pthread_create(&execution_thread, NULL, &execute_instruction, (void*) instruccion_string);
 	pthread_join(execution_thread, NULL);
 
-	if(program_counter == pcb->program_counter && !string_starts_with(instruccion_string, TEXT_END)) {
+	if(program_counter == pcb->program_counter && !string_starts_with(instruccion_string, TEXT_END) && !string_starts_with(instruccion_string, TEXT_RETURN)) {
 	    pcb->program_counter++;
 	}
 };
@@ -335,6 +334,7 @@ t_puntero definirVariable(t_nombre_variable variable) {
 void validate_stack_size(t_variable *variable) {
     if((variable->dato->direccion->pagina + 1) >= pcb->used_pages) {
 	pcb->program_finished = 2;
+	pthread_exit();
     }
 }
 
@@ -713,7 +713,7 @@ int ejecutar_pcb(){
     	   printf("Instruccion %d del pid %d ejecutada \n", instruccion_ejecutada, pcb->pid);
 		   fflush(stdout);
 		   instruccion_ejecutada ++;
-		   //usleep(100000);
+		   //usleep(300000);
        }
 
       return 0;

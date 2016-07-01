@@ -56,7 +56,8 @@ int main(int argc, char **argv) {
 
 		//Fibo Ansisop
 		//codigo = "begin\n	variables x\n	x <- fibo 3\n	# Esperable: SegFault en el 10mo (40)\n	\n	# x <- fibo 8\n	#Esperable: 21\n	\n	textPrint Solucion:\n	print x\n	end\n	\n	function fibo\n	print $0\n	jz $0 return0\n	jz $0-1 return1\n	variables a, b\n	a <- fibo $0-1\n	b <- fibo $0-2\n	return a+b\n	\n	:return0\n	return 0\n	\n	:return1\n	return 1\n";
-//		codigo = "begin\n variables x\n x <- fibo 3\n # Esperable: SegFault en el 10mo (40)\n \n # x <- fibo 8\n #Esperable: 21\n \n textPrint Solucion:\n print x\n end\n \n function fibo\n print $0\n jz $0 return0\n jz $0-1 return1\n variables a, b\n a <- fibo $0-1\n b <- fibo $0-2\n return a+b\n \n :return0\n return 0\n \n :return1\n return 1\n";
+		//codigo = "begin\n variables x\n x <- fibo 8\n # Esperable: SegFault en el 10mo (40)\n \n # x <- fibo 8\n #Esperable: 21\n \n textPrint Solucion:\n print x\n end\n \n function fibo\n print $0\n jz $0 return0\n jz $0-1 return1\n variables a, b\n a <- fibo $0-1\n b <- fibo $0-2\n return a+b\n \n :return0\n return 0\n \n :return1\n return 1\n";
+		codigo =   "begin\nvariables x\nx <- fibo 8\n # Esperable: SegFault en el 10mo (40)\n \n # x <- fibo 8\n #Esperable: 21\n\ntextPrint Solucion:\nprint x\nend\n\nfunction fibo\nprint $0\njz $0 return0\njz $0-1 return1\nvariables a, b\na <- fibo $0-1\nb <- fibo $0-2\nreturn a+b\n\n:return0\nreturn 0\n:return1\nreturn 1\n";
 //return 0;
 //		codigo = "begin\nvariables c, d, e\nc=2147483647\nd=224947129\nf\ne <- g\nend\nfunction f\nvariables a\na=1\nend\nfunction g\nvariables a\na=2\nreturn a\nend";
 
@@ -89,7 +90,7 @@ int main(int argc, char **argv) {
 //	codigo = "begin\n!colas = 20\n:etiqueta\nprint !colas\n!colas = !colas - 1\njnz !colas etiqueta\nend";
 	//codigo = "begin\nvariables x\nx <- fibo 8\n#Esperable: 21\n\ntextPrint Solucion:\nprint x\nend\n\nfunction fibo\nprint $0\njz $0 return0\njz $0-1 return1\nvariables a, b\na <- fibo $0-1\nb <- fibo $0-2\ntextPrint a:\nprint a\ntextPrint b:\nprint b\nreturn a+b\n\n:return0\nreturn 0\n:return1\nreturn 1#";
 //	codigo = "#!/usr/bin/ansisop\nbegin\n#un vector de 5 posiciones\nvariables a, b, c, d, e, i\na=111\nb=222\nc=333\n#i va a ser mi iterador, me interesa que empieze en 0\ni=0\n\n#Bucle del for\n:for\n#imprime el valor iavo del vector\nprint *&a+i\n#pongo en 0 el valor de la posicion para verificar escritura\n*&a+i = 0\n#avanzo en el vector (de a 4 posiciones, 1 int)\ni=i+4\n#Si i no es 20 (5 posiciones del vector * 4 temanio de las variables)\njnz 20-i for\n\n#Final del bucle\ntextPrint Fin\nend\n\n";
-//	codigo = "begin\nvariables x\nx <- fibo 8\n#Esperable: 21\n\ntextPrint Solucion:\nprint x\nend\n\nfunction fibo\nprint $0\njz $0 return0\njz $0-1 return1\nvariables a, b\na <- fibo $0-1\nb <- fibo $0-2\ntextPrint a:\nprint a\ntextPrint b:\nprint b\nreturn a+b\n\n:return0\nreturn 0\n:return1\nreturn 1#";
+	//codigo = "begin\nvariables x\nx <- fibo 8\n#Esperable: 21\n\ntextPrint Solucion:\nprint x\nend\n\nfunction fibo\nprint $0\njz $0 return0\njz $0-1 return1\nvariables a, b\na <- fibo $0-1\nb <- fibo $0-2\ntextPrint a:\nprint a\ntextPrint b:\nprint b\nreturn a+b\n\n:return0\nreturn 0\n:return1\nreturn 1\n";
 	//codigo = "begin\nvariables x\nx <- fibo 8\n#Esperable: 21\n\ntextPrint Solucion:\nprint x\nend\n\nfunction fibo\nreturn 1#";
 	iniciar_programa->codigo_de_programa = malloc(strlen(codigo)+1);
 	memcpy(iniciar_programa->codigo_de_programa, codigo, strlen(codigo)+1);
