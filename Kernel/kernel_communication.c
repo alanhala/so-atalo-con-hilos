@@ -128,7 +128,8 @@ void* handle_pcb_execution(void* data_to_cast) {
 				    	handle_io_operation(scheduler, unPCB->valor_mensaje, unPCB->cantidad_operaciones, pcb);
 				    else
 				    	enqueue_to_ready(scheduler, pcb);
-				    free_cpu(scheduler, cpu);
+				    if (!unPCB->cpu_unplugged)
+				    	free_cpu(scheduler, cpu);
 				    break; // TODO REVISAR
 				} else if(unPCB->mensaje == 4) {
 					int resultado = wait_ansisop(kernel, unPCB->valor_mensaje, pcb);
@@ -156,10 +157,7 @@ void* handle_pcb_execution(void* data_to_cast) {
 					pcb_serializacion->cantidad_operaciones = 0;
 					pcb_serializacion->valor_de_la_variable_compartida =0;
 					pcb_serializacion->resultado_mensaje = 0;
-					if (resultado == 0)
-						pcb_serializacion->program_finished = 6;
-					else
-						pcb_serializacion->program_finished = 7;
+					pcb_serializacion->program_finished = 6;
 					t_stream *buffer = serializar_mensaje(121,pcb_serializacion);
 
 					int bytes_enviados = send(pcb->cpu_socket_descriptor, buffer->datos, buffer->size, 0);

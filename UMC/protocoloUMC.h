@@ -81,7 +81,7 @@ typedef struct {
 }__attribute__((packed)) t_iniciar_programa_en_swap;
 
 typedef struct {
-  uint32_t cargado_correctamente; // 0 si ok, -1 si no ok
+  int32_t cargado_correctamente; // 0 si ok, -1 si no ok
 }__attribute__((packed)) t_respuesta_iniciar_programa_en_swap;
 
 typedef struct {

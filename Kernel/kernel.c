@@ -178,10 +178,7 @@ int32_t io_call(t_kernel* self, char* io_name, int times, t_PCB* pcb) {
 			return 0;
 	}
 	t_io_blocked_queue* io_queue = list_find(self->io_list, (void*) same_io);
-	if (io_queue == NULL)
-		return -1;
-	else
-		return 0;
+	return 0;
 }
 
 int32_t wait_ansisop(t_kernel* kernel, char* sem_id, t_PCB* pcb) {

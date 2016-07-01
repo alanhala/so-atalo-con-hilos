@@ -81,10 +81,16 @@ void* handle_new(void* scheduler) {
 		pcb->console_socket_descriptor = new_program->console_socket_descriptor;
 		int result = start_program_in_umc(self->umc_socket_descriptor,
 				pcb->pid, pcb->used_pages, new_program->program_code);
-		printf("resultado inicio programa en umc : %d\n", result); //TODO sacar este comentario
-		fflush(stdout);
+		if (result == -1) {
+			pcb->program_finished = 7;
+			end_program(scheduler, pcb);
+		}
+		else {
+			printf("resultado inicio programa en umc : %d\n", result); //TODO sacar este comentario
+			fflush(stdout);
 
-		enqueue_to_ready(self, pcb);
+			enqueue_to_ready(self, pcb);
+		}
 	}
 }
 

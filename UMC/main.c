@@ -167,7 +167,9 @@ void manejo_de_solicitudes(int socket_descriptor) {
 
 		int bytes_recibidos_header = recv(socket_descriptor, buffer_header, 5,
 				MSG_PEEK);
-
+		if (bytes_recibidos_header == 0) { // SE DESCONECTO UNA CPU
+			pthread_exit((void*) 1);
+		}
 		a_header = deserializar_header(buffer_header);
 
 		char buffer_recv[a_header->length]; //El buffer para recibir el mensaje se crea con la longitud recibida
