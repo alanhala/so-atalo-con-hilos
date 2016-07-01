@@ -32,7 +32,7 @@ int levanta_config_consola(void);
 //void imprimeArray(const int cantCar,char array[]);
 //Agrega Newton -- Fin
 
-void *senal_de_interrupcion_thread();
+void listen_sigint_signal();
 
 int main(int argc, char **argv) {
 
@@ -126,6 +126,8 @@ int main(int argc, char **argv) {
 
 	printf("Respuesta al inicio de programa: %d\n",respuesta->respuesta_correcta);
 
+	listen_sigint_signal();
+
 	while (1) {
 		t_header *un_header = malloc(sizeof(t_header));
 		char buffer_header[5];
@@ -169,6 +171,10 @@ int main(int argc, char **argv) {
 				printf("El programa finalizo por Stack Overflow\n");
 				log_trace(trace_log,"El programa finalizo por Stack Overflow\n");
 				fflush(stdout);
+			} else if (finalizar->motivo == 7) {
+				printf("Insuficiente espacio como para cargar el programa");
+				log_trace(trace_log, "Insuficiente espacio como para cargar el programa");
+				fflush(stdout);
 			} else {
 				printf("El programa no pudo finalizar correctamente\n");
 				log_trace(trace_log,"El programa no finalizo correctamente\n");
@@ -183,8 +189,13 @@ int main(int argc, char **argv) {
 	return 0;
 }
 
-void *senal_de_interrupcion_thread(){
+void sigint_handler() {
 
+}
+
+void listen_sigint_signal() {
+	if (signal(SIGINT, sigint_handler) == SIG_ERR)
+		printf("\ncan't catch SIGINT\n");
 }
 
 int levanta_config_consola(void){

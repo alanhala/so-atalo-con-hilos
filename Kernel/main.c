@@ -95,57 +95,54 @@ void manejo_de_solicitudes(int client_socket_descriptor) {
 	if(handshake == 2) //Consola
 	{
 		printf("consola conectada\n");
+
+		t_header *un_header = malloc(sizeof(t_header));
+		char buffer_header[5];
+
+		int	bytes_recibidos_header,
+			bytes_recibidos;
+
+		bytes_recibidos_header = recv(client_socket_descriptor,buffer_header,5,MSG_PEEK);
+
+		un_header = deserializar_header(buffer_header);
+
+		char buffer_recibidos[(un_header->length)];
+
+		if(un_header->tipo == 91){
+
+			int bytes_recibidos = recv(client_socket_descriptor,buffer_recibidos,un_header->length,0);
+
+			t_iniciar_programa_en_kernel *iniciar_programa = malloc(sizeof(t_iniciar_programa_en_kernel));
+
+			iniciar_programa = (t_iniciar_programa_en_kernel *)deserealizar_mensaje(91,buffer_recibidos);
+
+			printf("Kernel. El mensaje es: %s\n",iniciar_programa->codigo_de_programa);
+			printf("Kernel. El mensaje tiene de largo: %d\n",un_header->length);
+
+			// AGREGO EL CODIGO A LA COLA DE NEW
+			t_new_program* new_program = malloc(sizeof(t_new_program));
+			new_program->program_code = iniciar_programa->codigo_de_programa;
+			new_program->console_socket_descriptor = client_socket_descriptor;
+			//char * codigo_programa = iniciar_programa->codigo_de_programa;
+			sem_wait(&mutex_new);
+			queue_push(scheduler->new_state, new_program);
+			sem_post(&mutex_new);
+			sem_post(&sem_new);
+			// FIN
+
+			t_respuesta_iniciar_programa_en_kernel *respuesta = malloc(sizeof(t_respuesta_iniciar_programa_en_kernel));
+			memset(respuesta,0,sizeof(t_respuesta_iniciar_programa_en_kernel));
+
+			uint32_t respuesta_tmp = 22;
+			respuesta->respuesta_correcta=respuesta_tmp;
+
+			t_stream *buffer = malloc(sizeof(t_stream));
+
+			buffer = serializar_mensaje(92,respuesta);
+
+			int bytes_sent = send(client_socket_descriptor,buffer->datos,buffer->size,0);
+		}
 	}
-
-
-			t_header *un_header = malloc(sizeof(t_header));
-			char buffer_header[5];
-
-			int	bytes_recibidos_header,
-				bytes_recibidos;
-
-			bytes_recibidos_header = recv(client_socket_descriptor,buffer_header,5,MSG_PEEK);
-
-			un_header = deserializar_header(buffer_header);
-
-			char buffer_recibidos[(un_header->length)];
-
-			if(un_header->tipo == 91){
-
-				int bytes_recibidos = recv(client_socket_descriptor,buffer_recibidos,un_header->length,0);
-
-				t_iniciar_programa_en_kernel *iniciar_programa = malloc(sizeof(t_iniciar_programa_en_kernel));
-
-				iniciar_programa = (t_iniciar_programa_en_kernel *)deserealizar_mensaje(91,buffer_recibidos);
-
-				printf("Kernel. El mensaje es: %s\n",iniciar_programa->codigo_de_programa);
-				printf("Kernel. El mensaje tiene de largo: %d\n",un_header->length);
-
-				// AGREGO EL CODIGO A LA COLA DE NEW
-				t_new_program* new_program = malloc(sizeof(t_new_program));
-				new_program->program_code = iniciar_programa->codigo_de_programa;
-				new_program->console_socket_descriptor = client_socket_descriptor;
-				//char * codigo_programa = iniciar_programa->codigo_de_programa;
-				sem_wait(&mutex_new);
-				queue_push(scheduler->new_state, new_program);
-				sem_post(&mutex_new);
-				sem_post(&sem_new);
-				// FIN
-
-				t_respuesta_iniciar_programa_en_kernel *respuesta = malloc(sizeof(t_respuesta_iniciar_programa_en_kernel));
-				memset(respuesta,0,sizeof(t_respuesta_iniciar_programa_en_kernel));
-
-				uint32_t respuesta_tmp = 22;
-				respuesta->respuesta_correcta=respuesta_tmp;
-
-				t_stream *buffer = malloc(sizeof(t_stream));
-
-				buffer = serializar_mensaje(92,respuesta);
-
-				int bytes_sent = send(client_socket_descriptor,buffer->datos,buffer->size,0);
-
-			}
-
 }
 
 void inicializa_semaforos_kernel(void){

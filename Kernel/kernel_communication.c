@@ -156,10 +156,7 @@ void* handle_pcb_execution(void* data_to_cast) {
 					pcb_serializacion->cantidad_operaciones = 0;
 					pcb_serializacion->valor_de_la_variable_compartida =0;
 					pcb_serializacion->resultado_mensaje = 0;
-					if (resultado == 0)
-						pcb_serializacion->program_finished = 6;
-					else
-						pcb_serializacion->program_finished = 7;
+					pcb_serializacion->program_finished = 6;
 					t_stream *buffer = serializar_mensaje(121,pcb_serializacion);
 
 					int bytes_enviados = send(pcb->cpu_socket_descriptor, buffer->datos, buffer->size, 0);
