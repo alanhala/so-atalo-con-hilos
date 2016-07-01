@@ -578,7 +578,7 @@ void free_stack_element_memory(t_stack_element *element) {
     }
 
     list_destroy_and_destroy_elements(element->variables, free_memory);
-    //free(element);
+    free(element);
 };
 
 void set_PCB(t_PCB *new_pcb) {
