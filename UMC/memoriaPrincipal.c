@@ -326,22 +326,17 @@ int cargar_nuevo_programa_en_swap(int pid, int paginas_requeridas_del_proceso, c
 	respuesta = (t_respuesta_iniciar_programa_en_swap*)deserealizar_mensaje(buffer_header[0], buffer_recv);
 
 	sem_post(&mut_swap);
-	if (SWAP_MOCK_ENABLE){
-			int resp = cargar_nuevo_programa_en_swap_mock(pid, paginas_requeridas_del_proceso, codigo_programa);
-			//free(carga->codigo_programa);
-			free(carga);
-			free(buffer->datos);
-			free(buffer);
-			free(buffer_recv);
-			return resp;
 
+	if (SWAP_MOCK_ENABLE){
+			cargar_nuevo_programa_en_swap_mock(pid, paginas_requeridas_del_proceso, codigo_programa);
 	}
 	free(carga);
 	free(buffer->datos);
 	free(buffer);
 	free(buffer_recv);
-
-	return respuesta->cargado_correctamente;
+	int resp= respuesta->cargado_correctamente;
+	free(respuesta);
+	return resp;
 }
 
 char * leer_pagina_de_swap(int pid, int pagina){
@@ -389,7 +384,9 @@ char * leer_pagina_de_swap(int pid, int pagina){
 	free(buffer->datos);
 	free(buffer);
 	free(buffer_recv);
-	return respuesta->datos; //debe devolver esto si no leyo bien "~/-1"
+	char * datos_return = respuesta->datos;
+	free(respuesta);
+	return datos_return; //debe devolver esto si no leyo bien "~/-1"
 }
 
 int escribir_pagina_de_swap(int pid, int pagina, char * datos){
@@ -431,9 +428,12 @@ int escribir_pagina_de_swap(int pid, int pagina, char * datos){
 	free(buffer);
 	free(buffer_recv);
 
-	if (SWAP_MOCK_ENABLE)
+	if (SWAP_MOCK_ENABLE){
 		return escribir_pagina_de_swap_mock(pid, pagina, datos);
-	return respuesta->escritura_correcta;
+	}
+	int resp= respuesta->escritura_correcta;
+	free(respuesta);
+	return resp;
 }
 
 int finalizar_programa_de_swap(int pid){
@@ -476,8 +476,9 @@ int finalizar_programa_de_swap(int pid){
 	free(buffer);
 	free(buffer_recv);
 
-
-	return respuesta->resultado;
+	int result = respuesta->resultado;
+	free(respuesta);
+	return result;
 
 }
 

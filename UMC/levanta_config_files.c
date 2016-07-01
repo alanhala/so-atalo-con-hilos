@@ -14,13 +14,13 @@
 
 int *cargar_configuracion(){
 	t_log *trace_log_Config_Files;
-	trace_log_Config_Files = log_create("Log_de_Config_Files.txt","main.c",false,LOG_LEVEL_TRACE);
+	trace_log_Config_Files = log_create("./Log_de_Config_Files.txt","main.c",false,LOG_LEVEL_TRACE);
 
 	t_config *ptrConfig, *ptrConfigUpdate;
 
 	UMCConfigFile *ptrvaloresConfigFile = malloc(sizeof(UMCConfigFile));
 
-	ptrConfig = config_create("umc.cfg");
+	ptrConfig = config_create("./umc.cfg");
 	if (ptrConfig == NULL){
 		log_trace(trace_log_Config_Files,"Archivo de configuración no disponible. No puede ejecutar el UMC.\n");
 		return -1;
@@ -32,6 +32,7 @@ int *cargar_configuracion(){
 	cargar_variables_productivas(ptrvaloresConfigFile);
 	log_trace(trace_log_Config_Files,"Archivo de Configuracion levantado exitosamente.\n");
 	set_configuracion_cargada();
+	sem_post(&sem_config_file_umc);
 	while(1)
 	{
 		extern huboUnCambio;
@@ -39,7 +40,7 @@ int *cargar_configuracion(){
 		detectaCambiosEnConfigFile();
 		if(huboUnCambio)
 		{
-			ptrConfigUpdate = config_create("umc.cfg");
+			ptrConfigUpdate = config_create("./umc.cfg");
 			if(ptrConfigUpdate->properties->elements_amount==0) {
 				log_trace(trace_log_Config_Files,"No se puede levantar el Archivo de Configuracion\n");
 			} else {
@@ -66,7 +67,7 @@ void detectaCambiosEnConfigFile() {
 		}
 		// Creamos un monitor sobre un path indicando que eventos queremos escuchar
 		int watch_descriptor = inotify_add_watch(file_descriptor,
-				"/home/utnso/GitHub/tp-2016-1c-Atalo-con-Hilos/UMC", IN_MODIFY);
+				"./", IN_MODIFY);
 
 		// El file descriptor creado por inotify, es el que recibe la información sobre los eventos ocurridos
 		// para leer esta información el descriptor se lee como si fuera un archivo comun y corriente pero
@@ -105,8 +106,8 @@ void detectaCambiosEnConfigFile() {
 }
 
 void levantaConfigFileEnVariables(UMCConfigFile *ptrvaloresConfigFile,t_config *ptrConfig){
-	ptrvaloresConfigFile->puerto = leerUnsigned(ptrConfig, "PUERTO");
-	ptrvaloresConfigFile->puerto_swap = leerUnsigned(ptrConfig, "PUERTO_SWAP");
+	ptrvaloresConfigFile->puerto = leer_string(ptrConfig, "PUERTO");
+	ptrvaloresConfigFile->puerto_swap = leer_string(ptrConfig, "PUERTO_SWAP");
 	ptrvaloresConfigFile->marcos = leerUnsigned(ptrConfig, "MARCOS");
 	ptrvaloresConfigFile->marcos_size = leerUnsigned(ptrConfig, "MARCOS_SIZE");
 	ptrvaloresConfigFile->marco_x_proc = leerUnsigned(ptrConfig, "MARCO_X_PROC");
@@ -114,6 +115,8 @@ void levantaConfigFileEnVariables(UMCConfigFile *ptrvaloresConfigFile,t_config *
 	ptrvaloresConfigFile->retardo = leerUnsigned(ptrConfig, "RETARDO");
 	ptrvaloresConfigFile->ip_swap = leer_string(ptrConfig, "IP_SWAP");
 	ptrvaloresConfigFile->algoritmo_reemplazo = leer_string(ptrConfig, "ALGORITMO");
+	ptrvaloresConfigFile->ip_server = leer_string(ptrConfig, "IP_SERVER");
+	ptrvaloresConfigFile->backlog = leerUnsigned(ptrConfig,"BACKLOG");
 };
 
 void liberaVariables(t_log* trace_log, t_config* ptrConfig, t_config* ptrConfigUpdate) {

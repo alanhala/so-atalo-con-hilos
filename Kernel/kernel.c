@@ -26,7 +26,6 @@ t_list* load_input_output_list(char** name_list, char** sleep_values) {
 		t_io* io = malloc(sizeof(t_io));
 		io->name = *(name_list + i);
 		io->sleep = atoi(*(sleep_values + i));
-		sem_init(&io->resources, 0, 1);
 		list_add(io_list, io);
 		i++;
 	}
@@ -171,17 +170,14 @@ uint32_t update_shared_var_value(t_kernel* self, char* variable_name, uint32_t v
 	return 0;
 }
 
-uint32_t io_call(t_kernel* self, char* io_name, int times) {
+int32_t io_call(t_kernel* self, char* io_name, int times, t_PCB* pcb) {
 	int same_io(t_io* io) {
 		if (strcmp(io->name, io_name) == 0)
 			return 1;
 		else
 			return 0;
 	}
-	t_io* io = list_find(self->io_list, (void*) same_io);
-	sem_wait(&io->resources);
-	usleep(io->sleep * times * 1000); // milisegundos a microsegundos
-	sem_post(&io->resources);
+	t_io_blocked_queue* io_queue = list_find(self->io_list, (void*) same_io);
 	return 0;
 }
 

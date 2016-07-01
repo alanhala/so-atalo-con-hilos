@@ -1,0 +1,4 @@
+IP_KERNEL=localhost
+PUERTO_KERNEL=9000
+IP_UMC=localhost
+PUERTO_UMC=5000

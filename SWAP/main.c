@@ -41,12 +41,12 @@ int main(int argc, char *argv[]) {
 //	run_specs();
 
 
-	trace_log_SWAP = log_create("Log_de_SWAP.txt",
+	trace_log_SWAP = log_create("./Log_de_SWAP.txt",
 								"main.c",
 								false,
 								LOG_LEVEL_TRACE);
 
-	t_swap* swap = create_swap("config_file.txt");
+	t_swap* swap = create_swap("./config_file.txt");
 
 	UMC_connection(swap);
 	return 0;
@@ -55,8 +55,8 @@ int main(int argc, char *argv[]) {
 void UMC_connection(t_swap* swap) {
 	//Solo se va a conectar un proceso UMC
 
-	int server_socket_descriptor = create_server_socket_descriptor("localhost",
-			"6000",	10);
+	int server_socket_descriptor = create_server_socket_descriptor(server_ip,
+			umc_port,BACKLOG);
 
 	int umc_socket_descriptor = accept_connection(server_socket_descriptor);
 

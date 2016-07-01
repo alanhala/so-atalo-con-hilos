@@ -10,6 +10,9 @@
 #include <commons/log.h>
 #include "pages_table.h"
 
+char 	*server_ip,
+		*umc_port;
+
 	typedef struct {
 		FILE* file;
 		char* port;
@@ -46,4 +49,5 @@
 
 	char* read_page(t_swap* self, unsigned int pid, unsigned int page);
 
+	void compact_swap_file(t_swap* self, int free_pages);
 #endif
