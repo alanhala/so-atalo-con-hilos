@@ -23,6 +23,7 @@ char 	*server_ip,
 		t_list* pages_table_list;
 		int* bitmap;
 		int total_pids;
+		unsigned int access_delay;
 	} t_swap;
 
 	t_swap *create_swap(char* config_file_path);

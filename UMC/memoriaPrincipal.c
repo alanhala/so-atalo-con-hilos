@@ -450,7 +450,7 @@ int finalizar_programa_de_swap(int pid){
 	t_stream *buffer = serializar_mensaje(7,finalizar_programa);
 
 	int bytes_enviados = send(SWAP_SOCKET_DESCRIPTOR,buffer->datos,buffer->size,0);
-	free(bytes_enviados);
+
 
 
 	char buffer_header[5];	//Buffer donde se almacena el header recibido
@@ -1078,13 +1078,15 @@ void flush_tlb(int pid){
 			i++;
 		}
 		t_tabla_de_paginas * tabla = buscar_tabla_de_paginas_de_pid(pid);
+		if(tabla != NULL){
 		i=0;
-		while(i < MAX_FRAMES_POR_PROCESO){
-			(tabla->info_reemplazo[i]).frame = -1;
-			(tabla->info_reemplazo[i]).pagina = -1;
-			(tabla->info_reemplazo[i]).modificado = 0;
-			(tabla->info_reemplazo[i]).segunda_oportunidad = 1;
-			i++;
+			while(i < MAX_FRAMES_POR_PROCESO){
+				(tabla->info_reemplazo[i]).frame = -1;
+				(tabla->info_reemplazo[i]).pagina = -1;
+				(tabla->info_reemplazo[i]).modificado = 0;
+				(tabla->info_reemplazo[i]).segunda_oportunidad = 1;
+				i++;
+			}
 		}
 
 		//sem_post(&mut_tlb);

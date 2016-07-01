@@ -148,7 +148,9 @@ void manejo_de_solicitudes(int socket_descriptor) {
 		t_cpu_context * nueva_cpu = malloc(sizeof(t_cpu_context));
 		nueva_cpu->cpu_id = socket_descriptor;
 		nueva_cpu->pid_active = -1;
+		sem_wait(&mut_lista_cpu_context);
 		list_add(lista_cpu_context, nueva_cpu);
+		sem_post(&mut_lista_cpu_context);
 	}
 	if(handshake == 2) //KERNEL
 	{

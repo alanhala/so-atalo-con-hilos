@@ -40,6 +40,7 @@ t_swap *create_swap(char* config_file_path) {
 	self->page_size = config_get_int_value(swap_config, "TAMANIO_PAGINA");
 	self->compaction_delay = config_get_int_value(swap_config, "RETARDO_COMPACTACION");
 	self->pages_table_list = list_create();
+	self->access_delay = config_get_int_value(swap_config, "RETARDO_ACCESO");
 	initialize_bitmap(self);
 	create_file(self);
 	self->file = fopen(self->swap_name, "r+");
@@ -134,6 +135,7 @@ t_pages_table* find_pages_table(t_swap* self, unsigned int pid) {
 }
 
 int write_page(t_swap* self, unsigned int pid, unsigned int page, char* data) {
+	usleep(1000*self->access_delay);
 	t_pages_table* pages_table = find_pages_table(self, pid);
 	int page_location = *(pages_table->pages_location + page);
 	write_swap_file(self, page_location, 1, data);
@@ -149,6 +151,7 @@ char* read_swap_file(t_swap* self, int page_location) {
 }
 
 char* read_page(t_swap* self, unsigned int pid, unsigned int page) {
+	usleep(1000*self->access_delay);
 	char* page_content;
 	t_pages_table* pages_table = find_pages_table(self, pid);
 	int page_location = *(pages_table->pages_location + page);
