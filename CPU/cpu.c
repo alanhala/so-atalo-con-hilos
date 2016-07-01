@@ -254,6 +254,9 @@ void execute_next_instruction_for_process() {
 	if(program_counter == pcb->program_counter && !string_starts_with(instruccion_string, TEXT_END) && !string_starts_with(instruccion_string, TEXT_RETURN)) {
 	    pcb->program_counter++;
 	}
+
+	free(instruccion);
+	free(instruccion_string);
 };
 
 
@@ -361,6 +364,9 @@ t_valor_variable dereferenciar(t_puntero absolute_offset) {
     char* respuesta = ejecutar_lectura_de_dato_con_iteraciones(leer_memoria_de_umc, direccion, tamanio_pagina);
     uint32_t valor;
     memcpy(&valor, respuesta, direccion->size);
+    free(respuesta);
+    free(direccion->direccion);
+    free(direccion);
     return valor;
 }
 
@@ -369,8 +375,6 @@ void go_back_to_previous_stack_element(t_stack_element *current_stack_element) {
     for(i=0; i<list_size(current_stack_element->variables); i++) {
 	decrementar_next_free_space(sizeof(int));
     }
-
-    int j = list_size(pcb->stack);
 
     list_remove(pcb->stack, list_size(pcb->stack)-1);
 
@@ -396,9 +400,7 @@ void imprimir(t_valor_variable valor_mostrar) {
 }
 
 void imprimirTexto(char* print_value) {
-	int enviado_correctamente = send_text_to_kernel(print_value, string_length(print_value));
-    //todo si se quiere validar que haya enviado correctmente
-    printf("%s\n", print_value);
+    send_text_to_kernel(print_value, string_length(print_value));
 }
 
 void irALabel(t_nombre_etiqueta nombre_etiqueta) {
@@ -452,13 +454,15 @@ void finalizar(void) {
 
 int send_text_to_kernel(char* print_value, uint32_t length) {
 
-	t_imprimir_texto_en_cpu *imprimir_en_cpu = malloc(sizeof(t_imprimir_texto_en_cpu));
-	imprimir_en_cpu->texto_a_imprimir = print_value;
-	t_stream *buffer = serializar_mensaje(132,imprimir_en_cpu);
+    t_imprimir_texto_en_cpu *imprimir_en_cpu = malloc(sizeof(t_imprimir_texto_en_cpu));
+    imprimir_en_cpu->texto_a_imprimir = print_value;
+    t_stream *buffer = serializar_mensaje(132,imprimir_en_cpu);
 
-	int bytes_enviados = send(KERNEL_DESCRIPTOR, buffer->datos, buffer->size, 0);
+    int bytes_enviados = send(KERNEL_DESCRIPTOR, buffer->datos, buffer->size, 0);
 
-	free(imprimir_en_cpu);
+    free(imprimir_en_cpu);
+    free(buffer->datos);
+    free(buffer);
     return bytes_enviados;
 }
 
@@ -473,10 +477,9 @@ char* leer_memoria_de_umc(t_dato_en_memoria *dato) {
     pedido->size = dato->size;
 
     t_stream *buffer = (t_stream*)serializar_mensaje(31,pedido);
+    free(pedido);
 
     send(UMC_DESCRIPTOR, buffer->datos, buffer->size, 0);
-
-    t_header *aHeader = malloc(sizeof(t_header));
 
     char 	buffer_header[5];	//Buffer donde se almacena el header recibido
 
@@ -489,9 +492,9 @@ char* leer_memoria_de_umc(t_dato_en_memoria *dato) {
 
     recv(UMC_DESCRIPTOR, buffer_recv, buffer_header[1], 0);
 
-    t_respuesta_bytes_de_una_pagina_a_CPU *respuesta = malloc(sizeof(t_respuesta_bytes_de_una_pagina_a_CPU));
-
-    respuesta = (t_respuesta_bytes_de_una_pagina_a_CPU*)deserealizar_mensaje(buffer_header[0], buffer_recv);
+    t_respuesta_bytes_de_una_pagina_a_CPU *respuesta = (t_respuesta_bytes_de_una_pagina_a_CPU*)deserealizar_mensaje(buffer_header[0], buffer_recv);
+    free(buffer->datos);
+    free(buffer);
     return respuesta->bytes_de_una_pagina;
 }
 
@@ -509,10 +512,11 @@ int escribir_en_umc(t_dato_en_memoria * dato, char* valor) {
     escritura_bytes->buffer = valor;
 
     t_stream *buffer = serializar_mensaje(33,escritura_bytes);
+    free(escritura_bytes);
 
     int bytes = send(UMC_DESCRIPTOR, buffer->datos, buffer->size, 0);
-
-    t_header *aHeader = malloc(sizeof(t_header));
+    free(buffer->datos);
+    free(buffer);
 
     char 	buffer_header[5];	//Buffer donde se almacena el header recibido
 
@@ -525,10 +529,10 @@ int escribir_en_umc(t_dato_en_memoria * dato, char* valor) {
 
     recv(UMC_DESCRIPTOR, buffer_recv, buffer_header[1], 0);
 
-    t_respuesta_escribir_bytes_de_una_pagina_en_UMC * respuesta = malloc(sizeof(t_respuesta_escribir_bytes_de_una_pagina_en_UMC));
-
-    respuesta =(t_respuesta_escribir_bytes_de_una_pagina_en_UMC*)deserealizar_mensaje(34, buffer_recv);
-    return respuesta->escritura_correcta;
+    t_respuesta_escribir_bytes_de_una_pagina_en_UMC *respuesta =(t_respuesta_escribir_bytes_de_una_pagina_en_UMC*)deserealizar_mensaje(34, buffer_recv);
+    int escritura_correcta = respuesta->escritura_correcta;
+    free(respuesta);
+    return escritura_correcta;
 }
 
 t_puntero convert_to_absolute_offset(t_dato_en_memoria* dato) {
@@ -571,15 +575,26 @@ void decrementar_next_free_space(uint32_t size) {
     pcb->stack_free_space_pointer->offset = new_offset;
 };
 
-void free_stack_element_memory(t_stack_element *element) {
+void free_variable(void *variable) {
+    t_variable *var = (t_variable*)variable;
 
-    void free_memory(void *variable) {
-	free(variable);
-    }
+    free(var->dato->direccion);
+    free(var->dato);
+    free(var);
+}
 
-    list_destroy_and_destroy_elements(element->variables, free_memory);
-    free(element);
-};
+void free_memory(void *variable) {
+    free(variable);
+}
+
+void free_stack_element_memory(void *element) {
+    t_stack_element* stack_element = (t_stack_element*)element;
+    list_destroy_and_destroy_elements(stack_element->variables, free_variable);
+
+    free(stack_element->valor_retorno->direccion);
+    free(stack_element->valor_retorno);
+    free(stack_element);
+}
 
 void set_PCB(t_PCB *new_pcb) {
     pcb = new_pcb;
@@ -598,6 +613,7 @@ t_stack_element* create_stack_element() {
     stack_element->variables = list_create();
     stack_element->posicion_retorno = 0;
     stack_element->valor_retorno = malloc(sizeof(t_dato_en_memoria));
+    stack_element->valor_retorno->size = 0;
     t_direccion_virtual_memoria * direccion = malloc(sizeof(t_direccion_virtual_memoria));
     direccion->pagina = 0;
     direccion->offset = 0;
@@ -629,8 +645,9 @@ char* ejecutar_lectura_de_dato_con_iteraciones(void*(*closure_lectura)(t_dato_en
 	} else {
 	    aux_dato->size = remaining_size;
 	}
-
-	memcpy(result+desplazamiento_acumulado, closure_lectura(aux_dato), aux_dato->size);
+	char* dato_leido = closure_lectura(aux_dato);
+	memcpy(result+desplazamiento_acumulado, dato_leido, aux_dato->size);
+	free(dato_leido);
 	//strcpy(result+desplazamiento_acumulado, closure_lectura(aux_dato));
 	desplazamiento_acumulado += aux_dato->size;
 	aux_dato->direccion->offset = 0;
@@ -639,6 +656,7 @@ char* ejecutar_lectura_de_dato_con_iteraciones(void*(*closure_lectura)(t_dato_en
 
 	is_last_page = (aux_dato->direccion->offset + remaining_size < tamanio_pagina);
     }
+    free(aux_dato->direccion);
     free(aux_dato);
     char endString='\0';
     memcpy(result+dato->size,&endString,1);
@@ -681,7 +699,10 @@ int ejecutar_escritura_de_dato_con_iteraciones(t_dato_en_memoria *dato, char* va
 	is_last_page = (aux_dato->direccion->offset + remaining_size < tamanio_pagina);
     }
 
+    free(aux_dato->direccion);
     free(aux_dato);
+    free(dato->direccion);
+    free(dato);
 
     return 0;
 }
