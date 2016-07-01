@@ -86,7 +86,7 @@ t_dato_en_memoria* get_next_instruction();
 char* obtener_instruccion_de_umc(t_dato_en_memoria *instruccion);
 void incrementar_next_free_space();
 void decrementar_next_free_space();
-void free_stack_element_memory(void *element);
+void free_stack_element_memory(t_stack_element *element);
 void set_PCB(t_PCB *pcb);
 t_PCB* get_PCB();
 t_stack_element* create_stack_element();
@@ -112,8 +112,7 @@ t_puntero convert_to_absolute_offset(t_dato_en_memoria* dato);
 
 char* leer_memoria_de_umc(t_dato_en_memoria *dato);
 int escribir_en_umc(t_dato_en_memoria *dato, char* valor);
-void free_memory(void *variable);
-void free_variable(void *variable);
+
 char* ejecutar_lectura_de_dato_con_iteraciones(void*(*lectura)(t_dato_en_memoria*), t_dato_en_memoria* dato, uint32_t tamanio_pagina);
 int ejecutar_escritura_de_dato_con_iteraciones(t_dato_en_memoria *dato, char* valor, uint32_t tamanio_pagina);
 

@@ -82,6 +82,8 @@ int main(int argc, char **argv) {
 
 	while (1) {
 
+		t_header *a_header = malloc(sizeof(t_header));
+
 		char buffer_header[5];	//Buffer donde se almacena el header recibido
 
 		int bytes_recibidos_header,	//Cantidad de bytes recibidos en el recv() que recibe el header
@@ -89,11 +91,11 @@ int main(int argc, char **argv) {
 
 		bytes_recibidos_header = recv(KERNEL_DESCRIPTOR, buffer_header, 5,	MSG_PEEK);
 
-		t_header *a_header = deserializar_header(buffer_header);
+		a_header = deserializar_header(buffer_header);
 
 		int tipo = a_header->tipo;
 		int length = a_header->length;
-		free(a_header);
+
 		char buffer_recv[length]; //El buffer para recibir el mensaje se crea con la longitud recibida
 
 		if (tipo == 121) {
@@ -101,55 +103,24 @@ int main(int argc, char **argv) {
 			int bytes_recibidos = recv(KERNEL_DESCRIPTOR, buffer_recv,
 					length, 0);
 
-			t_PCB_serializacion *recibir_pcb = (t_PCB_serializacion * ) deserealizar_mensaje(121, buffer_recv);
+			t_PCB_serializacion *recibir_pcb = malloc(sizeof(t_PCB_serializacion));
+
+			recibir_pcb = (t_PCB_serializacion * ) deserealizar_mensaje(121, buffer_recv);
 
 			t_PCB *pcb = malloc(sizeof(t_PCB));
 
-			pcb->instructions_index = malloc(sizeof(t_intructions) * recibir_pcb->instructions_size);
-			memcpy(pcb->instructions_index,recibir_pcb->instructions_index, sizeof(t_intructions) * recibir_pcb->instructions_size);
+			//actualizarPCB(pcb, recibir_pcb);  -->Validar y agregar. Es un adapter
+			pcb->instructions_index = recibir_pcb->instructions_index;
 			pcb->pid = recibir_pcb->pid;
 			pcb->instructions_size = recibir_pcb->instructions_size;
 			pcb->program_counter = recibir_pcb->program_counter;
-
 			pcb->stack = list_create();
-			int i;
-			for(i=0; i< list_size(recibir_pcb->stack_index); i++) {
-			    t_stack_element *element = malloc (sizeof(t_stack_element));
-			    element->valor_retorno = malloc(sizeof(t_dato_en_memoria));
-			    element->valor_retorno->direccion = malloc(sizeof(t_direccion_virtual_memoria));
-			    element->variables = list_create();
-
-			    t_stack_element *origen = list_get(recibir_pcb->stack_index, i);
-
-			    element->posicion_retorno = origen->posicion_retorno;
-
-			    memcpy(element->valor_retorno->direccion, origen->valor_retorno->direccion, sizeof(t_direccion_virtual_memoria));
-			    element->valor_retorno->size = origen->valor_retorno->size;
-
-			    int j;
-			    for(j=0; j < list_size(origen->variables); j++) {
-				t_variable *variable = malloc(sizeof(t_variable));
-				variable->dato = malloc(sizeof(t_dato_en_memoria));
-				variable->dato->direccion = malloc(sizeof(t_direccion_virtual_memoria));
-
-				t_variable *var_origen = list_get(origen->variables, j);
-
-				memcpy(variable->dato->direccion, var_origen->dato->direccion, sizeof(t_direccion_virtual_memoria));
-				variable->dato->size = var_origen->dato->size;
-				variable->id = var_origen->id;
-
-				list_add(element->variables, variable);
-			    }
-
-			    list_add(pcb->stack, element);
-			}
-
+			pcb->stack = recibir_pcb->stack_index;
 			pcb->used_pages = recibir_pcb->used_pages;
 			pcb->stack_size = recibir_pcb->stack_size;
 			pcb->program_finished = recibir_pcb->program_finished;
 			pcb->stack_free_space_pointer = malloc(sizeof(t_direccion_virtual_memoria));
-			memcpy(pcb->stack_free_space_pointer,recibir_pcb->stack_last_address, sizeof(t_direccion_virtual_memoria));
-			//pcb->label_index = list_create();
+			pcb->stack_free_space_pointer = recibir_pcb->stack_last_address;
 			pcb->label_index = recibir_pcb->label_index;
 			set_quantum(recibir_pcb->quantum);
 			set_quantum_sleep(recibir_pcb->quantum_sleep);
@@ -174,26 +145,6 @@ int main(int argc, char **argv) {
 			}
 			t_stream * stream = serializar_mensaje(121,pcb_serializado);
 			send(KERNEL_DESCRIPTOR, stream->datos, stream->size, 0);
-
-			//NEED HELP: si hago free del stack del pcb falla la ejecucion
-			//list_destroy_and_destroy_elements(pcb->stack, free_stack_element_memory);
-			free(recibir_pcb->instructions_index);
-			list_destroy_and_destroy_elements(recibir_pcb->label_index, free_memory);
-			free(recibir_pcb->stack_last_address);
-			set_PCB(NULL);
-			free(recibir_pcb->valor_mensaje);
-			free(recibir_pcb);
-
-			free(pcb->instructions_index);
-			free(pcb->stack_free_space_pointer);
-			free(pcb);
-
-			list_destroy_and_destroy_elements(pcb_serializado->stack_index, free_stack_element_memory);
-			list_destroy_and_destroy_elements(recibir_pcb->stack_index, free_stack_element_memory);
-			free(pcb_serializado);
-			if (sigusr_received) {
-				exit(1);
-			}
 		}
 	}
 
@@ -236,40 +187,7 @@ t_PCB_serializacion * adaptar_pcb_a_serializar(t_PCB * pcb){
 	pcb_serializacion->program_finished = pcb->program_finished;
 	pcb_serializacion->quantum = 0;
 	pcb_serializacion->quantum_sleep = 0;
-
-	pcb_serializacion->stack_index = list_create();
-	int i;
-	for(i=0; i< list_size(pcb->stack); i++) {
-	    t_stack_element *element = malloc (sizeof(t_stack_element));
-	    element->valor_retorno = malloc(sizeof(t_dato_en_memoria));
-	    element->valor_retorno->direccion = malloc(sizeof(t_direccion_virtual_memoria));
-	    element->variables = list_create();
-
-	    t_stack_element *origen = list_get(pcb->stack, i);
-
-	    element->posicion_retorno = origen->posicion_retorno;
-
-	    memcpy(element->valor_retorno->direccion, origen->valor_retorno->direccion, sizeof(t_direccion_virtual_memoria));
-	    element->valor_retorno->size = origen->valor_retorno->size;
-
-	    int j;
-	    for(j=0; j < list_size(origen->variables); j++) {
-		t_variable *variable = malloc(sizeof(t_variable));
-		variable->dato = malloc(sizeof(t_dato_en_memoria));
-		variable->dato->direccion = malloc(sizeof(t_direccion_virtual_memoria));
-
-		t_variable *var_origen = list_get(origen->variables, j);
-
-		memcpy(variable->dato->direccion, var_origen->dato->direccion, sizeof(t_direccion_virtual_memoria));
-		variable->dato->size = var_origen->dato->size;
-		variable->id = var_origen->id;
-
-		list_add(element->variables, variable);
-	    }
-
-	    list_add(pcb_serializacion->stack_index, element);
-	}
-
+	pcb_serializacion->stack_index = pcb->stack;
 	pcb_serializacion->stack_last_address = pcb->stack_free_space_pointer;
 	pcb_serializacion->stack_size = pcb->stack_size;
 	pcb_serializacion->used_pages = pcb->used_pages;
