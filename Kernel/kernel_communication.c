@@ -120,7 +120,7 @@ void* handle_pcb_execution(void* data_to_cast) {
 
 				} else if(unPCB->mensaje == 3) {
 				    int cpu = pcb->cpu_socket_descriptor;
-				    if(pcb->program_finished == 1)
+				    if(pcb->program_finished == 1 || pcb->program_finished == 2)
 				    	end_program(scheduler, pcb);
 				    else if (pcb->program_finished == 5)
 				    	wait_block_process(scheduler, unPCB->valor_mensaje, pcb);

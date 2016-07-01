@@ -70,6 +70,7 @@ int main(int argc, char **argv) {
 		fread(codigo, tamanio, 1, fdarchivo);
 		printf(" %s\n", codigo);
 	}
+
 	t_log *trace_log = log_create("./Log_de_Consola.txt", "console_main.c",
 	false, LOG_LEVEL_TRACE);
 	int kernel_socket_descriptor = create_client_socket_descriptor(kernel_ip,
@@ -164,8 +165,11 @@ int main(int argc, char **argv) {
 				printf("El programa finalizo correctamente\n");
 				log_trace(trace_log,"El programa finalizo correctamente\n");
 				fflush(stdout);
-			}
-			else{
+			} else if (finalizar->motivo == 2){
+				printf("El programa finalizo por Stack Overflow\n");
+				log_trace(trace_log,"El programa finalizo por Stack Overflow\n");
+				fflush(stdout);
+			} else {
 				printf("El programa no pudo finalizar correctamente\n");
 				log_trace(trace_log,"El programa no finalizo correctamente\n");
 				fflush(stdout);
