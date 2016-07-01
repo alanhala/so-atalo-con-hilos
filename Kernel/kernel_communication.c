@@ -48,7 +48,6 @@ void* handle_pcb_execution(void* data_to_cast) {
 	pcb_serializacion->valor_de_la_variable_compartida = 0;
 	pcb_serializacion->resultado_mensaje = 0;
 	t_stream *buffer = serializar_mensaje(121,pcb_serializacion);
-	free(pcb_serializacion);
 
 	int bytes_enviados = send(pcb->cpu_socket_descriptor, buffer->datos, buffer->size, 0);
 	free(buffer->datos);
@@ -107,7 +106,6 @@ void* handle_pcb_execution(void* data_to_cast) {
 					}
 					free(buffer->datos);
 					free(buffer);
-					free(pcb_serializacion);
 				}else if(unPCB->mensaje ==2){
 					//aca hay que renombrar el cantidad de operaciones ya que no imagine todos los casos.
 					//estoy reutilizadno el campo para no serializar algo mas
@@ -126,7 +124,6 @@ void* handle_pcb_execution(void* data_to_cast) {
 					}
 					free(buffer->datos);
 					free(buffer);
-					free(pcb_serializacion);
 				} else if(unPCB->mensaje == 3) {
 				    int cpu = pcb->cpu_socket_descriptor;
 				    if(pcb->program_finished == 1 || pcb->program_finished == 2)
@@ -158,7 +155,6 @@ void* handle_pcb_execution(void* data_to_cast) {
 					}
 					free(buffer->datos);
 					free(buffer);
-					free(pcb_serializacion);
 				} else if (unPCB->mensaje == 5) {
 					signal_ansisop(kernel, unPCB->valor_mensaje);
 				} else if (unPCB->mensaje == 6) {
@@ -178,9 +174,7 @@ void* handle_pcb_execution(void* data_to_cast) {
 					}
 					free(buffer->datos);
 					free(buffer);
-					free(pcb_serializacion);
 				}
-				free(unPCB);
 			}
 	}
 	pthread_exit(1);

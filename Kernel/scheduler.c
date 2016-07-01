@@ -147,7 +147,6 @@ void* handle_exit(void* scheduler) {
 		int umc_finalizado = end_program_umc(pcb, self->umc_socket_descriptor);
 		int consola_finalizado = end_program_console(pcb);
 
-		free(pcb->instructions_index);
 		free(pcb);// lo libero directamente creo q no es necesario hacer cola de exit
 	}
 }
@@ -223,7 +222,9 @@ void signal_unblock_process(t_scheduler* scheduler, char* sem_id) {
 	int same_pid(t_PCB* aux_pcb) {
 		return (aux_pcb->pid == pid);
 	}
+	sem_wait(&mutex_block);
 	t_PCB* pcb = list_remove_by_condition(scheduler->block_state, (void*) same_pid);
+	sem_post(&mutex_block);
 	enqueue_to_ready(scheduler, pcb);
 }
 
