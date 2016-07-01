@@ -162,8 +162,6 @@ void manejo_de_solicitudes(int socket_descriptor) {
 
 		char buffer_header[5];	//Buffer donde se almacena el header recibido
 
-		//int bytes_recibidos_header = -1;	//Cantidad de bytes recibidos en el recv() que recibe el header
-		//int bytes_recibidos= -1;			//Cantidad de bytes recibidos en el recv() que recibe el mensaje completo
 
 		int bytes_recibidos_header = recv(socket_descriptor, buffer_header, 5,
 				MSG_PEEK);
@@ -176,6 +174,8 @@ void manejo_de_solicitudes(int socket_descriptor) {
 
 		int tipo = a_header->tipo;
 		int length = a_header->length;
+
+		free(a_header);
 
 		if (tipo == 31) {
 
@@ -207,6 +207,9 @@ void manejo_de_solicitudes(int socket_descriptor) {
 
 			int bytes_sent = send(socket_descriptor, buffer->datos,
 					buffer->size, 0);
+
+			free(buffer->datos);
+			free(buffer);
 		}
 
 		if (tipo == 33) {
@@ -236,6 +239,9 @@ void manejo_de_solicitudes(int socket_descriptor) {
 
 			int bytes_sent = send(socket_descriptor, buffer->datos,
 					buffer->size, 0);
+
+			free(buffer->datos);
+			free(buffer);
 		}
 		if (tipo == 35) {
 
@@ -260,6 +266,9 @@ void manejo_de_solicitudes(int socket_descriptor) {
 
 			int bytes_sent = send(socket_descriptor, buffer->datos,
 					buffer->size, 0);
+
+			free(buffer->datos);
+			free(buffer);
 		}
 		if(tipo == 61){
 
@@ -280,7 +289,8 @@ void manejo_de_solicitudes(int socket_descriptor) {
 			t_stream *buffer = (t_stream*)serializar_mensaje(62,respuesta);
 
 			int bytes_sent = send(socket_descriptor,buffer->datos,buffer->size,0);
-
+			free(buffer->datos);
+			free(buffer);
 			   }
 		if(tipo==63) {
 
@@ -302,8 +312,11 @@ void manejo_de_solicitudes(int socket_descriptor) {
 			t_stream *buffer = (t_stream *)serializar_mensaje(64,respuesta);
 
 			int bytes_sent = send(socket_descriptor,buffer->datos,buffer->size,0);
-
+			free(buffer->datos);
+			free(buffer);
 		}
+
+		//ACA
 
 	}
 }
