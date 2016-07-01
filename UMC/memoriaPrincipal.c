@@ -333,7 +333,7 @@ int cargar_nuevo_programa_en_swap(int pid, int paginas_requeridas_del_proceso, c
 	free(carga);
 	free(buffer->datos);
 	free(buffer);
-	free(buffer_recv);
+
 	int resp= respuesta->cargado_correctamente;
 	free(respuesta);
 	return resp;
@@ -376,14 +376,14 @@ char * leer_pagina_de_swap(int pid, int pagina){
 			free(lectura);
 			free(buffer->datos);
 			free(buffer);
-			free(buffer_recv);
+
 			return resp;
 	}
 
 	free(lectura);
 	free(buffer->datos);
 	free(buffer);
-	free(buffer_recv);
+
 	char * datos_return = respuesta->datos;
 	free(respuesta);
 	return datos_return; //debe devolver esto si no leyo bien "~/-1"
@@ -426,7 +426,7 @@ int escribir_pagina_de_swap(int pid, int pagina, char * datos){
 	free(escritura);
 	free(buffer->datos);
 	free(buffer);
-	free(buffer_recv);
+
 
 	if (SWAP_MOCK_ENABLE){
 		return escribir_pagina_de_swap_mock(pid, pagina, datos);
