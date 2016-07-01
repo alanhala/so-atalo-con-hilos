@@ -128,7 +128,8 @@ void* handle_pcb_execution(void* data_to_cast) {
 				    	handle_io_operation(scheduler, unPCB->valor_mensaje, unPCB->cantidad_operaciones, pcb);
 				    else
 				    	enqueue_to_ready(scheduler, pcb);
-				    free_cpu(scheduler, cpu);
+				    if (!unPCB->cpu_unplugged)
+				    	free_cpu(scheduler, cpu);
 				    break; // TODO REVISAR
 				} else if(unPCB->mensaje == 4) {
 					int resultado = wait_ansisop(kernel, unPCB->valor_mensaje, pcb);

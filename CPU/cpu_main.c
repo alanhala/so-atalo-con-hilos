@@ -28,10 +28,9 @@ t_PCB_serializacion * adaptar_pcb_a_serializar(t_PCB * pcb);
 void actualizarPCB(t_PCB *pcb, t_PCB_serializacion *recibir_pcb);
 void *captador_de_senal_thread();
 void sig_handler();
+int sigusr_received;
 
 t_log *trace_log_CPU;
-
-int hot_plug;
 
 char	*kernel_ip,
 		*kernel_puerto,
@@ -130,10 +129,6 @@ int main(int argc, char **argv) {
 			int resultado_ejecucion = ejecutar_pcb();
 			t_PCB_serializacion * pcb_serializado = adaptar_pcb_a_serializar(get_PCB());
 
-			if(hot_plug==1){
-				pcb_serializado->program_finished = 9;
-			}
-
 			pcb_serializado->mensaje = 3;
 			pcb_serializado->valor_mensaje = "";
 			pcb_serializado->cantidad_operaciones = 0;
@@ -145,8 +140,14 @@ int main(int argc, char **argv) {
 				pcb_serializado->valor_mensaje = io_id;
 				pcb_serializado->cantidad_operaciones = io_operations;
 			}
+			if (sigusr_received) {
+				pcb_serializado->cpu_unplugged = 1;
+			}
 			t_stream * stream = serializar_mensaje(121,pcb_serializado);
 			send(KERNEL_DESCRIPTOR, stream->datos, stream->size, 0);
+			if (sigusr_received) {
+				exit(1);
+			}
 		}
 	}
 
@@ -224,8 +225,7 @@ void *captador_de_senal_thread(){
 }
 
 void sig_handler(){
-	hot_plug = 1;
-	printf("Pulpo\n");
+	sigusr_received = 1;
 };
 
 int levanta_config_cpu(void){
