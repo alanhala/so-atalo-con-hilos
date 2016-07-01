@@ -59,6 +59,7 @@ typedef struct {
 	uint32_t cantidad_operaciones;
 	int32_t resultado_mensaje;
 	uint32_t valor_de_la_variable_compartida;
+	uint32_t cpu_unplugged;
 }__attribute__((packed)) t_PCB_serializacion;
 
 typedef struct {

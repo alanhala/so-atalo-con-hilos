@@ -712,7 +712,10 @@ t_PCB_serializacion *deserializar_PCB(char *datos){
 	memcpy(&unPCB->resultado_mensaje,datos+offset,tmpsize=sizeof(uint32_t));
 	offset+=tmpsize;
 
-	memcpy(&unPCB->valor_de_la_variable_compartida,datos+offset,sizeof(uint32_t));
+	memcpy(&unPCB->valor_de_la_variable_compartida,datos+offset,tmpsize=sizeof(uint32_t));
+	offset+=tmpsize;
+
+	memcpy(&unPCB->cpu_unplugged,datos+offset,sizeof(uint32_t));
 
 	return unPCB;
 }
