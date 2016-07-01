@@ -13,7 +13,11 @@ int start_program_in_umc(int umc_socket_descriptor, int pid, int cantidad_pagina
 
 	   buffer = serializar_mensaje(61,iniciar_programa_en_UMC);
 
+	   free(iniciar_programa_en_UMC);
+
 	   int bytes_enviados = send(umc_socket_descriptor,buffer->datos,buffer->size,0);
+	   free(buffer->datos);
+	   free(buffer);
 
 	   char buffer_header[5];
 
@@ -26,8 +30,9 @@ int start_program_in_umc(int umc_socket_descriptor, int pid, int cantidad_pagina
 	   t_respuesta_iniciar_programa_en_UMC *respuesta = malloc(sizeof(t_respuesta_iniciar_programa_en_UMC));
 	   memset(respuesta,0,sizeof(t_respuesta_iniciar_programa_en_UMC));
 	   respuesta = deserealizar_mensaje(buffer_header[0],buffer_recv);
-
-	   return respuesta->respuesta_correcta;
+	   int resultado = respuesta->respuesta_correcta;
+	   free(respuesta);
+	   return resultado;
 }
 
 void* handle_pcb_execution(void* data_to_cast) {
@@ -43,8 +48,11 @@ void* handle_pcb_execution(void* data_to_cast) {
 	pcb_serializacion->valor_de_la_variable_compartida = 0;
 	pcb_serializacion->resultado_mensaje = 0;
 	t_stream *buffer = serializar_mensaje(121,pcb_serializacion);
+	free(pcb_serializacion);
 
 	int bytes_enviados = send(pcb->cpu_socket_descriptor, buffer->datos, buffer->size, 0);
+	free(buffer->datos);
+	free(buffer);
 	if (bytes_enviados == -1){
 		printf("error al enviar pcb\n");
 	}
@@ -63,7 +71,7 @@ void* handle_pcb_execution(void* data_to_cast) {
 
 			uint8_t tipo = un_header->tipo;
 			uint32_t length = un_header->length;
-
+			free(un_header);
 
 			char buffer_recibidos[length];
 
@@ -97,9 +105,9 @@ void* handle_pcb_execution(void* data_to_cast) {
 					if (bytes_enviados == -1){
 						printf("error al enviar pcb\n");
 					}
-
-
-
+					free(buffer->datos);
+					free(buffer);
+					free(pcb_serializacion);
 				}else if(unPCB->mensaje ==2){
 					//aca hay que renombrar el cantidad de operaciones ya que no imagine todos los casos.
 					//estoy reutilizadno el campo para no serializar algo mas
@@ -116,8 +124,9 @@ void* handle_pcb_execution(void* data_to_cast) {
 					if (bytes_enviados == -1){
 						printf("error al enviar pcb\n");
 					}
-
-
+					free(buffer->datos);
+					free(buffer);
+					free(pcb_serializacion);
 				} else if(unPCB->mensaje == 3) {
 				    int cpu = pcb->cpu_socket_descriptor;
 				    if(pcb->program_finished == 1 || pcb->program_finished == 2)
@@ -147,6 +156,9 @@ void* handle_pcb_execution(void* data_to_cast) {
 					if (bytes_enviados == -1){
 						printf("error al enviar pcb\n");
 					}
+					free(buffer->datos);
+					free(buffer);
+					free(pcb_serializacion);
 				} else if (unPCB->mensaje == 5) {
 					signal_ansisop(kernel, unPCB->valor_mensaje);
 				} else if (unPCB->mensaje == 6) {
@@ -164,8 +176,11 @@ void* handle_pcb_execution(void* data_to_cast) {
 					if (bytes_enviados == -1){
 						printf("error al enviar pcb\n");
 					}
+					free(buffer->datos);
+					free(buffer);
+					free(pcb_serializacion);
 				}
-
+				free(unPCB);
 			}
 	}
 	pthread_exit(1);
@@ -182,9 +197,10 @@ int end_program_umc(t_PCB *pcb, int umc_socket_descriptor) {
 		t_stream *buffer = malloc(sizeof(t_stream));
 
 		buffer = serializar_mensaje(63,finalizar_programa_en_UMC);
-
+		free(finalizar_programa_en_UMC);
 		int bytes_enviados = send(umc_socket_descriptor,buffer->datos,buffer->size,0);
-
+		free(buffer->datos);
+		free(buffer);
 		char buffer_header[5];
 
 		int bytes_header = recv(umc_socket_descriptor,buffer_header,5,MSG_PEEK);
@@ -199,6 +215,8 @@ int end_program_umc(t_PCB *pcb, int umc_socket_descriptor) {
 
 		respuesta_finalizar_prog_UMC = deserealizar_mensaje(64,buffer_recv);
 
+		int resultado = respuesta_finalizar_prog_UMC->respuesta_correcta;
+		free(respuesta_finalizar_prog_UMC);
 		return respuesta_finalizar_prog_UMC->respuesta_correcta;
 }
 
@@ -210,9 +228,10 @@ int end_program_console(t_PCB *pcb) {
 	t_stream *buffer = malloc(sizeof(t_stream));
 
 	buffer = serializar_mensaje(133,finalizar_consola);
-
+	free(finalizar_consola);
 	int bytes_enviados = send(pcb->console_socket_descriptor,buffer->datos,buffer->size,0);
-
+	free(buffer->datos);
+	free(buffer);
 	return bytes_enviados;
 }
 

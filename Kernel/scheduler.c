@@ -11,7 +11,6 @@ void initialize_semaphores() {
 	sem_init(&sem_new, 0, 0);
 	sem_init(&sem_ready, 0,0);
 	sem_init(&sem_execution, 0, 0);
-	sem_init(&sem_block, 0, 0);
 	sem_init(&sem_exit, 0, 0);
 	sem_init(&sem_cpus_available, 0, 0);
 }
@@ -20,7 +19,6 @@ void create_states_threads(t_scheduler* self) {
 	pthread_create(&new_thread, NULL, &handle_new, (void*) self);
 	pthread_create(&ready_thread, NULL, &handle_ready, (void*) self);
 	pthread_create(&execution_thread, NULL, &handle_execution, (void*) self);
-	pthread_create(&block_thread, NULL, &handle_block, (void*) self);
 	pthread_create(&exit_thread, NULL, &handle_exit, (void*) self);
 }
 
@@ -138,13 +136,6 @@ void* handle_execution(void* scheduler) {
 	}
 }
 
-void* handle_block(void* scheduler) {
-	t_scheduler* self = (t_scheduler*) scheduler;
-	while(1) {
-
-	}
-}
-
 void* handle_exit(void* scheduler) {
 	t_scheduler* self = (t_scheduler*) scheduler;
 	while (1) {
@@ -156,6 +147,7 @@ void* handle_exit(void* scheduler) {
 		int umc_finalizado = end_program_umc(pcb, self->umc_socket_descriptor);
 		int consola_finalizado = end_program_console(pcb);
 
+		free(pcb->instructions_index);
 		free(pcb);// lo libero directamente creo q no es necesario hacer cola de exit
 	}
 }
@@ -191,7 +183,6 @@ void enqueue_to_block(t_scheduler* scheduler, t_PCB* pcb) {
 	printf("Bloqueado: %d\n", pcb->pid);
 	list_add(scheduler->block_state, pcb);
 	sem_post(&mutex_block);
-	sem_post(&sem_block);
 }
 
 void end_program(t_scheduler* self, t_PCB *pcb) {

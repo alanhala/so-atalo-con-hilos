@@ -121,8 +121,8 @@
 
 	sem_t mutex_new, mutex_ready, mutex_exit, mutex_block, mutex_execution,
 		mutex_cpus_available;
-	sem_t sem_new, sem_ready, sem_exit, sem_block, sem_execution, sem_cpus_available;
-	pthread_t new_thread, ready_thread, exit_thread, execution_thread, block_thread;
+	sem_t sem_new, sem_ready, sem_exit, sem_execution, sem_cpus_available;
+	pthread_t new_thread, ready_thread, exit_thread, execution_thread;
 	t_scheduler* scheduler;
 
 	t_PCB* create_pcb(t_kernel* kernel, char* program);
@@ -151,7 +151,6 @@
 	void* handle_new(void* scheduler);
 	void* handle_ready(void* scheduler);
 	void* handle_exit(void* scheduler);
-	void* handle_block(void* scheduler);
 	void* handle_execution(void* scheduler);
 	void enqueue_to_ready(t_scheduler* scheduler, t_PCB* pcb);
 	void end_program(t_scheduler* scheduler, t_PCB *pcb);
