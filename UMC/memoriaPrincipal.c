@@ -474,7 +474,7 @@ int finalizar_programa_de_swap(int pid){
 	free(finalizar_programa);
 	free(buffer->datos);
 	free(buffer);
-	free(buffer_recv);
+
 
 	int result = respuesta->resultado;
 	free(respuesta);
