@@ -156,7 +156,7 @@ char* read_swap_file(t_swap* self, int page_location) {
 
 char* read_page(t_swap* self, unsigned int pid, unsigned int page) {
 	usleep(1000*self->access_delay);
-	log_trace(trace_log_SWAP, "Leyendo pagina %d, pid %pid", page, pid);
+	log_trace(trace_log_SWAP, "Leyendo pagina %d, pid %d", page, pid);
 	char* page_content;
 	t_pages_table* pages_table = find_pages_table(self, pid);
 	int page_location = *(pages_table->pages_location + page);
