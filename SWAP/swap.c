@@ -21,6 +21,7 @@ void create_file(t_swap* self) {
 	strcat(linux_instruction, self->swap_name);
 	system(linux_instruction);
 	free(linux_instruction);
+	log_trace(trace_log_SWAP, "Se creo el archivo swap. El tamaño es de %d Bytes", self->pages_number * self->page_size);
 }
 
 void initialize_bitmap(t_swap* self) {
@@ -46,7 +47,7 @@ t_swap *create_swap(char* config_file_path) {
 	self->file = fopen(self->swap_name, "r+");
 
 	server_ip = config_get_string_value(swap_config,"SERVER_IP");
-
+	log_trace(trace_log_SWAP, "Se cargo satisfactoriamente el archivo de configuracion");
 	return self;
 }
 
@@ -83,7 +84,9 @@ int check_space_available(t_swap* self, unsigned int pages_amount) {
 	if (free_slots < pages_amount)
 		first_page_location = -1;
 	if (total_free_slots >= pages_amount && first_page_location == -1) {
+		log_trace(trace_log_SWAP, " Compactando...");
 		compact_swap_file(self, total_free_slots);
+		log_trace(trace_log_SWAP, "SWAP compactada");
 		first_page_location = self->pages_number - total_free_slots;
 	}
 	return first_page_location;
@@ -136,6 +139,7 @@ t_pages_table* find_pages_table(t_swap* self, unsigned int pid) {
 
 int write_page(t_swap* self, unsigned int pid, unsigned int page, char* data) {
 	usleep(1000*self->access_delay);
+	log_trace(trace_log_SWAP, "Escribiendo pagina %d, pid %d", page, pid);
 	t_pages_table* pages_table = find_pages_table(self, pid);
 	int page_location = *(pages_table->pages_location + page);
 	write_swap_file(self, page_location, 1, data);
@@ -152,6 +156,7 @@ char* read_swap_file(t_swap* self, int page_location) {
 
 char* read_page(t_swap* self, unsigned int pid, unsigned int page) {
 	usleep(1000*self->access_delay);
+	log_trace(trace_log_SWAP, "Leyendo pagina %d, pid %pid", page, pid);
 	char* page_content;
 	t_pages_table* pages_table = find_pages_table(self, pid);
 	int page_location = *(pages_table->pages_location + page);
@@ -177,6 +182,7 @@ int remove_program(t_swap* self, unsigned int pid) {
 	int first_page = *(pages_table->pages_location) / self->page_size;
 	remove_program_from_bitmap(self, first_page, pages_table->pages_number);
 	destroy_pages_table(pages_table);
+	log_trace(trace_log_SWAP, "PID %d eliminado", pid);
 	return 0;
 }
 

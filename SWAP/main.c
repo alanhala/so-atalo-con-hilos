@@ -31,8 +31,6 @@
 #include "swap.h"
 #include "protocolo_swap.h"
 
-t_log *trace_log_SWAP;
-
 #define BACKLOG 10
 
 void UMC_connection(t_swap* swap);
