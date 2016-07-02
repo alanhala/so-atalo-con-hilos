@@ -25,6 +25,7 @@ Para usar LOGS
 extern t_log *trace_log_UMC
 log_trace(trace_log_UMC,"<lo_que_quieran_loggear>");
 */
+extern t_log *trace_log_UMC;
 t_clock_m* inicializar_info_reemplazo();
 
 int buscar_pagina_victima_de_frame_en_info_reemplazo(int frame_victima, t_tabla_de_paginas *tabla){
@@ -500,31 +501,31 @@ int buscar_en_tlb_frame_de_pagina(int pid, int pagina){
 
 int conseguir_frame_mediante_reemplazo(t_tabla_de_paginas* tabla, int pagina) {
 
-	extern t_log *trace_log_UMC;
+
 
 	int frame_victima = seleccionar_frame_victima(tabla);
 	int pagina_victima = buscar_pagina_victima_de_frame_en_info_reemplazo(frame_victima, tabla);
 
 
-	log_trace(trace_log_UMC,"frame victima %d\n",frame_victima);
+	log_trace(trace_log_UMC,"PID %d : frame victima %d\n",tabla->pid, frame_victima);
 	printf("\n frame victima %d\n", frame_victima);
 	char* contenido_frame_victima = leer_frame_de_memoria_principal(frame_victima, 0, TAMANIO_FRAME);
-	log_trace(trace_log_UMC,"contenido de frame victima a escribir en swap: %s de la pagina victima %d\n",contenido_frame_victima,pagina_victima);
-	printf("\n contenido de frame victima a escribir en swap :  %s de la pagina victima %d\n", contenido_frame_victima, pagina_victima);
+//	log_trace(trace_log_UMC,"contenido de frame victima a escribir en swap: %s de la pagina victima %d\n",contenido_frame_victima,pagina_victima);
+//	printf("\n contenido de frame victima a escribir en swap :  %s de la pagina victima %d\n", contenido_frame_victima, pagina_victima);
 
 
 
 	if ((tabla->entradas[pagina_victima]).modificado == 1){
 		escribir_pagina_de_swap(tabla->pid, pagina_victima,	contenido_frame_victima);
-		printf("Actualizacion de swap al reemplazar pagina porque estaba modificado");
+		//printf("Actualizacion de swap al reemplazar pagina porque estaba modificado");
+		log_trace(trace_log_UMC,"PID %d : Actualizacion de swap al reemplazar pagina porque estaba modificado\n",tabla->pid);
 	}
 
 	char* contenido_pagina_a_actualizar = leer_pagina_de_swap(tabla->pid, pagina);
 
 	//log_trace(trace_log_UMC,"Contenido a actualizar:  %s en pagina victima %d\n",contenido_pagina_a_actualizar,pagina);
 	//printf("\n contenido a actualizar :  %s en pagina victima %d\n", contenido_pagina_a_actualizar, pagina);
-	log_trace(trace_log_UMC,"Contenido a actualizar:  %s en pagina victima %d\n",contenido_pagina_a_actualizar,pagina);
-	printf("\n contenido a actualizar :  %s \n", contenido_pagina_a_actualizar);
+	log_trace(trace_log_UMC,"PID %d : frame victima \n",tabla->pid, frame_victima);
 	escribir_frame_de_memoria_principal(frame_victima, 0, TAMANIO_FRAME, contenido_pagina_a_actualizar);
 	actualizar_reemplazo(tabla, frame_victima, pagina, pagina_victima);
 	return frame_victima;
@@ -549,12 +550,13 @@ int darle_frame_a_una_pagina(t_tabla_de_paginas* tabla, int pagina){
 	int frame = -1;
 	if(tiene_tabla_mas_paginas_para_pedir(tabla))
 	{
+		log_trace(trace_log_UMC,"PID %d : No hay mas frames para pedir\n",tabla->pid);
 		frame = buscar_frame_libre();
 		if(frame !=-1)
 		{
 			asignar_frame_a_una_pagina_info_reemplazo(tabla, frame, pagina);
 			asignar_frame_a_una_pagina(tabla, frame, pagina);
-
+			log_trace(trace_log_UMC,"PID %d : Asigno frame %d a la pagina %d \n",tabla->pid, frame, pagina);
 			return frame;
 		}
 		else
@@ -599,6 +601,7 @@ int seleccionar_frame_victima(t_tabla_de_paginas* tabla)
 		frame_victima= reemplazar_clock_modificado(tabla);
 		break;
 	}
+	log_trace(trace_log_UMC,"PID %d Frame a actualizar %d\n",tabla->pid, frame_victima);
 	return frame_victima;
 }
 
@@ -727,7 +730,6 @@ int reemplazar_clock_modificado(t_tabla_de_paginas * tabla){
 
 int reemplazar_clock(t_tabla_de_paginas * tabla){
 
-	printf("Reemplazo por clock\n");//TODO Modificar este
 
 	int indice = tabla->indice_segunda_oportunidad;
 
