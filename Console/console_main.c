@@ -117,10 +117,10 @@ int main(int argc, char **argv) {
 
 
 	//COMPLETO
-	//codigo = "\n#Respuesta esperada: 1; 1; Hola Mundo!; 3; Bye\n\nbegin\nvariables f,  A,  g\n    A = 	0\n    !compartida = 1+A\n    print !compartida\n    jnz !compartida Siguiente \n:Proximo\n	\n    f = 8	  \n    g <- doble !compartida	\n    io LPT1 20\n\n    textPrint    Hola Mundo!\n    \n    g = 1 + g\n    print 		g    \n    \n    textPrint Bye\n    \nend\n\n\n#Devolver el doble del\n#primer parametro\nfunction doble\nvariables f\n    f = $0 + $0\n    return f\nend\n\n:Siguiente	\n	print A+1\ngoto Proximo\n\n";
+	codigo = "\n#Respuesta esperada: 1; 1; Hola Mundo!; 3; Bye\n\nbegin\nvariables f,  A,  g\n    A = 	0\n    !compartida = 1+A\n    print !compartida\n    jnz !compartida Siguiente \n:Proximo\n	\n    f = 8	  \n    g <- doble !compartida	\n    io LPT1 20\n\n    textPrint    Hola Mundo!\n    \n    g = 1 + g\n    print 		g    \n    \n    textPrint Bye\n    \nend\n\n\n#Devolver el doble del\n#primer parametro\nfunction doble\nvariables f\n    f = $0 + $0\n    return f\nend\n\n:Siguiente	\n	print A+1\ngoto Proximo\n\n";
 
 	//PRODUCTOR
-	codigo="\nbegin	\n	:etiqueta\n	\n	wait b\n		!colas = !colas +1\n	signal c\n	\n	#Ciclar indefinidamente\n	goto etiqueta\n\nend\n\n";
+	//codigo="\nbegin	\n	:etiqueta\n	\n	wait b\n		!colas = !colas +1\n	signal c\n	\n	#Ciclar indefinidamente\n	goto etiqueta\n\nend\n\n";
 
 	//CONSUMIDOR
 	//codigo = "\nbegin	\n	:etiqueta\n	\n	wait c\n		print !colas\n	signal b\n	\n	#Ciclar indefinidamente\n	goto etiqueta\n\nend\n\n";
@@ -169,8 +169,11 @@ int main(int argc, char **argv) {
 	t_respuesta_iniciar_programa_en_kernel *respuesta = malloc(sizeof(t_respuesta_iniciar_programa_en_kernel));
 
 	respuesta = deserealizar_mensaje(92,buffer_recibidos);
-
-	printf("Respuesta al inicio de programa: %d\n",respuesta->respuesta_correcta);
+	if(respuesta->respuesta_correcta == 2){
+		log_trace(trace_log,"Inicio correcto de programa ansisop\n");
+	}else{
+		log_trace(trace_log,"No se pudo iniciar el programa ansisop\n");
+	}
 
 //	listen_sigint_signal();
 
