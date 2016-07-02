@@ -252,7 +252,7 @@ void execute_next_instruction_for_process() {
 	pthread_t execution_thread;
 	pthread_create(&execution_thread, NULL, &execute_instruction, (void*) instruccion_string);
 	pthread_join(execution_thread, NULL);
-
+	printf("Instruccion: %s", instruccion_string);
 	if(program_counter == pcb->program_counter && !string_starts_with(instruccion_string, TEXT_END) && !string_starts_with(instruccion_string, TEXT_RETURN)) {
 	    pcb->program_counter++;
 	}
