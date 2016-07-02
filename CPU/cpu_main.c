@@ -127,6 +127,8 @@ int main(int argc, char **argv) {
 
 			set_PCB(pcb);
 			int resultado_ejecucion = ejecutar_pcb();
+			if (pcb->program_finished == 5)
+				continue; // Se bloqueo por wait, no hay que mandar nada
 			t_PCB_serializacion * pcb_serializado = adaptar_pcb_a_serializar(get_PCB());
 
 			pcb_serializado->mensaje = 3;
@@ -134,8 +136,6 @@ int main(int argc, char **argv) {
 			pcb_serializado->cantidad_operaciones = 0;
 			pcb_serializado->valor_de_la_variable_compartida =0;
 			pcb_serializado->resultado_mensaje = 0;
-			if (pcb_serializado->program_finished == 5)
-				pcb_serializado->valor_mensaje = sem_to_be_blocked;
 			if (pcb_serializado->program_finished == 6) {
 				pcb_serializado->valor_mensaje = io_id;
 				pcb_serializado->cantidad_operaciones = io_operations;

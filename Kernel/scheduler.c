@@ -212,6 +212,7 @@ void end_program(t_scheduler* self, t_PCB *pcb) {
 
 void free_cpu(t_scheduler* self, int cpu) {
     sem_wait(&mutex_cpus_available);
+    printf("CPU LIBERADA \n");
     queue_push(self->cpus_available, cpu);
     sem_post(&mutex_cpus_available);
     sem_post(&sem_cpus_available);
@@ -226,7 +227,9 @@ void wait_block_process(t_scheduler* scheduler, char* sem_id, t_PCB* pcb) {
 	}
 	t_sem_blocked_queue* sem_blocks = list_find(scheduler->semaphores_list, (void*) same_sem);
 	queue_push(sem_blocks->blocked_pids, pcb->pid);
+	pcb->program_counter ++;
 	enqueue_to_block(scheduler, pcb);
+	free_cpu(scheduler, pcb->cpu_socket_descriptor);
 }
 
 void signal_unblock_process(t_scheduler* scheduler, char* sem_id) {

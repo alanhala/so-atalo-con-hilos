@@ -81,7 +81,6 @@ void do_wait(t_nombre_semaforo identificador_semaforo) {
 		recibir_pcb = (t_PCB_serializacion * ) deserealizar_mensaje(121, buffer_recv);
 		actualizarPCB(get_PCB(), recibir_pcb);
 		if (get_PCB()->program_finished == 5) {
-			sem_to_be_blocked = identificador_semaforo;
 			pthread_exit();
 		}
 	}

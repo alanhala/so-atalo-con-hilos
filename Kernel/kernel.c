@@ -191,6 +191,7 @@ int32_t wait_ansisop(t_kernel* kernel, char* sem_id, t_PCB* pcb) {
 	t_semaphore* semaphore = list_find(kernel->semaphores, (void*) same_sem);
 	semaphore->value--; // TODO ver si hace falta poner semaforo
 	if (semaphore->value < 0) {
+		wait_block_process(scheduler, sem_id, pcb);
 		return -1;
 	}
 	else

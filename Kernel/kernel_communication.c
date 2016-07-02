@@ -156,8 +156,8 @@ void* handle_pcb_execution(void* data_to_cast) {
 				    int cpu = pcb->cpu_socket_descriptor;
 				    if(pcb->program_finished == 1 || pcb->program_finished == 2)
 				    	end_program(scheduler, pcb);
-				    else if (pcb->program_finished == 5)
-				    	wait_block_process(scheduler, unPCB->valor_mensaje, pcb);
+//				    else if (pcb->program_finished == 5)
+//				    	wait_block_process(scheduler, unPCB->valor_mensaje, pcb);
 				    else if (pcb->program_finished == 6)
 				    	handle_io_operation(scheduler, unPCB->valor_mensaje, unPCB->cantidad_operaciones, pcb);
 				    else
@@ -168,8 +168,9 @@ void* handle_pcb_execution(void* data_to_cast) {
 				} else if(unPCB->mensaje == 4) {
 					int resultado = wait_ansisop(kernel, unPCB->valor_mensaje, pcb);
 					t_PCB_serializacion * pcb_serializacion = adaptar_pcb_a_serializar(pcb, kernel);
-					if (resultado == -1)
+					if (resultado == -1) {
 						pcb_serializacion->program_finished = 5;
+					}
 					pcb_serializacion->mensaje = 0;
 					pcb_serializacion->valor_mensaje = "";
 					pcb_serializacion->cantidad_operaciones = 0;
@@ -183,6 +184,8 @@ void* handle_pcb_execution(void* data_to_cast) {
 					}
 					free(buffer->datos);
 					free(buffer);
+					if (resultado == -1)
+						break;
 				} else if (unPCB->mensaje == 5) {
 					signal_ansisop(kernel, unPCB->valor_mensaje);
 				} else if (unPCB->mensaje == 6) {
