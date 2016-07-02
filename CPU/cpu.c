@@ -99,6 +99,7 @@ void do_signal(t_nombre_semaforo identificador_semaforo) {
 }
 
 t_valor_variable obtenerValorCompartida(t_nombre_compartida variable) {
+	//log_trace
 //	char * new_variable = string_substring(variable, 0, strlen(variable)-1); //LE SACO EL \n
 	char* variable_limpia = (char*)variable;
 
@@ -147,6 +148,7 @@ t_valor_variable obtenerValorCompartida(t_nombre_compartida variable) {
 }
 
 t_valor_variable asignarValorCompartida(t_nombre_compartida variable, t_valor_variable valor) {
+	log_trace(trace_log_CPU,"asignarValorCompartida");
 //	char * new_variable = string_substring(variable, 0, strlen(variable)); //LE SACO EL \N
 	char* variable_limpia = (char*)variable;
 
@@ -160,7 +162,6 @@ t_valor_variable asignarValorCompartida(t_nombre_compartida variable, t_valor_va
 	pcb_serializado->resultado_mensaje = 0;
 	t_stream * stream = serializar_mensaje(121,pcb_serializado);
 	send(KERNEL_DESCRIPTOR, stream->datos, stream->size, 0);
-
 
 	t_header *a_header = malloc(sizeof(t_header));
 
@@ -194,6 +195,8 @@ t_valor_variable asignarValorCompartida(t_nombre_compartida variable, t_valor_va
 }
 
 void entradaSalida(t_nombre_dispositivo dispositivo, int tiempo) {
+
+
 	while(string_ends_with(dispositivo, "\n") || string_ends_with(dispositivo, " "))
 			dispositivo = string_substring_until(dispositivo, string_length((char*)dispositivo)-1);
 	t_PCB_serializacion * pcb_serializado = adaptar_pcb_a_serializar(get_PCB());
@@ -310,6 +313,8 @@ t_dato_en_memoria* get_next_instruction() {
 }
 
 t_puntero definirVariable(t_nombre_variable variable) {
+	log_trace(trace_log_CPU,"definirVariable");
+
 	t_stack_element *stack_element =list_get(pcb->stack, list_size(pcb->stack) - 1);
 
 	t_variable *new_variable = malloc(sizeof(t_variable));
@@ -338,6 +343,8 @@ void validate_stack_size(t_variable *variable) {
 }
 
 t_puntero obtenerPosicionVariable(t_nombre_variable identificador_variable) {
+	log_trace(trace_log_CPU,"obtenerPosicionVariable");
+
     t_stack_element *stack_element = list_get(pcb->stack, list_size(pcb->stack) - 1);
 
     int find_variable(t_variable *var) {
@@ -355,6 +362,7 @@ t_puntero obtenerPosicionVariable(t_nombre_variable identificador_variable) {
 }
 
 t_valor_variable dereferenciar(t_puntero absolute_offset) {
+	log_trace(trace_log_CPU,"dereferenciar");
     t_dato_en_memoria *direccion = convert_to_virtual_address(absolute_offset);
 
     char* respuesta = ejecutar_lectura_de_dato_con_iteraciones(leer_memoria_de_umc, direccion, tamanio_pagina);
@@ -377,10 +385,12 @@ void go_back_to_previous_stack_element(t_stack_element *current_stack_element) {
 }
 
 void asignar(t_puntero absolute_offset, t_valor_variable valor) {
+	log_trace(trace_log_CPU,"asignar");
     ejecutar_escritura_de_dato_con_iteraciones(convert_to_virtual_address(absolute_offset), (char*) &valor, tamanio_pagina);
 }
 
 void retornar(t_valor_variable retorno) {
+	log_trace(trace_log_CPU,"retornar");
     t_stack_element *stack_element = list_get(pcb->stack, list_size(pcb->stack)-1);
 
     asignar(convert_to_absolute_offset(stack_element->valor_retorno), retorno);
@@ -389,18 +399,21 @@ void retornar(t_valor_variable retorno) {
 }
 
 void imprimir(t_valor_variable valor_mostrar) {
+	log_trace(trace_log_CPU,"imprimir");
     char* print_value = string_itoa(valor_mostrar);
 
     imprimirTexto(print_value);
 }
 
 void imprimirTexto(char* print_value) {
+	log_trace(trace_log_CPU,"imprimirTexto");
 	int enviado_correctamente = send_text_to_kernel(print_value, string_length(print_value));
     //todo si se quiere validar que haya enviado correctmente
     printf("%s\n", print_value);
 }
 
 void irALabel(t_nombre_etiqueta nombre_etiqueta) {
+	log_trace(trace_log_CPU,"irALabel");
     char* etiqueta_limpia = (char*)nombre_etiqueta;
 
     if(string_ends_with((char*) nombre_etiqueta, "\n")) {
@@ -417,6 +430,7 @@ void irALabel(t_nombre_etiqueta nombre_etiqueta) {
 }
 
 void llamarSinRetorno(t_nombre_etiqueta etiqueta) {
+	log_trace(trace_log_CPU,"llamarSinRetorno");
     t_stack_element *stack_element = create_stack_element();
     stack_element->posicion_retorno = pcb->program_counter+1;
     list_add(pcb->stack, stack_element);
@@ -425,7 +439,7 @@ void llamarSinRetorno(t_nombre_etiqueta etiqueta) {
 }
 
 void llamarConRetorno(t_nombre_etiqueta etiqueta, t_puntero donde_retornar) {
-
+	log_trace(trace_log_CPU,"llamarConRetorno");
     t_stack_element *stack_element = create_stack_element();
     stack_element->valor_retorno = convert_to_virtual_address(donde_retornar);
     stack_element->posicion_retorno = pcb->program_counter+1;
@@ -436,6 +450,7 @@ void llamarConRetorno(t_nombre_etiqueta etiqueta, t_puntero donde_retornar) {
 }
 
 void finalizar(void) {
+	log_trace(trace_log_CPU,"finalizar");
     t_stack_element *stack_element = list_get(pcb->stack, list_size(pcb->stack)-1);
 
     if(stack_element->posicion_retorno) {
