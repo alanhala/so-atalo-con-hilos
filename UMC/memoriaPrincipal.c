@@ -696,7 +696,7 @@ int busco_cero_uno(t_tabla_de_paginas * tabla){
 
 int reemplazar_clock_modificado(t_tabla_de_paginas * tabla){
 
-	puts("Reemplazo por clock modificado"); //TODO Modificar este print
+	printf("Reemplazo por clock modificado\n"); //TODO Modificar este print
 
 	int indice = tabla->indice_segunda_oportunidad;
 
@@ -726,7 +726,7 @@ int reemplazar_clock_modificado(t_tabla_de_paginas * tabla){
 
 int reemplazar_clock(t_tabla_de_paginas * tabla){
 
-	puts("Reemplazo por clock\n");//TODO Modificar este
+	printf("Reemplazo por clock\n");//TODO Modificar este
 
 	int indice = tabla->indice_segunda_oportunidad;
 
