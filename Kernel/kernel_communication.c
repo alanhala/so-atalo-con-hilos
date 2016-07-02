@@ -1,5 +1,26 @@
 #include "kernel_communication.h"
 #include "protocoloKernel.h"
+
+int validate_console_connection(int socket_fd){
+		int error = 0;
+		socklen_t len = sizeof (error);
+		int retval = getsockopt (socket_fd, SOL_SOCKET, SO_ERROR, &error, &len);
+
+
+		if (retval != 0) {
+			/* there was a problem getting the error code */
+			//fprintf(stderr, "error getting socket error code: %s\n", strerror(retval));
+			return 1;
+		}
+
+		if (error != 0) {
+			/* socket has a non zero error status */
+			fprintf(stderr, "socket error: %s\n", strerror(error));
+			return 1;
+		}
+		return 0;
+}
+
 int start_program_in_umc(int umc_socket_descriptor, int pid, int cantidad_paginas_requeridas, char* codigo) {
 
 	   t_inicio_de_programa_en_UMC *iniciar_programa_en_UMC = malloc(sizeof(t_inicio_de_programa_en_UMC));
@@ -78,9 +99,16 @@ void* handle_pcb_execution(void* data_to_cast) {
 
 				int bytes_recibidos = recv(pcb->cpu_socket_descriptor,buffer_recibidos,length,0);
 
+				if(validate_console_connection(pcb->console_socket_descriptor) == 1){
 
-				int bytes_sent = send(pcb->console_socket_descriptor,buffer_recibidos,length,0);
-				printf("Envio imprimir texto a consola\n");
+						close(pcb->console_socket_descriptor);
+//						int umc_finalizado = end_program_umc(pcb, self->umc_socket_descriptor);
+//						free(pcb);
+				}else
+				{
+					int bytes_sent = send(pcb->console_socket_descriptor,buffer_recibidos,length,0);
+					printf("Envio imprimir texto a consola\n");
+				}
 			}
 			if(tipo == 121){
 
@@ -223,10 +251,16 @@ int end_program_console(t_PCB *pcb) {
 
 	buffer = serializar_mensaje(133,finalizar_consola);
 	free(finalizar_consola);
-	int bytes_enviados = send(pcb->console_socket_descriptor,buffer->datos,buffer->size,0);
+
+	if(validate_console_connection(pcb->console_socket_descriptor) == 1){
+						close(pcb->console_socket_descriptor);
+	}else
+	{
+		send(pcb->console_socket_descriptor,buffer->datos,buffer->size,0);
+	}
 	free(buffer->datos);
 	free(buffer);
-	return bytes_enviados;
+	return 0;
 }
 
 t_PCB_serializacion* adaptar_pcb_a_serializar(t_PCB* pcb, t_kernel* kernel) {

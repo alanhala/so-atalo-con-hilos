@@ -11,4 +11,7 @@
 	int end_program_console(t_PCB *pcb);
 	t_PCB_serializacion* adaptar_pcb_a_serializar(t_PCB* pcb, t_kernel* kernel);
 	void actualizar_pcb_serializado(t_PCB *pcb, t_PCB_serializacion *pcb_serializacion);
+
+	int validate_console_connection(int socket_fd);
+
 #endif

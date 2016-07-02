@@ -458,8 +458,11 @@ int send_text_to_kernel(char* print_value, uint32_t length) {
 
 	int bytes_enviados = send(KERNEL_DESCRIPTOR, buffer->datos, buffer->size, 0);
 
+
 	free(imprimir_en_cpu);
-    return bytes_enviados;
+	free(buffer->datos);
+	free(buffer);
+	return bytes_enviados;
 }
 
 char* leer_memoria_de_umc(t_dato_en_memoria *dato) {
@@ -713,7 +716,7 @@ int ejecutar_pcb(){
     	   printf("Instruccion %d del pid %d ejecutada \n", instruccion_ejecutada, pcb->pid);
 		   fflush(stdout);
 		   instruccion_ejecutada ++;
-		   //usleep(300000);
+		   usleep(1000 * QUANTUM_SLEEP);
        }
 
       return 0;

@@ -1,5 +1,6 @@
 #include "kernel_communication.h"
 
+
 void initialize_semaphores() {
 	sem_init(&mutex_new, 0, 1);
 	sem_init(&mutex_ready, 0, 1);
@@ -99,7 +100,19 @@ void* handle_ready(void* scheduler) {
 		sem_wait(&mutex_ready);
 		t_PCB *pcb  = queue_pop(self->ready_state);
 		sem_post(&mutex_ready);
+
 		sem_wait(&sem_cpus_available); //espero tener una cpu disponible
+
+		if(validate_console_connection(pcb->console_socket_descriptor) == 1){
+			sem_post(&sem_cpus_available);
+			close(pcb->console_socket_descriptor);
+			int umc_finalizado = end_program_umc(pcb, self->umc_socket_descriptor);
+			free(pcb);
+			continue;
+		}
+
+
+
 		sem_wait(&mutex_execution);
 		pcb->state = "Ejecutando";
 		printf("Ejecutando: %d\n", pcb->pid);
@@ -117,6 +130,12 @@ void* handle_execution(void* scheduler) {
 		t_PCB* pcb  = queue_pop(self->execution_state);
 		sem_post(&mutex_execution);
 
+		if(validate_console_connection(pcb->console_socket_descriptor) == 1){
+			close(pcb->console_socket_descriptor);
+			int umc_finalizado = end_program_umc(pcb, self->umc_socket_descriptor);
+			free(pcb);
+			continue;
+		}
 
 		sem_wait(&mutex_cpus_available);
 		int cpu  = (int )queue_pop(self->cpus_available);
@@ -145,7 +164,7 @@ void* handle_exit(void* scheduler) {
 		sem_post(&mutex_exit);
 
 		int umc_finalizado = end_program_umc(pcb, self->umc_socket_descriptor);
-		int consola_finalizado = end_program_console(pcb);
+		int consola_finalizado = end_program_console(pcb); //console_finalizado no usarlo para nada es valor 0
 
 		free(pcb);// lo libero directamente creo q no es necesario hacer cola de exit
 	}
