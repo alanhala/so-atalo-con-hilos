@@ -838,11 +838,20 @@ void actualizar_reemplazo(t_tabla_de_paginas* tabla, int frame_a_asignar,int pag
 
 }
 
+int hay_frames_disponibles(){
+	int frame_libre(t_frame *frame) {
+		return (frame->asignado == 0);
+	}
 
+	t_frame* frame_encontrado = list_find(lista_frames,	(void*) frame_libre);
+	if (frame_encontrado == NULL)
+		return 0;
+	return 1;
+}
 
 int tiene_tabla_mas_paginas_para_pedir(t_tabla_de_paginas* tabla)
 {
-	return (tabla->frames_en_uso < MAX_FRAMES_POR_PROCESO);
+	return (tabla->frames_en_uso < MAX_FRAMES_POR_PROCESO && hay_frames_disponibles());
 }
 
 int escribir_pagina_de_programa(int pid, int pagina, int offset, int size, char * datos){
@@ -1051,14 +1060,14 @@ void flush_tlb(int pid){
 				}
 				i++;
 			}
-			i=0;
-			while(i < MAX_FRAMES_POR_PROCESO){
-				(tabla->info_reemplazo[i]).frame = -1;
-				(tabla->info_reemplazo[i]).pagina = -1;
-				(tabla->info_reemplazo[i]).modificado = 0;
-				(tabla->info_reemplazo[i]).segunda_oportunidad = 1;
-				i ++;
-			}
+//			i=0;
+//			while(i < MAX_FRAMES_POR_PROCESO){
+//				(tabla->info_reemplazo[i]).frame = -1;
+//				(tabla->info_reemplazo[i]).pagina = -1;
+//				(tabla->info_reemplazo[i]).modificado = 0;
+//				(tabla->info_reemplazo[i]).segunda_oportunidad = 1;
+//				i ++;
+//			}
 
 		}
 		//sem_wait(&mut_tlb);
@@ -1078,17 +1087,17 @@ void flush_tlb(int pid){
 			}
 			i++;
 		}
-		t_tabla_de_paginas * tabla = buscar_tabla_de_paginas_de_pid(pid);
-		if(tabla != NULL){
-		i=0;
-			while(i < MAX_FRAMES_POR_PROCESO){
-				(tabla->info_reemplazo[i]).frame = -1;
-				(tabla->info_reemplazo[i]).pagina = -1;
-				(tabla->info_reemplazo[i]).modificado = 0;
-				(tabla->info_reemplazo[i]).segunda_oportunidad = 1;
-				i++;
-			}
-		}
+//		t_tabla_de_paginas * tabla = buscar_tabla_de_paginas_de_pid(pid);
+//		if(tabla != NULL){
+//		i=0;
+//			while(i < MAX_FRAMES_POR_PROCESO){
+//				(tabla->info_reemplazo[i]).frame = -1;
+//				(tabla->info_reemplazo[i]).pagina = -1;
+//				(tabla->info_reemplazo[i]).modificado = 0;
+//				(tabla->info_reemplazo[i]).segunda_oportunidad = 1;
+//				i++;
+//			}
+//		}
 
 		//sem_post(&mut_tlb);
 

@@ -101,7 +101,7 @@ int main(int argc, char **argv) {
 //	int swap_socket_test = create_client_socket_descriptor("localhost", "6000");
 //	set_socket_descriptor(swap_socket_test);
 //	//ESTE SOCKET ES PARA TEST borrarlo
-//	correr_test_tlb(); //
+	//correr_test_tlb(); //
 
 
 	inicializar_estructuras();
@@ -212,7 +212,7 @@ void manejo_de_solicitudes(int socket_descriptor) {
 
 			free(buffer->datos);
 			free(buffer);
-			free(datos_de_lectura);
+
 		}
 
 		if (tipo == 33) {
