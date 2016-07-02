@@ -18,6 +18,10 @@ int validate_console_connection(int socket_fd){
 			fprintf(stderr, "socket error: %s\n", strerror(error));
 			return 1;
 		}
+//		int isopen =isfdtype(socket_fd, SOCK_STREAM);
+//		if (isopen ! 1)
+//			return 1;
+
 		return 0;
 }
 
