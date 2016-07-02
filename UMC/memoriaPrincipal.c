@@ -61,7 +61,7 @@ int inicializar_estructuras() {
 	TLB = crear_tlb();
 	lista_tabla_de_paginas = list_create();
 	crear_lista_frames();
-	set_test();
+	//set_test();
 	CANTIDAD_MAXIMA_PROGRAMAS = CANTIDAD_FRAMES / MAX_FRAMES_POR_PROCESO;
 	crear_swap_mock();
 
@@ -83,7 +83,7 @@ void inicializar_semaforos() {
 
 void crear_memoria_principal() {
 	char* datos = malloc(TAMANIO_MEMORIA_PRINCIPAL);
-	memset(datos, '\0', TAMANIO_MEMORIA_PRINCIPAL);
+	memset(datos, '0', TAMANIO_MEMORIA_PRINCIPAL);
 	MEMORIA_PRINCIPAL = datos;
 }
 
@@ -212,8 +212,9 @@ int devolver_frame_de_pagina(t_tabla_de_paginas* tabla, int pagina) {
 }
 
 char* leer_frame_de_memoria_principal(int frame, int offset, int size) {
-	char* datos = malloc(size);
+	char* datos = malloc(size+1);
 	memcpy(datos, MEMORIA_PRINCIPAL + (frame * TAMANIO_FRAME) + offset, size);
+	datos[size]='\0';
 	usleep(RETARDO*1000);
 	return datos;
 }
@@ -274,7 +275,7 @@ int buscar_frame_de_una_pagina(t_tabla_de_paginas* tabla, int pagina){
 	int frame_de_pagina = -1;
 	if(TLB_HABILITADA)
 	{
-		puts("Busco frame en la TLB"); //TODO Modificar el print
+		//puts("Busco frame en la TLB"); //TODO Modificar el print
 		frame_de_pagina = buscar_en_tlb_frame_de_pagina(tabla->pid, pagina);
 	}
 
@@ -1305,7 +1306,7 @@ void set_socket_descriptor(int fd){
 void crear_swap_mock(){
 
 	char* datos = malloc(10000000);
-	memset(datos, '/0', 10000000);
+	memset(datos, '0', 10000000);
 	SWAP_MOCK = datos;
 
 }

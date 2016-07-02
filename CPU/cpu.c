@@ -12,11 +12,11 @@
 #include <commons/collections/list.h>
 #include "protocoloCPU.h"
 
-/*
-Para usar Logs
-t_log *trace_log_CPU;
-log_trace(trace_log_CPU,"<lo_que_quieran_loggear>");
-*/
+
+
+extern t_log *trace_log_CPU;
+//log_trace(trace_log_CPU,"<lo_que_quieran_loggear>");
+
 
 AnSISOP_funciones functions = {
 	.AnSISOP_definirVariable	= definirVariable,

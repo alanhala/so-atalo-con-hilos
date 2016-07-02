@@ -212,6 +212,7 @@ void manejo_de_solicitudes(int socket_descriptor) {
 
 			free(buffer->datos);
 			free(buffer);
+			free(datos_de_lectura);
 		}
 
 		if (tipo == 33) {
