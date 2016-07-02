@@ -12,6 +12,7 @@
 
 char 	*server_ip,
 		*umc_port;
+t_log *trace_log_SWAP;
 
 	typedef struct {
 		FILE* file;

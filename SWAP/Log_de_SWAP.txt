@@ -12,3 +12,4 @@
 
 [TRACE] 14:43:07:952 main.c/(3069:3069): ---------
 
+[TRACE] 03:26:58:477 main.c/(3019:3019): Se creo el archivo swap. El tamaño es de 50000 MB
