@@ -111,16 +111,16 @@ t_escribir_pagina_swap * deserializar_escribir_pagina_swap(char *datos){
 	memcpy(&escritura->pagina, datos+offset, tmpsize = sizeof(uint32_t));
 	offset+=tmpsize;
 
-	for(tamanoDato = 0; (datos+offset)[tamanoDato] != '\0';tamanoDato++);//incremento tamanoDato, hasta el tamaÃ±o del nombre
+	//for(tamanoDato = 0; (datos+offset)[tamanoDato] != '\0';tamanoDato++);//incremento tamanoDato, hasta el tamaÃ±o del nombre
 
-	escritura->datos = malloc(tamanoDato+1);
-	memset(escritura->datos,0,tamanoDato+1);
+	escritura->datos = malloc(get_page_size());
+	memset(escritura->datos,0,get_page_size());
 
-	memcpy(escritura->datos, datos+offset, tmpsize=tamanoDato+1);
+	memcpy(escritura->datos, datos+offset, tmpsize=get_page_size());
 	offset+=tmpsize;
 
-	char endString = '\0';
-	memcpy(escritura->datos+tamanoDato,&endString,1);
+	//char endString = '\0';
+	//memcpy(escritura->datos+tamanoDato,&endString,1);
 
 	return escritura;
 }
@@ -199,7 +199,7 @@ t_stream * serializar_respuesta_leer_pagina_swap(t_respuesta_leer_pagina_swap *r
 		uint32_t 	tmpsize = 0,
 					offset = 0;
 
-		size_t size_bytes_de_lectura = strlen(respuesta->datos)+1;
+		size_t size_bytes_de_lectura = get_page_size();
 
 		uint32_t stream_size =	sizeof(uint8_t)  +			//Tamano del tipo
 								sizeof(uint32_t) +			//Tamano del largo del stream
@@ -223,8 +223,8 @@ t_stream * serializar_respuesta_leer_pagina_swap(t_respuesta_leer_pagina_swap *r
 		memcpy(stream->datos+offset,respuesta->datos,tmpsize=size_bytes_de_lectura);
 		offset+=tmpsize;
 
-		char endString='\0';
-		memcpy(stream->datos+offset-1,&endString,1);
+		//char endString='\0';
+		//memcpy(stream->datos+offset-1,&endString,1);
 
 		return stream;
 }

@@ -52,6 +52,10 @@ void set_configuracion_cargada(){
 int get_configuracion_cargada(){
 	return CONFIGURACION_CARGADA;
 }
+
+int obtener_tamanio_del_frame(){
+	return TAMANIO_FRAME;
+}
 void interprete_de_comandos();
 void manejo_de_solicitudes(int cpu_socket_descriptor);
 void inicializar_semaforos_main(void);

@@ -45,9 +45,10 @@ t_swap *create_swap(char* config_file_path) {
 	initialize_bitmap(self);
 	create_file(self);
 	self->file = fopen(self->swap_name, "r+");
-
 	server_ip = config_get_string_value(swap_config,"SERVER_IP");
 	log_trace(trace_log_SWAP, "Se cargo satisfactoriamente el archivo de configuracion");
+
+	set_page_size(self->page_size);
 	return self;
 }
 

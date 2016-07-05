@@ -18,6 +18,7 @@
 #include "protocoloUMC.h"
 
 
+
 //Deserealizacion
 void *deserealizar_mensaje(uint8_t tipo, char* datos) {
 
@@ -144,7 +145,8 @@ t_solicitar_bytes_de_una_pagina_a_UMC *deserializar_pedido_bytes_de_una_pagina_a
 	return pedido;
 }
 /*
-t_escribir_bytes_de_una_pagina_en_UMC *deserializar_escribir_bytes_de_una_pagina_en_UMC(char *datos){
+t_escribir_bytes_de_una_pagina_en_UMC *de
+escribir_bytes_de_una_pagina_en_UMC(char *datos){
 
 	int		tmpsize = 0,
 			offset = 0,
@@ -393,7 +395,9 @@ t_stream * serializar_escribir_pagina_swap(t_escribir_pagina_swap * escritura){
 	uint32_t 	tmpsize = 0,
 				offset = 0;
 
-	size_t size_datos = strlen(escritura->datos)+1;
+	//size_t size_datos = strlen(escritura->datos)+1;
+
+	size_t size_datos = obtener_tamanio_del_frame();
 
 	uint32_t 	size_escritura = 	sizeof(uint32_t) +	//Tamano del pid
 									sizeof(uint32_t) +	//Tamano de pagina
@@ -430,8 +434,8 @@ t_stream * serializar_escribir_pagina_swap(t_escribir_pagina_swap * escritura){
 	memcpy(stream->datos+offset,escritura->datos,tmpsize=size_datos);
 	offset+=tmpsize;
 
-	char endString='\0';
-	memcpy(stream->datos+offset-1,&endString,1);
+	//char endString='\0';
+	//memcpy(stream->datos+offset,&endString,1);
 
 	return stream;
 }
@@ -473,7 +477,7 @@ t_stream *serializar_respuesta_bytes_de_una_pagina_a_CPU(t_respuesta_bytes_de_un
 	uint32_t 	tmpsize = 0,
 				offset = 0;
 
-	size_t size_bytes_de_una_pagina = strlen(unaEstructura->bytes_de_una_pagina)+1;
+	size_t size_bytes_de_una_pagina = obtener_tamanio_del_frame();
 
 	uint32_t stream_size =	sizeof(uint8_t)  +			//Tamano del tipo
 							sizeof(uint32_t) +			//Tamano del largo del stream
@@ -498,7 +502,7 @@ t_stream *serializar_respuesta_bytes_de_una_pagina_a_CPU(t_respuesta_bytes_de_un
 	offset+=tmpsize;
 
 	char endString='\0';
-	memcpy(stream->datos+offset-1,&endString,1);
+	memcpy(stream->datos+offset,&endString,1);
 
 	return stream;
 }

@@ -121,59 +121,7 @@ t_stream *serializar_pedido_bytes_de_una_pagina_a_UMC(t_solicitar_bytes_de_una_p
 	return stream;
 }
 
-/*
-t_stream *serializar_escribir_bytes_de_una_pagina_en_UMC(t_escribir_bytes_de_una_pagina_en_UMC *escritura){
 
-	uint32_t 	tmpsize = 0,
-				offset = 0;
-
-	size_t size_bytes_a_escribir = escritura->size+1;	//El campo size es el tamano del string, sin el '\0'. Hablado con @Frabos
-
-	uint32_t 	size_escritura = 	sizeof(uint32_t) +	    //Tamano del numero de pagina
-									sizeof(uint32_t) +	    //Tamano del offset
-									sizeof(uint32_t) +	    //Tamano del campo datos a escribir
-									size_bytes_a_escribir ;	//Tamano del char* de bytes
-
-	uint32_t 	stream_size =	sizeof(uint8_t)	+	//Tamano del tipo
-								sizeof(uint32_t)+	//Tamano del largo del stream
-								size_escritura;		//Tamano del pedido de pagina
-
-	t_stream *stream = malloc(sizeof(t_stream));
-	memset(stream, 0,sizeof(t_stream));
-
-	stream->size = stream_size;
-	stream->datos = malloc(stream_size);
-	memset(stream->datos,0,stream_size);
-
-	uint8_t tipo = 33; 	//Tipo del Mensaje . Fijado estaticamente segun protocolo
-	uint32_t numero_pagina = escritura->pagina;
-	uint32_t offset_pagina = escritura->offset;
-	uint32_t size_pagina = escritura->size;
-
-	memcpy(stream->datos,&tipo,tmpsize=sizeof(uint8_t));
-	offset+=tmpsize;
-
-	memcpy(stream->datos+offset,&stream_size,tmpsize=sizeof(uint32_t));
-	offset+=tmpsize;
-
-	memcpy(stream->datos+offset,&numero_pagina,tmpsize=sizeof(uint32_t));
-	offset+=tmpsize;
-
-	memcpy(stream->datos+offset,&offset_pagina,tmpsize=sizeof(uint32_t));
-	offset+=tmpsize;
-
-	memcpy(stream->datos+offset,&size_pagina,tmpsize=sizeof(uint32_t));
-	offset+=tmpsize;
-
-	memcpy(stream->datos+offset,escritura->buffer,tmpsize=size_bytes_a_escribir);
-	offset+=tmpsize;
-
-	char endString='\0';
-	memcpy(stream->datos+offset-1,&endString,1);
-
-	return stream;
-}
-*/
 
 t_stream *serializar_escribir_bytes_de_una_pagina_en_UMC(t_escribir_bytes_de_una_pagina_en_UMC *escritura){
 

@@ -34,7 +34,14 @@
 #define BACKLOG 10
 
 void UMC_connection(t_swap* swap);
+int page_size;
+int get_page_size(){
+	return page_size;
+}
 
+void set_page_size(int size){
+	page_size = size;
+}
 int main(int argc, char *argv[]) {
 //	run_specs();
 
