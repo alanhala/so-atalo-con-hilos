@@ -366,8 +366,10 @@ t_valor_variable dereferenciar(t_puntero absolute_offset) {
     t_dato_en_memoria *direccion = convert_to_virtual_address(absolute_offset);
 
     char* respuesta = ejecutar_lectura_de_dato_con_iteraciones(leer_memoria_de_umc, direccion, tamanio_pagina);
-    uint32_t valor;
-    memcpy(&valor, respuesta, direccion->size);
+    int valor = 0;
+    char *aux = malloc(sizeof(int));
+    memcpy(aux, respuesta, sizeof(int));
+    valor = (int)*(aux);
     return valor;
 }
 
