@@ -213,12 +213,12 @@ int devolver_frame_de_pagina(t_tabla_de_paginas* tabla, int pagina) {
 }
 
 char* leer_frame_de_memoria_principal(int frame, int offset, int size) {
-	//char* datos = malloc(size);
-	//memcpy(datos, MEMORIA_PRINCIPAL + (frame * TAMANIO_FRAME) + offset, size);
-
-	char* datos = malloc(size+1);
+	char* datos = malloc(size);
 	memcpy(datos, MEMORIA_PRINCIPAL + (frame * TAMANIO_FRAME) + offset, size);
-	datos[size]='\0';
+
+//	char* datos = malloc(size+1);
+//	memcpy(datos, MEMORIA_PRINCIPAL + (frame * TAMANIO_FRAME) + offset, size);
+//	datos[size]='\0';
 	usleep(RETARDO*1000);
 	return datos;
 }

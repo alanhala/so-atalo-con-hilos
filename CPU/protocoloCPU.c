@@ -17,6 +17,11 @@
 #include "socket.h"
 #include "protocoloCPU.h"
 
+int TAMANIO_PEDIDO;
+void set_tamanio_pedido(int tamanio){
+	TAMANIO_PEDIDO = tamanio;
+}
+
 
 //Serializacion
 t_stream *serializar_mensaje(int tipo,void* unaEstructura) {
@@ -490,15 +495,21 @@ t_respuesta_bytes_de_una_pagina_a_CPU *deserializar_respuesta_bytes_de_una_pagin
 	t_respuesta_bytes_de_una_pagina_a_CPU *respuesta = malloc(sizeof(t_respuesta_bytes_de_una_pagina_a_CPU));
 	memset(respuesta,0, sizeof(t_respuesta_bytes_de_una_pagina_a_CPU));
 
-	for(tamanoDato = 0; (datos+desplazamientoHeader)[tamanoDato] != '\0';tamanoDato++);//incremento tamanoDato, hasta el tamaÃ±o del nombre
+	//for(tamanoDato = 0; (datos+desplazamientoHeader)[tamanoDato] != '\0';tamanoDato++);//incremento tamanoDato, hasta el tamaÃ±o del nombre
 
-	respuesta->bytes_de_una_pagina = malloc(tamanoDato+1);
-	memset(respuesta->bytes_de_una_pagina,0,tamanoDato+1);
+//	respuesta->bytes_de_una_pagina = malloc(tamanoDato+1);
+//	memset(respuesta->bytes_de_una_pagina,0,tamanoDato+1);
+//
+//	memcpy(respuesta->bytes_de_una_pagina, datos+desplazamientoHeader, tmpsize=tamanoDato+1);
+//
+//	char endString = '\0';
+//	memcpy(respuesta->bytes_de_una_pagina+tamanoDato,&endString,1);
 
-	memcpy(respuesta->bytes_de_una_pagina, datos+desplazamientoHeader, tmpsize=tamanoDato+1);
+	respuesta->bytes_de_una_pagina = malloc(TAMANIO_PEDIDO);
+	memset(respuesta->bytes_de_una_pagina,0,TAMANIO_PEDIDO);
 
-	char endString = '\0';
-	memcpy(respuesta->bytes_de_una_pagina+tamanoDato,&endString,1);
+	memcpy(respuesta->bytes_de_una_pagina, datos+desplazamientoHeader, tmpsize=TAMANIO_PEDIDO);
+
 
 	return respuesta;
 }

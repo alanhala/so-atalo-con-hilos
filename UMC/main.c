@@ -53,7 +53,7 @@ int get_configuracion_cargada(){
 	return CONFIGURACION_CARGADA;
 }
 
-int obtener_tamanio_del_frame(){
+int get_tamanio_frame(){
 	return TAMANIO_FRAME;
 }
 void interprete_de_comandos();
@@ -205,7 +205,7 @@ void manejo_de_solicitudes(int socket_descriptor) {
 
 			memset(respuesta_bytes, 0,
 					sizeof(t_respuesta_bytes_de_una_pagina_a_CPU));
-
+			respuesta_bytes->tamanio_dato = bytes_de_una_pagina->size;
 			respuesta_bytes->bytes_de_una_pagina = datos_de_lectura;
 
 			t_stream *buffer = (t_stream*) serializar_mensaje(32,

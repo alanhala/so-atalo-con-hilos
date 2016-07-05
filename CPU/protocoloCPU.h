@@ -71,6 +71,7 @@ typedef struct {
 
 typedef struct {
 	char *bytes_de_una_pagina;
+	int tamanio_dato;
 }__attribute__((packed)) t_respuesta_bytes_de_una_pagina_a_CPU;
 
 typedef struct {

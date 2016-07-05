@@ -116,7 +116,7 @@ int main(int argc, char **argv) {
 
 
 
-	//COMPLETO
+	//COMPLETO PROBLEMA PARA CARGAR ESTE PROGRAMA
 	//codigo = "\n#Respuesta esperada: 1; 1; Hola Mundo!; 3; Bye\n\nbegin\nvariables f,  A,  g\n    A = 	0\n    !compartida = 1+A\n    print !compartida\n    jnz !compartida Siguiente \n:Proximo\n	\n    f = 8	  \n    g <- doble !compartida	\n    io LPT1 20\n\n    textPrint    Hola Mundo!\n    \n    g = 1 + g\n    print 		g    \n    \n    textPrint Bye\n    \nend\n\n\n#Devolver el doble del\n#primer parametro\nfunction doble\nvariables f\n    f = $0 + $0\n    return f\nend\n\n:Siguiente	\n	print A+1\ngoto Proximo\n\n";
 
 	//PRODUCTOR
@@ -127,14 +127,16 @@ int main(int argc, char **argv) {
 
 	//FOR ES
 	//codigo = "\n#Alliance - S4\n\nbegin\nvariables f, i, t\n\n	#`f`: Hasta donde contar\n	i=0\n	f=20\n	:inicio\n\n	#`i`: Iterador\n	i=i+1\n	\n	#Imprimir el contador\n	print i\n\n	#`t`: Comparador entre `i` y `f`\n	t=f-i\n	#De no ser iguales, salta a inicio\n\n	#esperar\n	io HDD1 3\n	jnz t inicio\nend\n\n";
+	//FOR ES EZE AGREGA PRINT T
+	//codigo = "\n#Alliance - S4\n\nbegin\nvariables f, i, t\n\n	#`f`: Hasta donde contar\n t=10\n	i=0\n	f=20\n	:inicio\n\n	#`i`: Iterador\n	i=i+1\n	\n	#Imprimir el contador\n	print i\n\n	#`t`: Comparador entre `i` y `f`\n	t=f-i\nprint t\n	#De no ser iguales, salta a inicio\n\n	#esperar\n	io HDD1 3\n	jnz t inicio\nend\n\n";
 
 	//FIBO
-	//codigo = "\nbegin\nvariables x\n	x <- fibo 3\n# Esperable: SegFault en el 10mo (40)\n\n#	x <- fibo 8\n#Esperable: 21\n\n	textPrint Solucion:\n		print x\nend\n\nfunction fibo\nprint $0\n	jz $0 return0\n	jz $0-1 return1\nvariables a, b\n	a <- fibo $0-1\n	b <- fibo $0-2\nreturn a+b\n\n:return0\nreturn 0\n\n:return1\nreturn 1\n\n";
+	codigo = "\nbegin\nvariables x\n	x <- fibo 8\n# Esperable: SegFault en el 10mo (40)\n\n#	x <- fibo 8\n#Esperable: 21\n\n	textPrint Solucion:\n		print x\nend\n\nfunction fibo\nprint $0\n	jz $0 return0\n	jz $0-1 return1\nvariables a, b\n	a <- fibo $0-1\n	b <- fibo $0-2\nreturn a+b\n\n:return0\nreturn 0\n\n:return1\nreturn 1\n\n";
 
 	//FACIL
 	//codigo = "\nbegin\nvariables a, b\na = 3\nb = 5\na = b + 12\nend\n";
 	//FACIL IMPRIMIENDO RESULTADO
-	codigo = "\nbegin\nvariables a, b\na = 3\nb = 5\na = b + 12\nprint a\nend\n";
+	//codigo = "\nbegin\nvariables a, b\na = 3\nb = 5\na = b + 12\nprint a\nend\n";
 
 //	codigo = "begin\n!colas = 20\n:etiqueta\nprint !colas\n!colas = !colas - 1\njnz !colas etiqueta\nend";
 	//codigo = "begin\nvariables x\nx <- fibo 8\n#Esperable: 21\n\ntextPrint Solucion:\nprint x\nend\n\nfunction fibo\nprint $0\njz $0 return0\njz $0-1 return1\nvariables a, b\na <- fibo $0-1\nb <- fibo $0-2\ntextPrint a:\nprint a\ntextPrint b:\nprint b\nreturn a+b\n\n:return0\nreturn 0\n:return1\nreturn 1#";
@@ -171,7 +173,7 @@ int main(int argc, char **argv) {
 	t_respuesta_iniciar_programa_en_kernel *respuesta = malloc(sizeof(t_respuesta_iniciar_programa_en_kernel));
 
 	respuesta = deserealizar_mensaje(92,buffer_recibidos);
-	if(respuesta->respuesta_correcta == 2){
+	if(respuesta->respuesta_correcta == 22){
 		log_trace(trace_log,"Inicio correcto de programa ansisop\n");
 	}else{
 		log_trace(trace_log,"No se pudo iniciar el programa ansisop\n");

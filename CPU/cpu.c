@@ -248,6 +248,9 @@ void* execute_instruction(void* instruction) {
 void execute_next_instruction_for_process() {
 	t_dato_en_memoria *instruccion = get_next_instruction();
 	char *instruccion_string = ejecutar_lectura_de_dato_con_iteraciones(leer_memoria_de_umc, instruccion, tamanio_pagina);
+//	int memory_used = malloc_usable_size(instruccion_string);
+//	realloc(instruccion_string, memory_used+1);
+//	instruccion_string[memory_used]= '\0';
 	int program_counter = pcb->program_counter;
 	pthread_t execution_thread;
 	pthread_create(&execution_thread, NULL, &execute_instruction, (void*) instruccion_string);
@@ -371,6 +374,7 @@ t_valor_variable dereferenciar(t_puntero absolute_offset) {
     memcpy(aux, respuesta, sizeof(int));
     valor = (int)*(aux);
     return valor;
+
 }
 
 void go_back_to_previous_stack_element(t_stack_element *current_stack_element) {
@@ -490,7 +494,7 @@ char* leer_memoria_de_umc(t_dato_en_memoria *dato) {
     pedido->pagina = dato->direccion->pagina;
     pedido->offset = dato->direccion->offset;
     pedido->size = dato->size;
-
+    set_tamanio_pedido(pedido->size);
     t_stream *buffer = (t_stream*)serializar_mensaje(31,pedido);
 
     send(UMC_DESCRIPTOR, buffer->datos, buffer->size, 0);
@@ -633,7 +637,8 @@ char* ejecutar_lectura_de_dato_con_iteraciones(void*(*closure_lectura)(t_dato_en
     }
 
     //char *result = malloc(sizeof(char) * dato->size);
-    char *result = malloc(dato->size +1);
+    // char *result = malloc(dato->size +1 ); COMENTA EZE
+    char *result = malloc(dato->size);
     t_dato_en_memoria *aux_dato = malloc(sizeof(t_dato_en_memoria));
     aux_dato->direccion = malloc(sizeof(t_direccion_virtual_memoria));
     aux_dato->size = dato->size;
@@ -659,8 +664,8 @@ char* ejecutar_lectura_de_dato_con_iteraciones(void*(*closure_lectura)(t_dato_en
 	is_last_page = (aux_dato->direccion->offset + remaining_size < tamanio_pagina);
     }
     free(aux_dato);
-    char endString='\0';
-    memcpy(result+dato->size,&endString,1);
+    //char endString='\0'; //COMENTA EZE
+    //memcpy(result+dato->size,&endString,1);//COMENTA EZE
     return result;
 }
 
