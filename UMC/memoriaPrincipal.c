@@ -385,7 +385,7 @@ char * leer_pagina_de_swap(int pid, int pagina){
 			return resp;
 	}
 
-	free(lectura);
+	//free(lectura);
 	free(buffer->datos);
 	free(buffer);
 

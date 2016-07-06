@@ -111,16 +111,8 @@ t_escribir_pagina_swap * deserializar_escribir_pagina_swap(char *datos){
 	memcpy(&escritura->pagina, datos+offset, tmpsize = sizeof(uint32_t));
 	offset+=tmpsize;
 
-	//for(tamanoDato = 0; (datos+offset)[tamanoDato] != '\0';tamanoDato++);//incremento tamanoDato, hasta el tamaÃ±o del nombre
-
-	escritura->datos = malloc(get_page_size());
-	memset(escritura->datos,0,get_page_size());
-
+	escritura->datos = malloc(get_page_size()); //TODO VER SI VA MEMSET 0
 	memcpy(escritura->datos, datos+offset, tmpsize=get_page_size());
-	offset+=tmpsize;
-
-	//char endString = '\0';
-	//memcpy(escritura->datos+tamanoDato,&endString,1);
 
 	return escritura;
 }
