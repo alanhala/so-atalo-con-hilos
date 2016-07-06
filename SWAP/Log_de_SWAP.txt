@@ -13,3 +13,46 @@
 [TRACE] 14:43:07:952 main.c/(3069:3069): ---------
 
 [TRACE] 03:26:58:477 main.c/(3019:3019): Se creo el archivo swap. El tamaño es de 50000 MB
+[TRACE] 22:19:31:392 main.c/(16605:16605): Se creo el archivo swap. El tamaño es de 50000 Bytes
+[TRACE] 22:19:31:393 main.c/(16605:16605): Se cargo satisfactoriamente el archivo de configuracion
+[TRACE] 22:27:18:224 main.c/(16605:16605): Leyendo pagina 11, pid 0
+[TRACE] 22:27:18:228 main.c/(16605:16605): Leyendo pagina 12, pid 0
+[TRACE] 22:27:18:233 main.c/(16605:16605): Leyendo pagina 13, pid 0
+[TRACE] 22:27:18:238 main.c/(16605:16605): Leyendo pagina 14, pid 0
+[TRACE] 22:27:18:248 main.c/(16605:16605): Leyendo pagina 15, pid 0
+[TRACE] 22:27:18:253 main.c/(16605:16605): Leyendo pagina 16, pid 0
+[TRACE] 22:27:18:262 main.c/(16605:16605): Leyendo pagina 17, pid 0
+[TRACE] 22:27:18:277 main.c/(16605:16605): Leyendo pagina 94, pid 0
+[TRACE] 22:27:18:286 main.c/(16605:16605): Leyendo pagina 95, pid 0
+[TRACE] 22:27:18:305 main.c/(16605:16605): Leyendo pagina 18, pid 0
+[TRACE] 22:27:18:311 main.c/(16605:16605): Leyendo pagina 19, pid 0
+[TRACE] 22:27:18:317 main.c/(16605:16605): Leyendo pagina 20, pid 0
+[TRACE] 22:27:18:322 main.c/(16605:16605): Leyendo pagina 21, pid 0
+[TRACE] 22:27:18:341 main.c/(16605:16605): Leyendo pagina 22, pid 0
+[TRACE] 22:27:18:348 main.c/(16605:16605): Leyendo pagina 23, pid 0
+[TRACE] 22:27:18:353 main.c/(16605:16605): Leyendo pagina 24, pid 0
+[TRACE] 22:27:18:358 main.c/(16605:16605): Leyendo pagina 25, pid 0
+[TRACE] 22:27:18:374 main.c/(16605:16605): Leyendo pagina 26, pid 0
+[TRACE] 22:27:18:378 main.c/(16605:16605): Leyendo pagina 27, pid 0
+[TRACE] 22:27:18:386 main.c/(16605:16605): Leyendo pagina 28, pid 0
+[TRACE] 22:27:18:390 main.c/(16605:16605): Leyendo pagina 29, pid 0
+[TRACE] 22:27:18:395 main.c/(16605:16605): Leyendo pagina 30, pid 0
+[TRACE] 22:27:18:400 main.c/(16605:16605): Leyendo pagina 31, pid 0
+[TRACE] 22:27:18:406 main.c/(16605:16605): Leyendo pagina 32, pid 0
+[TRACE] 22:27:18:414 main.c/(16605:16605): Leyendo pagina 88, pid 0
+[TRACE] 22:27:18:420 main.c/(16605:16605): Leyendo pagina 89, pid 0
+[TRACE] 22:27:18:426 main.c/(16605:16605): Leyendo pagina 90, pid 0
+[TRACE] 22:27:18:481 main.c/(16605:16605): Leyendo pagina 91, pid 0
+[TRACE] 22:27:18:487 main.c/(16605:16605): Leyendo pagina 92, pid 0
+[TRACE] 22:27:18:492 main.c/(16605:16605): Leyendo pagina 93, pid 0
+[TRACE] 22:27:18:504 main.c/(16605:16605): Leyendo pagina 34, pid 0
+[TRACE] 22:27:18:508 main.c/(16605:16605): Leyendo pagina 35, pid 0
+[TRACE] 22:27:18:514 main.c/(16605:16605): Leyendo pagina 36, pid 0
+[TRACE] 22:27:18:527 main.c/(16605:16605): Leyendo pagina 37, pid 0
+[TRACE] 22:27:18:532 main.c/(16605:16605): Leyendo pagina 38, pid 0
+[TRACE] 22:27:18:539 main.c/(16605:16605): Leyendo pagina 39, pid 0
+[TRACE] 22:27:18:544 main.c/(16605:16605): Leyendo pagina 40, pid 0
+[TRACE] 22:27:18:549 main.c/(16605:16605): Leyendo pagina 41, pid 0
+[TRACE] 22:27:18:554 main.c/(16605:16605): Leyendo pagina 42, pid 0
+[TRACE] 22:27:19:256 main.c/(16605:16605): Leyendo pagina 96, pid 0
+[TRACE] 22:27:19:261 main.c/(16605:16605): Leyendo pagina 97, pid 0
