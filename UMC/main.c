@@ -32,6 +32,8 @@
 #include "main.h"
 
 t_log 	*trace_log_UMC;
+t_log 	*historial_reemplazos_UMC;
+t_log 	*informacion_TLB;
 
 int backlog;
 
@@ -69,6 +71,16 @@ int main(int argc, char **argv) {
 								false,
 								LOG_LEVEL_TRACE);
 
+	historial_reemplazos_UMC = log_create("./Historial_Reemplazos_UMC.txt",
+								"main.c",
+								false,
+								LOG_LEVEL_TRACE);
+
+	informacion_TLB= log_create("./Informacion_TLB.txt",
+									"main.c",
+									false,
+									LOG_LEVEL_TRACE);
+
 	pthread_t interprete_comandos;
 	int interprete_thread_result = pthread_create(&interprete_comandos, NULL,
 			&interprete_comando_thread, NULL);
@@ -84,11 +96,6 @@ int main(int argc, char **argv) {
 
 	sem_wait(&sem_config_file_umc);
 
-	/*
-	while(CONFIGURACION_CARGADA == 0){
-		//espero
-	};
-	*/
 
 
 	//if (strcmp(argv[1], "-test") == 0 || strcmp(argv[1], "-testMock") == 0){
