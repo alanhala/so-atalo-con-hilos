@@ -20,12 +20,9 @@
 #include "protocoloUMC.h"
 #include "main.h"
 
-/*
-Para usar LOGS
-extern t_log *trace_log_UMC
-log_trace(trace_log_UMC,"<lo_que_quieran_loggear>");
-*/
 extern t_log *trace_log_UMC;
+extern t_log *historial_reemplazos_UMC;
+extern t_log *informacion_TLB;
 t_clock_m* inicializar_info_reemplazo();
 
 int buscar_pagina_victima_de_frame_en_info_reemplazo(int frame_victima, t_tabla_de_paginas *tabla){
@@ -62,7 +59,6 @@ int inicializar_estructuras() {
 	TLB = crear_tlb();
 	lista_tabla_de_paginas = list_create();
 	crear_lista_frames();
-	//set_test();
 	CANTIDAD_MAXIMA_PROGRAMAS = CANTIDAD_FRAMES / MAX_FRAMES_POR_PROCESO;
 	crear_swap_mock();
 
@@ -93,10 +89,12 @@ void liberar_memoria_principal() {
 }
 
 int cargar_nuevo_programa(int pid, int paginas_requeridas_del_proceso, char * codigo_programa) {
-//	if (lista_tabla_de_paginas->elements_count == CANTIDAD_MAXIMA_PROGRAMAS){
-//		printf("Se supero la cantidad maximas de procesos activos");
-//		return -1;
-//	}
+
+	if (hay_frames_disponibles() == 0){
+		log_trace(trace_log_UMC,"PID %d : No puede inicializarse por falta de espacio en memoria \n", pid);
+		return 9; // NO HAY ESPACIO EN MEMORIA
+	}
+
 
 	int pudo_cargar_swap = cargar_nuevo_programa_en_swap(pid, paginas_requeridas_del_proceso, codigo_programa);
 	if (pudo_cargar_swap != -1 )
@@ -216,9 +214,6 @@ char* leer_frame_de_memoria_principal(int frame, int offset, int size) {
 	char* datos = malloc(size);
 	memcpy(datos, MEMORIA_PRINCIPAL + (frame * TAMANIO_FRAME) + offset, size);
 
-//	char* datos = malloc(size+1);
-//	memcpy(datos, MEMORIA_PRINCIPAL + (frame * TAMANIO_FRAME) + offset, size);
-//	datos[size]='\0';
 	usleep(RETARDO*1000);
 	return datos;
 }
@@ -385,7 +380,7 @@ char * leer_pagina_de_swap(int pid, int pagina){
 			return resp;
 	}
 
-	free(lectura);
+	//free(lectura);
 	free(buffer->datos);
 	free(buffer);
 
@@ -513,22 +508,17 @@ int conseguir_frame_mediante_reemplazo(t_tabla_de_paginas* tabla, int pagina) {
 	log_trace(trace_log_UMC,"PID %d : frame victima %d\n",tabla->pid, frame_victima);
 	printf("\n frame victima %d\n", frame_victima);
 	char* contenido_frame_victima = leer_frame_de_memoria_principal(frame_victima, 0, TAMANIO_FRAME);
-//	log_trace(trace_log_UMC,"contenido de frame victima a escribir en swap: %s de la pagina victima %d\n",contenido_frame_victima,pagina_victima);
-//	printf("\n contenido de frame victima a escribir en swap :  %s de la pagina victima %d\n", contenido_frame_victima, pagina_victima);
-
 
 
 	if ((tabla->entradas[pagina_victima]).modificado == 1){
 		escribir_pagina_de_swap(tabla->pid, pagina_victima,	contenido_frame_victima);
-		//printf("Actualizacion de swap al reemplazar pagina porque estaba modificado");
 		log_trace(trace_log_UMC,"PID %d : Actualizacion de swap al reemplazar pagina porque estaba modificado\n",tabla->pid);
 	}
 
 	char* contenido_pagina_a_actualizar = leer_pagina_de_swap(tabla->pid, pagina);
 
-	//log_trace(trace_log_UMC,"Contenido a actualizar:  %s en pagina victima %d\n",contenido_pagina_a_actualizar,pagina);
-	//printf("\n contenido a actualizar :  %s en pagina victima %d\n", contenido_pagina_a_actualizar, pagina);
-	log_trace(trace_log_UMC,"PID %d : frame victima \n",tabla->pid, frame_victima);
+	log_trace(trace_log_UMC,"PID %d : frame victima %d\n",tabla->pid, frame_victima);
+	log_trace(historial_reemplazos_UMC,"PID %d : \tframe victima %d \t pagina victima %d \t  pagina %d \t\n",tabla->pid, frame_victima, pagina_victima, pagina);
 	escribir_frame_de_memoria_principal(frame_victima, 0, TAMANIO_FRAME, contenido_pagina_a_actualizar);
 	actualizar_reemplazo(tabla, frame_victima, pagina, pagina_victima);
 	return frame_victima;
@@ -841,6 +831,19 @@ void actualizar_reemplazo(t_tabla_de_paginas* tabla, int frame_a_asignar,int pag
 	tabla->entradas[pagina_victima].modificado = 0;
 
 
+	int i= 0;
+	while(i < CANTIDAD_ENTRADAS_TLB){
+		if((TLB->entradas[i]).pid == tabla->pid && (TLB->entradas[i]).pagina == pagina_victima){
+			(TLB->entradas[i]).pid =-1;
+			(TLB->entradas[i]).lru = 0;
+			(TLB->entradas[i]).pagina = -1;
+			(TLB->entradas[i]).frame = -1;
+			break;
+		}
+		i++;
+	}
+
+
 }
 
 int hay_frames_disponibles(){
@@ -963,8 +966,11 @@ int buscar_entrada_tlb(int pid){
 		i++;
 	}
 	//sem_post(&mut_tlb);
-	if (entrada_tlb == -1)
+	if (entrada_tlb == -1){
 		entrada_tlb = buscar_victima_tlb_lru(pid);
+		log_trace(informacion_TLB,"PID %d : \tEntrada TLB victima %d ",entrada_tlb);
+	}
+
 
 	return entrada_tlb;
 
@@ -977,8 +983,10 @@ void lru_sumarle_uno_a_todos(){
 	while(i < CANTIDAD_ENTRADAS_TLB){
 		if((TLB->entradas[i]).pid != -1){
 			(TLB->entradas[i]).lru ++;
+			//log_trace(informacion_TLB,"PID %d : \tEntrada %d LRU aumentado a %d\n",i, (TLB->entradas[i]).lru);
 		}
 		i++;
+
 	}
 	//sem_post(&mut_tlb);
 }
@@ -1013,7 +1021,7 @@ void actualizar_tlb(int pid, int pagina, int frame){
 	(TLB->entradas[entrada]).frame = frame;
 	(TLB->entradas[entrada]).pagina = pagina;
 
-
+	log_trace(informacion_TLB,"PID %d :\tEntrada %d es asignada a frame %d", pid,entrada, frame);
 	//sem_post(&mut_tlb);
 	lru_sumarle_uno_a_todos();
 }
@@ -1140,14 +1148,6 @@ void dump_memory(int pid){
 					  posicion++;
 					}
 					printf("\n");
-//					int poshex = 0;
-//					while (contenido[poshex] != '\0') {
-//					  //printf("%02x   ", (unsigned int) contenido[poshex]);
-//					  printf("%x   ", contenido[poshex] & 0xff);
-//					  fflush(stdout);
-//					  poshex++;
-//					}
-//					printf("\n");
 					printf("\n");
 
 				}
@@ -1182,12 +1182,6 @@ void dump_memory(int pid){
 				  posicion++;
 				}
 				printf("\n");
-//				int poshex = 0;
-//				while (contenido[poshex] != '\0') {
-//				  printf("%02x   ", (unsigned int) contenido[poshex]);
-//				  i++;
-//				}
-//				printf("\n");
 				printf("\n");
 			}
 		}

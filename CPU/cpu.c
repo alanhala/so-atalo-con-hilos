@@ -45,7 +45,7 @@ t_PCB *pcb;
 uint32_t tamanio_pagina;
 
 void do_wait(t_nombre_semaforo identificador_semaforo) {
-	while(string_ends_with(identificador_semaforo, "\n") || string_ends_with(identificador_semaforo, " "))
+	while(string_ends_with(identificador_semaforo, "\n") || string_ends_with(identificador_semaforo, " ") || string_ends_with(identificador_semaforo, "\t"))
 			identificador_semaforo = string_substring_until(identificador_semaforo, string_length((char*)identificador_semaforo)-1);
 	t_PCB_serializacion * pcb_serializado = adaptar_pcb_a_serializar(get_PCB());
 	pcb_serializado->mensaje = 4;
@@ -87,7 +87,7 @@ void do_wait(t_nombre_semaforo identificador_semaforo) {
 }
 
 void do_signal(t_nombre_semaforo identificador_semaforo) {
-	while(string_ends_with(identificador_semaforo, "\n") || string_ends_with(identificador_semaforo, " "))
+	while(string_ends_with(identificador_semaforo, "\n") || string_ends_with(identificador_semaforo, " ") || string_ends_with(identificador_semaforo, "\t"))
 		identificador_semaforo = string_substring_until(identificador_semaforo, string_length((char*)identificador_semaforo)-1);
 	t_PCB_serializacion * pcb_serializado = adaptar_pcb_a_serializar(get_PCB());
 	pcb_serializado->mensaje = 5;
@@ -99,15 +99,12 @@ void do_signal(t_nombre_semaforo identificador_semaforo) {
 }
 
 t_valor_variable obtenerValorCompartida(t_nombre_compartida variable) {
-	//log_trace
-//	char * new_variable = string_substring(variable, 0, strlen(variable)-1); //LE SACO EL \n
-	char* variable_limpia = (char*)variable;
 
-	while(string_ends_with(variable_limpia, "\n") || string_ends_with(variable_limpia, " "))
-		variable_limpia = string_substring_until(variable, string_length((char*)variable)-1);
+	while(string_ends_with(variable, "\n") || string_ends_with(variable, " ") || string_ends_with(variable, "\t"))
+		variable = string_substring_until(variable, string_length((char*)variable)-1);
 	t_PCB_serializacion * pcb_serializado = adaptar_pcb_a_serializar(get_PCB());
 	pcb_serializado->mensaje = 1;
-	pcb_serializado->valor_mensaje = variable_limpia;
+	pcb_serializado->valor_mensaje = variable;
 	pcb_serializado->cantidad_operaciones = 0;
 	pcb_serializado->valor_de_la_variable_compartida =0;
 	pcb_serializado->resultado_mensaje = 0;
@@ -149,14 +146,12 @@ t_valor_variable obtenerValorCompartida(t_nombre_compartida variable) {
 
 t_valor_variable asignarValorCompartida(t_nombre_compartida variable, t_valor_variable valor) {
 	log_trace(trace_log_CPU,"asignarValorCompartida");
-//	char * new_variable = string_substring(variable, 0, strlen(variable)); //LE SACO EL \N
-	char* variable_limpia = (char*)variable;
 
-	while(string_ends_with(variable_limpia, "\n") || string_ends_with(variable_limpia, " "))
-		variable_limpia = string_substring_until(variable, string_length((char*)variable)-1);
+	while(string_ends_with(variable, "\n") || string_ends_with(variable, " ") || string_ends_with(variable, "\t"))
+		variable = string_substring_until(variable, string_length((char*)variable)-1);
 	t_PCB_serializacion * pcb_serializado = adaptar_pcb_a_serializar(get_PCB());
 	pcb_serializado->mensaje = 2;
-	pcb_serializado->valor_mensaje = variable_limpia;
+	pcb_serializado->valor_mensaje = variable;
 	pcb_serializado->cantidad_operaciones = 0;
 	pcb_serializado->valor_de_la_variable_compartida =valor;
 	pcb_serializado->resultado_mensaje = 0;
@@ -197,7 +192,7 @@ t_valor_variable asignarValorCompartida(t_nombre_compartida variable, t_valor_va
 void entradaSalida(t_nombre_dispositivo dispositivo, int tiempo) {
 
 
-	while(string_ends_with(dispositivo, "\n") || string_ends_with(dispositivo, " "))
+	while(string_ends_with(dispositivo, "\n") || string_ends_with(dispositivo, " ") || string_ends_with(dispositivo, "\t"))
 			dispositivo = string_substring_until(dispositivo, string_length((char*)dispositivo)-1);
 	t_PCB_serializacion * pcb_serializado = adaptar_pcb_a_serializar(get_PCB());
 	pcb_serializado->mensaje = 6;
@@ -251,9 +246,12 @@ void execute_next_instruction_for_process() {
 //	int memory_used = malloc_usable_size(instruccion_string);
 //	realloc(instruccion_string, memory_used+1);
 //	instruccion_string[memory_used]= '\0';
+	char* asd = malloc(instruccion->size + 1);
+	memcpy(asd, instruccion_string, instruccion->size);
+	asd[instruccion->size] = '\0';
 	int program_counter = pcb->program_counter;
 	pthread_t execution_thread;
-	pthread_create(&execution_thread, NULL, &execute_instruction, (void*) instruccion_string);
+	pthread_create(&execution_thread, NULL, &execute_instruction, (void*) asd);
 	pthread_join(execution_thread, NULL);
 	printf("Instruccion: %s", instruccion_string);
 	if(program_counter == pcb->program_counter && !string_starts_with(instruccion_string, TEXT_END) && !string_starts_with(instruccion_string, TEXT_RETURN)) {

@@ -81,17 +81,8 @@ t_respuesta_leer_pagina_swap *deserializar_respuesta_leer_pagina_swap(char *dato
 	t_respuesta_leer_pagina_swap *respuesta = malloc(sizeof(t_respuesta_leer_pagina_swap));
 
 	memset(respuesta,0, sizeof(t_respuesta_leer_pagina_swap));
-
-	for(tamanoDato = 0; (datos+desplazamientoHeader)[tamanoDato] != '\0';tamanoDato++);//incremento tamanoDato, hasta el tamaÃ±o del nombre
-
-	respuesta->datos = malloc(tamanoDato+1);
-	memset(respuesta->datos,0,tamanoDato+1);
-
-	memcpy(respuesta->datos, datos+desplazamientoHeader, tmpsize=tamanoDato+1);
-	offset+=tmpsize;
-
-	char endString = '\0';
-	memcpy(respuesta->datos+tamanoDato,&endString,1);
+	respuesta->datos = malloc(get_tamanio_frame());
+	memcpy(respuesta->datos, datos+desplazamientoHeader, tmpsize=get_tamanio_frame());
 
 	return respuesta;
 }

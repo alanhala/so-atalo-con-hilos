@@ -115,6 +115,20 @@ void write_swap_file(t_swap* self, int first_page_location, unsigned int pages_a
 	// TODO ver que hacer si fseek falla
 }
 
+void write_swap_page_file(t_swap* self, int first_page_location, unsigned int pages_amount, char * page_data) {
+	int i;
+	if (fseek(self->file, first_page_location, SEEK_SET) == 0) {
+		fwrite(page_data, self->page_size, 1, self->file);
+		int not_written_bytes = pages_amount * self->page_size - get_page_size();
+		if (not_written_bytes > 0) {
+			for (i = 0; i < not_written_bytes; i++)
+				fwrite("0", 1, 1, self->file);
+		}
+	}
+
+	// TODO ver que hacer si fseek falla
+}
+
 int initialize_program(t_swap* self, unsigned int pid, unsigned int pages_amount, char* program) {
 	int first_page = check_space_available(self, pages_amount);
 	if (first_page != -1) {
@@ -143,7 +157,7 @@ int write_page(t_swap* self, unsigned int pid, unsigned int page, char* data) {
 	log_trace(trace_log_SWAP, "Escribiendo pagina %d, pid %d", page, pid);
 	t_pages_table* pages_table = find_pages_table(self, pid);
 	int page_location = *(pages_table->pages_location + page);
-	write_swap_file(self, page_location, 1, data);
+	write_swap_page_file(self, page_location, 1, data);
 	return 0;
 }
 
