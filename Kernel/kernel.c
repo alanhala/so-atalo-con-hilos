@@ -96,7 +96,7 @@ t_PCB* create_pcb(t_kernel* kernel, char* program) {
 }
 
 uint32_t get_used_pages(t_PCB *pcb, uint32_t stack_size) {
-    return stack_size + pcb->stack_last_address->page + 1;
+    return stack_size + pcb->stack_last_address->page;
 }
 
 t_virtual_address* get_stack_address(char* program) {

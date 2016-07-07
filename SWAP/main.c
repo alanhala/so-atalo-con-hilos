@@ -156,12 +156,12 @@ void UMC_connection(t_swap* swap) {
 
 			finalizar_programa = (t_finalizar_programa_en_swap *)deserealizar_mensaje(7,buffer_recv);
 
+			int resultado_temp = remove_program(swap, finalizar_programa->process_id);
+
 			t_respuesta_finalizar_programa_swap *respuesta_finalizar_programa_swap = malloc(sizeof(t_respuesta_finalizar_programa_swap));
 
 			memset(respuesta_finalizar_programa_swap,0,sizeof(t_respuesta_finalizar_programa_swap));
 
-			//HARDCODEADO. ASIGNAR VALOR CORRECTO
-			int resultado_temp = 1;
 			respuesta_finalizar_programa_swap->resultado=resultado_temp;
 
 			t_stream *buffer = serializar_mensaje(8,respuesta_finalizar_programa_swap);
