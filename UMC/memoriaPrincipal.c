@@ -841,6 +841,19 @@ void actualizar_reemplazo(t_tabla_de_paginas* tabla, int frame_a_asignar,int pag
 	tabla->entradas[pagina_victima].modificado = 0;
 
 
+	int i= 0;
+	while(i < CANTIDAD_ENTRADAS_TLB){
+		if((TLB->entradas[i]).pid == tabla->pid && (TLB->entradas[i]).pagina == pagina_victima){
+			(TLB->entradas[i]).pid =-1;
+			(TLB->entradas[i]).lru = 0;
+			(TLB->entradas[i]).pagina = -1;
+			(TLB->entradas[i]).frame = -1;
+			break;
+		}
+		i++;
+	}
+
+
 }
 
 int hay_frames_disponibles(){
