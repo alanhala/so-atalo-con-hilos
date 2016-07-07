@@ -89,10 +89,12 @@ void liberar_memoria_principal() {
 }
 
 int cargar_nuevo_programa(int pid, int paginas_requeridas_del_proceso, char * codigo_programa) {
-//	if (lista_tabla_de_paginas->elements_count == CANTIDAD_MAXIMA_PROGRAMAS){
-//		printf("Se supero la cantidad maximas de procesos activos");
-//		return -1;
-//	}
+
+	if (hay_frames_disponibles() == 0){
+		log_trace(trace_log_UMC,"PID %d : No puede inicializarse por falta de espacio en memoria \n", pid);
+		return 9; // NO HAY ESPACIO EN MEMORIA
+	}
+
 
 	int pudo_cargar_swap = cargar_nuevo_programa_en_swap(pid, paginas_requeridas_del_proceso, codigo_programa);
 	if (pudo_cargar_swap != -1 )
