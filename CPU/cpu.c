@@ -339,7 +339,10 @@ t_puntero definirVariable(t_nombre_variable variable) {
 }
 
 void validate_stack_size(t_variable *variable) {
-    if((variable->dato->direccion->pagina + 1) >= pcb->used_pages) {
+    int available_bytes =  pcb->used_pages * tamanio_pagina;
+    int absolute_offset = convert_to_absolute_offset(variable->dato) + variable->dato->size;
+
+    if(absolute_offset > available_bytes) {
 	pcb->program_finished = 2;
 	pthread_exit();
     }

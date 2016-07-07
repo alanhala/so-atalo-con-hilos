@@ -1,0 +1,24 @@
+#!/usr/bin/ansisop
+
+#Respuesta esperada: 1; 1; Hola Mundo!; 3; Bye
+
+
+
+begin
+variables A,  g
+    A = 2
+    g <- doble A
+    print g
+    
+end
+#Devolver el doble del
+#primer parametro
+function doble
+variables f
+    f = $0 + $0
+    return f
+end
+
+
+
+

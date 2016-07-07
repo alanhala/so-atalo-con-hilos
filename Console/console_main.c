@@ -60,37 +60,33 @@ int main(int argc, char **argv) {
 	pthread_create(&captador_de_senal,NULL,&captador_de_senal_thread,NULL);
 
 	char* codigo;
-//	FILE *fdarchivo;
-//
-//	if ((fdarchivo = fopen(argv[1], "rb")) == 0) {
-//		//todo log el archivo esta vacio en este caso no se ejecuta consola
-////return 0;PESADO ANSISOP
-//
-//		//Pesado Ansisop
-//		//codigo = "begin\ngoto Etiqueta19\nend\n:Etiqueta1\n	:Etiqueta2\n	:Etiqueta3\n	:Etiqueta4\n	:Etiqueta5\n	:Etiqueta6\n	:Etiqueta7\n	:Etiqueta8\n	:Etiqueta9\n	:Etiqueta10\n	:Etiqueta11\n	:Etiqueta12\n	:Etiqueta13\n	:Etiqueta14\n	:Etiqueta15\n	:Etiqueta16\n	:Etiqueta17\n	:Etiqueta18\n	:Etiqueta19\n	:Etiqueta20\n	:Etiqueta21\n	:Etiqueta22\n	:Etiqueta23\n	:Etiqueta24\n	:Etiqueta25\n	:Etiqueta26\n	:Etiqueta27\n	textPrint Alfin entre!\n	end\n";
-//
-//		//Vector Ansisop
-//		//codigo = "begin\n	#un vector de 5 posiciones\n	variables a, b, c, d, e, i\n	#No inicializo las primeras 5 variables (vector) para tener elementos aleatorios\n	#i va a ser mi iterador, me interesa que empieze en 0\n	i=0\n	\n	#Bucle del for\n	:for\n	#imprime el valor iavo del vector\n	print *&a+i\n	#pongo en 0 el valor de la posicion para verificar escritura\n	*&a+i = 0\n	#avanzo en el vector (de a 4 posiciones, 1 int)\n	i=i+4\n	#Si i no es 20 (5 posiciones del vector * 4 temanio de las variables)\n	jnz 20-i for\n	\n	#Final del bucle\n	textPrint Fin\n	end\n";
-//
-//		//For Ansisop
-//		//codigo = "begin\n	variables f, i, t\n	\n	#`f`: Hasta donde contar\n	f=20\n	#`i`: Iterador\n	i=0\n	\n	:inicio\n	\n	#Iterar\n	i=i+1\n	\n	#Imprimir el contador\n	print i\n	\n	#`t`: Comparador entre `i` y `f`\n	t=f-i\n	#De no ser iguales, salta a inicio\n	jnz t inicio\n	\n	end\n";
-//
-//		//Fibo Ansisop
-//		//codigo = "begin\n	variables x\n	x <- fibo 3\n	# Esperable: SegFault en el 10mo (40)\n	\n	# x <- fibo 8\n	#Esperable: 21\n	\n	textPrint Solucion:\n	print x\n	end\n	\n	function fibo\n	print $0\n	jz $0 return0\n	jz $0-1 return1\n	variables a, b\n	a <- fibo $0-1\n	b <- fibo $0-2\n	return a+b\n	\n	:return0\n	return 0\n	\n	:return1\n	return 1\n";
-//		//codigo = "begin\n variables x\n x <- fibo 8\n # Esperable: SegFault en el 10mo (40)\n \n # x <- fibo 8\n #Esperable: 21\n \n textPrint Solucion:\n print x\n end\n \n function fibo\n print $0\n jz $0 return0\n jz $0-1 return1\n variables a, b\n a <- fibo $0-1\n b <- fibo $0-2\n return a+b\n \n :return0\n return 0\n \n :return1\n return 1\n";
-//		codigo =   "begin\nvariables x\nx <- fibo 8\n # Esperable: SegFault en el 10mo (40)\n \n # x <- fibo 8\n #Esperable: 21\n\ntextPrint Solucion:\nprint x\nend\n\nfunction fibo\nprint $0\njz $0 return0\njz $0-1 return1\nvariables a, b\na <- fibo $0-1\nb <- fibo $0-2\nreturn a+b\n\n:return0\nreturn 0\n:return1\nreturn 1\n";
-////return 0;
-////		codigo = "begin\nvariables c, d, e\nc=2147483647\nd=224947129\nf\ne <- g\nend\nfunction f\nvariables a\na=1\nend\nfunction g\nvariables a\na=2\nreturn a\nend";
-//
-//
-//	} else {
-//		fseek(fdarchivo, 0, SEEK_END);
-//		int tamanio = ftell(fdarchivo);
-//		rewind(fdarchivo);
-//		codigo = malloc(tamanio);
-//		fread(codigo, tamanio, 1, fdarchivo);
-//		printf(" %s\n", codigo);
-//	}
+
+	FILE *fdarchivo;
+
+	//para probar pongan aca descomenten la linea del script y listo
+	//argv[1] = "../scripts/completo.ansisop";
+	//argv[1] = "../scripts/facil.ansisop";
+
+
+
+	if ((fdarchivo = fopen(argv[1], "r")) == 0) {
+		//todo log el archivo esta vacio en este caso no se ejecuta consola
+
+	} else {
+		fseek(fdarchivo, 0L, SEEK_END);
+		int tamanio = ftell(fdarchivo);
+		char * buff = malloc(255);
+		rewind(fdarchivo);
+		fgets(buff, 255, fdarchivo);
+		int inicio =  ftell(fdarchivo);
+		tamanio = tamanio - inicio;
+		codigo = malloc(tamanio);
+		fread(codigo, tamanio, inicio, fdarchivo);
+		printf("%s\n", codigo);
+		free(buff);
+	}
+	fclose(fdarchivo);
+
 
 	t_log *trace_log = log_create("./Log_de_Consola.txt", "console_main.c",
 	true, LOG_LEVEL_TRACE);
@@ -143,6 +139,7 @@ int main(int argc, char **argv) {
 //	codigo = "#!/usr/bin/ansisop\nbegin\n#un vector de 5 posiciones\nvariables a, b, c, d, e, i\na=111\nb=222\nc=333\n#i va a ser mi iterador, me interesa que empieze en 0\ni=0\n\n#Bucle del for\n:for\n#imprime el valor iavo del vector\nprint *&a+i\n#pongo en 0 el valor de la posicion para verificar escritura\n*&a+i = 0\n#avanzo en el vector (de a 4 posiciones, 1 int)\ni=i+4\n#Si i no es 20 (5 posiciones del vector * 4 temanio de las variables)\njnz 20-i for\n\n#Final del bucle\ntextPrint Fin\nend\n\n";
 //	codigo = "begin\nvariables x\nx <- fibo 8\n#Esperable: 21\n\ntextPrint Solucion:\nprint x\nend\n\nfunction fibo\nprint $0\njz $0 return0\njz $0-1 return1\nvariables a, b\na <- fibo $0-1\nb <- fibo $0-2\ntextPrint a:\nprint a\ntextPrint b:\nprint b\nreturn a+b\n\n:return0\nreturn 0\n:return1\nreturn 1\n";
 	//codigo = "begin\nvariables x\nx <- fibo 8\n#Esperable: 21\n\ntextPrint Solucion:\nprint x\nend\n\nfunction fibo\nreturn 1#";
+
 	iniciar_programa->codigo_de_programa = malloc(strlen(codigo)+1);
 	memcpy(iniciar_programa->codigo_de_programa, codigo, strlen(codigo)+1);
 
