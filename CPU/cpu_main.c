@@ -127,7 +127,7 @@ int main(int argc, char **argv) {
 
 			set_PCB(pcb);
 			int resultado_ejecucion = ejecutar_pcb();
-			if (pcb->program_finished == 5)
+			if (pcb->program_finished == 5 )
 				continue; // Se bloqueo por wait, no hay que mandar nada
 			t_PCB_serializacion * pcb_serializado = adaptar_pcb_a_serializar(get_PCB());
 

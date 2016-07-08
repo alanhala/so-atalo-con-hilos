@@ -103,7 +103,7 @@ int main(int argc, char **argv) {
 //	codigo = "\nbegin	\n	:etiqueta\n	\n	wait c\n		print !colas\n	signal b\n	\n	#Ciclar indefinidamente\n	goto etiqueta\n\nend\n\n";
 
 	//FOR ES
-//	codigo = "\n#Alliance - S4\n\nbegin\nvariables f, i, t\n\n	#`f`: Hasta donde contar\n	i=0\n	f=20\n	:inicio\n\n	#`i`: Iterador\n	i=i+1\n	\n	#Imprimir el contador\n	print i\n\n	#`t`: Comparador entre `i` y `f`\n	t=f-i\n	#De no ser iguales, salta a inicio\n\n	#esperar\n	io HDD1 3\n	jnz t inicio\nend\n\n";
+	codigo = "\n#Alliance - S4\n\nbegin\nvariables f, i, t\n\n	#`f`: Hasta donde contar\n	i=0\n	f=20\n	:inicio\n\n	#`i`: Iterador\n	i=i+1\n	\n	#Imprimir el contador\n	print i\n\n	#`t`: Comparador entre `i` y `f`\n	t=f-i\n	#De no ser iguales, salta a inicio\n\n	#esperar\n	io HDD1 3\n	jnz t inicio\nend\n\n";
 	//FOR ES EZE AGREGA PRINT T
 	//codigo = "\n#Alliance - S4\n\nbegin\nvariables f, i, t\n\n	#`f`: Hasta donde contar\n t=10\n	i=0\n	f=20\n	:inicio\n\n	#`i`: Iterador\n	i=i+1\n	\n	#Imprimir el contador\n	print i\n\n	#`t`: Comparador entre `i` y `f`\n	t=f-i\nprint t\n	#De no ser iguales, salta a inicio\n\n	#esperar\n	io HDD1 3\n	jnz t inicio\nend\n\n";
 
@@ -203,8 +203,12 @@ int main(int argc, char **argv) {
 				log_trace(trace_log,"El programa finalizo por Stack Overflow\n");
 				fflush(stdout);
 			} else if (finalizar->motivo == 7) {
-				printf("Insuficiente espacio como para cargar el programa");
-				log_trace(trace_log, "Insuficiente espacio como para cargar el programa");
+				printf("Insuficiente espacio como para cargar el programa\n");
+				log_trace(trace_log, "Insuficiente espacio como para cargar el programa\n");
+				fflush(stdout);
+			} else if (finalizar->motivo == 58) {
+				printf("No hay frames libres, se finaliza el proceso\n");
+				log_trace(trace_log, "No hay frames libres, se finaliza el proceso\n");
 				fflush(stdout);
 			} else {
 				printf("El programa no pudo finalizar correctamente\n");
