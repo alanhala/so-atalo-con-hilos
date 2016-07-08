@@ -1,5 +1,15 @@
 #include "kernel_communication.h"
 
+uint32_t check_closed_console(t_scheduler* scheduler, int console_descriptor) {
+	int same_descriptor(int descriptor) {
+		return descriptor == console_descriptor;
+	}
+	int descriptor = list_remove_by_condition(scheduler->closed_consoles, (void*) same_descriptor);
+	if (descriptor == NULL)
+		return 0;
+	else
+		return 1;
+}
 
 void initialize_semaphores() {
 	sem_init(&mutex_new, 0, 1);
@@ -63,6 +73,7 @@ t_scheduler* create_scheduler(t_kernel* kernel) {
 	self->semaphores_list = create_semaphores_list(kernel);
 	self->io_list = create_io_list(kernel);
 	self->kernel = kernel;
+	self->closed_consoles = list_create();
 	initialize_semaphores();
 	create_states_threads(self);
 	return self;
@@ -100,7 +111,10 @@ void* handle_ready(void* scheduler) {
 		sem_wait(&mutex_ready);
 		t_PCB *pcb  = queue_pop(self->ready_state);
 		sem_post(&mutex_ready);
-
+		if (check_closed_console(self, pcb->console_socket_descriptor) == 1) {
+			end_program(self, pcb);
+			continue;
+		}
 		sem_wait(&sem_cpus_available); //espero tener una cpu disponible
 
 		if(validate_console_connection(pcb->console_socket_descriptor) == 1){
@@ -130,13 +144,10 @@ void* handle_execution(void* scheduler) {
 		t_PCB* pcb  = queue_pop(self->execution_state);
 		sem_post(&mutex_execution);
 
-		if(validate_console_connection(pcb->console_socket_descriptor) == 1){
-			close(pcb->console_socket_descriptor);
-			int umc_finalizado = end_program_umc(pcb, self->umc_socket_descriptor);
-			free(pcb);
+		if (check_closed_console(self, pcb->console_socket_descriptor) == 1) {
+			end_program(self, pcb);
 			continue;
 		}
-
 		sem_wait(&mutex_cpus_available);
 		int cpu  = (int )queue_pop(self->cpus_available);
 		sem_post(&mutex_cpus_available);

@@ -42,6 +42,7 @@
 		int umc_socket_descriptor;
 		t_list* semaphores_list;
 		t_list* io_list;
+		t_list* closed_consoles;
 	} t_scheduler;
 
 	typedef struct {

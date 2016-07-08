@@ -145,6 +145,9 @@ int main(int argc, char **argv) {
 			}
 			t_stream * stream = serializar_mensaje(121,pcb_serializado);
 			send(KERNEL_DESCRIPTOR, stream->datos, stream->size, 0);
+			if (sigusr_received) {
+				break;
+			}
 		}
 	}
 

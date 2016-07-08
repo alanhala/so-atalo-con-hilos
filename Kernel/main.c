@@ -141,6 +141,13 @@ void manejo_de_solicitudes(int client_socket_descriptor) {
 			buffer = serializar_mensaje(92,respuesta);
 
 			int bytes_sent = send(client_socket_descriptor,buffer->datos,buffer->size,0);
+			free(buffer->datos);
+			free(buffer);
+			int signal_received;
+			recv(client_socket_descriptor, &signal_received, sizeof(int) , 0);
+			if (signal_received == 1) {
+				list_add(scheduler->closed_consoles, client_socket_descriptor);
+			}
 		}
 	}
 }
