@@ -214,6 +214,12 @@ void manejo_de_solicitudes(int socket_descriptor) {
 					sizeof(t_respuesta_bytes_de_una_pagina_a_CPU));
 			respuesta_bytes->tamanio_dato = bytes_de_una_pagina->size;
 			respuesta_bytes->bytes_de_una_pagina = datos_de_lectura;
+			respuesta_bytes->no_hay_memoria =0;
+
+			if (!strcmp(datos_de_lectura, "~~~-1")){
+				respuesta_bytes->bytes_de_una_pagina= "";
+				respuesta_bytes->no_hay_memoria =1;
+			}
 
 			t_stream *buffer = (t_stream*) serializar_mensaje(32,
 					respuesta_bytes);

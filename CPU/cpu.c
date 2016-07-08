@@ -513,6 +513,13 @@ char* leer_memoria_de_umc(t_dato_en_memoria *dato) {
     t_respuesta_bytes_de_una_pagina_a_CPU *respuesta = malloc(sizeof(t_respuesta_bytes_de_una_pagina_a_CPU));
 
     respuesta = (t_respuesta_bytes_de_una_pagina_a_CPU*)deserealizar_mensaje(buffer_header[0], buffer_recv);
+
+    if(respuesta->no_hay_memoria == 1){
+    	pcb->program_finished = 58;
+		pthread_exit();
+    }
+
+
     return respuesta->bytes_de_una_pagina;
 }
 
