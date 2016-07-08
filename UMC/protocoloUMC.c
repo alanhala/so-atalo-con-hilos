@@ -436,7 +436,8 @@ t_stream *serializar_respuesta_bytes_de_una_pagina_a_CPU(t_respuesta_bytes_de_un
 
 	uint32_t stream_size =	sizeof(uint8_t)  +			//Tamano del tipo
 							sizeof(uint32_t) +			//Tamano del largo del stream
-							size_bytes_de_una_pagina ;	//Tamano del char* de bytes
+							size_bytes_de_una_pagina +	//Tamano del char* de bytes
+							sizeof(int);				//Tamano del int flag de memoria disponible
 
 	t_stream *stream = malloc(sizeof(t_stream));
 	memset(stream, 0,sizeof(t_stream));
@@ -446,6 +447,7 @@ t_stream *serializar_respuesta_bytes_de_una_pagina_a_CPU(t_respuesta_bytes_de_un
 	memset(stream->datos,0,stream_size);
 
 	uint8_t tipo = 32; 	//Tipo del Mensaje . Fijado estaticamente segun protocolo
+	int memoria_disponible = unaEstructura->no_hay_memoria;
 
 	memcpy(stream->datos,&tipo,tmpsize=sizeof(uint8_t));
 	offset+=tmpsize;
@@ -456,8 +458,7 @@ t_stream *serializar_respuesta_bytes_de_una_pagina_a_CPU(t_respuesta_bytes_de_un
 	memcpy(stream->datos+offset,unaEstructura->bytes_de_una_pagina,tmpsize=size_bytes_de_una_pagina);
 	offset+=tmpsize;
 
-//	char endString='\0';
-//	memcpy(stream->datos+offset,&endString,1);
+	memcpy(stream->datos+offset,&memoria_disponible,sizeof(int));
 
 	return stream;
 }

@@ -112,12 +112,15 @@ int cargar_nuevo_programa(int pid, int paginas_requeridas_del_proceso, char * co
 
 
 int buscar_frame_libre(){
-	//TODO IMPORTANTE devolver -1 si no hay libres
+
 	int frame_libre(t_frame *frame) {
 			return (frame->asignado == 0);
 		}
 
 	t_frame* frame_encontrado = list_find(lista_frames,	(void*) frame_libre);
+
+	if(frame_encontrado == NULL)
+		return -1;
 
 	return frame_encontrado->frame;
 }
@@ -284,6 +287,8 @@ int buscar_frame_de_una_pagina(t_tabla_de_paginas* tabla, int pagina){
 		if(frame_de_pagina == -1 )
 		{
 			frame_de_pagina = darle_frame_a_una_pagina(tabla, pagina);
+			if(frame_de_pagina == -99)
+				return -1;
 			char * contenido =leer_pagina_de_swap(tabla->pid, pagina);
 			escribir_frame_de_memoria_principal(frame_de_pagina, 0, TAMANIO_FRAME, contenido);
 			return frame_de_pagina;
@@ -554,11 +559,13 @@ int darle_frame_a_una_pagina(t_tabla_de_paginas* tabla, int pagina){
 		}
 		else
 		{
-			return  conseguir_frame_mediante_reemplazo(tabla, pagina);
+			return  -99; //FINALIZO EL PROGRAMA PORQUE NO HAY ESPACIO EN MEMORIA
 		}
 	}
 	else
 	{
+		if(tabla->frames_en_uso == 0 && !hay_frames_disponibles())
+			return -99;//FINALIZO EL PROGRAMA PORQUE NO HAY ESPACIO EN MEMORIA
 		return conseguir_frame_mediante_reemplazo(tabla, pagina);
 	}
 }
@@ -902,7 +909,7 @@ char* leer_pagina_de_programa(int pid, int pagina, int offset, int size){
 		}
 		else
 		{
-			return "~/-1"; //no pude leer memoria
+			return "~~~-1"; //no pude leer memoria
 		}
 }
 

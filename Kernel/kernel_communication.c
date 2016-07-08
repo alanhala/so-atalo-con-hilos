@@ -158,10 +158,8 @@ void* handle_pcb_execution(void* data_to_cast) {
 					free(buffer);
 				} else if(unPCB->mensaje == 3) {
 				    int cpu = pcb->cpu_socket_descriptor;
-				    if(pcb->program_finished == 1 || pcb->program_finished == 2)
+				    if(pcb->program_finished == 1 || pcb->program_finished == 2 || pcb->program_finished == 58)
 				    	end_program(scheduler, pcb);
-//				    else if (pcb->program_finished == 5)
-//				    	wait_block_process(scheduler, unPCB->valor_mensaje, pcb);
 				    else if (pcb->program_finished == 6)
 				    	handle_io_operation(scheduler, unPCB->valor_mensaje, unPCB->cantidad_operaciones, pcb);
 				    else
