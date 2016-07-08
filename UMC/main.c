@@ -217,12 +217,12 @@ void manejo_de_solicitudes(int socket_descriptor) {
 			respuesta_bytes->no_hay_memoria =0;
 
 			if (!strcmp(datos_de_lectura, "~~~-1")){
-				respuesta_bytes->bytes_de_una_pagina= "";
-				respuesta_bytes->no_hay_memoria =1;
+				char * aux =  malloc(bytes_de_una_pagina->size);
+				respuesta_bytes->bytes_de_una_pagina =aux;
+				respuesta_bytes->no_hay_memoria = 1;
 			}
 
-			t_stream *buffer = (t_stream*) serializar_mensaje(32,
-					respuesta_bytes);
+			t_stream *buffer = serializar_mensaje(32,respuesta_bytes);
 
 			int bytes_sent = send(socket_descriptor, buffer->datos,
 					buffer->size, 0);

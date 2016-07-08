@@ -246,16 +246,18 @@ void execute_next_instruction_for_process() {
 //	int memory_used = malloc_usable_size(instruccion_string);
 //	realloc(instruccion_string, memory_used+1);
 //	instruccion_string[memory_used]= '\0';
-	char* asd = malloc(instruccion->size + 1);
-	memcpy(asd, instruccion_string, instruccion->size);
-	asd[instruccion->size] = '\0';
-	int program_counter = pcb->program_counter;
-	pthread_t execution_thread;
-	pthread_create(&execution_thread, NULL, &execute_instruction, (void*) asd);
-	pthread_join(execution_thread, NULL);
-	printf("Instruccion: %s", instruccion_string);
-	if(program_counter == pcb->program_counter && !string_starts_with(instruccion_string, TEXT_END) && !string_starts_with(instruccion_string, TEXT_RETURN)) {
-	    pcb->program_counter++;
+	if(pcb->program_finished != 58){
+		char* asd = malloc(instruccion->size + 1);
+		memcpy(asd, instruccion_string, instruccion->size);
+		asd[instruccion->size] = '\0';
+		int program_counter = pcb->program_counter;
+		pthread_t execution_thread;
+		pthread_create(&execution_thread, NULL, &execute_instruction, (void*) asd);
+		pthread_join(execution_thread, NULL);
+		printf("Instruccion: %s", instruccion_string);
+		if(program_counter == pcb->program_counter && !string_starts_with(instruccion_string, TEXT_END) && !string_starts_with(instruccion_string, TEXT_RETURN)) {
+			pcb->program_counter++;
+		}
 	}
 };
 
@@ -506,17 +508,22 @@ char* leer_memoria_de_umc(t_dato_en_memoria *dato) {
 
     recv(UMC_DESCRIPTOR, buffer_header, 5, MSG_PEEK);
 
-    char buffer_recv[buffer_header[1]];
+    aHeader = deserializar_header(buffer_header);
 
-    recv(UMC_DESCRIPTOR, buffer_recv, buffer_header[1], 0);
+    uint8_t tipo = aHeader->tipo;
+    uint32_t length = aHeader->length;
+
+    char buffer_recv[length];
+
+    recv(UMC_DESCRIPTOR, buffer_recv, length, 0);
 
     t_respuesta_bytes_de_una_pagina_a_CPU *respuesta = malloc(sizeof(t_respuesta_bytes_de_una_pagina_a_CPU));
 
-    respuesta = (t_respuesta_bytes_de_una_pagina_a_CPU*)deserealizar_mensaje(buffer_header[0], buffer_recv);
+    respuesta = (t_respuesta_bytes_de_una_pagina_a_CPU*)deserealizar_mensaje(tipo, buffer_recv);
 
     if(respuesta->no_hay_memoria == 1){
     	pcb->program_finished = 58;
-		pthread_exit();
+    	//ACA NO VA EL PTHREAD EXIT
     }
 
 
@@ -739,6 +746,10 @@ int ejecutar_pcb(){
        int instruccion_ejecutada = 1;
        while(instruccion_ejecutada <= QUANTUM  && pcb->program_finished == 0){
     	   execute_next_instruction_for_process();
+    	   if(pcb->program_finished == 58){
+    		   break;
+    	   }
+
     	   printf("Instruccion %d del pid %d ejecutada \n", instruccion_ejecutada, pcb->pid);
 		   fflush(stdout);
 		   instruccion_ejecutada ++;

@@ -225,12 +225,12 @@ int main(int argc, char **argv) {
 				log_trace(trace_log,"El programa finalizo por Stack Overflow\n");
 				fflush(stdout);
 			} else if (finalizar->motivo == 7) {
-				printf("Insuficiente espacio como para cargar el programa");
-				log_trace(trace_log, "Insuficiente espacio como para cargar el programa");
+				printf("Insuficiente espacio como para cargar el programa\n");
+				log_trace(trace_log, "Insuficiente espacio como para cargar el programa\n");
 				fflush(stdout);
 			} else if (finalizar->motivo == 58) {
-				printf("No hay frames libres, se finaliza el proceso");
-				log_trace(trace_log, "No hay frames libres, se finaliza el proceso");
+				printf("No hay frames libres, se finaliza el proceso\n");
+				log_trace(trace_log, "No hay frames libres, se finaliza el proceso\n");
 				fflush(stdout);
 			} else {
 				printf("El programa no pudo finalizar correctamente\n");

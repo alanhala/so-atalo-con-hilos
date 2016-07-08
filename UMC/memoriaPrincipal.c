@@ -564,6 +564,8 @@ int darle_frame_a_una_pagina(t_tabla_de_paginas* tabla, int pagina){
 	}
 	else
 	{
+		if(tabla->frames_en_uso == 0 && !hay_frames_disponibles())
+			return -99;//FINALIZO EL PROGRAMA PORQUE NO HAY ESPACIO EN MEMORIA
 		return conseguir_frame_mediante_reemplazo(tabla, pagina);
 	}
 }
