@@ -60,7 +60,7 @@ int inicializar_estructuras() {
 	lista_tabla_de_paginas = list_create();
 	crear_lista_frames();
 	CANTIDAD_MAXIMA_PROGRAMAS = CANTIDAD_FRAMES / MAX_FRAMES_POR_PROCESO;
-	crear_swap_mock();
+
 
 
 	return 0;
@@ -347,6 +347,14 @@ int cargar_nuevo_programa_en_swap(int pid, int paginas_requeridas_del_proceso, c
 char * leer_pagina_de_swap(int pid, int pagina){
 
 	sem_wait(&mut_swap);
+	t_tabla_de_paginas * tabla = buscar_tabla_de_paginas_de_pid(pid);
+	if(tabla ==NULL){
+		sem_post(&mut_swap);
+		pthread_exit(1);
+	}
+
+
+
 	t_leer_pagina_swap *lectura = malloc(sizeof(t_leer_pagina_swap));
 
 	memset(lectura,0,sizeof(t_leer_pagina_swap));
@@ -396,6 +404,13 @@ char * leer_pagina_de_swap(int pid, int pagina){
 
 int escribir_pagina_de_swap(int pid, int pagina, char * datos){
 	sem_wait(&mut_swap);
+	t_tabla_de_paginas * tabla = buscar_tabla_de_paginas_de_pid(pid);
+	if(tabla ==NULL){
+		sem_post(&mut_swap);
+		pthread_exit(1);
+	}
+
+
 	t_escribir_pagina_swap *escritura = malloc(sizeof(t_escribir_pagina_swap));
 
 	memset(escritura,0,sizeof(t_escribir_pagina_swap));
@@ -871,6 +886,8 @@ int tiene_tabla_mas_paginas_para_pedir(t_tabla_de_paginas* tabla)
 
 int escribir_pagina_de_programa(int pid, int pagina, int offset, int size, char * datos){
 	t_tabla_de_paginas * tabla = buscar_tabla_de_paginas_de_pid(pid);
+	if(tabla== NULL )
+		pthread_exit(1);
 	int frame = buscar_frame_de_una_pagina(tabla, pagina);
 
 	if(frame != -1)
@@ -898,7 +915,8 @@ int escribir_pagina_de_programa(int pid, int pagina, int offset, int size, char 
 char* leer_pagina_de_programa(int pid, int pagina, int offset, int size){
 
 		t_tabla_de_paginas * tabla = buscar_tabla_de_paginas_de_pid(pid);
-
+		if(tabla== NULL )
+				pthread_exit(1);
 		int frame = buscar_frame_de_una_pagina(tabla, pagina);
 
 		if(frame != -1)
@@ -1169,6 +1187,7 @@ void dump_memory(int pid){
 	{
 		//TODO VER SI PONGO MUTEX ACA O NO
 		t_tabla_de_paginas * tabla = buscar_tabla_de_paginas_de_pid(pid);
+
 		log_trace(trace_log_UMC,"Contenido en memoria de proceso %d\n", tabla->pid);
 		printf("Contenido en memoria de proceso %d\n", tabla->pid);
 		int i =0;
