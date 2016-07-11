@@ -143,7 +143,7 @@ int finalizar_programa(int pid){
 		}
 
 	t_tabla_de_paginas * aux = list_remove_by_condition(lista_tabla_de_paginas, pid_iguales);
-	free(aux);
+	//free(aux);
 	return 0;
 }
 
