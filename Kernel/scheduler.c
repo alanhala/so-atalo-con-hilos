@@ -91,7 +91,7 @@ void* handle_new(void* scheduler) {
 		pcb->console_socket_descriptor = new_program->console_socket_descriptor;
 		int result = start_program_in_umc(self->umc_socket_descriptor,
 				pcb->pid, pcb->used_pages, new_program->program_code);
-		if (result == -1) {
+		if (result == -1 || result == 9) {
 			pcb->program_finished = 7;
 			//end_program(scheduler, pcb);
 			int consola_finalizado = end_program_console(pcb); //console_finalizado no usarlo para nada es valor 0
