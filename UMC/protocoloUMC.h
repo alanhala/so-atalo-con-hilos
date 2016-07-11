@@ -9,7 +9,7 @@
 #define PROTOCOLOUMC_H_
 
 typedef struct {
-       uint32_t respuesta_correcta;
+       int32_t respuesta_correcta;
 }__attribute__((packed)) t_respuesta_inicio_de_programa_en_UMC;
 
 typedef struct {

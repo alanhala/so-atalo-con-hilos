@@ -38,7 +38,7 @@ typedef struct {
 }__attribute__((packed)) t_respuesta_iniciar_programa_en_kernel;
 
 typedef struct {
-       uint32_t respuesta_correcta;
+       int32_t respuesta_correcta;
 }__attribute__((packed)) t_respuesta_iniciar_programa_en_UMC;
 
 typedef struct {

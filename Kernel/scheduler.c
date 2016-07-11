@@ -93,7 +93,11 @@ void* handle_new(void* scheduler) {
 				pcb->pid, pcb->used_pages, new_program->program_code);
 		if (result == -1) {
 			pcb->program_finished = 7;
-			end_program(scheduler, pcb);
+			//end_program(scheduler, pcb);
+			int consola_finalizado = end_program_console(pcb); //console_finalizado no usarlo para nada es valor 0
+
+			free(pcb);// lo libero directamente creo q no es necesario hacer cola de exit
+
 		}
 		else {
 			printf("resultado inicio programa en umc : %d\n", result); //TODO sacar este comentario
