@@ -210,7 +210,12 @@ int main(int argc, char **argv) {
 				printf("No hay frames libres, se finaliza el proceso\n");
 				log_trace(trace_log, "No hay frames libres, se finaliza el proceso\n");
 				fflush(stdout);
-			} else {
+			} else if (finalizar->motivo == 34) {
+				printf("El proceso no puede continuar su ejecucion ya que se desconecto la CPU en medio de la rafaga\n");
+				log_trace(trace_log, "El proceso no puede continuar su ejecucion ya que se desconecto la CPU en medio de la rafaga\n");
+				fflush(stdout);
+			}
+			else {
 				printf("El programa no pudo finalizar correctamente\n");
 				log_trace(trace_log,"El programa no finalizo correctamente\n");
 				fflush(stdout);

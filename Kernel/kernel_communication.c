@@ -77,8 +77,11 @@ void* handle_pcb_execution(void* data_to_cast) {
 	int bytes_enviados = send(pcb->cpu_socket_descriptor, buffer->datos, buffer->size, 0);
 	free(buffer->datos);
 	free(buffer);
-	if (bytes_enviados == -1){
-		printf("error al enviar pcb\n");
+	if (bytes_enviados == 0 || bytes_enviados == -1){
+		printf("Cpu desconectada, se finaliza el proceso\n");
+		pcb->program_finished = 34; //CPU DESCONECATADA
+		end_program(scheduler, pcb);
+		pthread_exit(1);
 	}
 	printf("pcb enviado a cpu \n ");
 	while(1){
@@ -90,6 +93,13 @@ void* handle_pcb_execution(void* data_to_cast) {
 				bytes_recibidos;
 
 			bytes_recibidos_header = recv(pcb->cpu_socket_descriptor,buffer_header,5,MSG_PEEK);
+			if(bytes_recibidos_header == 0 ){
+				printf("Cpu desconectada, se finaliza el proceso\n");
+				pcb->program_finished = 34; //CPU DESCONECATADA
+				end_program(scheduler, pcb);
+				break;
+			}
+
 
 			un_header = deserializar_header(buffer_header);
 
@@ -102,6 +112,13 @@ void* handle_pcb_execution(void* data_to_cast) {
 			if(tipo == 132){
 
 				int bytes_recibidos = recv(pcb->cpu_socket_descriptor,buffer_recibidos,length,0);
+
+				if(bytes_recibidos == 0){
+					printf("Cpu desconectada, se finaliza el proceso\n");
+					pcb->program_finished = 34; //CPU DESCONECATADA
+					end_program(scheduler, pcb);
+					break;
+				}
 
 				if(validate_console_connection(pcb->console_socket_descriptor) == 1){
 
@@ -117,6 +134,14 @@ void* handle_pcb_execution(void* data_to_cast) {
 			if(tipo == 121){
 
 				int bytes_recibidos = recv(pcb->cpu_socket_descriptor,buffer_recibidos,length,0);
+				if(bytes_recibidos == 0){
+					printf("Cpu desconectada, se finaliza el proceso\n");
+					pcb->program_finished = 34; //CPU DESCONECATADA
+					end_program(scheduler, pcb);
+					break;
+				}
+
+
 				t_PCB_serializacion *unPCB = deserealizar_mensaje(121,buffer_recibidos);
 
 				actualizar_pcb_serializado(pcb, unPCB);
@@ -133,8 +158,11 @@ void* handle_pcb_execution(void* data_to_cast) {
 					t_stream *buffer = serializar_mensaje(121,pcb_serializacion);
 
 					int bytes_enviados = send(pcb->cpu_socket_descriptor, buffer->datos, buffer->size, 0);
-					if (bytes_enviados == -1){
-						printf("error al enviar pcb\n");
+					if(bytes_enviados == 0){
+						printf("Cpu desconectada, se finaliza el proceso\n");
+						pcb->program_finished = 34; //CPU DESCONECATADA
+						end_program(scheduler, pcb);
+						break;
 					}
 					free(buffer->datos);
 					free(buffer);
@@ -151,8 +179,11 @@ void* handle_pcb_execution(void* data_to_cast) {
 					t_stream *buffer = serializar_mensaje(121,pcb_serializacion);
 
 					int bytes_enviados = send(pcb->cpu_socket_descriptor, buffer->datos, buffer->size, 0);
-					if (bytes_enviados == -1){
-						printf("error al enviar pcb\n");
+					if (bytes_enviados == -1 || bytes_enviados == 0){
+						printf("Cpu desconectada, se finaliza el proceso\n");
+						pcb->program_finished = 34; //CPU DESCONECATADA
+						end_program(scheduler, pcb);
+						break;
 					}
 					free(buffer->datos);
 					free(buffer);
@@ -181,8 +212,11 @@ void* handle_pcb_execution(void* data_to_cast) {
 					t_stream *buffer = serializar_mensaje(121,pcb_serializacion);
 
 					int bytes_enviados = send(pcb->cpu_socket_descriptor, buffer->datos, buffer->size, 0);
-					if (bytes_enviados == -1){
-						printf("error al enviar pcb\n");
+					if (bytes_enviados == -1 || bytes_enviados == 0){
+						printf("Cpu desconectada, se finaliza el proceso\n");
+						pcb->program_finished = 34; //CPU DESCONECATADA
+						end_program(scheduler, pcb);
+						break;
 					}
 					free(buffer->datos);
 					free(buffer);
@@ -202,8 +236,11 @@ void* handle_pcb_execution(void* data_to_cast) {
 					t_stream *buffer = serializar_mensaje(121,pcb_serializacion);
 
 					int bytes_enviados = send(pcb->cpu_socket_descriptor, buffer->datos, buffer->size, 0);
-					if (bytes_enviados == -1){
-						printf("error al enviar pcb\n");
+					if (bytes_enviados == -1 || bytes_enviados == 0){
+						printf("Cpu desconectada, se finaliza el proceso\n");
+						pcb->program_finished = 34; //CPU DESCONECATADA
+						end_program(scheduler, pcb);
+						break;
 					}
 					free(buffer->datos);
 					free(buffer);

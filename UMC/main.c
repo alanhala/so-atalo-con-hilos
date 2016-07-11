@@ -195,6 +195,10 @@ void manejo_de_solicitudes(int socket_descriptor) {
 			int bytes_recibidos = recv(socket_descriptor, buffer_recv,
 				length, 0);
 
+			if (bytes_recibidos == 0 ) { // SE DESCONECTO UNA CPU
+						pthread_exit((void*) 1);
+			}
+
 			t_solicitar_bytes_de_una_pagina_a_UMC *bytes_de_una_pagina = malloc(
 					sizeof(t_solicitar_bytes_de_una_pagina_a_UMC));
 
@@ -226,6 +230,9 @@ void manejo_de_solicitudes(int socket_descriptor) {
 
 			int bytes_sent = send(socket_descriptor, buffer->datos,
 					buffer->size, 0);
+			if (bytes_sent == 0 || bytes_sent == -1) { // SE DESCONECTO UNA CPU
+						pthread_exit((void*) 1);
+			}
 
 			free(buffer->datos);
 			free(buffer);
@@ -236,6 +243,10 @@ void manejo_de_solicitudes(int socket_descriptor) {
 
 			int bytes_recibidos = recv(socket_descriptor, buffer_recv,
 					length, 0);
+
+			if (bytes_recibidos == 0 ) { // SE DESCONECTO UNA CPU
+					pthread_exit((void*) 1);
+			}
 
 			t_escribir_bytes_de_una_pagina_en_UMC *bytes_de_una_pagina = malloc(
 					sizeof(t_escribir_bytes_de_una_pagina_en_UMC));
@@ -260,6 +271,8 @@ void manejo_de_solicitudes(int socket_descriptor) {
 			int bytes_sent = send(socket_descriptor, buffer->datos,
 					buffer->size, 0);
 
+
+
 			free(buffer->datos);
 			free(buffer);
 		}
@@ -267,6 +280,10 @@ void manejo_de_solicitudes(int socket_descriptor) {
 
 			int bytes_recibidos = recv(socket_descriptor, buffer_recv,
 					length, 0);
+
+			if (bytes_recibidos == 0 ) { // SE DESCONECTO UNA CPU
+						pthread_exit((void*) 1);
+			}
 
 			t_cambio_de_proceso *cambio_de_proceso = malloc(
 					sizeof(t_cambio_de_proceso));
