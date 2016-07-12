@@ -149,6 +149,18 @@ void *kernel_and_cpu_connection_handler(int client_socket_descriptor) {
 	return 0;
 }
 
+void eliminar_cpu_context_con_mismo_socket(socket_descriptor){
+	int mismo_socket(t_cpu_context *cpu) {
+				return (cpu->cpu_id == socket_descriptor);
+			}
+
+
+	t_cpu_context* cpu_encontrada = list_remove_by_condition(lista_cpu_context, (void*) mismo_socket);
+
+
+
+}
+
 void manejo_de_solicitudes(int socket_descriptor) {
 	int handshake = -1;
 	recv(socket_descriptor, &handshake, sizeof(int), 0);
@@ -159,6 +171,7 @@ void manejo_de_solicitudes(int socket_descriptor) {
 		t_cpu_context * nueva_cpu = malloc(sizeof(t_cpu_context));
 		nueva_cpu->cpu_id = socket_descriptor;
 		nueva_cpu->pid_active = -1;
+		eliminar_cpu_context_con_mismo_socket(socket_descriptor);
 		sem_wait(&mut_lista_cpu_context);
 		list_add(lista_cpu_context, nueva_cpu);
 		sem_post(&mut_lista_cpu_context);
