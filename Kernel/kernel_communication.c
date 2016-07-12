@@ -1,6 +1,8 @@
 #include "kernel_communication.h"
 #include "protocoloKernel.h"
 
+extern t_log *kernel_trace;
+
 int validate_console_connection(int socket_fd){
 		int error = 0;
 		socklen_t len = sizeof (error);
@@ -78,12 +80,13 @@ void* handle_pcb_execution(void* data_to_cast) {
 	free(buffer->datos);
 	free(buffer);
 	if (bytes_enviados == 0 || bytes_enviados == -1){
-		printf("Cpu desconectada, se finaliza el proceso\n");
+		log_trace(kernel_trace,"PID %d :Cpu desconectada, se finaliza el proceso\n", pcb->pid);
 		pcb->program_finished = 34; //CPU DESCONECATADA
 		end_program(scheduler, pcb);
 		pthread_exit(1);
 	}
-	printf("pcb enviado a cpu \n ");
+	log_trace(kernel_trace,"PID %d : Pcb enviado a cpu\n", pcb->pid);
+
 	while(1){
 
 			t_header *un_header = malloc(sizeof(t_header));
@@ -94,7 +97,7 @@ void* handle_pcb_execution(void* data_to_cast) {
 
 			bytes_recibidos_header = recv(pcb->cpu_socket_descriptor,buffer_header,5,MSG_PEEK);
 			if(bytes_recibidos_header == 0 ){
-				printf("Cpu desconectada, se finaliza el proceso\n");
+				log_trace(kernel_trace,"PID %d :Cpu desconectada, se finaliza el proceso\n", pcb->pid);
 				pcb->program_finished = 34; //CPU DESCONECATADA
 				end_program(scheduler, pcb);
 				break;
@@ -114,7 +117,7 @@ void* handle_pcb_execution(void* data_to_cast) {
 				int bytes_recibidos = recv(pcb->cpu_socket_descriptor,buffer_recibidos,length,0);
 
 				if(bytes_recibidos == 0){
-					printf("Cpu desconectada, se finaliza el proceso\n");
+					log_trace(kernel_trace,"PID %d :Cpu desconectada, se finaliza el proceso\n", pcb->pid);
 					pcb->program_finished = 34; //CPU DESCONECATADA
 					end_program(scheduler, pcb);
 					break;
@@ -128,14 +131,14 @@ void* handle_pcb_execution(void* data_to_cast) {
 				}else
 				{
 					int bytes_sent = send(pcb->console_socket_descriptor,buffer_recibidos,length,0);
-					printf("Envio imprimir texto a consola\n");
+					log_trace(kernel_trace,"PID %d : Envio imprimir texto a consola\n", pcb->pid);
 				}
 			}
 			if(tipo == 121){
 
 				int bytes_recibidos = recv(pcb->cpu_socket_descriptor,buffer_recibidos,length,0);
 				if(bytes_recibidos == 0){
-					printf("Cpu desconectada, se finaliza el proceso\n");
+					log_trace(kernel_trace,"PID %d :Cpu desconectada, se finaliza el proceso\n", pcb->pid);
 					pcb->program_finished = 34; //CPU DESCONECATADA
 					end_program(scheduler, pcb);
 					break;
@@ -159,7 +162,7 @@ void* handle_pcb_execution(void* data_to_cast) {
 
 					int bytes_enviados = send(pcb->cpu_socket_descriptor, buffer->datos, buffer->size, 0);
 					if(bytes_enviados == 0){
-						printf("Cpu desconectada, se finaliza el proceso\n");
+						log_trace(kernel_trace,"PID %d :Cpu desconectada, se finaliza el proceso\n", pcb->pid);
 						pcb->program_finished = 34; //CPU DESCONECATADA
 						end_program(scheduler, pcb);
 						break;
@@ -180,7 +183,7 @@ void* handle_pcb_execution(void* data_to_cast) {
 
 					int bytes_enviados = send(pcb->cpu_socket_descriptor, buffer->datos, buffer->size, 0);
 					if (bytes_enviados == -1 || bytes_enviados == 0){
-						printf("Cpu desconectada, se finaliza el proceso\n");
+						log_trace(kernel_trace,"PID %d :Cpu desconectada, se finaliza el proceso\n", pcb->pid);
 						pcb->program_finished = 34; //CPU DESCONECATADA
 						end_program(scheduler, pcb);
 						break;
@@ -213,7 +216,7 @@ void* handle_pcb_execution(void* data_to_cast) {
 
 					int bytes_enviados = send(pcb->cpu_socket_descriptor, buffer->datos, buffer->size, 0);
 					if (bytes_enviados == -1 || bytes_enviados == 0){
-						printf("Cpu desconectada, se finaliza el proceso\n");
+						log_trace(kernel_trace,"PID %d :Cpu desconectada, se finaliza el proceso\n", pcb->pid);
 						pcb->program_finished = 34; //CPU DESCONECATADA
 						end_program(scheduler, pcb);
 						break;
@@ -237,7 +240,7 @@ void* handle_pcb_execution(void* data_to_cast) {
 
 					int bytes_enviados = send(pcb->cpu_socket_descriptor, buffer->datos, buffer->size, 0);
 					if (bytes_enviados == -1 || bytes_enviados == 0){
-						printf("Cpu desconectada, se finaliza el proceso\n");
+						log_trace(kernel_trace,"PID %d :Cpu desconectada, se finaliza el proceso\n", pcb->pid);
 						pcb->program_finished = 34; //CPU DESCONECATADA
 						end_program(scheduler, pcb);
 						break;

@@ -23,7 +23,8 @@
 #include "levanta_config_file.h"
 #include "main.h"
 
-//t_kernel * gkernel;
+t_log 	*kernel_trace;
+
 
 void *cpu_connection(int socket_descriptor);
 void *console_and_cpu_connection_handler(int client_socket_descriptor);
@@ -36,6 +37,11 @@ int main(int argc, char **argv) {
 	//set_page_size(5);
 
 	inicializa_semaforos_kernel();
+	kernel_trace= log_create("./Kernel_trace.txt",
+										"main.c",
+										true,
+										LOG_LEVEL_TRACE);
+
 
 	t_kernel *kernel = create_kernel("./kernel_config.txt");
 

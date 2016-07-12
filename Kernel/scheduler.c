@@ -1,5 +1,7 @@
 #include "kernel_communication.h"
 
+extern t_log *kernel_trace;
+
 uint32_t check_closed_console(t_scheduler* scheduler, int console_descriptor) {
 	int same_descriptor(int descriptor) {
 		return descriptor == console_descriptor;
@@ -92,6 +94,7 @@ void* handle_new(void* scheduler) {
 		int result = start_program_in_umc(self->umc_socket_descriptor,
 				pcb->pid, pcb->used_pages, new_program->program_code);
 		if (result == -1 || result == 9) {
+			log_trace(kernel_trace,"PID %d : No pudo iniciarse el programa correctamente\n", pcb->pid);
 			pcb->program_finished = 7;
 			//end_program(scheduler, pcb);
 			int consola_finalizado = end_program_console(pcb); //console_finalizado no usarlo para nada es valor 0
@@ -100,8 +103,8 @@ void* handle_new(void* scheduler) {
 
 		}
 		else {
-			printf("resultado inicio programa en umc : %d\n", result); //TODO sacar este comentario
-			fflush(stdout);
+			log_trace(kernel_trace,"PID %d : Inicio de programa correcto \n", pcb->pid);
+
 
 			enqueue_to_ready(self, pcb);
 		}
@@ -133,7 +136,7 @@ void* handle_ready(void* scheduler) {
 
 		sem_wait(&mutex_execution);
 		pcb->state = "Ejecutando";
-		printf("Ejecutando: %d\n", pcb->pid);
+		log_trace(kernel_trace,"Ejecutando: %d\n", pcb->pid);
 		queue_push(self->execution_state, pcb);
 		sem_post(&mutex_execution);
 		sem_post(&sem_execution);
@@ -204,7 +207,7 @@ void* handle_io_queue(void* io_attr) {
 void enqueue_to_ready(t_scheduler* scheduler, t_PCB* pcb) {
 	sem_wait(&mutex_ready);
 	pcb->state = "Ready";
-	printf("Ready: %d\n", pcb->pid);
+	log_trace(kernel_trace,"Ready: %d\n", pcb->pid);
 	queue_push(scheduler->ready_state, pcb);
 	sem_post(&mutex_ready);
 	sem_post(&sem_ready);
@@ -213,7 +216,7 @@ void enqueue_to_ready(t_scheduler* scheduler, t_PCB* pcb) {
 void enqueue_to_block(t_scheduler* scheduler, t_PCB* pcb) {
 	sem_wait(&mutex_block);
 	pcb->state = "Bloqueado";
-	printf("Bloqueado: %d\n", pcb->pid);
+	log_trace(kernel_trace,"Bloqueado: %d\n", pcb->pid);
 	list_add(scheduler->block_state, pcb);
 	sem_post(&mutex_block);
 }
@@ -227,7 +230,7 @@ void end_program(t_scheduler* self, t_PCB *pcb) {
 
 void free_cpu(t_scheduler* self, int cpu) {
     sem_wait(&mutex_cpus_available);
-    printf("CPU LIBERADA \n");
+    log_trace(kernel_trace,"Cpu liberada\n");
     queue_push(self->cpus_available, cpu);
     sem_post(&mutex_cpus_available);
     sem_post(&sem_cpus_available);

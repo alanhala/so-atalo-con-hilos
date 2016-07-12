@@ -39,7 +39,8 @@ void listen_sigint_signal();
 int main(int argc, char **argv) {
 
 	levanta_config_consola();
-
+	t_log *trace_log = log_create("./Log_de_Consola.txt", "console_main.c",
+		true, LOG_LEVEL_TRACE);
 	char* codigo;
 
 	FILE *fdarchivo;
@@ -63,14 +64,13 @@ int main(int argc, char **argv) {
 		tamanio = tamanio - inicio;
 		codigo = malloc(tamanio);
 		fread(codigo, tamanio, inicio, fdarchivo);
-		printf("%s\n", codigo);
+		log_trace(trace_log,"%s\n", codigo);
 		free(buff);
 		fclose(fdarchivo);
 	}
 
 
-	t_log *trace_log = log_create("./Log_de_Consola.txt", "console_main.c",
-	true, LOG_LEVEL_TRACE);
+
 	kernel_socket_descriptor = create_client_socket_descriptor(kernel_ip,
 			kernel_puerto);
 	int a = 2;
@@ -195,28 +195,28 @@ int main(int argc, char **argv) {
 			finalizar = (t_finalizar_programa_en_consola *)deserealizar_mensaje(133,buffer_recibidos);
 
 			if (finalizar->motivo == 1){
-				printf("El programa finalizo correctamente\n");
+
 				log_trace(trace_log,"El programa finalizo correctamente\n");
 				fflush(stdout);
 			} else if (finalizar->motivo == 2){
-				printf("El programa finalizo por Stack Overflow\n");
+
 				log_trace(trace_log,"El programa finalizo por Stack Overflow\n");
 				fflush(stdout);
 			} else if (finalizar->motivo == 7) {
-				printf("Insuficiente espacio como para cargar el programa\n");
+
 				log_trace(trace_log, "Insuficiente espacio como para cargar el programa\n");
 				fflush(stdout);
 			} else if (finalizar->motivo == 58) {
-				printf("No hay frames libres, se finaliza el proceso\n");
+
 				log_trace(trace_log, "No hay frames libres, se finaliza el proceso\n");
 				fflush(stdout);
 			} else if (finalizar->motivo == 34) {
-				printf("El proceso no puede continuar su ejecucion ya que se desconecto la CPU en medio de la rafaga\n");
+
 				log_trace(trace_log, "El proceso no puede continuar su ejecucion ya que se desconecto la CPU en medio de la rafaga\n");
 				fflush(stdout);
 			}
 			else {
-				printf("El programa no pudo finalizar correctamente\n");
+
 				log_trace(trace_log,"El programa no finalizo correctamente\n");
 				fflush(stdout);
 			}
