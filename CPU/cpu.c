@@ -136,7 +136,7 @@ t_valor_variable obtenerValorCompartida(t_nombre_compartida variable) {
 		t_PCB_serializacion *recibir_pcb = malloc(sizeof(t_PCB_serializacion));
 
 		recibir_pcb = (t_PCB_serializacion * ) deserealizar_mensaje(121, buffer_recv);
-		printf("valor de la variable compartida: %d\n", recibir_pcb->resultado_mensaje);
+		log_trace(trace_log_CPU,"Valor de la variable compartida: %d\n", recibir_pcb->resultado_mensaje);
 		return recibir_pcb->resultado_mensaje;
 	}
 	return -1; //TODO NO SE OBTUVO RESULTADO DE LA VARIABLE COMPARTIDA
@@ -254,7 +254,7 @@ void execute_next_instruction_for_process() {
 		pthread_t execution_thread;
 		pthread_create(&execution_thread, NULL, &execute_instruction, (void*) asd);
 		pthread_join(execution_thread, NULL);
-		printf("Instruccion: %s", instruccion_string);
+		log_trace(trace_log_CPU,"Instruccion: %s", instruccion_string);
 		if(program_counter == pcb->program_counter && !string_starts_with(instruccion_string, TEXT_END) && !string_starts_with(instruccion_string, TEXT_RETURN)) {
 			pcb->program_counter++;
 		}
@@ -408,17 +408,16 @@ void retornar(t_valor_variable retorno) {
 }
 
 void imprimir(t_valor_variable valor_mostrar) {
-	log_trace(trace_log_CPU,"imprimir");
+	log_trace(trace_log_CPU,"Imprimir\n");
     char* print_value = string_itoa(valor_mostrar);
 
     imprimirTexto(print_value);
 }
 
 void imprimirTexto(char* print_value) {
-	log_trace(trace_log_CPU,"imprimirTexto");
+	log_trace(trace_log_CPU,"ImprimirTexto\n");
 	int enviado_correctamente = send_text_to_kernel(print_value, string_length(print_value));
-    //todo si se quiere validar que haya enviado correctmente
-    printf("%s\n", print_value);
+    log_trace(trace_log_CPU,"%s\n", print_value);
 }
 
 void irALabel(t_nombre_etiqueta nombre_etiqueta) {
@@ -753,7 +752,8 @@ int ejecutar_pcb(){
     		   break;
     	   }
 
-    	   printf("Instruccion %d del pid %d ejecutada \n", instruccion_ejecutada, pcb->pid);
+
+    	   log_trace(trace_log_CPU,"Instruccion %d del pid %d ejecutada \n", instruccion_ejecutada, pcb->pid);
 		   fflush(stdout);
 		   instruccion_ejecutada ++;
 		   usleep(1000 * QUANTUM_SLEEP);

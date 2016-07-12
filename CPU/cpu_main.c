@@ -45,7 +45,7 @@ int main(int argc, char **argv) {
 
 	trace_log_CPU = log_create("./Log_de_CPU.txt",
 								"cpu_main.c",
-								false,
+								true,
 								LOG_LEVEL_TRACE);
 
 	//set_quantum(3); // me lo tiene qe mandar cpu en cada ejecucion
