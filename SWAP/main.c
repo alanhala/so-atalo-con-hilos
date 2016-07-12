@@ -51,6 +51,8 @@ int main(int argc, char *argv[]) {
 								true,
 								LOG_LEVEL_TRACE);
 
+
+	log_trace(trace_log_SWAP,"\n\n\n\n\n");
 	t_swap* swap = create_swap("./config_file.txt");
 
 	UMC_connection(swap);

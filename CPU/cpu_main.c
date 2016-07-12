@@ -48,6 +48,8 @@ int main(int argc, char **argv) {
 								true,
 								LOG_LEVEL_TRACE);
 
+	log_trace(trace_log_CPU,"\n\n\n\n\n");
+
 	//set_quantum(3); // me lo tiene qe mandar cpu en cada ejecucion
 //	set_tamanio_pagina(5);
 //	correr_simulacion();

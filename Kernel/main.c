@@ -43,6 +43,8 @@ int main(int argc, char **argv) {
 										LOG_LEVEL_TRACE);
 
 
+	log_trace(kernel_trace,"\n\n\n\n\n");
+
 	t_kernel *kernel = create_kernel("./kernel_config.txt");
 
 	pthread_t levanta_config_file;

@@ -1,5 +1,5 @@
 #include "kernel_communication.h"
-
+#include <commons/log.h>
 extern t_log *kernel_trace;
 
 uint32_t check_closed_console(t_scheduler* scheduler, int console_descriptor) {

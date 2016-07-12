@@ -1,6 +1,6 @@
 #include "kernel_communication.h"
 #include "protocoloKernel.h"
-
+#include <commons/log.h>
 extern t_log *kernel_trace;
 
 int validate_console_connection(int socket_fd){

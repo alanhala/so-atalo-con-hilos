@@ -87,6 +87,11 @@ int main(int argc, char **argv) {
 									true,
 									LOG_LEVEL_TRACE);
 
+	log_trace(trace_log_UMC,"\n\n\n\n\n");
+	log_trace(historial_reemplazos_UMC,"\n\n\n\n\n");
+	log_trace(interprete_log,"\n\n\n\n\n");
+	log_trace(interprete_log,"\n\n\n\n\n");
+
 	pthread_t interprete_comandos;
 	int interprete_thread_result = pthread_create(&interprete_comandos, NULL,
 			&interprete_comando_thread, NULL);

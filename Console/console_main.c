@@ -41,6 +41,8 @@ int main(int argc, char **argv) {
 	levanta_config_consola();
 	t_log *trace_log = log_create("./Log_de_Consola.txt", "console_main.c",
 		true, LOG_LEVEL_TRACE);
+
+	log_trace(trace_log,"\n\n\n\n\n");
 	char* codigo;
 
 	FILE *fdarchivo;
