@@ -48,7 +48,7 @@ int main(int argc, char *argv[]) {
 
 	trace_log_SWAP = log_create("./Log_de_SWAP.txt",
 								"main.c",
-								false,
+								true,
 								LOG_LEVEL_TRACE);
 
 	t_swap* swap = create_swap("./config_file.txt");
