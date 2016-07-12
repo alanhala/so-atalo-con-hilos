@@ -34,6 +34,7 @@
 t_log 	*trace_log_UMC;
 t_log 	*historial_reemplazos_UMC;
 t_log 	*informacion_TLB;
+t_log 	*interprete_log;
 
 int backlog;
 
@@ -79,6 +80,11 @@ int main(int argc, char **argv) {
 	informacion_TLB= log_create("./Informacion_TLB.txt",
 									"main.c",
 									false,
+									LOG_LEVEL_TRACE);
+
+	interprete_log= log_create("./Log_interprete_comandos.txt",
+									"main.c",
+									true,
 									LOG_LEVEL_TRACE);
 
 	pthread_t interprete_comandos;
@@ -130,7 +136,6 @@ int main(int argc, char **argv) {
 					&kernel_and_cpu_connection_handler, client_socket_descriptor);
 			if (thread_result) {
 				log_trace(trace_log_UMC,"Error en la creacion del thread que maneja las conexiones de CPU y Nucleo\n. Codigo de error: %d\n",thread_result);
-				// TODO Analizar el tratamiento que desea darse
 				exit(1);
 			}
 		}
