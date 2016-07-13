@@ -138,6 +138,7 @@ int main(int argc, char **argv) {
 			pcb_serializado->cantidad_operaciones = 0;
 			pcb_serializado->valor_de_la_variable_compartida =0;
 			pcb_serializado->resultado_mensaje = 0;
+			pcb_serializado->cpu_unplugged = 0;
 			if (pcb_serializado->program_finished == 6) {
 				pcb_serializado->valor_mensaje = io_id;
 				pcb_serializado->cantidad_operaciones = io_operations;
