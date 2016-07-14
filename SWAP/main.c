@@ -43,14 +43,14 @@ void set_page_size(int size){
 	page_size = size;
 }
 int main(int argc, char *argv[]) {
-//	run_specs();
+
 
 
 	trace_log_SWAP = log_create("./Log_de_SWAP.txt",
 								"main.c",
 								true,
 								LOG_LEVEL_TRACE);
-
+//	run_specs();
 
 	log_trace(trace_log_SWAP,"\n\n\n\n\n");
 	t_swap* swap = create_swap("./config_file.txt");
