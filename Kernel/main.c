@@ -152,8 +152,8 @@ void manejo_de_solicitudes(int client_socket_descriptor) {
 			free(buffer->datos);
 			free(buffer);
 			int signal_received;
-			recv(client_socket_descriptor, &signal_received, sizeof(int) , 0);
-			if (signal_received == 1) {
+			int bytes_received = recv(client_socket_descriptor, &signal_received, sizeof(int) , 0);
+			if (signal_received == 1 || bytes_received == 0) {
 				list_add(scheduler->closed_consoles, client_socket_descriptor);
 			}
 		}
