@@ -105,11 +105,6 @@ void write_swap_file(t_swap* self, int first_page_location, unsigned int pages_a
 	int i;
 	if (fseek(self->file, first_page_location, SEEK_SET) == 0) {
 		fwrite(program, strlen(program), 1, self->file);
-		int not_written_bytes = pages_amount * self->page_size - strlen(program);
-		if (not_written_bytes > 0) {
-			for (i = 0; i < not_written_bytes; i++)
-				fwrite("0", 1, 1, self->file);
-		}
 	}
 
 	// TODO ver que hacer si fseek falla
@@ -119,11 +114,6 @@ void write_swap_page_file(t_swap* self, int first_page_location, unsigned int pa
 	int i;
 	if (fseek(self->file, first_page_location, SEEK_SET) == 0) {
 		fwrite(page_data, self->page_size, 1, self->file);
-		int not_written_bytes = pages_amount * self->page_size - get_page_size();
-		if (not_written_bytes > 0) {
-			for (i = 0; i < not_written_bytes; i++)
-				fwrite("0", 1, 1, self->file);
-		}
 	}
 
 	// TODO ver que hacer si fseek falla

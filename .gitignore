@@ -51,4 +51,5 @@ UMC/Log_de_Config_Files.txt
 UMC/Log_de_UMC.txt
 UMC/Historial_Reemplazos_UMC.txt
 UMC/Informacion_TLB.txt
+Kernel/Kernel_trace.txt
 */Log*
