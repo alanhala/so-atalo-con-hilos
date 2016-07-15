@@ -337,9 +337,7 @@ int cargar_nuevo_programa_en_swap(int pid, int paginas_requeridas_del_proceso, c
 
 	sem_post(&mut_swap);
 
-	if (SWAP_MOCK_ENABLE){
-			cargar_nuevo_programa_en_swap_mock(pid, paginas_requeridas_del_proceso, codigo_programa);
-	}
+
 	free(carga);
 	free(buffer->datos);
 	free(buffer);
@@ -388,17 +386,8 @@ char * leer_pagina_de_swap(int pid, int pagina){
 
 	respuesta = (t_respuesta_leer_pagina_swap*)deserealizar_mensaje(buffer_header[0], buffer_recv);
 	sem_post(&mut_swap);
-	if(SWAP_MOCK_ENABLE)
-	{
-			char *resp =leer_pagina_de_swap_mock(pid, pagina);
-			free(lectura);
-			free(buffer->datos);
-			free(buffer);
 
-			return resp;
-	}
 
-	//free(lectura);
 	free(buffer->datos);
 	free(buffer);
 
@@ -447,15 +436,13 @@ int escribir_pagina_de_swap(int pid, int pagina, char * datos){
 	respuesta = (t_respuesta_escribir_pagina_swap*)deserealizar_mensaje(buffer_header[0], buffer_recv);
 	sem_post(&mut_swap);
 
-	free(escritura->datos);
+
 	free(escritura);
 	free(buffer->datos);
 	free(buffer);
 
 
-	if (SWAP_MOCK_ENABLE){
-		return escribir_pagina_de_swap_mock(pid, pagina, datos);
-	}
+
 	int resp= respuesta->escritura_correcta;
 	free(respuesta);
 	return resp;
@@ -493,9 +480,7 @@ int finalizar_programa_de_swap(int pid){
 
 	respuesta = (t_respuesta_finalizar_programa_swap*)deserealizar_mensaje(8, buffer_recv);
 	sem_post(&mut_swap);
-	if(SWAP_MOCK_ENABLE){ //ACA NO QUIERO RETORNAR NADA, QUIERO RETORNAL SWAP
-		int aux= finalizar_programa_de_swap_mock(pid);
-	}
+
 	free(finalizar_programa);
 	free(buffer->datos);
 	free(buffer);
@@ -1324,8 +1309,8 @@ void set_socket_descriptor(int fd){
 
 void crear_swap_mock(){
 
-	char* datos = malloc(10000000);
-	memset(datos, '0', 10000000);
+	char* datos = malloc(1);
+	memset(datos, '0', 1);
 	SWAP_MOCK = datos;
 
 }
