@@ -1,12 +1,41 @@
-cd /home/utnso;ls tp || mkdir tp 
-cd tp
 
-if ls /home/utnso/tp/tp-2016-1c-Atalo-con-Hilos; then
+if ls /home/utnso/ansisop-parser; then
+    exit 0
+fi
+
+cd /home/utnso
+if ls /home/utnso/ansisop-parser; then
     echo 'YA ESTA BAJADO DEL REPOSITORIO NO BAJAR';
 else
-	git clone https://github.com/sisoputnfrba/tp-2016-1c-Atalo-con-Hilos.git;
+	git clone https://github.com/sisoputnfrba/ansisop-parser.git
+	
 fi
-cd /home/utnso/tp/tp-2016-1c-Atalo-con-Hilos
+
+echo "DESCARGA DEL PARSER COMPLETA"
+echo "PROCEDEMOS A INSTALARLA"
+cd ansisop-parser/parser
+sudo make all
+sudo make install
+
+cd /home/utnso
+if ls /home/utnso/so-commons-library; then
+    echo 'YA ESTA BAJADO DEL REPOSITORIO NO BAJAR';
+else
+	git clone https://github.com/sisoputnfrba/so-commons-library.git
+	
+fi
+echo "DESCARGA DE LAS COMMONS COMPLETA"
+echo "PROCEDEMOS A INSTALARLAS"
+cd so-commons-library
+sudo make all
+sudo make install
+
+if ls /home/utnso/tp-2016-1c-Atalo-con-Hilos; then
+    echo 'YA ESTA BAJADO DEL REPOSITORIO NO BAJAR';
+else
+	git clone -b cambiosSerializacionNewton --single-branch https://github.com/sisoputnfrba/tp-2016-1c-Atalo-con-Hilos.git;
+fi
+cd /home/utnso/tp-2016-1c-Atalo-con-Hilos
 
 cd Console
 sudo make clean
@@ -30,36 +59,4 @@ cd UMC
 make clean
 make all
 cp umc1.cfg umc.cfg
-
-
-if ls /home/utnso/tp/ansisop-parser; then
-    exit 0
-fi
-
-cd /home/utnso/tp
-if ls /home/utnso/tp/ansisop-parser; then
-    echo 'YA ESTA BAJADO DEL REPOSITORIO NO BAJAR';
-else
-	git clone https://github.com/sisoputnfrba/ansisop-parser.git
-	
-fi
-
-echo "DESCARGA DEL PARSER COMPLETA"
-echo "PROCEDEMOS A INSTALARLA"
-cd ansisop-parser/parser
-sudo make all
-sudo make install
-
-cd /home/utnso/tp
-if ls /home/utnso/tp/so-commons-library; then
-    echo 'YA ESTA BAJADO DEL REPOSITORIO NO BAJAR';
-else
-	git clone https://github.com/sisoputnfrba/so-commons-library.git
-	
-fi
-echo "DESCARGA DE LAS COMMONS COMPLETA"
-echo "PROCEDEMOS A INSTALARLAS"
-cd so-commons-library
-sudo make all
-sudo make install
 
