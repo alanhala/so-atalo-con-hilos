@@ -1,8 +1,4 @@
 
-if ls /home/utnso/ansisop-parser; then
-    exit 0
-fi
-
 cd /home/utnso
 if ls /home/utnso/ansisop-parser; then
     echo 'YA ESTA BAJADO DEL REPOSITORIO NO BAJAR';
