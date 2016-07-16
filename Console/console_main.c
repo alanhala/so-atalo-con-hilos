@@ -35,6 +35,7 @@ int levanta_config_consola(void);
 //Agrega Newton -- Fin
 
 void listen_sigint_signal();
+void carga_programas_ansisop(char *programas[15]);
 
 int main(int argc, char **argv) {
 
@@ -43,11 +44,13 @@ int main(int argc, char **argv) {
 		true, LOG_LEVEL_TRACE);
 
 	log_trace(trace_log,"\n\n\n\n\n");
-	char* codigo;
+
+	char *array_de_programas[15];
+	char *codigo;
 
 	FILE *fdarchivo;
 
-
+	/*
 	if ((fdarchivo = fopen(argv[1], "r")) == 0) {
 		//todo log el archivo esta vacio en este caso no se ejecuta consola
 
@@ -65,6 +68,11 @@ int main(int argc, char **argv) {
 		free(buff);
 		fclose(fdarchivo);
 	}
+	*/
+
+	carga_programas_ansisop(array_de_programas);
+
+	codigo = array_de_programas[4];
 
 
 
@@ -189,6 +197,22 @@ void sigint_handler() {
 	fflush(stdout);
 	int a = 1;
 	send(kernel_socket_descriptor, &a, sizeof(int), 0);
+}
+
+void carga_programas_ansisop(char *programas[15]){
+
+	/*
+	 * 0 - Fibo
+	 * 1 - Consumidor
+	 * 2 - Productor
+	 * 3 - Vector
+	 * 4 - Completo
+	 */
+	programas[0]="begin\n	variables x\n	x <- fibo 50\n	# Esperable: SegFault en el 10mo (40)\n	\n	# x <- fibo 8\n	#Esperable: 21\n	\n	textPrint Solucion:\n	print x\n	end\n	\n	function fibo\n	print $0\n	jz $0 return0\n	jz $0-1 return1\n	variables a, b\n	a <- fibo $0-1\n	b <- fibo $0-2\n	return a+b\n	\n	:return0\n	return 0\n	\n	:return1\n	return 1\n";
+	programas[1]="begin\n	:etiqueta\n	\n	wait c\n	print !colas\n	signal b\n	\n	#Ciclar indefinidamente\n	goto etiqueta\n	\n	end\n";
+	programas[2]="begin\n	:etiqueta\n	\n	wait b\n	!colas = !colas +1\n	signal c\n	\n	#Ciclar indefinidamente\n	goto etiqueta\n	\n	end\n";
+	programas[3]="begin\n	#un vector de 5 posiciones\n	variables a, b, c, d, e, i\n	#No inicializo las primeras 5 variables (vector) para tener elementos aleatorios\n	#i va a ser mi iterador, me interesa que empieze en 0\n	i=0\n	\n	#Bucle del for\n	:for\n	#imprime el valor iavo del vector\n	print *&a+i\n	#pongo en 0 el valor de la posicion para verificar escritura\n	*&a+i = 0\n	#avanzo en el vector (de a 4 posiciones, 1 int)\n	i=i+4\n	#Si i no es 20 (5 posiciones del vector * 4 temanio de las variables)\n	jnz 20-i for\n	\n	#Final del bucle\n	textPrint Fin\n	end\n";
+	programas[4]="begin\n	variables f, A, g\n	A = 0\n	!compartida = 1+A\n	print !compartida\n	jnz !compartida Siguiente\n	:Proximo\n	\n	f = 8\n	g <- doble !compartida\n	io LPT1 20\n	\n	textPrint Hola Mundo!\n	\n	g = 1 + g\n	print g\n	\n	textPrint Bye\n	\n	end\n	\n	\n	#Devolver el doble del\n	#primer parametro\n	function doble\n	variables f\n	f = $0 + $0\n	return f\n	end\n	\n	:Siguiente\n	print A+1\n	goto Proximo\n";
 }
 
 void listen_sigint_signal() {

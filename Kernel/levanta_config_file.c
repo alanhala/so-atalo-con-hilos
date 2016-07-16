@@ -76,7 +76,6 @@ void levantaConfigFileEnVariables(KernelConfigFile *ptrvaloresConfigFile,t_confi
 	ptrvaloresConfigFile->stack_size = leerUnsigned(ptrConfig,"STACK_SIZE");
 	ptrvaloresConfigFile->umc_ip = leer_string(ptrConfig,"UMC_IP");
 	ptrvaloresConfigFile->server_ip = leer_string(ptrConfig,"SERVER_IP");
-	ptrvaloresConfigFile->backlog = leerUnsigned(ptrConfig,"BACKLOG");
 }
 
 void carga_variables_globales(KernelConfigFile *una_config){
