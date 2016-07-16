@@ -267,7 +267,8 @@ void signal_unblock_process(t_scheduler* scheduler, char* sem_id) {
 	sem_wait(&mutex_block);
 	t_PCB* pcb = list_remove_by_condition(scheduler->block_state, (void*) same_pid);
 	sem_post(&mutex_block);
-	enqueue_to_ready(scheduler, pcb);
+	if (pcb != NULL)
+		enqueue_to_ready(scheduler, pcb);
 }
 
 void handle_io_operation(t_scheduler* scheduler, char* io_name, int times, t_PCB* pcb) {
