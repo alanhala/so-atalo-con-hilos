@@ -159,6 +159,7 @@ void* handle_execution(void* scheduler) {
 			log_trace(kernel_trace,"PID %d : Finalizando \n", pcb->pid);
 			end_program_umc(pcb, self->umc_socket_descriptor);
 			free(pcb);
+			sem_post(&sem_cpus_available);
 			continue;
 		}
 		sem_wait(&mutex_cpus_available);
