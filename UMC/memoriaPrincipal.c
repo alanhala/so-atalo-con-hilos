@@ -224,6 +224,13 @@ char* leer_frame_de_memoria_principal(int frame, int offset, int size) {
 	return datos;
 }
 
+char* leer_frame_de_memoria_principal_dump(int frame, int offset, int size) {
+	char* datos = malloc(size);
+	memcpy(datos, MEMORIA_PRINCIPAL + (frame * TAMANIO_FRAME) + offset, size);
+
+	return datos;
+}
+
 void escribir_frame_de_memoria_principal(int frame, int offset, int size, char* datos) {
 	memcpy(MEMORIA_PRINCIPAL + (frame * TAMANIO_FRAME) + offset, datos, size);
 	usleep(RETARDO*1000);
@@ -1126,19 +1133,27 @@ void dump_memory(int pid){
 		{
 			log_trace(interprete_log,"Contenido en memoria de proceso %d\n",tabla->pid);
 			int i =0;
-			for(0; i<tabla->paginas_totales; i++)
+			for(0; i<MAX_FRAMES_POR_PROCESO; i++)
 			{
-				int frame =(tabla->entradas[i]).frame ;
+				int frame =(tabla->info_reemplazo[i]).frame ;
 				if (frame != -1)
 				{
-					log_trace(interprete_log,"Contenido de la entrada %d ubicada en el frame %d\n",i, frame );
-					char *  contenido = leer_frame_de_memoria_principal(frame, 0, TAMANIO_FRAME);
+					log_trace(interprete_log,"Contenido de la pagina %d ubicada en el frame %d\n",(tabla->info_reemplazo[i]).pagina, frame );
+					sem_wait(&mut_memoria_principal);
+					char *  contenido = leer_frame_de_memoria_principal_dump(frame, 0, TAMANIO_FRAME);
+					sem_post(&mut_memoria_principal);
+
+
 					int posicion = 0;
-					while (contenido[posicion] != '\0') {
-					  if (isprint(contenido[posicion]))
-						  log_trace(interprete_log,"Contenido frame %d : %c    ", frame, contenido[posicion]);
-						else
-						  log_trace(interprete_log,"~    ");
+					while (posicion < TAMANIO_FRAME) {
+					  if (isprint(contenido[posicion])){
+						  log_trace(interprete_log,"%c \n", contenido[posicion]);
+						  //log_trace(interprete_log,"Contenido frame %d : %c    ", frame, contenido[posicion]);
+					  }
+						else{
+							  log_trace(interprete_log,"~ \n ");
+						}
+
 						posicion++;
 					}
 					log_trace(interprete_log,"\n\n");
@@ -1155,24 +1170,30 @@ void dump_memory(int pid){
 		//TODO VER SI PONGO MUTEX ACA O NO
 		t_tabla_de_paginas * tabla = buscar_tabla_de_paginas_de_pid(pid);
 
-		log_trace(interprete_log,"Contenido en memoria de proceso %d\n", tabla->pid);
+		log_trace(interprete_log,"Contenido en memoria de proceso %d\n",tabla->pid);
 		int i =0;
-		for(0; i<tabla->paginas_totales; i++)
+		for(0; i<MAX_FRAMES_POR_PROCESO; i++)
 		{
-			int frame =(tabla->entradas[i]).frame ;
+			int frame =(tabla->info_reemplazo[i]).frame ;
 			if (frame != -1)
 			{
-				log_trace(interprete_log,"Contenido en memoria de proceso %d\n", tabla->pid);
-				log_trace(interprete_log,"Contenido de la entrada %d ubicada en el frame %d : \n",i, frame );
-				char *  contenido = leer_frame_de_memoria_principal(frame, 0, TAMANIO_FRAME);
+				log_trace(interprete_log,"Contenido de la pagina %d ubicada en el frame %d\n",(tabla->info_reemplazo[i]).pagina, frame );
+				sem_wait(&mut_memoria_principal);
+				char *  contenido = leer_frame_de_memoria_principal_dump(frame, 0, TAMANIO_FRAME);
+				sem_post(&mut_memoria_principal);
+
+
 				int posicion = 0;
-				while (contenido[posicion] != '\0') {
-				  if (isprint(contenido[posicion]))
-					  log_trace(interprete_log,"contenido frame %d : %c    ", frame, contenido[posicion]);
-				  else
-					  log_trace(interprete_log,"contenido frame %d : %c    ", frame, contenido[posicion]);
-				  	  log_trace(interprete_log,"~    ");
-				  posicion++;
+				while (posicion < TAMANIO_FRAME) {
+				  if (isprint(contenido[posicion])){
+					  log_trace(interprete_log,"%c \n", contenido[posicion]);
+					  //log_trace(interprete_log,"Contenido frame %d : %c    ", frame, contenido[posicion]);
+				  }
+					else{
+						  log_trace(interprete_log,"~ \n ");
+					}
+
+					posicion++;
 				}
 				log_trace(interprete_log,"\n\n");
 
