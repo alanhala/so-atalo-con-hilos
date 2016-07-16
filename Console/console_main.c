@@ -197,6 +197,7 @@ void sigint_handler() {
 	fflush(stdout);
 	int a = 1;
 	send(kernel_socket_descriptor, &a, sizeof(int), 0);
+	exit(1);
 }
 
 void carga_programas_ansisop(char *programas[15]){

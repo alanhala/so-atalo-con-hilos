@@ -119,7 +119,8 @@ void* handle_ready(void* scheduler) {
 		t_PCB *pcb  = queue_pop(self->ready_state);
 		sem_post(&mutex_ready);
 		if (check_closed_console(self, pcb->console_socket_descriptor) == 1) {
-			end_program(self, pcb);
+			end_program_umc(pcb, self->umc_socket_descriptor);
+			free(pcb);
 			continue;
 		}
 		sem_wait(&sem_cpus_available); //espero tener una cpu disponible
@@ -152,7 +153,8 @@ void* handle_execution(void* scheduler) {
 		sem_post(&mutex_execution);
 
 		if (check_closed_console(self, pcb->console_socket_descriptor) == 1) {
-			end_program(self, pcb);
+			end_program_umc(pcb, self->umc_socket_descriptor);
+			free(pcb);
 			continue;
 		}
 		sem_wait(&mutex_cpus_available);
@@ -282,4 +284,18 @@ void handle_io_operation(t_scheduler* scheduler, char* io_name, int times, t_PCB
 	enqueue_to_block(scheduler, pcb);
 	queue_push(io_queue->blocked_pids, blocked_data);
 	sem_post(&io_queue->resources);
+}
+
+uint32_t check_blocked_pcb(t_scheduler* scheduler, int console_socket_descriptor) {
+	int same_descriptor(t_PCB* aux_pcb) {
+		return (aux_pcb->console_socket_descriptor == console_socket_descriptor);
+	}
+	t_PCB* pcb = list_remove_by_condition(scheduler->block_state, (void*) same_descriptor);
+	if (pcb != NULL) {
+		end_program_umc(pcb, scheduler->umc_socket_descriptor);
+		free(pcb);
+		return 0;
+	} else
+		return 1;
+
 }

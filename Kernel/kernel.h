@@ -162,4 +162,5 @@
 	uint32_t get_used_pages(t_PCB *pcb, uint32_t stack_size);
 	void* handle_io_queue(void* io_attr);
 	void handle_io_operation(t_scheduler* scheduler, char* io_name, int times, t_PCB* pcb);
+	uint32_t check_blocked_pcb(t_scheduler* scheduler, int console_socket_descriptor);
 #endif

@@ -155,7 +155,8 @@ void manejo_de_solicitudes(int client_socket_descriptor) {
 			int signal_received;
 			int bytes_received = recv(client_socket_descriptor, &signal_received, sizeof(int) , 0);
 			if (signal_received == 1 || bytes_received == 0) {
-				list_add(scheduler->closed_consoles, client_socket_descriptor);
+				if (check_blocked_pcb(scheduler, client_socket_descriptor) == 1)
+					list_add(scheduler->closed_consoles, client_socket_descriptor);
 			}
 		}
 	}
