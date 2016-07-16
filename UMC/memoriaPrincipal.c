@@ -295,9 +295,11 @@ int buscar_frame_de_una_pagina(t_tabla_de_paginas* tabla, int pagina){
 
 	if(frame_de_pagina == -1)
 	{
+		log_trace(informacion_TLB,"PID %d : \tLa pagina %d no se encuentra en la memoria",tabla->pid, pagina);
 		frame_de_pagina = devolver_frame_de_pagina(tabla, pagina);
 		if(frame_de_pagina == -1 )
 		{
+
 			frame_de_pagina = darle_frame_a_una_pagina(tabla, pagina);
 			if(frame_de_pagina == -99)
 				return -1;
@@ -918,7 +920,7 @@ char* leer_pagina_de_programa(int pid, int pagina, int offset, int size){
 
 		if(frame != -1)
 		{
-			//(tabla->entradas[pagina]).segunda_oportunidad = 1;
+
 			actualizar_tlb(pid, pagina, frame);
 			return leer_frame_de_memoria_principal(frame, offset, size);
 		}
