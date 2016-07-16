@@ -140,7 +140,6 @@ void* handle_ready(void* scheduler) {
 		log_trace(kernel_trace,"Ejecutando: %d\n", pcb->pid);
 		queue_push(self->execution_state, pcb);
 		sem_post(&mutex_execution);
-
 		sem_post(&sem_execution);
 	}
 }
@@ -253,28 +252,6 @@ void wait_block_process(t_scheduler* scheduler, char* sem_id, t_PCB* pcb) {
 	free_cpu(scheduler, pcb->cpu_socket_descriptor);
 }
 
-
-
-void sacar_pid_semaforo(t_list * lista_de_colas, int pid){
-
-
-	int same_pid(int pid_cola) {
-			return (pid_cola == pid);
-		}
-
-	void sacar_de_la_cola(t_sem_blocked_queue* cola) {
-		int pid_sacado = list_remove_by_condition(cola->blocked_pids->elements, (void*) same_pid);
-	}
-
-	list_iterate(lista_de_colas, (void*)sacar_de_la_cola);
-
-
-
-
-}
-
-
-
 void signal_unblock_process(t_scheduler* scheduler, char* sem_id) {
 	int same_sem(t_sem_blocked_queue* sem) {
 		if (strcmp(sem->id, sem_id) == 0)
@@ -315,7 +292,6 @@ uint32_t check_blocked_pcb(t_scheduler* scheduler, int console_socket_descriptor
 	}
 	t_PCB* pcb = list_remove_by_condition(scheduler->block_state, (void*) same_descriptor);
 	if (pcb != NULL) {
-		sacar_pid_semaforo(scheduler->semaphores_list, pcb->pid);
 		end_program_umc(pcb, scheduler->umc_socket_descriptor);
 		free(pcb);
 		return 0;
