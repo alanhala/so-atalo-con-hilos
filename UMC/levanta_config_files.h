@@ -25,7 +25,6 @@ typedef struct umcConfigFile {
 			marco_x_proc,
 			entradas_tlb,
 			retardo;
-	int		backlog;
 	char 	*ip_swap,
 			*algoritmo_reemplazo,
 			*puerto_swap,

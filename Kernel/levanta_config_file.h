@@ -8,8 +8,7 @@
 typedef struct kernelConfigFile {
 	uint32_t quantum,
 			quantum_sleep,
-			stack_size,
-			backlog;
+			stack_size;
 	char 	**idDispositivo,
 			**sleepIO,
 			**idSemaforo,

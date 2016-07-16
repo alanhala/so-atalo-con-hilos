@@ -36,7 +36,7 @@ t_log 	*historial_reemplazos_UMC;
 t_log 	*informacion_TLB;
 t_log 	*interprete_log;
 
-int backlog;
+const int backlog = 10;
 
 char	*swap_ip,
 		*swap_puerto,
@@ -444,7 +444,6 @@ void cargar_variables_productivas(UMCConfigFile *config){
 
 	server_ip = config->ip_server;
 	kernel_puerto = config->puerto;
-	backlog = config->backlog;
 
 
 	set_cantidad_entradas_tlb(config->entradas_tlb);

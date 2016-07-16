@@ -10,8 +10,6 @@
 
 #include <semaphore.h>
 
-uint32_t	backlog;
-
 char	*umc_ip,
 		*puerto_umc,
 		*server_ip,

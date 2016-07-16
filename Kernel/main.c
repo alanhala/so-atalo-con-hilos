@@ -25,6 +25,7 @@
 
 t_log 	*kernel_trace;
 
+const int backlog = 10;
 
 void *cpu_connection(int socket_descriptor);
 void *console_and_cpu_connection_handler(int client_socket_descriptor);

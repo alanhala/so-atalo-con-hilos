@@ -116,7 +116,6 @@ void levantaConfigFileEnVariables(UMCConfigFile *ptrvaloresConfigFile,t_config *
 	ptrvaloresConfigFile->ip_swap = leer_string(ptrConfig, "IP_SWAP");
 	ptrvaloresConfigFile->algoritmo_reemplazo = leer_string(ptrConfig, "ALGORITMO");
 	ptrvaloresConfigFile->ip_server = leer_string(ptrConfig, "IP_SERVER");
-	ptrvaloresConfigFile->backlog = leerUnsigned(ptrConfig,"BACKLOG");
 };
 
 void liberaVariables(t_log* trace_log, t_config* ptrConfig, t_config* ptrConfigUpdate) {
