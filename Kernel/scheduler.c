@@ -155,6 +155,7 @@ void* handle_execution(void* scheduler) {
 		if (check_closed_console(self, pcb->console_socket_descriptor) == 1) {
 			end_program_umc(pcb, self->umc_socket_descriptor);
 			free(pcb);
+			sem_post(&sem_cpus_available);
 			continue;
 		}
 		sem_wait(&mutex_cpus_available);
