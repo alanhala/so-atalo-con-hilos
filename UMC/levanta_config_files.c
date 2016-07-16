@@ -67,7 +67,7 @@ void detectaCambiosEnConfigFile() {
 		}
 		// Creamos un monitor sobre un path indicando que eventos queremos escuchar
 		int watch_descriptor = inotify_add_watch(file_descriptor,
-				"./", IN_MODIFY);
+				"./umc.cfg", IN_MODIFY);
 
 		// El file descriptor creado por inotify, es el que recibe la información sobre los eventos ocurridos
 		// para leer esta información el descriptor se lee como si fuera un archivo comun y corriente pero
