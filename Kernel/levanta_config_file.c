@@ -103,7 +103,7 @@ void detectaCambiosEnConfigFile() {
 		}
 		// Creamos un monitor sobre un path indicando que eventos queremos escuchar
 		int watch_descriptor = inotify_add_watch(file_descriptor,
-				"./", IN_MODIFY);
+				"./kernel_config.txt", IN_MODIFY);
 
 		int length = read(file_descriptor, buffer, BUF_LEN);
 		if (length < 0) {
