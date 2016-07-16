@@ -79,6 +79,9 @@ int main(int argc, char **argv) {
 	connect_to_UMC();
 	connect_to_Kernel();
 
+	log_trace(trace_log_CPU,"Esperando PCB\n");
+
+
 	pthread_t captador_de_senal;
 	pthread_create(&captador_de_senal,NULL,&captador_de_senal_thread,NULL);
 

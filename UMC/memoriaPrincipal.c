@@ -101,7 +101,7 @@ int cargar_nuevo_programa(int pid, int paginas_requeridas_del_proceso, char * co
 	if (pudo_cargar_swap != -1 )
 	{
 		t_tabla_de_paginas * tabla = crear_tabla_de_pagina_de_un_proceso(pid, paginas_requeridas_del_proceso);
-
+		log_trace(trace_log_UMC,"PID %d : Proceso iniciado correctamente \n", pid);
 		return 0; // se pudo cargar el programa correctamente
 	}
 	else
