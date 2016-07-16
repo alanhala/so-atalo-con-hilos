@@ -1081,7 +1081,8 @@ tabla_tlb* crear_tlb(){
 // COMANDOS
 
 void flush_tlb(int pid){
-	if (pid == -1)
+    log_trace(informacion_TLB, "Se hace flush de la TLB para PID: %d\n", pid);
+    if (pid == -1)
 	{
 		void flush(t_tabla_de_paginas *tabla)
 		{
@@ -1249,7 +1250,8 @@ void dump_structs(int pid){
 }
 
 void flush_memory(int pid){
-	if (pid == -1)
+    log_trace(historial_reemplazos_UMC, "Se realiza Flush de memoria para PID: %d\n", pid);
+    if (pid == -1)
 		{
 			void flush(t_tabla_de_paginas *tabla)
 			{
