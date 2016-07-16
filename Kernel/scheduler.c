@@ -98,7 +98,7 @@ void* handle_new(void* scheduler) {
 			pcb->program_finished = 7;
 			//end_program(scheduler, pcb);
 			int consola_finalizado = end_program_console(pcb); //console_finalizado no usarlo para nada es valor 0
-
+			log_trace(kernel_trace,"PID %d : Finalizando \n", pcb->pid);
 			free(pcb);// lo libero directamente creo q no es necesario hacer cola de exit
 
 		}
@@ -120,6 +120,8 @@ void* handle_ready(void* scheduler) {
 		sem_post(&mutex_ready);
 		if (check_closed_console(self, pcb->console_socket_descriptor) == 1) {
 			end_program_umc(pcb, self->umc_socket_descriptor);
+			log_trace(kernel_trace,"PID %d : Finalizando \n", pcb->pid);
+
 			free(pcb);
 			continue;
 		}
@@ -128,6 +130,7 @@ void* handle_ready(void* scheduler) {
 		if(validate_console_connection(pcb->console_socket_descriptor) == 1){
 			sem_post(&sem_cpus_available);
 			close(pcb->console_socket_descriptor);
+			log_trace(kernel_trace,"PID %d : Finalizando \n", pcb->pid);
 			int umc_finalizado = end_program_umc(pcb, self->umc_socket_descriptor);
 			free(pcb);
 			continue;
@@ -153,6 +156,7 @@ void* handle_execution(void* scheduler) {
 		sem_post(&mutex_execution);
 
 		if (check_closed_console(self, pcb->console_socket_descriptor) == 1) {
+			log_trace(kernel_trace,"PID %d : Finalizando \n", pcb->pid);
 			end_program_umc(pcb, self->umc_socket_descriptor);
 			free(pcb);
 			sem_post(&sem_cpus_available);
@@ -183,7 +187,7 @@ void* handle_exit(void* scheduler) {
 		sem_wait(&mutex_exit);
 		t_PCB *pcb = queue_pop(self->exit_state);
 		sem_post(&mutex_exit);
-
+		log_trace(kernel_trace,"PID %d : Finalizando \n", pcb->pid);
 		int umc_finalizado = end_program_umc(pcb, self->umc_socket_descriptor);
 		int consola_finalizado = end_program_console(pcb); //console_finalizado no usarlo para nada es valor 0
 
@@ -294,6 +298,7 @@ uint32_t check_blocked_pcb(t_scheduler* scheduler, int console_socket_descriptor
 	}
 	t_PCB* pcb = list_remove_by_condition(scheduler->block_state, (void*) same_descriptor);
 	if (pcb != NULL) {
+		log_trace(kernel_trace,"PID %d : Finalizando \n", pcb->pid);
 		end_program_umc(pcb, scheduler->umc_socket_descriptor);
 		free(pcb);
 		return 0;
