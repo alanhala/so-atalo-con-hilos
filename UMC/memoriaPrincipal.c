@@ -1097,13 +1097,13 @@ void flush_tlb(int pid){
 			}
 
 		}
-		//sem_wait(&mut_tlb);
+		sem_wait(&mut_tabla_de_paginas);
 		list_iterate(lista_tabla_de_paginas, (void*) flush);
-		//sem_post(&mut_tlb);
+		sem_post(&mut_tabla_de_paginas);
 	}
 	else
 	{
-		//sem_wait(&mut_tlb);
+		sem_wait(&mut_tabla_de_paginas);
 		int i= 0;
 		while(i < CANTIDAD_ENTRADAS_TLB){
 			if((TLB->entradas[i]).pid == pid){
@@ -1115,7 +1115,7 @@ void flush_tlb(int pid){
 			i++;
 		}
 
-		//sem_post(&mut_tlb);
+		sem_post(&mut_tabla_de_paginas);
 
 	}
 
@@ -1167,7 +1167,7 @@ void dump_memory(int pid){
 	}
 	else
 	{
-		//TODO VER SI PONGO MUTEX ACA O NO
+
 		t_tabla_de_paginas * tabla = buscar_tabla_de_paginas_de_pid(pid);
 
 		log_trace(interprete_log,"Contenido en memoria de proceso %d\n",tabla->pid);
@@ -1266,7 +1266,7 @@ void flush_memory(int pid){
 		}
 	else
 	{
-		//TODO VER SI PONGO MUTEX ACA O NO
+
 		t_tabla_de_paginas * tabla = buscar_tabla_de_paginas_de_pid(pid);
 		int i =0;
 		for(0; i<tabla->paginas_totales; i++){
