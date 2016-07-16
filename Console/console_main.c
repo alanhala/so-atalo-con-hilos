@@ -50,7 +50,7 @@ int main(int argc, char **argv) {
 
 	FILE *fdarchivo;
 
-	/*
+
 	if ((fdarchivo = fopen(argv[1], "r")) == 0) {
 		//todo log el archivo esta vacio en este caso no se ejecuta consola
 
@@ -68,11 +68,11 @@ int main(int argc, char **argv) {
 		free(buff);
 		fclose(fdarchivo);
 	}
-	*/
 
-	carga_programas_ansisop(array_de_programas);
 
-	codigo = array_de_programas[4];
+//	carga_programas_ansisop(array_de_programas);
+//
+//	codigo = array_de_programas[4];
 
 
 
